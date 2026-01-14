@@ -1,0 +1,357 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPORT STRINGS (MIN + FULL) — MODULE GROUPED
+f_s(string s) =>
+    string x = na(s) ? "" : s
+    x := str.replace_all(x, "|", "/")
+    x := str.replace_all(x, "=", ":")
+    x := str.replace_all(x, "\n", " ")
+    x
+
+
+// Helpers for ints (keeps empty on na)
+f_i(float x) => na(x) ? "" : str.tostring(int(x))
+
+// Build pool dump (optional; can get long)
+f_pool_dump(float[] lvls, string[] srcs, int maxN) =>
+    string out = ""
+    int n = math.min(array.size(lvls), array.size(srcs))
+    int k = math.min(n, maxN)
+    for i = 0 to k - 1
+        float lvl = array.get(lvls, i)
+        string src = array.get(srcs, i)
+        string item = (na(lvl) ? "" : (src + "@" + str.tostring(lvl, format.mintick)))
+        out := out + (i == 0 ? "" : ",") + item
+    out
+
+// --- CORE IDS (already in your code)
+t2          = time("120")
+nyH2        = hour(t2, EXP_TZ)
+ovc_ms      = f_ovc_day_start_ms(t2)
+
+exp_date    = f_ymd(ovc_ms, EXP_TZ)
+exp_ymd     = f_ymd_compact(ovc_ms, EXP_TZ)
+exp_seg     = f_seg_from_hour(nyH2)
+exp_4h      = f_block4h_from_seg(exp_seg)
+
+exp_sym     = syminfo.ticker
+exp_bid     = exp_ymd + "-" + exp_seg + "-" + exp_sym
+
+
+exp_ready = (is2H and hasHist) ? 1 : 0
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IDS (available if you want to display later)
+string instrument = syminfo.ticker
+int t_ms = t2  // anchor IDs to the 2H container, not the current chart bar
+string block_2h_id = f_block2h_id(t_ms, instrument)
+string block_4h_id = f_block4h_id(t_ms, instrument)
+
+
+// --- MIN (WEBHOOK SAFE): everything needed to reconstruct the market state + decisions
+exportMin = (
+    // META / VIEW
+    "ver=" + f_txt(exp_schema) +
+    "|profile=MIN" +
+    "|schema_min=OVC_MIN_V0_1" +
+    "|sym=" + f_txt(exp_sym) +
+    "|tz=" + f_txt(EXP_TZ) +
+    "|date_ny=" + f_txt(exp_date) +
+    "|bar_close_ms=" + str.tostring(t2) +
+    "|block2h_id=" + f_txt(block_2h_id) +
+    "|block4h_id=" + f_txt(block_4h_id) +
+    "|bid=" + f_txt(exp_bid) +
+    "|seg=" + f_txt(exp_seg) +
+    "|news_flag=" + str.tostring(exp_news) +
+
+    // OHLC
+    "|o=" + f_px(open) +
+    "|h=" + f_px(high) +
+    "|l=" + f_px(low) +
+    "|c=" + f_px(close) +
+    "|dir=" + (close > open ? "UP" : close < open ? "DN" : "0") +
+
+    // L1 MAIN (tags + critical scalars)
+    "|state_tag=" + f_txt(StateTag) +
+    "|value_tag=" + f_txt(ValueTag) +
+    "|event=" + f_s(DominantEvent) +
+    "|tt=" + str.tostring(TT) +
+    "|cp_tag=" + f_txt(CPTag) +
+    "|tis=" + f_i(TiS) +
+
+    // L2 CORE (context tags)
+    "|rrc=" + f_px(RRc) +
+    "|vrc=" + f_num(VRc) +
+    "|tr=" + f_txt(TrendTag) +
+    "|ss=" + f_txt(SS) +
+    "|sp=" + f_txt(SpaceTag) +
+    "|htf_stack=" + f_s(HTFStack) +
+    "|with_htf=" + f_txt(WithHTF) +
+
+    // RD + BlockStack (regime)
+    "|rd_state=" + f_txt(RD_State) +
+    "|regime_tag=" + f_txt(RegimeTag) +
+    "|trans_risk=" + f_txt(TransitionRisk) +
+
+    // L3 DECISION (what you actually trade)
+    "|bias_mode=" + f_txt(BiasMode) +
+    "|bias_dir=" + f_txt(BiasDir) +
+    "|perm_state=" + f_txt(PermissionState) +
+    "|rail_loc=" + f_txt(RailLoc) +
+    "|tradeable=" + f_txt(TradeableNow) +
+    "|conf_l3=" + f_txt(Conf_L3) +
+    "|play=" + f_txt(Play) +
+    "|pred_dir=" + f_txt(PredDir) +
+    "|pred_target=" + f_s(PredTarget) +
+    "|timebox=" + f_txt(Timebox) +
+    "|invalidation=" + f_s(Invalidation) +
+
+    // META FOOTER
+    "|source=" + f_txt(exp_source) +
+    "|build_id=" + f_txt(exp_buildId) +
+    "|note=" + f_s(exp_note) +
+    "|ready=" + str.tostring(exp_ready)
+)
+
+// --- FULL (COPY/DEBUG): “every computed piece” grouped by module
+// Warning: this can get VERY long.
+string exp_bid4h = exp_ymd + "-" + exp_4h + "-" + exp_sym
+f_b(bool x) => x ? "1" : "0"
+
+exportFull = (
+    // META
+    "ver=" + f_txt(exp_schema) +
+    "|profile=FULL" +
+    "|schema_full=OVC_FULL_V0_1" +
+    "|g0=META" +   
+    "|sym=" + f_txt(exp_sym) +
+    "|tz=" + f_txt(EXP_TZ) +
+    "|date_ny=" + f_txt(exp_date) +
+    "|bar_close_ms=" + str.tostring(t2) +
+    "|block2h_id=" + f_txt(block_2h_id) +
+    "|block4h_id=" + f_txt(block_4h_id) +
+    "|bid=" + f_txt(exp_bid) +
+    "|bid4h=" + f_txt(exp_bid4h) +
+    "|ymd=" + f_txt(exp_ymd) +
+    "|seg=" + f_txt(exp_seg) +
+    "|news_flag=" + str.tostring(exp_news) +
+    
+
+    // BAR
+    "|g1=BAR" +
+    "|o=" + f_px(open) +
+    "|h=" + f_px(high) +
+    "|l=" + f_px(low) +
+    "|c=" + f_px(close) +
+    "|rng=" + f_px(high - low) +
+    "|body=" + f_px(math.abs(close - open)) +
+    "|dir=" + (close > open ? "UP" : close < open ? "DN" : "0") +
+
+    // L1 MAIN
+    "|g2=L1_MAIN" +
+    "|state_tag=" + f_txt(StateTag) +
+    "|value_tag=" + f_txt(ValueTag) +
+    "|event=" + f_s(DominantEvent) +
+    "|vr=" + f_num(VR) +
+    "|ts=" + f_num(TS) +
+    "|cp=" + f_num(CP) +
+    "|cp_tag=" + f_txt(CPTag) +
+    "|tt=" + str.tostring(TT) +
+    "|tis=" + (na(TiS) ? "" : str.tostring(TiS)) +
+
+    // L1 REF
+    "|g3=L1_REF" +
+    "|rr=" + f_px(rr) +
+    "|rm=" + f_px(rm) +
+    "|q1=" + f_px(q1) +
+    "|q3=" + f_px(q3) +
+    "|band=" + (na(closeBand) ? "" : str.tostring(closeBand)) +
+
+    // L1 STATE
+    "|g4=L1_STATE" +
+    "|rer=" + f_num(RER) +
+    "|or=" + f_num(OR) +
+    "|clv=" + f_num(CLV_signed) +
+    "|brb=" + f_num(BRB) +
+    "|bodyrr=" + f_num(BodyRR) +
+
+    // L1 VALUE
+    "|g5=L1_VALUE" +
+    "|sd=" + f_num(SD) +
+    "|out=" + f_txt(OutsideTag) +
+    "|oa=" + f_num(OA) +
+    "|mc=" + str.tostring(MC) +
+    "|mc3=" + str.tostring(MC3) +
+    "|vflip=" + str.tostring(VFlip) +
+    "|vf3=" + str.tostring(VF3) +
+
+    // L1 LIQ
+    "|g6=L1_LIQ" +
+    "|swhi=" + f_num(SweepHigh) +
+    "|swlo=" + f_num(SweepLow) +
+    "|took_hi=" + str.tostring(TookHigh) +
+    "|took_lo=" + str.tostring(TookLow) +
+    "|hi_ran=" + str.tostring(HighRan) +
+    "|hi_rev=" + str.tostring(HighRev) +
+    "|lo_ran=" + str.tostring(LowRan) +
+    "|lo_rev=" + str.tostring(LowRev) +
+
+    // L1 D2K
+    "|g7=L1_D2K" +
+    "|d2rm=" + f_num(D2RM) +
+    "|d2q1=" + f_num(D2Q1) +
+    "|d2q3=" + f_num(D2Q3) +
+    "|d2rrh=" + f_num(D2RRH) +
+    "|d2rrl=" + f_num(D2RRL) +
+
+    // L1 OUT (X-1)
+    "|g8=L1_OUT" +
+    "|out_ready=" + f_b(canOutcome) +
+    "|rtrm=" + (canOutcome ? str.tostring(RtRM) : "") +
+    "|nxtext=" + (canOutcome ? f_num(NxtExt) : "") +
+    "|nxtsd=" + (canOutcome ? f_num(NxtSD) : "") +
+    "|hint1=" + (canOutcome ? f_txt(Hint1) : "") +
+    "|hint2=" + (canOutcome ? f_txt(Hint2) : "") +
+
+    // L1 KLS (FULL)
+    "|g9=L1_KLS" +
+    "|kls_mode_l1=" + f_txt(l1_kls_mode) +
+    "|pooln_l1=" + str.tostring(PoolN) +
+    "|near_lvl=" + f_px(NearLvl) +
+    "|near_src=" + f_txt(NearSrc) +
+    "|near_dr=" + f_num(NearDR) +
+    "|conf_l1=" + (na(Conf_L1) ? "" : str.tostring(Conf_L1)) +
+    "|age_l1=" + (na(Age_L1) ? "" : str.tostring(int(Age_L1))) +
+    "|hitsn_l1=" + (na(HitsN_L1) ? "" : str.tostring(int(HitsN_L1))) +
+    "|width_l1=" + f_num(l1_kls_confW) +
+    "|decay_l1=" + f_num(Decay_L1) +
+    "|kscore_l1=" + f_num(KScore_L1) +
+    "|ktag_l1=" + f_txt(KTag_L1) +
+
+    // L2 CONTEXT UNIT
+    "|g10=L2_CTX" +
+    "|rrc=" + f_px(RRc) +
+    "|vrc=" + f_num(VRc) +
+
+    // L2 STRUCTURE
+    "|g11=L2_STRUCT" +
+    "|lastpivot=" + f_txt(LastPivot) +
+    "|swingdir=" + f_txt(SwingDir) +
+    "|phidr=" + f_num(PHiDR) +
+    "|plodr=" + f_num(PLoDR) +
+    "|struct=" + f_txt(StructState) +
+    "|ss=" + f_txt(SS) +
+
+    // L2 TREND
+    "|g12=L2_TREND" +
+    "|rmdrift=" + f_num(RMdrift) +
+    "|dirrun=" + str.tostring(DirRun) +
+    "|tr=" + f_txt(TrendTag) +
+
+    // L2 SPACE
+    "|g13=L2_SPACE" +
+    "|sp=" + f_txt(SpaceTag) +
+    "|space_up=" + f_num(SpaceUp) +
+    "|space_dn=" + f_num(SpaceDn) +
+    "|space_min=" + f_num(SpaceMin) +
+    "|up_src=" + f_txt(UpSrc) +
+    "|dn_src=" + f_txt(DnSrc) +
+    "|up_lvl=" + f_px(UpLvl) +
+    "|dn_lvl=" + f_px(DnLvl) +
+
+    // L2 HTF
+    "|g14=L2_HTF" +
+    "|htf4=" + f_txt(HTF4) +
+    "|htfd=" + f_txt(HTFD) +
+    "|sd4=" + f_num(SD4) +
+    "|sdd=" + f_num(SDD) +
+    "|htf_stack=" + f_s(HTFStack) +
+    "|with_htf=" + f_txt(WithHTF) +
+    "|mdir=" + f_txt(mDirStr) +
+
+    // L2 KLS-LITE
+    "|g15=L2_KLS" +
+    "|kt=" + f_txt(KTag2) +
+    "|kscore2=" + f_num(KScore2) +
+    "|kup_dr=" + f_num(KUpDR) +
+    "|kdn_dr=" + f_num(KDnDR) +
+    "|conf2=" + (na(l2_Conf) ? "" : str.tostring(l2_Conf)) +
+    "|age2=" + (na(Age2) ? "" : str.tostring(int(Age2))) +
+    "|hits2=" + (na(Hits2) ? "" : str.tostring(int(Hits2))) +
+    "|decay2=" + f_num(Decay2) +
+    "|width2=" + f_num(l2_kls_confW) +
+
+    // RD
+    "|g16=RD" +
+    "|rd_state=" + f_txt(RD_State) +
+    "|rd_brkdir=" + f_txt(RD_BrkDir) +
+    "|rd_w_rrc=" + f_num(rdW_RRc) +
+    "|rd_hi=" + f_px(rdHi) +
+    "|rd_lo=" + f_px(rdLo) +
+    "|rd_mid=" + f_px(rdMid) +
+    "|rd_why=" + f_txt(RD_Why) +
+
+    // BLOCKSTACK
+    "|g17=BLOCKSTACK" +
+    "|regime_tag=" + f_txt(RegimeTag) +
+    "|regime_dir=" + f_txt(RegimeDir) +
+    "|regime_conf=" + f_txt(RegimeConf) +
+    "|trans_risk=" + f_txt(TransitionRisk) +
+    "|p_campaign=" + f_num(pCampaign) +
+    "|p_rdrange=" + f_num(pRDRange) +
+    "|p_confmove=" + f_num(pConfMove) +
+    "|p_chop=" + f_num(pChop) +
+    "|p_split=" + f_num(pSplit) +
+    "|p_contra=" + f_num(pContra) +
+    "|p_spacelow=" + f_num(pSpaceLow) +
+    "|avg_drift=" + f_num(avgDrift) +
+    "|avg_space=" + f_num(avgSpace) +
+    "|flip_rate=" + f_num(flipRate) +
+
+    // L3
+    "|g18=L3" +
+    "|tagstring=" + f_s(TagString) +
+    "|bias_mode=" + f_txt(BiasMode) +
+    "|bias_dir=" + f_txt(BiasDir) +
+    "|bias_why=" + f_s(BiasWhy) +
+    "|perm_state=" + f_txt(PermissionState) +
+    "|rail_src=" + f_txt(useRDrailsNow ? "RD" : "SESS") +
+    "|rail_loc=" + f_txt(RailLoc) +
+    "|tradeable=" + f_txt(TradeableNow) +
+    "|conf_l3=" + f_txt(Conf_L3) +
+    "|play=" + f_txt(Play) +
+    "|pred_dir=" + f_txt(PredDir) +
+    "|pred_target=" + f_s(PredTarget) +
+    "|timebox=" + f_txt(Timebox) +
+    "|invalidation=" + f_s(Invalidation) +
+    "|blocker=" + f_txt(Blocker) +
+    "|reasons=" + f_s(Reasons_L3) +
+
+    // FOOTER
+    "|g19=FOOTER" +
+    "|source=" + f_txt(exp_source) +
+    "|build_id=" + f_txt(exp_buildId) +
+    "|note=" + f_s(exp_note) +
+    "|ready=" + str.tostring(exp_ready)
+)
+
+// Choose which string is active
+string activeProfile = exp_profile  // MIN or FULL
+string rawExport = (activeProfile == "FULL") ? exportFull : exportMin
+exportStr = (exp_ready == 1) ? rawExport : ""
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ALERT EXPORT (TradingView webhook)
+// Fires only on 2H bar close, when exp_ready == 1
+if exp_on and exp_ready == 1 and barstate.isconfirmed
+    alert(exportStr, alert.freq_once_per_bar_close)
+
+
+// Separate export table
+var table tExp = table.new(position.bottom_right, 1, 2, frame_width=1)
+
+if exp_on and exp_showBox and barstate.islast
+    table.cell(tExp, 0, 0, "OVC EXPORT (copy)", text_color=hdrTxt, bgcolor=hdrBg, text_size=f_size())
+    table.cell(tExp, 0, 1, (exp_ready == 1 ? exportStr : "NOT READY (need TF=2H + 2 prior bars)"),
+         text_color=bodyTxt, bgcolor=bodyBg, text_size=size.tiny)
+
+
