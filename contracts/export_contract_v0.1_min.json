@@ -45,7 +45,7 @@
     { "key": "bias_mode", "order": 33, "type": "string", "required": true },
     { "key": "bias_dir", "order": 34, "type": "string", "required": true },
     { "key": "perm_state", "order": 35, "type": "string", "required": true },
-    { "key": "rail_loc", "order": 36, "type": "string", "required": true },
+    { "key": "rail_loc", "order": 36, "type": "string_or_empty", "required": true },
     { "key": "tradeable", "order": 37, "type": "bool_any", "required": true },
     { "key": "conf_l3", "order": 38, "type": "string", "required": true },
     { "key": "play", "order": 39, "type": "string", "required": true },
