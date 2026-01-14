@@ -1,0 +1,5 @@
+﻿oandapyV20
+pandas
+psycopg2-binary
+python-dateutil
+pytz
