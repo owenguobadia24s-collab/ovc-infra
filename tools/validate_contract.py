@@ -29,51 +29,58 @@ def _ordered_fields(contract: Dict) -> List[Dict]:
 def _expected_keys(fields: List[Dict]) -> List[str]:
     return [field["key"] for field in fields]
 
+def _norm(value: str) -> str:
+    # Treat TradingView/Pine "na" as empty
+    if value is None:
+        return ""
+    v = value.strip()
+    if v.lower() == "na":
+        return ""
+    return v
+
 
 def _check_type(value: str, field: Dict) -> Tuple[bool, str]:
+    value = _norm(value)
     field_type = field.get("type", "string")
 
     if field_type == "string":
         if value == "":
             return False, "expected non-empty string"
         return True, ""
+
     if field_type == "string_or_empty":
         return True, ""
+
     if field_type == "int":
         if _INT_RE.match(value):
             return True, ""
         return False, "expected int"
+
     if field_type == "int_or_empty":
         if value == "":
             return True, ""
         if _INT_RE.match(value):
             return True, ""
         return False, "expected int or empty"
+
     if field_type == "float":
         if _FLOAT_RE.match(value):
             return True, ""
         return False, "expected float"
+
     if field_type == "number_or_empty":
         if value == "":
             return True, ""
         if _FLOAT_RE.match(value):
             return True, ""
         return False, "expected number or empty"
-    if field_type == "enum":
-        enum_values = field.get("enum", [])
-        if value in enum_values:
-            return True, ""
-        return False, f"expected enum {enum_values}"
-    if field_type == "bool_str":
-        if value in ("true", "false"):
-            return True, ""
-        return False, "expected bool string 'true' or 'false'"
-    if field_type == "bool_01":
-        if value in ("0", "1"):
-            return True, ""
-        return False, "expected 0 or 1"
 
-    return False, f"unknown field type '{field_type}'"
+    # ✅ Accept either 0/1 OR true/false in one type
+    if field_type == "bool_any":
+        if value in ("0", "1", "true", "false"):
+            return True, ""
+        return False, "expected 0/1 or true/false"
+
 
 
 def validate_export_string(export_str: str, contract_path: str) -> List[str]:
