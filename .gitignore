@@ -218,3 +218,8 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+**/node_modules/
+**/.wrangler/
+**/.dev.vars
+.env
+.env.*

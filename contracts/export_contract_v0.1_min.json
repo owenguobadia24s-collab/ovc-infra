@@ -47,6 +47,7 @@
     { "key": "perm_state", "order": 35, "type": "string", "required": true },
     { "key": "rail_loc", "order": 36, "type": "string_or_empty", "required": true },
     { "key": "tradeable", "order": 37, "type": "enum", "enum": ["Y", "N"], "required": true },
+    { "key": "tradeable", "order": 37, "type": "bool_01", "required": true },
     { "key": "conf_l3", "order": 38, "type": "string", "required": true },
     { "key": "play", "order": 39, "type": "string", "required": true },
     { "key": "pred_dir", "order": 40, "type": "string", "required": true },
@@ -56,7 +57,7 @@
 
     { "key": "source", "order": 44, "type": "string", "required": true },
     { "key": "build_id", "order": 45, "type": "string", "required": true },
-    { "key": "note", "order": 46, "type": "string_or_empty", "required": false },
+    { "key": "note", "order": 46, "type": "string_or_empty", "required": true },
     { "key": "ready", "order": 47, "type": "bool_01", "required": true }
   ]
 }
