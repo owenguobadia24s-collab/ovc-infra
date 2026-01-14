@@ -48,13 +48,11 @@ def _check_type(value: str, field: Dict) -> Tuple[bool, str]:
             return False, "expected non-empty string"
         return True, ""
 
-    if field_type == "string_or_empty":
+    if field_type in ("string_or_empty",):
         return True, ""
 
     if field_type == "int":
-        if _INT_RE.match(value):
-            return True, ""
-        return False, "expected int"
+        return (_INT_RE.match(value) is not None), ("expected int" if _INT_RE.match(value) is None else "")
 
     if field_type == "int_or_empty":
         if value == "":
@@ -68,21 +66,38 @@ def _check_type(value: str, field: Dict) -> Tuple[bool, str]:
             return True, ""
         return False, "expected float"
 
-    if field_type == "number_or_empty":
+    if field_type in ("number_or_empty", "float_or_empty"):
         if value == "":
             return True, ""
         if _FLOAT_RE.match(value):
             return True, ""
         return False, "expected number or empty"
 
-    # ✅ Accept either 0/1 OR true/false in one type
+    if field_type == "enum":
+        enum_values = field.get("enum", [])
+        if value in enum_values:
+            return True, ""
+        return False, f"expected enum {enum_values}"
+
+    # Accept either 0/1 or true/false
     if field_type == "bool_any":
         if value in ("0", "1", "true", "false"):
             return True, ""
         return False, "expected 0/1 or true/false"
 
+    # If you still want strict variants:
+    if field_type == "bool_01":
+        if value in ("0", "1"):
+            return True, ""
+        return False, "expected 0 or 1"
 
+    if field_type == "bool_str":
+        if value in ("true", "false"):
+            return True, ""
+        return False, "expected 'true' or 'false'"
 
+    # ✅ critical: never fall off the end
+    return False, f"unknown field type '{field_type}'"
 def validate_export_string(export_str: str, contract_path: str) -> List[str]:
     contract = load_contract(contract_path)
     delimiter = contract.get("delimiter", "|")
@@ -165,4 +180,5 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 
