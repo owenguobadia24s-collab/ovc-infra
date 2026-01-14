@@ -1,0 +1,2 @@
+contract=MIN
+<export string>
