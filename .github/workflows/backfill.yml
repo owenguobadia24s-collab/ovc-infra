@@ -21,8 +21,21 @@ jobs:
       BACKFILL_START_UTC: "2005-01-01T00:00:00Z"
 
     steps:
+    
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate required secrets exist
+        run: |
+          python - << 'PY'
+          import os, sys
+          required = ["NEON_DSN", "OANDA_API_TOKEN", "OANDA_ENV"]
+          missing = [k for k in required if not os.environ.get(k)]
+          if missing:
+              print("Missing required env vars:", missing)
+              sys.exit(1)
+          print("Secrets OK:", required)
+          PY
 
       - name: Set up Python
         uses: actions/setup-python@v5
