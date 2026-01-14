@@ -2,7 +2,7 @@ import { neon } from "@neondatabase/serverless";
 
 type Env = {
   DATABASE_URL: string;
-  OVC_TOKEN: string; // add as Cloudflare secret
+  OVC_TOKEN: string;
 };
 
 type Envelope = {
@@ -35,12 +35,19 @@ function requireField(m: Record<string, string>, key: string): string {
   return v;
 }
 
+function msToTimestamptzStart2H(barCloseMs: number): string {
+  // block_start = bar_close_ms - 2 hours
+  const startMs = barCloseMs - 2 * 60 * 60 * 1000;
+  // Send ISO string; Postgres will cast to timestamptz
+  return new Date(startMs).toISOString();
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
       const url = new URL(request.url);
 
-      // ✅ Health check (NO DB call)
+      // ✅ Health check
       if (url.pathname === "/") return new Response("OVC webhook OK", { status: 200 });
 
       // ✅ Only accept POST /tv
@@ -51,36 +58,35 @@ export default {
       if (!env.DATABASE_URL) return new Response("Missing DATABASE_URL", { status: 500 });
       if (!env.OVC_TOKEN) return new Response("Missing OVC_TOKEN", { status: 500 });
 
-      // ✅ Read raw body
       const raw = await request.text();
       if (!raw || raw.trim().length === 0) return new Response("Empty body", { status: 400 });
 
-      // Support:
-      // A) JSON envelope: {schema, contract_version, token, export, bid?}
-      // B) Plain export string: "ver=...|sym=...|...|bid=..."
       const trimmed = raw.trim();
 
-      let envelope: Envelope | null = null;
-      let exportStr = "";
+      // Support:
+      // A) JSON envelope (recommended): {schema, contract_version, token, export, bid?}
+      // B) Plain export string: "ver=...|sym=...|...|bid=..."
       let schema = "";
       let contractVersion = "";
       let token = "";
+      let exportStr = "";
       let bidFromEnvelope = "";
-      let source = "tradingview_plain";
+      let source = "tv_plain";
 
       if (trimmed.startsWith("{")) {
+        let body: Envelope;
         try {
-          envelope = JSON.parse(trimmed) as Envelope;
+          body = JSON.parse(trimmed) as Envelope;
         } catch {
           return new Response("Invalid JSON body", { status: 400 });
         }
 
-        schema = String(envelope.schema ?? "");
-        contractVersion = String(envelope.contract_version ?? "");
-        token = String(envelope.token ?? "");
-        exportStr = String(envelope.export ?? "");
-        bidFromEnvelope = String(envelope.bid ?? "");
-        source = String(envelope.source ?? "tradingview");
+        schema = String(body.schema ?? "");
+        contractVersion = String(body.contract_version ?? "");
+        token = String(body.token ?? "");
+        exportStr = String(body.export ?? "");
+        bidFromEnvelope = String(body.bid ?? "");
+        source = String(body.source ?? "tv");
       } else {
         exportStr = trimmed;
       }
@@ -89,68 +95,72 @@ export default {
         return new Response("Missing export string", { status: 400 });
       }
 
-      // ✅ MIN-only enforcement:
-      // If schema is supplied, it MUST be MIN.
-      // If schema is omitted (plain text), we infer MIN but still validate required export fields.
+      // ✅ MIN-only enforcement (if schema is provided it MUST be MIN)
       if (schema && schema !== "OVC_MIN_V01") {
         return new Response("Rejected: schema must be OVC_MIN_V01", { status: 403 });
       }
 
-      // ✅ Token enforcement: only possible when using JSON envelope
+      // ✅ Token enforcement only when using JSON envelope
       if (schema) {
         if (!token || token !== env.OVC_TOKEN) {
           return new Response("Rejected: bad token", { status: 403 });
         }
       }
 
-      // ✅ Parse export
+      // ✅ Parse export string
       const m = parseExport(exportStr);
 
-      // ✅ Required MIN keys (tighten/extend to match your frozen contract)
-      const ver = requireField(m, "ver");
+      // Required keys for timing + identity
       const sym = requireField(m, "sym");
-      const tz = requireField(m, "tz");
-      const date_ny = requireField(m, "date_ny"); // YYYY-MM-DD
-      const bar_close_ms_str = requireField(m, "bar_close_ms");
-      const seg = requireField(m, "seg");
-      const block4h = requireField(m, "block4h");
-
+      const barCloseMsStr = requireField(m, "bar_close_ms");
       const bid = (m["bid"] && m["bid"].trim()) || (bidFromEnvelope && bidFromEnvelope.trim());
       if (!bid) return new Response("Missing bid (in export or envelope)", { status: 400 });
 
-      const bar_close_ms = Number(bar_close_ms_str);
-      if (!Number.isFinite(bar_close_ms) || bar_close_ms <= 0) {
+      const barCloseMs = Number(barCloseMsStr);
+      if (!Number.isFinite(barCloseMs) || barCloseMs <= 0) {
         return new Response("Invalid bar_close_ms", { status: 400 });
       }
 
-      // (Optional) If you export exp_ready=1, enforce it:
-      // if (m["exp_ready"] && m["exp_ready"] !== "1") return new Response("Rejected: exp_ready != 1", { status: 409 });
+      // Your v0.1-min table design
+      const schema_ver = "v0.1-min";
+      const block_type = "2H";
+      const block_start_iso = msToTimestamptzStart2H(barCloseMs);
+
+      // Optional metadata (store as parsed JSONB)
+      const payloadMin = {
+        schema: schema || "OVC_MIN_V01",
+        contract_version: contractVersion || "1.0.0",
+        bid,
+        export: exportStr,
+        parsed: m,
+      };
 
       const sql = neon(env.DATABASE_URL);
 
-      // ✅ Idempotent upsert into core table
+      // ✅ Idempotent upsert into your real core table
+      // PK: (symbol, block_start, block_type, schema_ver)
+      // OHLC nullable (you already altered), so TV can insert NULLs.
       await sql`
-        INSERT INTO ovc_blocks_core_v01
-          (bid, ver, sym, tz, date_ny, bar_close_ms, seg, block4h, export_min, schema_name, contract_version, source)
-        VALUES
-          (${bid}, ${ver}, ${sym}, ${tz}, ${date_ny}::date, ${bar_close_ms}, ${seg}, ${block4h}, ${exportStr},
-           ${schema || "OVC_MIN_V01"}, ${contractVersion || "1.0.0"}, ${source})
-        ON CONFLICT (bid)
+        INSERT INTO ovc_blocks_v01 (
+          schema_ver, source, symbol, block_type, block_start,
+          open, high, low, close, volume,
+          bid, export_min, payload_min
+        )
+        VALUES (
+          ${schema_ver}, ${source}, ${sym}, ${block_type}, ${block_start_iso}::timestamptz,
+          NULL, NULL, NULL, NULL, NULL,
+          ${bid}, ${exportStr}, ${JSON.stringify(payloadMin)}::jsonb
+        )
+        ON CONFLICT (symbol, block_start, block_type, schema_ver)
         DO UPDATE SET
-          ver = EXCLUDED.ver,
-          sym = EXCLUDED.sym,
-          tz = EXCLUDED.tz,
-          date_ny = EXCLUDED.date_ny,
-          bar_close_ms = EXCLUDED.bar_close_ms,
-          seg = EXCLUDED.seg,
-          block4h = EXCLUDED.block4h,
+          source = EXCLUDED.source,
+          bid = EXCLUDED.bid,
           export_min = EXCLUDED.export_min,
-          schema_name = EXCLUDED.schema_name,
-          contract_version = EXCLUDED.contract_version,
-          source = EXCLUDED.source
+          payload_min = EXCLUDED.payload_min,
+          ingested_at = now()
       `;
 
-      return new Response(JSON.stringify({ ok: true, bid }), {
+      return new Response(JSON.stringify({ ok: true, bid, symbol: sym, block_start: block_start_iso }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
