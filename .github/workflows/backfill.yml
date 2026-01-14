@@ -1,0 +1,39 @@
+name: OVC Backfill (GBPUSD 2H)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "17 2 * * *"  # daily at 02:17 UTC
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      NEON_DSN: ${{ secrets.NEON_DSN }}
+      OANDA_API_TOKEN: ${{ secrets.OANDA_API_TOKEN }}
+      OANDA_ENV: ${{ secrets.OANDA_ENV }}
+
+      # backfill controls (safe to hardcode)
+      BACKFILL_DAYS_PER_RUN: "30"
+      OANDA_SLICE_DAYS: "3"
+      BACKFILL_START_UTC: "2005-01-01T00:00:00Z"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run checkpointed backfill
+        run: |
+          python src/backfill_oanda_2h_checkpointed.py
