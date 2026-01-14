@@ -1,3 +1,16 @@
+# --- OVC specific ---
+.env
+.env.*
+.venv/
+venv/
+
+# VS Code (optional but recommended)
+.vscode/
+
+# Data / logs (future-proofing)
+data/
+logs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
