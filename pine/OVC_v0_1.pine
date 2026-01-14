@@ -97,7 +97,7 @@ exportMin = (
     "|bias_dir=" + f_txt(BiasDir) +
     "|perm_state=" + f_txt(PermissionState) +
     "|rail_loc=" + f_txt(RailLoc) +
-    "|tradeable=" + f_txt(TradeableNow) +
+    "|tradeable=" + (TradeableNow == "Y" ? "1" : "0") +
     "|conf_l3=" + f_txt(Conf_L3) +
     "|play=" + f_txt(Play) +
     "|pred_dir=" + f_txt(PredDir) +
@@ -109,7 +109,7 @@ exportMin = (
     "|source=" + f_txt(exp_source) +
     "|build_id=" + f_txt(exp_buildId) +
     "|note=" + f_s(exp_note) +
-    "|ready=" + str.tostring(exp_ready)
+    "|ready=" + (exp_ready == 1 ? "1" : "0")
 )
 
 // --- FULL (COPY/DEBUG): “every computed piece” grouped by module
