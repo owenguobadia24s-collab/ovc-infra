@@ -113,7 +113,18 @@ INSERT_SQL = """
 INSERT INTO ovc_blocks_v01
 (schema_ver, source, symbol, block_type, block_start, open, high, low, close, volume)
 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-ON CONFLICT (symbol, block_start, block_type, schema_ver) DO NOTHING;
+ON CONFLICT (symbol, block_start, block_type, schema_ver)
+DO UPDATE SET
+  source = COALESCE(ovc_blocks_v01.source, EXCLUDED.source),
+  open = COALESCE(ovc_blocks_v01.open, EXCLUDED.open),
+  high = COALESCE(ovc_blocks_v01.high, EXCLUDED.high),
+  low = COALESCE(ovc_blocks_v01.low, EXCLUDED.low),
+  close = COALESCE(ovc_blocks_v01.close, EXCLUDED.close),
+  volume = COALESCE(ovc_blocks_v01.volume, EXCLUDED.volume),
+  bid = COALESCE(ovc_blocks_v01.bid, EXCLUDED.bid),
+  export_min = COALESCE(ovc_blocks_v01.export_min, EXCLUDED.export_min),
+  payload_min = COALESCE(ovc_blocks_v01.payload_min, EXCLUDED.payload_min),
+  ingested_at = now();
 """
 
 def get_min_block_start() -> datetime | None:
