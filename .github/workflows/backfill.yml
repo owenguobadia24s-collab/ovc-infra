@@ -3,7 +3,7 @@ name: OVC Backfill (GBPUSD 2H)
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "17 2 * * *"  # daily at 02:17 UTC
+    - cron: "17 */6 * * *"  # daily at 02:17 UTC
 
 jobs:
   backfill:
