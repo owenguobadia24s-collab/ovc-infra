@@ -5,6 +5,18 @@
 - **Core (MIN)**: `public.ovc_blocks_v01`
 - **Detail (FULL, cold path)**: `public.ovc_blocks_detail_v01`
 
+## Architecture (Step 8B Option B)
+
+1. **TradingView → Worker** (`/tv_secure`) → **MIN only** → `public.ovc_blocks_v01`.
+2. **OANDA backfill** → `public.ovc_blocks_v01` **OHLC only** (preserve any existing MIN fields).
+3. **FULL ingest** (GitHub Actions/Python) → `public.ovc_blocks_detail_v01` **JSONB only**.
+
+**Idempotency key:** `(symbol, block_start, block_type, schema_ver)` in `ovc_blocks_v01`.
+
+**OHLC ownership:** Only backfill jobs write/overwrite `open/high/low/close/volume`. TradingView never does.
+
+**Replay guarantee:** Worker stores every raw body in R2 (`tv/YYYY-MM-DD/...`) for deterministic replay.
+
 ## TradingView webhook: switch to `/tv_secure`
 
 1. **Update webhook URL** in TradingView to point to `/tv_secure` (instead of `/tv`).
@@ -22,6 +34,7 @@
 Notes:
 - `/tv_secure` rejects non-JSON bodies, schemas other than `OVC_MIN_V01`, and invalid tokens.
 - `/tv` remains available for plain export testing (no token required).
+- Set the secret with: `wrangler secret put OVC_TOKEN`.
 
 ## Readiness SQL queries
 

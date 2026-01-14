@@ -16,7 +16,7 @@ type Envelope = {
   sent_ms?: number;
 };
 
-function parseExport(exportStr: string): Record<string, string> {
+export function parseExport(exportStr: string): Record<string, string> {
   const out: Record<string, string> = {};
   for (const part of exportStr.split("|")) {
     if (!part) continue;
@@ -36,7 +36,7 @@ function requireField(m: Record<string, string>, key: string): string {
   return v;
 }
 
-function msToTimestamptzStart2H(barCloseMs: number): string {
+export function msToTimestamptzStart2H(barCloseMs: number): string {
   // block_start = bar_close_ms - 2 hours
   const startMs = barCloseMs - 2 * 60 * 60 * 1000;
   // Send ISO string; Postgres will cast to timestamptz
@@ -51,8 +51,9 @@ function sanitizeKeyPart(value: string): string {
   return value.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-function randomSuffix(): string {
-  const bytes = new Uint8Array(6);
+function uniqueKeySuffix(): string {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
@@ -68,10 +69,11 @@ async function writeRawEvent(
     return;
   }
   const day = formatDateUTC(now);
+  const iso = now.toISOString().replace(/[:]/g, "-");
   const keyBid = bid ? sanitizeKeyPart(bid) : "";
   const key = keyBid
-    ? `tv/${day}/${keyBid}.txt`
-    : `tv/${day}/${now.getTime()}_${randomSuffix()}.txt`;
+    ? `tv/${day}/${keyBid}_${uniqueKeySuffix()}.txt`
+    : `tv/${day}/${iso}_${uniqueKeySuffix()}.txt`;
   try {
     await env.RAW_EVENTS.put(key, raw, { httpMetadata: { contentType: "text/plain" } });
   } catch (err) {
@@ -146,11 +148,6 @@ export default {
       }
 
       // ✅ MIN-only enforcement
-      if (schema && schema !== "OVC_MIN_V01") {
-        await writeRawEvent(env, raw, undefined, receivedAt);
-        return new Response("Rejected: schema must be OVC_MIN_V01", { status: 403 });
-      }
-
       if (isTvSecure) {
         if (!envelopeProvided) {
           await writeRawEvent(env, raw, undefined, receivedAt);
@@ -158,12 +155,15 @@ export default {
         }
         if (schema !== "OVC_MIN_V01") {
           await writeRawEvent(env, raw, undefined, receivedAt);
-          return new Response("Rejected: schema must be OVC_MIN_V01", { status: 403 });
+          return new Response("Invalid schema: must be OVC_MIN_V01", { status: 400 });
         }
         if (!token || token !== env.OVC_TOKEN) {
           await writeRawEvent(env, raw, undefined, receivedAt);
-          return new Response("Rejected: bad token", { status: 403 });
+          return new Response("Rejected: bad token", { status: 401 });
         }
+      } else if (schema && schema !== "OVC_MIN_V01") {
+        await writeRawEvent(env, raw, undefined, receivedAt);
+        return new Response("Invalid schema: must be OVC_MIN_V01", { status: 400 });
       }
 
       // ✅ Parse export string
@@ -198,8 +198,12 @@ export default {
 
       // Optional metadata (store as parsed JSONB)
       const payloadMin = {
-        schema: schema || "OVC_MIN_V01",
-        contract_version: contractVersion || "1.0.0",
+        envelope: {
+          schema: schema || "OVC_MIN_V01",
+          contract_version: contractVersion || "1.0.0",
+          token_present: Boolean(token),
+          source,
+        },
         bid,
         export: exportStr,
         parsed: m,
@@ -214,12 +218,12 @@ export default {
         INSERT INTO ovc_blocks_v01 (
           schema_ver, source, symbol, block_type, block_start,
           open, high, low, close, volume,
-          bid, export_min, payload_min
+          bid, export_min, payload_min, ingested_at
         )
         VALUES (
           ${schema_ver}, ${source}, ${sym}, ${block_type}, ${block_start_iso}::timestamptz,
           NULL, NULL, NULL, NULL, NULL,
-          ${bid}, ${exportStr}, ${JSON.stringify(payloadMin)}::jsonb
+          ${bid}, ${exportStr}, ${JSON.stringify(payloadMin)}::jsonb, now()
         )
         ON CONFLICT (symbol, block_start, block_type, schema_ver)
         DO UPDATE SET
