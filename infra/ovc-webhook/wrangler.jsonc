@@ -6,6 +6,10 @@
   "compatibility_date": "2026-01-12",
   "compatibility_flags": ["nodejs_compat"],
 
+  // Secrets:
+  //   wrangler secret put OVC_TOKEN
+  //   wrangler secret put DATABASE_URL
+  // OVC_TOKEN is required for /tv_secure requests.
 
   "r2_buckets": [
     {
