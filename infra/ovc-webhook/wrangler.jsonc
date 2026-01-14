@@ -1,0 +1,19 @@
+
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ovc-webhook",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-01-12",
+  "compatibility_flags": ["nodejs_compat"],
+
+
+  "r2_buckets": [
+    {
+      "binding": "RAW_EVENTS",
+      "bucket_name": "ovc-raw-events"
+    }
+  ]
+
+
+	
+}
