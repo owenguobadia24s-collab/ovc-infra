@@ -3,6 +3,7 @@ import { neon } from "@neondatabase/serverless";
 type Env = {
   DATABASE_URL: string;
   OVC_TOKEN: string;
+  RAW_EVENTS: R2Bucket;
 };
 
 type Envelope = {
@@ -42,6 +43,42 @@ function msToTimestamptzStart2H(barCloseMs: number): string {
   return new Date(startMs).toISOString();
 }
 
+function formatDateUTC(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function sanitizeKeyPart(value: string): string {
+  return value.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+function randomSuffix(): string {
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function writeRawEvent(
+  env: Env,
+  raw: string,
+  bid: string | undefined,
+  now: Date,
+): Promise<void> {
+  if (!env.RAW_EVENTS) {
+    console.error("RAW_EVENTS binding missing; skipping raw event write");
+    return;
+  }
+  const day = formatDateUTC(now);
+  const keyBid = bid ? sanitizeKeyPart(bid) : "";
+  const key = keyBid
+    ? `tv/${day}/${keyBid}.txt`
+    : `tv/${day}/${now.getTime()}_${randomSuffix()}.txt`;
+  try {
+    await env.RAW_EVENTS.put(key, raw, { httpMetadata: { contentType: "text/plain" } });
+  } catch (err) {
+    console.error("Failed to write raw event to R2", err);
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
@@ -50,8 +87,10 @@ export default {
       // ✅ Health check
       if (url.pathname === "/") return new Response("OVC webhook OK", { status: 200 });
 
-      // ✅ Only accept POST /tv
-      if (url.pathname !== "/tv") return new Response("Not Found", { status: 404 });
+      // ✅ Only accept POST /tv or /tv_secure
+      const isTv = url.pathname === "/tv";
+      const isTvSecure = url.pathname === "/tv_secure";
+      if (!isTv && !isTvSecure) return new Response("Not Found", { status: 404 });
       if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
 
       // ✅ Require env vars
@@ -59,7 +98,11 @@ export default {
       if (!env.OVC_TOKEN) return new Response("Missing OVC_TOKEN", { status: 500 });
 
       const raw = await request.text();
-      if (!raw || raw.trim().length === 0) return new Response("Empty body", { status: 400 });
+      const receivedAt = new Date();
+      if (!raw || raw.trim().length === 0) {
+        await writeRawEvent(env, raw, undefined, receivedAt);
+        return new Response("Empty body", { status: 400 });
+      }
 
       const trimmed = raw.trim();
 
@@ -71,38 +114,54 @@ export default {
       let token = "";
       let exportStr = "";
       let bidFromEnvelope = "";
-      let source = "tv_plain";
+      let source = isTvSecure ? "tv_secure" : "tv_plain";
+      let envelopeProvided = false;
 
       if (trimmed.startsWith("{")) {
         let body: Envelope;
         try {
           body = JSON.parse(trimmed) as Envelope;
         } catch {
+          await writeRawEvent(env, raw, undefined, receivedAt);
           return new Response("Invalid JSON body", { status: 400 });
         }
 
+        envelopeProvided = true;
         schema = String(body.schema ?? "");
         contractVersion = String(body.contract_version ?? "");
         token = String(body.token ?? "");
         exportStr = String(body.export ?? "");
         bidFromEnvelope = String(body.bid ?? "");
-        source = String(body.source ?? "tv");
       } else {
+        if (isTvSecure) {
+          await writeRawEvent(env, raw, undefined, receivedAt);
+          return new Response("Invalid body: /tv_secure requires JSON", { status: 400 });
+        }
         exportStr = trimmed;
       }
 
       if (!exportStr || exportStr.trim().length === 0) {
+        await writeRawEvent(env, raw, undefined, receivedAt);
         return new Response("Missing export string", { status: 400 });
       }
 
-      // ✅ MIN-only enforcement (if schema is provided it MUST be MIN)
+      // ✅ MIN-only enforcement
       if (schema && schema !== "OVC_MIN_V01") {
+        await writeRawEvent(env, raw, undefined, receivedAt);
         return new Response("Rejected: schema must be OVC_MIN_V01", { status: 403 });
       }
 
-      // ✅ Token enforcement only when using JSON envelope
-      if (schema) {
+      if (isTvSecure) {
+        if (!envelopeProvided) {
+          await writeRawEvent(env, raw, undefined, receivedAt);
+          return new Response("Invalid body: /tv_secure requires JSON", { status: 400 });
+        }
+        if (schema !== "OVC_MIN_V01") {
+          await writeRawEvent(env, raw, undefined, receivedAt);
+          return new Response("Rejected: schema must be OVC_MIN_V01", { status: 403 });
+        }
         if (!token || token !== env.OVC_TOKEN) {
+          await writeRawEvent(env, raw, undefined, receivedAt);
           return new Response("Rejected: bad token", { status: 403 });
         }
       }
@@ -111,10 +170,21 @@ export default {
       const m = parseExport(exportStr);
 
       // Required keys for timing + identity
-      const sym = requireField(m, "sym");
-      const barCloseMsStr = requireField(m, "bar_close_ms");
+      let sym = "";
+      let barCloseMsStr = "";
+      try {
+        sym = requireField(m, "sym");
+        barCloseMsStr = requireField(m, "bar_close_ms");
+      } catch (err: any) {
+        await writeRawEvent(env, raw, undefined, receivedAt);
+        return new Response(`Invalid export: ${err?.message ?? String(err)}`, { status: 400 });
+      }
       const bid = (m["bid"] && m["bid"].trim()) || (bidFromEnvelope && bidFromEnvelope.trim());
-      if (!bid) return new Response("Missing bid (in export or envelope)", { status: 400 });
+      if (!bid) {
+        await writeRawEvent(env, raw, undefined, receivedAt);
+        return new Response("Missing bid (in export or envelope)", { status: 400 });
+      }
+      await writeRawEvent(env, raw, bid, receivedAt);
 
       const barCloseMs = Number(barCloseMsStr);
       if (!Number.isFinite(barCloseMs) || barCloseMs <= 0) {
