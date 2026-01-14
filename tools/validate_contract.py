@@ -115,3 +115,47 @@ def validate_export_string(export_str: str, contract_path: str) -> List[str]:
             errors.append(f"{key}: {message}")
 
     return errors
+
+def main(argv=None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Validate an OVC export string against a contract JSON."
+    )
+    parser.add_argument(
+        "contract_json",
+        help="Path to contract JSON (e.g. contracts/export_contract_v0.1_min.json)",
+    )
+    parser.add_argument(
+        "sample_export",
+        help="Path to sample export .txt (tests/sample_exports/min_001.txt)",
+    )
+    args = parser.parse_args(argv)
+
+    # Load export text file (supports the 'contract=MIN' header convention)
+    with open(args.sample_export, "r", encoding="utf-8") as f:
+        lines = [ln.strip() for ln in f.readlines() if ln.strip()]
+
+    def _clean_line(s: str) -> str:
+     return s.strip().lstrip("<").lstrip('"').lstrip("'").strip()
+    export_line = next((_clean_line(ln) for ln in lines if _clean_line(ln).startswith("ver=")), "")
+    if not export_line:
+        print("ERROR: No line starting with 'ver=' found.")
+    return 2
+
+
+    errors = validate_export_string(export_line, args.contract_json)
+
+    if errors:
+        print("FAIL")
+        for e in errors:
+            print(f"- {e}")
+        return 1
+
+    print("PASS")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
