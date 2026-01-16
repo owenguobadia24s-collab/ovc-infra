@@ -1,4 +1,4 @@
-create table if not exists ovc.ovc_blocks_v01.1_min (
+create table if not exists ovc.ovc_blocks_v01_1_min (
   -- identity
   block_id        text primary key,
   sym             text not null,
@@ -72,10 +72,10 @@ create table if not exists ovc.ovc_blocks_v01.1_min (
 );
 
 create index if not exists idx_ovc_min_sym_date
-  on ovc.ovc_blocks_v01.1_min(sym, date_ny);
+  on ovc.ovc_blocks_v01_1_min(sym, date_ny);
 
 create index if not exists idx_ovc_min_state_key
-  on ovc.ovc_blocks_v01.1_min(state_key);
+  on ovc.ovc_blocks_v01_1_min(state_key);
 
 create index if not exists idx_ovc_min_block2h
-  on ovc.ovc_blocks_v01.1_min(block2h);
+  on ovc.ovc_blocks_v01_1_min(block2h);
