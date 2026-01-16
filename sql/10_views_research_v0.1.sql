@@ -7,8 +7,9 @@ select
   bias_dir, pred_dir,
   trend_tag, struct_state, space_tag, bias_mode, perm_state, play, timebox,
   state_key,
-  ingest_ts, src, contract_ver
+  ingest_ts, source, scheme_min, build_id, ver, profile
 from ovc.ovc_blocks_v01_1_min;
+
 
 -- Sequenced view (adds previous state + next returns)
 create or replace view ovc.v_ovc_min_events_seq as
