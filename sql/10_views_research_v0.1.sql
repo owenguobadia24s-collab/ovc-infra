@@ -1,7 +1,7 @@
 -- Normalized events view
 create or replace view ovc.v_ovc_min_events_norm as
 select
-  block_id, sym, date_utc, block2h, block4h,
+  block_id, sym, date_ny, block2h, block4h,
   o,h,l,c, rng, body, ret,
   with_htf, tradeable, ready,
   bias_dir, pred_dir,
@@ -15,9 +15,9 @@ create or replace view ovc.v_ovc_min_events_seq as
 with x as (
   select
     *,
-    lag(state_key) over (partition by sym order by date_utc, block2h, block_id) as prev_state_key,
-    lag(play)      over (partition by sym order by date_utc, block2h, block_id) as prev_play,
-    lead(ret)      over (partition by sym order by date_utc, block2h, block_id) as next_ret
+    lag(state_key) over (partition by sym order by date_ny, block2h, block_id) as prev_state_key,
+    lag(play)      over (partition by sym order by date_ny, block2h, block_id) as prev_play,
+    lead(ret)      over (partition by sym order by date_ny, block2h, block_id) as next_ret
   from ovc.v_ovc_min_events_norm
 )
 select * from x;
