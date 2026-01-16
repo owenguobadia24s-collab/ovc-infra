@@ -46,6 +46,21 @@ Citations: Worker ingress and raw-event writes are in `infra/ovc-webhook/src/ind
   - The Worker expects this table to also contain `bid`, `export_min`, and `payload_min` columns because it inserts them directly. 【F:infra/ovc-webhook/src/index.ts†L210-L240】
 - **Detail (FULL):** `public.ovc_blocks_detail_v01` stores FULL payloads as JSONB with the same PK. 【F:infra/ovc-webhook/sql/20250215_create_ovc_blocks_detail_v01.sql†L1-L12】
 
+### Schema Sync Warning (Critical)
+The Worker upsert assumes `ovc_blocks_v01` has the columns `bid`, `export_min`, and `payload_min` and will fail if they are missing. `sql/schema_v01.sql` only defines the core OHLC fields, so your live schema must be reconciled via migration to match the Worker’s insert columns. 【F:infra/ovc-webhook/src/index.ts†L210-L240】【F:sql/schema_v01.sql†L1-L21】
+
+**How to verify (check required columns):**
+```sql
+SELECT column_name
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'ovc_blocks_v01'
+  AND column_name IN ('bid', 'export_min', 'payload_min')
+ORDER BY column_name;
+```
+
+**How to fix:** add a migration file (SQL) that `ALTER TABLE ovc_blocks_v01 ADD COLUMN ...` for `bid`, `export_min`, and `payload_min`, then apply it to Neon.
+
 ### R2 raw event storage
 - **Bucket binding/name:** `RAW_EVENTS` → `ovc-raw-events` in `infra/ovc-webhook/wrangler.jsonc`. 【F:infra/ovc-webhook/wrangler.jsonc†L12-L18】
 - **Object key structure:** `tv/YYYY-MM-DD/<bid>_<uuid>.txt` or `tv/YYYY-MM-DD/<iso>_<uuid>.txt` (if bid missing). 【F:infra/ovc-webhook/src/index.ts†L52-L85】
@@ -58,7 +73,8 @@ Citations: Worker ingress and raw-event writes are in `infra/ovc-webhook/src/ind
 | Item | Status | Evidence |
 | --- | --- | --- |
 | MIN ingestion only via TradingView | **Implemented** | Worker enforces MIN schema (`OVC_MIN_V01`) and `/tv_secure` JSON-only ingestion. 【F:infra/ovc-webhook/src/index.ts†L114-L174】 |
-| FULL stored as JSONB only (opt-in) | **Implemented** | `ovc_blocks_detail_v01.full_payload` is JSONB and the FULL ingest stub writes JSONB. 【F:infra/ovc-webhook/sql/20250215_create_ovc_blocks_detail_v01.sql†L1-L12】【F:src/full_ingest_stub.py†L8-L58】 |
+| FULL storage layer exists (table + JSONB + PK) | **Implemented** | `ovc_blocks_detail_v01.full_payload` is JSONB with a PK on `(symbol, block_start, block_type, schema_ver)`. 【F:infra/ovc-webhook/sql/20250215_create_ovc_blocks_detail_v01.sql†L1-L12】 |
+| FULL ingestion is production-grade (non-stub, automated, run reports) | **Not Implemented Yet** | FULL ingest is currently a stub script invoked manually or via workflow without run-report artifacts. 【F:src/full_ingest_stub.py†L1-L103】【F:.github/workflows/ovc_full_ingest.yml†L1-L60】 |
 | Core/detail tables with PKs enforced | **Implemented** | PKs in `ovc_blocks_v01` and `ovc_blocks_detail_v01`. 【F:sql/schema_v01.sql†L1-L21】【F:infra/ovc-webhook/sql/20250215_create_ovc_blocks_detail_v01.sql†L1-L12】 |
 | Backfill reruns produce zero duplicates | **Implemented** | Backfill uses `ON CONFLICT ... DO UPDATE` on the PK. 【F:src/backfill_oanda_2h.py†L95-L113】【F:src/backfill_oanda_2h_checkpointed.py†L89-L117】 |
 | Run report artifact generated per run | **Not Implemented** | No artifact-generation step exists in the workflows. 【F:.github/workflows/backfill.yml†L1-L56】【F:.github/workflows/ovc_full_ingest.yml†L1-L60】 |
@@ -114,10 +130,10 @@ python src/full_ingest_stub.py --symbol GBPUSD --start-date 2025-01-01 --end-dat
 - Requires `NEON_DSN` in the environment. 【F:src/full_ingest_stub.py†L59-L72】
 
 ## 6) Where to See the Logs (“the good stuff”)
-- **TradingView alert logs:** Alerts are emitted via `alert()` in the Pine script; view the alert log in the TradingView UI for those alerts. 【F:pine/OVC_v0_1.pine†L340-L348】
-- **Cloudflare Worker logs:** Use `wrangler dev` locally (prints request logs), and use the Cloudflare Workers dashboard/logs for deployed runs. The repo only defines the worker and `wrangler` scripts; log viewing itself is platform-provided. 【F:infra/ovc-webhook/package.json†L1-L11】
-- **Neon rows:** Use SQL queries (examples in `docs/step8_readiness.md`) to inspect inserts. 【F:docs/step8_readiness.md†L41-L79】
-- **R2 objects:** Check the `ovc-raw-events` bucket in Cloudflare R2 (bucket name defined in `wrangler.jsonc`). 【F:infra/ovc-webhook/wrangler.jsonc†L12-L18】
+- **TradingView alert logs (upstream source):** Alerts are emitted via `alert()` in the Pine script; view the alert log in the TradingView UI for those alerts. 【F:pine/OVC_v0_1.pine†L340-L348】
+- **Cloudflare Worker logs (ingestion truth):** Use `wrangler dev` locally (prints request logs), and use the Cloudflare Workers dashboard/logs for deployed runs. The repo only defines the worker and `wrangler` scripts; log viewing itself is platform-provided. 【F:infra/ovc-webhook/package.json†L1-L11】
+- **Neon tables (persistence truth):** Use SQL queries (examples in `docs/step8_readiness.md`) to inspect inserts. 【F:docs/step8_readiness.md†L41-L79】
+- **R2 objects (raw replay truth):** Check the `ovc-raw-events` bucket in Cloudflare R2 (bucket name defined in `wrangler.jsonc`). 【F:infra/ovc-webhook/wrangler.jsonc†L12-L18】
 
 ## 7) Troubleshooting (Top 8 Failures + Fixes)
 1) **Date parsing errors (FULL ingest stub).** `full_ingest_stub.py` parses dates using `%Y-%m-%d`; other formats will crash. Fix by supplying `YYYY-MM-DD` dates. 【F:src/full_ingest_stub.py†L24-L56】
