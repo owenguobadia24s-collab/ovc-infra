@@ -1,0 +1,1 @@
+- MIN is v0.1.1; news_flag removed; contract is source of truth.
