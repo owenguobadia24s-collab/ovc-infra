@@ -4,3 +4,5 @@ psycopg2-binary
 python-dateutil
 pytz
 requests
+psycopg[binary]==3.2.1
+requests==2.32.3
