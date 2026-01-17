@@ -1,23 +1,20 @@
-# MIN Contract Alignment (v0.1.1)
+# MIN Contract Alignment v0.1.1 (Infra)
 
-## What changed
-- MIN export in Pine now matches `contracts/export_contract_v0.1.1_min.json` field order, names, and types.
-- String fields are sanitized for `|`, `=`, and newlines; derived fields are deterministic.
-- Worker validation aligns with contract keys/types, rejects unknown keys, and reports all missing required keys at once.
-- Validator and tests use the frozen v0.1.1 MIN contract and fixtures.
+## End-to-end flow
+TradingView (Pine) export string → local validator → Cloudflare Worker `/tv` → Neon table `ovc.ovc_blocks_v01_1_min`.
 
 ## Validate locally
-PowerShell validator (single-line summary):
+Python validator:
+```
+python tools/validate_contract.py contracts/export_contract_v0.1.1_min.json tests/sample_exports/min_001.txt
+```
+
+PowerShell wrapper:
 ```
 .\tools\validate_contract.ps1 -SampleExport tests\sample_exports\min_001.txt
 ```
 
-Direct Python:
-```
-python tools\validate_contract.py contracts\export_contract_v0.1.1_min.json tests\sample_exports\min_001.txt
-```
-
-POST to worker (plain /tv):
+POST to worker:
 ```
 curl -X POST http://localhost:8787/tv --data-binary "@tests/sample_exports/min_001.txt"
 ```

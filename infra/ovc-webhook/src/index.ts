@@ -16,14 +16,15 @@ type Envelope = {
 };
 
 const CONTRACT_VERSION = "0.1.1";
-const SCHEMA_MIN = "export_contract_v0.1.1_min";
-const PROFILE_MIN = "MIN";
+const SCHEMA_MIN = "export_contract_v0.1_min_r1";
 
 // Enums
 const DIR_ENUM = new Set(["UP", "DOWN", "NEUTRAL"]);
+const INT_RE = /^-?\d+$/;
+const FLOAT_RE = /^-?\d+(\.\d+)?$/;
 
 // Contract typing
-type FieldType = "string" | "string_or_empty" | "int" | "int_or_empty" | "float" | "bool_01" | "enum_dir";
+type FieldType = "string" | "string_or_empty" | "int" | "int_or_empty" | "float" | "bool_01";
 
 type FieldSpec = {
   key: string;
@@ -69,14 +70,14 @@ const FIELDS: FieldSpec[] = [
   { key: "space_tag", type: "string", required: true },
 
   { key: "htf_stack", type: "string_or_empty", required: false },
-  { key: "with_htf", type: "bool_01", required: true },
+  { key: "with_htf", type: "string", required: true },
 
   { key: "rd_state", type: "string_or_empty", required: false },
   { key: "regime_tag", type: "string_or_empty", required: false },
   { key: "trans_risk", type: "string_or_empty", required: false },
 
   { key: "bias_mode", type: "string", required: true },
-  { key: "bias_dir", type: "enum_dir", required: true },
+  { key: "bias_dir", type: "string", required: true },
   { key: "perm_state", type: "string", required: true },
   { key: "rail_loc", type: "string_or_empty", required: false },
 
@@ -84,7 +85,7 @@ const FIELDS: FieldSpec[] = [
   { key: "conf_l3", type: "string", required: true },
 
   { key: "play", type: "string", required: true },
-  { key: "pred_dir", type: "enum_dir", required: true },
+  { key: "pred_dir", type: "string", required: true },
   { key: "pred_target", type: "string_or_empty", required: false },
   { key: "timebox", type: "string", required: true },
   { key: "invalidation", type: "string_or_empty", required: false },
@@ -101,6 +102,8 @@ type ParseFailCode =
   | "E_DUPLICATE_KEY"
   | "E_BAD_KV"
   | "E_REQUIRED_MISSING"
+  | "E_UNKNOWN_KEY"
+  | "E_KEY_ORDER"
   | "E_EMPTY_NOT_ALLOWED"
   | "E_TYPE_COERCION"
   | "E_ENUM"
@@ -119,12 +122,30 @@ type ParseResult = {
   message: string;
 };
 
-function parseKvStrict(exportStr: string): Record<string, string> {
+function keysFollowContractOrder(keys: string[], expected: string[]): boolean {
+  const indexByKey = new Map(expected.map((key, idx) => [key, idx]));
+  let lastIndex = -1;
+  for (const key of keys) {
+    const idx = indexByKey.get(key);
+    if (idx === undefined) continue;
+    if (idx < lastIndex) return false;
+    lastIndex = idx;
+  }
+  return true;
+}
+
+type ParsedKv = {
+  kv: Record<string, string>;
+  keys: string[];
+};
+
+function parseKvStrict(exportStr: string): ParsedKv {
   const out: Record<string, string> = {};
+  const keys: string[] = [];
   const parts = exportStr.split("|");
 
   for (const part of parts) {
-    if (!part) continue;
+    if (!part) throw new Error("E_BAD_KV: empty segment");
     const idx = part.indexOf("=");
     if (idx <= 0) throw new Error("E_BAD_KV: missing '=' or empty key");
 
@@ -137,56 +158,59 @@ function parseKvStrict(exportStr: string): Record<string, string> {
       throw new Error(`E_DUPLICATE_KEY: ${k}`);
     }
     out[k] = v;
+    keys.push(k);
   }
 
-  return out;
+  return { kv: out, keys };
 }
 
-function coerceValue(key: string, raw: string): { value: any; isNull: boolean } {
-  const spec = SPEC_BY_KEY[key];
-  if (!spec) {
-    // Unknown keys are allowed to exist in RAW only, but they should not break parsing.
-    // If you want unknown keys to be a hard error, flip this to throw.
-    return { value: raw, isNull: false };
-  }
+function normalizeBoolLike(raw: string, key: string): boolean {
+  const lowered = raw.trim().toLowerCase();
+  if (raw === "1" || lowered === "true" || lowered === "y" || lowered === "yes") return true;
+  if (raw === "0" || lowered === "false" || lowered === "n" || lowered === "no") return false;
+  throw new Error(`E_TYPE_COERCION: ${key}`);
+}
 
+function validateField(key: string, raw: string, spec: FieldSpec): { ok: boolean; value: any; error?: string; code?: ParseFailCode } {
   const isEmpty = raw.length === 0;
 
+  if (isEmpty && spec.type.endsWith("_or_empty")) {
+    return { ok: true, value: null };
+  }
+
   if (isEmpty) {
-    if (spec.type.endsWith("_or_empty")) return { value: null, isNull: true };
-    throw new Error(`E_EMPTY_NOT_ALLOWED: ${key}`);
+    return { ok: false, value: null, error: "expected non-empty value", code: "E_EMPTY_NOT_ALLOWED" };
   }
 
   switch (spec.type) {
     case "string":
-    case "string_or_empty":
-      return { value: raw, isNull: false };
+      return { ok: true, value: raw };
 
-    case "int":
+    case "string_or_empty":
+      return { ok: true, value: raw };
+
+    case "int": {
+      if (!INT_RE.test(raw)) return { ok: false, value: null, error: "expected int", code: "E_TYPE_COERCION" };
+      return { ok: true, value: Number(raw) };
+    }
+
     case "int_or_empty": {
-      const n = Number(raw);
-      if (!Number.isInteger(n)) throw new Error(`E_TYPE_COERCION: ${key}`);
-      return { value: n, isNull: false };
+      if (!INT_RE.test(raw)) return { ok: false, value: null, error: "expected int or empty", code: "E_TYPE_COERCION" };
+      return { ok: true, value: Number(raw) };
     }
 
     case "float": {
-      const n = Number(raw);
-      if (!Number.isFinite(n)) throw new Error(`E_TYPE_COERCION: ${key}`);
-      return { value: n, isNull: false };
+      if (!FLOAT_RE.test(raw)) return { ok: false, value: null, error: "expected float", code: "E_TYPE_COERCION" };
+      return { ok: true, value: Number(raw) };
     }
 
     case "bool_01": {
-      if (raw !== "0" && raw !== "1") throw new Error(`E_TYPE_COERCION: ${key}`);
-      return { value: raw === "1" ? 1 : 0, isNull: false };
-    }
-
-    case "enum_dir": {
-      if (!DIR_ENUM.has(raw)) throw new Error(`E_ENUM: ${key}`);
-      return { value: raw, isNull: false };
+      if (raw !== "0" && raw !== "1") return { ok: false, value: null, error: "expected 0 or 1", code: "E_TYPE_COERCION" };
+      return { ok: true, value: raw === "1" };
     }
 
     default:
-      return { value: raw, isNull: false };
+      return { ok: false, value: null, error: "unknown type", code: "E_TYPE_COERCION" };
   }
 }
 
@@ -229,12 +253,29 @@ function semanticChecks(v: Record<string, any>): ParseFailCode[] {
   return codes;
 }
 
+function buildStateKey(v: Record<string, any>): string {
+  return [
+    v.trend_tag,
+    v.struct_state,
+    v.space_tag,
+    v.bias_mode,
+    v.bias_dir,
+    v.perm_state,
+    v.play,
+    v.pred_dir,
+    v.timebox,
+  ].map((value) => String(value ?? "")).join("|");
+}
+
 function parseAndValidate(exportStr: string): ParseResult {
   const codes: ParseFailCode[] = [];
   let kv: Record<string, string>;
+  let keys: string[];
 
   try {
-    kv = parseKvStrict(exportStr);
+    const parsed = parseKvStrict(exportStr);
+    kv = parsed.kv;
+    keys = parsed.keys;
   } catch (e: any) {
     const msg = String(e?.message ?? e);
     if (msg.startsWith("E_DUPLICATE_KEY")) return { ok: false, codes: ["E_DUPLICATE_KEY"], message: msg };
@@ -242,37 +283,74 @@ function parseAndValidate(exportStr: string): ParseResult {
     return { ok: false, codes: ["E_BAD_KV"], message: msg };
   }
 
-  // Required presence
+  const missing: string[] = [];
+  const invalid: string[] = [];
+  const enumInvalid: string[] = [];
+  let hasTypeError = false;
+  let hasEmptyError = false;
   for (const f of FIELDS) {
     if (!f.required) continue;
-    if (!Object.prototype.hasOwnProperty.call(kv, f.key)) {
-      return { ok: false, codes: ["E_REQUIRED_MISSING"], message: `Missing required key: ${f.key}` };
-    }
+    if (!Object.prototype.hasOwnProperty.call(kv, f.key)) missing.push(f.key);
   }
+
+  const extras = keys.filter((key) => !SPEC_BY_KEY[key]);
+  const expectedOrder = FIELDS.map((f) => f.key);
+  const orderOk = keysFollowContractOrder(keys, expectedOrder);
 
   // Coerce
   const values: Record<string, any> = {};
-  for (const [k, raw] of Object.entries(kv)) {
-    if (SPEC_BY_KEY[k]) {
-      try {
-        values[k] = coerceValue(k, raw).value;
-      } catch (e: any) {
-        const msg = String(e?.message ?? e);
-        if (msg.startsWith("E_EMPTY_NOT_ALLOWED")) return { ok: false, codes: ["E_EMPTY_NOT_ALLOWED"], message: msg };
-        if (msg.startsWith("E_ENUM")) return { ok: false, codes: ["E_ENUM"], message: msg };
-        if (msg.startsWith("E_TYPE_COERCION")) return { ok: false, codes: ["E_TYPE_COERCION"], message: msg };
-        return { ok: false, codes: ["E_TYPE_COERCION"], message: msg };
-      }
+  for (const field of FIELDS) {
+    const raw = kv[field.key];
+    if (raw === undefined) continue;
+    const result = validateField(field.key, raw, field);
+    if (!result.ok) {
+      invalid.push(`${field.key}: ${result.error ?? "invalid"}`);
+      if (result.code === "E_EMPTY_NOT_ALLOWED") hasEmptyError = true;
+      else hasTypeError = true;
     } else {
-      // Unknown key: keep as string in payload only (does not block parse).
-      values[k] = raw;
+      values[field.key] = result.value;
     }
   }
 
-  // Contract identity checks
-  if (values.ver !== CONTRACT_VERSION) return { ok: false, codes: ["E_TYPE_COERCION"], message: `ver must be ${CONTRACT_VERSION}` };
-  if (values.profile !== PROFILE_MIN) return { ok: false, codes: ["E_TYPE_COERCION"], message: `profile must be ${PROFILE_MIN}` };
-  if (values.scheme_min !== SCHEMA_MIN) return { ok: false, codes: ["E_TYPE_COERCION"], message: `scheme_min must be ${SCHEMA_MIN}` };
+  if (values.with_htf !== undefined) {
+    try {
+      values.with_htf = normalizeBoolLike(String(values.with_htf ?? ""), "with_htf");
+    } catch {
+      invalid.push("with_htf: expected Y/N or 0/1");
+      hasTypeError = true;
+    }
+  }
+  if (values.bias_dir !== undefined && !DIR_ENUM.has(String(values.bias_dir ?? ""))) {
+    enumInvalid.push("bias_dir: expected UP, DOWN, or NEUTRAL");
+  }
+  if (values.pred_dir !== undefined && !DIR_ENUM.has(String(values.pred_dir ?? ""))) {
+    enumInvalid.push("pred_dir: expected UP, DOWN, or NEUTRAL");
+  }
+
+  if (enumInvalid.length) invalid.push(...enumInvalid);
+
+  if (missing.length || extras.length || invalid.length || !orderOk) {
+    const parts: string[] = [];
+    if (missing.length) {
+      codes.push("E_REQUIRED_MISSING");
+      parts.push(`Missing required keys: ${missing.join(", ")}`);
+    }
+    if (extras.length) {
+      codes.push("E_UNKNOWN_KEY");
+      parts.push(`Unexpected keys: ${extras.join(", ")}`);
+    }
+    if (invalid.length) {
+      if (hasEmptyError) codes.push("E_EMPTY_NOT_ALLOWED");
+      if (enumInvalid.length) codes.push("E_ENUM");
+      if (hasTypeError) codes.push("E_TYPE_COERCION");
+      parts.push(`Invalid keys: ${invalid.join(", ")}`);
+    }
+    if (!orderOk) {
+      codes.push("E_KEY_ORDER");
+      parts.push("Key order mismatch");
+    }
+    return { ok: false, codes, message: parts.join(" | ") };
+  }
 
   // Semantic checks
   const sem = semanticChecks(values);
@@ -441,8 +519,8 @@ export default {
       // Attempt to extract block_id for raw-key naming even on failure
       let blockIdForKey: string | undefined = undefined;
       try {
-        const kv = parseKvStrict(exportStr);
-        blockIdForKey = kv["block_id"];
+        const parsedKv = parseKvStrict(exportStr);
+        blockIdForKey = parsedKv.kv["block_id"];
       } catch {
         // ignore
       }
@@ -467,6 +545,7 @@ export default {
       verdict = "PASS";
 
       const v = parsed.values;
+      const stateKey = buildStateKey(v);
 
       // Upsert into LOCKED MIN table: ovc.ovc_blocks_v01_1_min (PK: block_id)
       // Keep the raw export string for audit + parsed JSON for reprocessing.
@@ -477,12 +556,14 @@ export default {
         raw_key: rawKey,
         export: exportStr,
         parsed: v,
+        state_key: stateKey,
         received_at: receivedAt.toISOString(),
       };
 
       const upsertRows = await sql!`
         INSERT INTO ovc.ovc_blocks_v01_1_min (
           block_id, sym, tz, date_ny, bar_close_ms, block2h, block4h,
+          ver, profile, scheme_min,
           o, h, l, c, rng, body, dir, ret,
           state_tag, value_tag, event, tt, cp_tag, tis,
           rrc, vrc,
@@ -493,10 +574,11 @@ export default {
           tradeable, conf_l3,
           play, pred_dir, pred_target, timebox, invalidation,
           source, build_id, note, ready,
-          export_str, payload, ingest_ts
+          state_key, export_str, payload, ingest_ts
         )
         VALUES (
           ${v.block_id}, ${v.sym}, ${v.tz}, ${v.date_ny}, ${v.bar_close_ms}, ${v.block2h}, ${v.block4h},
+          ${v.ver}, ${v.profile}, ${v.scheme_min},
           ${v.o}, ${v.h}, ${v.l}, ${v.c}, ${v.rng}, ${v.body}, ${v.dir}, ${v.ret},
           ${v.state_tag}, ${v.value_tag}, ${v.event ?? null}, ${v.tt}, ${v.cp_tag}, ${v.tis ?? null},
           ${v.rrc}, ${v.vrc},
@@ -507,7 +589,7 @@ export default {
           ${v.tradeable}, ${v.conf_l3},
           ${v.play}, ${v.pred_dir}, ${v.pred_target ?? null}, ${v.timebox}, ${v.invalidation ?? null},
           ${v.source}, ${v.build_id}, ${v.note ?? null}, ${v.ready},
-          ${exportStr}, ${JSON.stringify(payload)}::jsonb, now()
+          ${stateKey}, ${exportStr}, ${JSON.stringify(payload)}::jsonb, now()
         )
         ON CONFLICT (block_id)
         DO UPDATE SET
@@ -517,6 +599,9 @@ export default {
           bar_close_ms = EXCLUDED.bar_close_ms,
           block2h = EXCLUDED.block2h,
           block4h = EXCLUDED.block4h,
+          ver = EXCLUDED.ver,
+          profile = EXCLUDED.profile,
+          scheme_min = EXCLUDED.scheme_min,
           o = EXCLUDED.o,
           h = EXCLUDED.h,
           l = EXCLUDED.l,
@@ -556,6 +641,7 @@ export default {
           build_id = EXCLUDED.build_id,
           note = EXCLUDED.note,
           ready = EXCLUDED.ready,
+          state_key = EXCLUDED.state_key,
           export_str = EXCLUDED.export_str,
           payload = EXCLUDED.payload,
           ingest_ts = now()
