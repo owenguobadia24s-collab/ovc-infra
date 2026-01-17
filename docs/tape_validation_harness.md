@@ -4,39 +4,58 @@ Scope: validate OVC outputs vs TradingView 2H candles for a single NY trading da
 (17:00 to 17:00 America/New_York). This harness writes validation artifacts to
 `ovc_qa` only.
 
+## Env vars (set once)
+Set one of these in `.env` at repo root. `validate_day.py` prefers `NEON_DSN` and
+falls back to `DATABASE_URL`:
+```
+NEON_DSN=postgres://user:pass@host/db
+DATABASE_URL=postgres://user:pass@host/db
+```
+
 ## One-time setup
-1) Create the QA schema:
+Create the QA schema:
 ```
 psql -d $env:DATABASE_URL -f sql/qa_schema.sql
 ```
 
-2) Ensure derived views exist (if not already applied):
+Ensure derived views exist (if not already applied):
 ```
 psql -d $env:DATABASE_URL -f sql/derived_v0_1.sql
 psql -d $env:DATABASE_URL -f sql/option_c_v0_1.sql
 ```
 
-## Create a validation_run
-Option A (script creates it automatically):
+## Canonical run (from repo root)
 ```
-python src/backfill_day.py --symbol GBPUSD --date_ny 2026-01-16
-```
-The script prints a `run_id`. Keep it for all SQL and CSV loads.
-
-Option B (manual SQL):
-```
-insert into ovc_qa.validation_run (run_id, symbol, date_ny, ovc_contract_version, status, notes)
-values ('<uuid>', 'GBPUSD', '2026-01-16', 'v0.1', 'pending', 'manual');
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16
 ```
 
-## Single-day backfill (expected blocks + checks)
+Optional TradingView CSV load (2H export):
 ```
-python src/backfill_day.py --symbol GBPUSD --date_ny 2026-01-16 --run-id <uuid> --strict
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --tv-csv C:\path\to\tv_export.csv
 ```
-This seeds 12 expected blocks (A-L) in `ovc_qa.expected_blocks` and prints
-counts for OVC blocks, derived features, and outcomes.
+Expected headers include `time`, `open`, `high`, `low`, `close` (2H timeframe).
 
-## Load TradingView OHLC (CSV or manual)
+Optional convenience wrapper:
+```
+.\scripts\validate_day.ps1 -DateNy 2026-01-16 -Symbol GBPUSD
+```
+
+The command prints the `run_id` and a ready-to-paste psql invocation. If `psql`
+exists on PATH, it will run the validation pack automatically.
+
+## Manual psql validation (PowerShell)
+```
+psql -d $env:DATABASE_URL `
+  -v run_id='<uuid>' `
+  -v symbol='GBPUSD' `
+  -v date_ny='2026-01-16' `
+  -v tolerance_seconds=10 `
+  -v tolerance=0.00001 `
+  -f sql/qa_validation_pack.sql
+```
+If you only set `NEON_DSN`, replace `$env:DATABASE_URL` with `$env:NEON_DSN`.
+
+## Load TradingView OHLC manually (optional)
 CSV columns:
 `run_id,symbol,date_ny,block_letter,tv_open,tv_high,tv_low,tv_close,tv_ts_start_ny,source`
 
@@ -47,8 +66,7 @@ Example CSV row:
 
 Load via psql:
 ```
-\copy ovc_qa.tv_ohlc_2h (run_id,symbol,date_ny,block_letter,tv_open,tv_high,tv_low,tv_close,tv_ts_start_ny,source) \
-  from 'C:/path/to/tv_ohlc.csv' with (format csv, header true)
+\copy ovc_qa.tv_ohlc_2h (run_id,symbol,date_ny,block_letter,tv_open,tv_high,tv_low,tv_close,tv_ts_start_ny,source) from 'C:/path/to/tv_ohlc.csv' with (format csv, header true)
 ```
 
 Manual insert (single row):
@@ -58,17 +76,6 @@ insert into ovc_qa.tv_ohlc_2h (
 ) values (
   '<uuid>', 'GBPUSD', '2026-01-16', 'A', 1.23456, 1.23567, 1.23321, 1.23401, '2026-01-16 17:00:00-05', 'manual'
 );
-```
-
-## Run the SQL validation pack
-```
-psql -d $env:DATABASE_URL \
-  -v run_id=<uuid> \
-  -v symbol=GBPUSD \
-  -v date_ny=2026-01-16 \
-  -v tolerance_seconds=10 \
-  -v tolerance=0.00001 \
-  -f sql/qa_validation_pack.sql
 ```
 
 ## Interpret PASS vs FAIL
@@ -85,6 +92,11 @@ update ovc_qa.validation_run
 set status = 'pass', notes = 'all checks ok'
 where run_id = '<uuid>';
 ```
+
+## Common Errors
+- Missing `NEON_DSN`/`DATABASE_URL`: add one to `.env` at repo root.
+- Date format: use `YYYY-MM-DD`, for example `2026-01-16`.
+- Running from the wrong directory: run from repo root or use `.\scripts\validate_day.ps1`.
 
 ## Notion tape validation DB structure
 Required properties:
