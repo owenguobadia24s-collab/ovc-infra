@@ -48,6 +48,7 @@ string G_EXP = "EXPORT (OVC_LOG_V0.1)"
 exp_on      = input.bool(true,  "Enable Export", group=G_EXP, inline="e0")
 exp_showBox = input.bool(true,  "Show Export Box", group=G_EXP, inline="e0")
 exp_profile = input.string("MIN", "profile", options=["MIN","FULL"], group=G_EXP, inline="e0")
+exp_showReady = input.bool(false, "Show Export Readiness", group=G_EXP, inline="e3")
 
 exp_schema  = input.string("OVC_LOG_V0.1", "schema_ver", group=G_EXP, inline="e1")
 exp_buildId = input.string("OVC_v0.1",     "build_id",   group=G_EXP, inline="e1")
@@ -1360,6 +1361,9 @@ f_s(string s) =>
 // Helpers for ints (keeps empty on na)
 f_i(float x) => na(x) ? "" : str.tostring(int(x))
 
+f_add_missing(string acc, string name, bool isMissing) =>
+    isMissing ? (acc == "" ? name : acc + ", " + name) : acc
+
 // Build pool dump (optional; can get long)
 f_pool_dump(float[] lvls, string[] srcs, int maxN) =>
     string out = ""
@@ -1387,6 +1391,13 @@ exp_bid     = exp_ymd + "-" + exp_seg + "-" + exp_sym
 
 
 exp_ready = (is2H and hasHist) ? 1 : 0
+int exp_dir = close > open ? 1 : close < open ? -1 : 0
+float exp_rng = high - low
+float exp_body = math.abs(close - open)
+float exp_ret = open != 0 ? (close - open) / open : 0
+
+string exp_contract_version = "0.1.1"
+string exp_scheme_min = "export_contract_v0.1_min_r1"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // IDS (available if you want to display later)
@@ -1399,66 +1410,67 @@ string block_4h_id = f_block4h_id(t_ms, instrument)
 // --- MIN (WEBHOOK SAFE): everything needed to reconstruct the market state + decisions
 exportMin = (
     // META / VIEW
-    "ver=" + f_txt(exp_schema) +
+    "ver=" + f_s(exp_schema) +
     "|profile=MIN" +
-    "|schema_min=OVC_MIN_V0_1" +
-    "|sym=" + f_txt(exp_sym) +
-    "|tz=" + f_txt(EXP_TZ) +
-    "|date_ny=" + f_txt(exp_date) +
+    "|scheme_min=" + exp_scheme_min +
+    "|block_id=" + f_s(exp_bid) +
+    "|sym=" + f_s(exp_sym) +
+    "|tz=" + f_s(EXP_TZ) +
+    "|date_ny=" + f_s(exp_date) +
     "|bar_close_ms=" + str.tostring(t2) +
-    "|block2h_id=" + f_txt(block_2h_id) +
-    "|block4h_id=" + f_txt(block_4h_id) +
-    "|bid=" + f_txt(exp_bid) +
-    "|seg=" + f_txt(exp_seg) +
-    "|news_flag=" + str.tostring(exp_news) +
+    "|block2h=" + f_s(exp_seg) +
+    "|block4h=" + f_s(exp_4h) +
 
     // OHLC
     "|o=" + f_px(open) +
     "|h=" + f_px(high) +
     "|l=" + f_px(low) +
     "|c=" + f_px(close) +
-    "|dir=" + (close > open ? "UP" : close < open ? "DN" : "0") +
+    "|rng=" + f_px(exp_rng) +
+    "|body=" + f_px(exp_body) +
+    "|dir=" + str.tostring(exp_dir) +
+    "|ret=" + f_num(exp_ret) +
 
     // L1 MAIN (tags + critical scalars)
-    "|state_tag=" + f_txt(StateTag) +
-    "|value_tag=" + f_txt(ValueTag) +
+    "|state_tag=" + f_s(StateTag) +
+    "|value_tag=" + f_s(ValueTag) +
     "|event=" + f_s(DominantEvent) +
-    "|tt=" + str.tostring(TT) +
-    "|cp_tag=" + f_txt(CPTag) +
+    "|tt=" + str.tostring(int(TT)) +
+    "|cp_tag=" + f_s(CPTag) +
     "|tis=" + f_i(TiS) +
 
     // L2 CORE (context tags)
     "|rrc=" + f_px(RRc) +
     "|vrc=" + f_num(VRc) +
-    "|tr=" + f_txt(TrendTag) +
-    "|ss=" + f_txt(SS) +
-    "|sp=" + f_txt(SpaceTag) +
+    "|trend_tag=" + f_s(TrendTag) +
+    "|struct_state=" + f_s(StructState) +
+    "|space_tag=" + f_s(SpaceTag) +
     "|htf_stack=" + f_s(HTFStack) +
-    "|with_htf=" + f_txt(WithHTF) +
+    "|with_htf=" + f_s(WithHTF) +
 
     // RD + BlockStack (regime)
-    "|rd_state=" + f_txt(RD_State) +
-    "|regime_tag=" + f_txt(RegimeTag) +
-    "|trans_risk=" + f_txt(TransitionRisk) +
+    "|rd_state=" + f_s(RD_State) +
+    "|regime_tag=" + f_s(RegimeTag) +
+    "|trans_risk=" + f_s(TransitionRisk) +
 
     // L3 DECISION (what you actually trade)
-    "|bias_mode=" + f_txt(BiasMode) +
-    "|bias_dir=" + f_txt(BiasDir) +
-    "|perm_state=" + f_txt(PermissionState) +
-    "|rail_loc=" + f_txt(RailLoc) +
-    "|tradeable=" + f_txt(TradeableNow) +
-    "|conf_l3=" + f_txt(Conf_L3) +
-    "|play=" + f_txt(Play) +
-    "|pred_dir=" + f_txt(PredDir) +
+    "|bias_mode=" + f_s(BiasMode) +
+    "|bias_dir=" + f_s(BiasDir) +
+    "|perm_state=" + f_s(PermissionState) +
+    "|rail_loc=" + f_s(RailLoc) +
+    "|tradeable=" + (TradeableNow == "Y" ? "1" : "0") +
+    "|conf_l3=" + f_s(Conf_L3) +
+    "|play=" + f_s(Play) +
+    "|pred_dir=" + f_s(PredDir) +
     "|pred_target=" + f_s(PredTarget) +
-    "|timebox=" + f_txt(Timebox) +
+    "|timebox=" + f_s(Timebox) +
     "|invalidation=" + f_s(Invalidation) +
 
     // META FOOTER
-    "|source=" + f_txt(exp_source) +
-    "|build_id=" + f_txt(exp_buildId) +
+    "|source=" + f_s(exp_source) +
+    "|build_id=" + f_s(exp_buildId) +
     "|note=" + f_s(exp_note) +
-    "|ready=" + str.tostring(exp_ready)
+    "|ready=" + (exp_ready == 1 ? "1" : "0")
 )
 
 // --- FULL (COPY/DEBUG): “every computed piece” grouped by module
@@ -1688,6 +1700,45 @@ string activeProfile = exp_profile  // MIN or FULL
 string rawExport = (activeProfile == "FULL") ? exportFull : exportMin
 exportStr = (exp_ready == 1) ? rawExport : ""
 
+string exp_missing = ""
+exp_missing := f_add_missing(exp_missing, "ver", na(exp_schema) or exp_schema == "")
+exp_missing := f_add_missing(exp_missing, "sym", na(exp_sym) or exp_sym == "")
+exp_missing := f_add_missing(exp_missing, "tz", na(EXP_TZ) or EXP_TZ == "")
+exp_missing := f_add_missing(exp_missing, "date_ny", na(exp_date) or exp_date == "")
+exp_missing := f_add_missing(exp_missing, "bar_close_ms", na(t2))
+exp_missing := f_add_missing(exp_missing, "block_id", na(exp_bid) or exp_bid == "")
+exp_missing := f_add_missing(exp_missing, "block2h", na(exp_seg) or exp_seg == "")
+exp_missing := f_add_missing(exp_missing, "block4h", na(exp_4h) or exp_4h == "")
+exp_missing := f_add_missing(exp_missing, "o", na(open))
+exp_missing := f_add_missing(exp_missing, "h", na(high))
+exp_missing := f_add_missing(exp_missing, "l", na(low))
+exp_missing := f_add_missing(exp_missing, "c", na(close))
+exp_missing := f_add_missing(exp_missing, "rng", na(exp_rng))
+exp_missing := f_add_missing(exp_missing, "body", na(exp_body))
+exp_missing := f_add_missing(exp_missing, "dir", na(exp_dir))
+exp_missing := f_add_missing(exp_missing, "ret", na(exp_ret))
+exp_missing := f_add_missing(exp_missing, "state_tag", na(StateTag) or StateTag == "")
+exp_missing := f_add_missing(exp_missing, "value_tag", na(ValueTag) or ValueTag == "")
+exp_missing := f_add_missing(exp_missing, "tt", na(TT))
+exp_missing := f_add_missing(exp_missing, "cp_tag", na(CPTag) or CPTag == "")
+exp_missing := f_add_missing(exp_missing, "rrc", na(RRc))
+exp_missing := f_add_missing(exp_missing, "vrc", na(VRc))
+exp_missing := f_add_missing(exp_missing, "trend_tag", na(TrendTag) or TrendTag == "")
+exp_missing := f_add_missing(exp_missing, "struct_state", na(StructState) or StructState == "")
+exp_missing := f_add_missing(exp_missing, "space_tag", na(SpaceTag) or SpaceTag == "")
+exp_missing := f_add_missing(exp_missing, "with_htf", na(WithHTF) or WithHTF == "")
+exp_missing := f_add_missing(exp_missing, "bias_mode", na(BiasMode) or BiasMode == "")
+exp_missing := f_add_missing(exp_missing, "bias_dir", na(BiasDir) or BiasDir == "")
+exp_missing := f_add_missing(exp_missing, "perm_state", na(PermissionState) or PermissionState == "")
+exp_missing := f_add_missing(exp_missing, "tradeable", na(TradeableNow) or TradeableNow == "")
+exp_missing := f_add_missing(exp_missing, "conf_l3", na(Conf_L3) or Conf_L3 == "")
+exp_missing := f_add_missing(exp_missing, "play", na(Play) or Play == "")
+exp_missing := f_add_missing(exp_missing, "pred_dir", na(PredDir) or PredDir == "")
+exp_missing := f_add_missing(exp_missing, "timebox", na(Timebox) or Timebox == "")
+exp_missing := f_add_missing(exp_missing, "source", na(exp_source) or exp_source == "")
+exp_missing := f_add_missing(exp_missing, "build_id", na(exp_buildId) or exp_buildId == "")
+exp_missing := f_add_missing(exp_missing, "ready", na(exp_ready))
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ALERT EXPORT (TradingView webhook)
 // Fires only on 2H bar close, when exp_ready == 1
@@ -1704,6 +1755,20 @@ if exp_on and exp_showBox and barstate.islast
     table.cell(tExp, 0, 0, "OVC EXPORT (copy)", text_color=hdrTxt, bgcolor=hdrBg, text_size=f_size())
     table.cell(tExp, 0, 1, (exp_ready == 1 ? exportStr : "NOT READY (need TF=2H + 2 prior bars)"),
          text_color=bodyTxt, bgcolor=bodyBg, text_size=size.tiny)
+
+var table tExpReady = table.new(position.bottom_left, 1, 4, frame_width=1)
+if barstate.islast
+    if exp_showReady
+        string readyLabel = exp_ready == 1 ? "READY" : "NOT READY"
+        string missingLabel = exp_missing == "" ? "none" : exp_missing
+        table.cell(tExpReady, 0, 0, "EXPORT READINESS", text_color=hdrTxt, bgcolor=hdrBg, text_size=f_size())
+        table.cell(tExpReady, 0, 1, "ready=" + readyLabel, text_color=bodyTxt, bgcolor=bodyBg, text_size=f_size())
+        table.cell(tExpReady, 0, 2, "missing=" + missingLabel, text_color=bodyTxt, bgcolor=bodyBg, text_size=f_size())
+        table.cell(tExpReady, 0, 3,
+            "contract=" + exp_contract_version + " scheme_min=" + exp_scheme_min + " block_id=" + exp_bid,
+            text_color=bodyTxt, bgcolor=bodyBg, text_size=f_size())
+    else
+        table.clear(tExpReady, 0, 0, 0, 3)
 
 
 
