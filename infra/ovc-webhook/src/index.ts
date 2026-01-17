@@ -20,6 +20,8 @@ const SCHEMA_MIN = "export_contract_v0.1_min_r1";
 
 // Enums
 const DIR_ENUM = new Set(["UP", "DOWN", "NEUTRAL"]);
+const INT_RE = /^-?\d+$/;
+const FLOAT_RE = /^-?\d+(\.\d+)?$/;
 
 // Contract typing
 type FieldType = "string" | "string_or_empty" | "int" | "int_or_empty" | "float" | "bool_01";
@@ -143,7 +145,7 @@ function parseKvStrict(exportStr: string): ParsedKv {
   const parts = exportStr.split("|");
 
   for (const part of parts) {
-    if (!part) continue;
+    if (!part) throw new Error("E_BAD_KV: empty segment");
     const idx = part.indexOf("=");
     if (idx <= 0) throw new Error("E_BAD_KV: missing '=' or empty key");
 
@@ -169,45 +171,46 @@ function normalizeBoolLike(raw: string, key: string): boolean {
   throw new Error(`E_TYPE_COERCION: ${key}`);
 }
 
-function coerceValue(key: string, raw: string): { value: any; isNull: boolean } {
-  const spec = SPEC_BY_KEY[key];
-  if (!spec) {
-    // Unknown keys should already be rejected by parseAndValidate.
-    return { value: raw, isNull: false };
-  }
-
+function validateField(key: string, raw: string, spec: FieldSpec): { ok: boolean; value: any; error?: string; code?: ParseFailCode } {
   const isEmpty = raw.length === 0;
 
+  if (isEmpty && spec.type.endsWith("_or_empty")) {
+    return { ok: true, value: null };
+  }
+
   if (isEmpty) {
-    if (spec.type.endsWith("_or_empty")) return { value: null, isNull: true };
-    throw new Error(`E_EMPTY_NOT_ALLOWED: ${key}`);
+    return { ok: false, value: null, error: "expected non-empty value", code: "E_EMPTY_NOT_ALLOWED" };
   }
 
   switch (spec.type) {
     case "string":
-    case "string_or_empty":
-      return { value: raw, isNull: false };
+      return { ok: true, value: raw };
 
-    case "int":
+    case "string_or_empty":
+      return { ok: true, value: raw };
+
+    case "int": {
+      if (!INT_RE.test(raw)) return { ok: false, value: null, error: "expected int", code: "E_TYPE_COERCION" };
+      return { ok: true, value: Number(raw) };
+    }
+
     case "int_or_empty": {
-      const n = Number(raw);
-      if (!Number.isInteger(n)) throw new Error(`E_TYPE_COERCION: ${key}`);
-      return { value: n, isNull: false };
+      if (!INT_RE.test(raw)) return { ok: false, value: null, error: "expected int or empty", code: "E_TYPE_COERCION" };
+      return { ok: true, value: Number(raw) };
     }
 
     case "float": {
-      const n = Number(raw);
-      if (!Number.isFinite(n)) throw new Error(`E_TYPE_COERCION: ${key}`);
-      return { value: n, isNull: false };
+      if (!FLOAT_RE.test(raw)) return { ok: false, value: null, error: "expected float", code: "E_TYPE_COERCION" };
+      return { ok: true, value: Number(raw) };
     }
 
     case "bool_01": {
-      if (raw !== "0" && raw !== "1") throw new Error(`E_TYPE_COERCION: ${key}`);
-      return { value: raw === "1", isNull: false };
+      if (raw !== "0" && raw !== "1") return { ok: false, value: null, error: "expected 0 or 1", code: "E_TYPE_COERCION" };
+      return { ok: true, value: raw === "1" };
     }
 
     default:
-      return { value: raw, isNull: false };
+      return { ok: false, value: null, error: "unknown type", code: "E_TYPE_COERCION" };
   }
 }
 
@@ -281,6 +284,10 @@ function parseAndValidate(exportStr: string): ParseResult {
   }
 
   const missing: string[] = [];
+  const invalid: string[] = [];
+  const enumInvalid: string[] = [];
+  let hasTypeError = false;
+  let hasEmptyError = false;
   for (const f of FIELDS) {
     if (!f.required) continue;
     if (!Object.prototype.hasOwnProperty.call(kv, f.key)) missing.push(f.key);
@@ -290,7 +297,39 @@ function parseAndValidate(exportStr: string): ParseResult {
   const expectedOrder = FIELDS.map((f) => f.key);
   const orderOk = keysFollowContractOrder(keys, expectedOrder);
 
-  if (missing.length || extras.length || !orderOk) {
+  // Coerce
+  const values: Record<string, any> = {};
+  for (const field of FIELDS) {
+    const raw = kv[field.key];
+    if (raw === undefined) continue;
+    const result = validateField(field.key, raw, field);
+    if (!result.ok) {
+      invalid.push(`${field.key}: ${result.error ?? "invalid"}`);
+      if (result.code === "E_EMPTY_NOT_ALLOWED") hasEmptyError = true;
+      else hasTypeError = true;
+    } else {
+      values[field.key] = result.value;
+    }
+  }
+
+  if (values.with_htf !== undefined) {
+    try {
+      values.with_htf = normalizeBoolLike(String(values.with_htf ?? ""), "with_htf");
+    } catch {
+      invalid.push("with_htf: expected Y/N or 0/1");
+      hasTypeError = true;
+    }
+  }
+  if (values.bias_dir !== undefined && !DIR_ENUM.has(String(values.bias_dir ?? ""))) {
+    enumInvalid.push("bias_dir: expected UP, DOWN, or NEUTRAL");
+  }
+  if (values.pred_dir !== undefined && !DIR_ENUM.has(String(values.pred_dir ?? ""))) {
+    enumInvalid.push("pred_dir: expected UP, DOWN, or NEUTRAL");
+  }
+
+  if (enumInvalid.length) invalid.push(...enumInvalid);
+
+  if (missing.length || extras.length || invalid.length || !orderOk) {
     const parts: string[] = [];
     if (missing.length) {
       codes.push("E_REQUIRED_MISSING");
@@ -300,43 +339,17 @@ function parseAndValidate(exportStr: string): ParseResult {
       codes.push("E_UNKNOWN_KEY");
       parts.push(`Unexpected keys: ${extras.join(", ")}`);
     }
+    if (invalid.length) {
+      if (hasEmptyError) codes.push("E_EMPTY_NOT_ALLOWED");
+      if (enumInvalid.length) codes.push("E_ENUM");
+      if (hasTypeError) codes.push("E_TYPE_COERCION");
+      parts.push(`Invalid keys: ${invalid.join(", ")}`);
+    }
     if (!orderOk) {
       codes.push("E_KEY_ORDER");
       parts.push("Key order mismatch");
     }
     return { ok: false, codes, message: parts.join(" | ") };
-  }
-
-  // Coerce
-  const values: Record<string, any> = {};
-  for (const [k, raw] of Object.entries(kv)) {
-    if (SPEC_BY_KEY[k]) {
-      try {
-        values[k] = coerceValue(k, raw).value;
-      } catch (e: any) {
-        const msg = String(e?.message ?? e);
-        if (msg.startsWith("E_EMPTY_NOT_ALLOWED")) return { ok: false, codes: ["E_EMPTY_NOT_ALLOWED"], message: msg };
-        if (msg.startsWith("E_ENUM")) return { ok: false, codes: ["E_ENUM"], message: msg };
-        if (msg.startsWith("E_TYPE_COERCION")) return { ok: false, codes: ["E_TYPE_COERCION"], message: msg };
-        return { ok: false, codes: ["E_TYPE_COERCION"], message: msg };
-      }
-    } else {
-      values[k] = raw;
-    }
-  }
-
-  // Normalize values for storage where DB expects boolean
-  try {
-    values.with_htf = normalizeBoolLike(String(values.with_htf ?? ""), "with_htf");
-  } catch (e: any) {
-    const msg = String(e?.message ?? e);
-    return { ok: false, codes: ["E_TYPE_COERCION"], message: msg };
-  }
-  if (!DIR_ENUM.has(String(values.bias_dir ?? ""))) {
-    return { ok: false, codes: ["E_ENUM"], message: "bias_dir must be UP, DOWN, or NEUTRAL" };
-  }
-  if (!DIR_ENUM.has(String(values.pred_dir ?? ""))) {
-    return { ok: false, codes: ["E_ENUM"], message: "pred_dir must be UP, DOWN, or NEUTRAL" };
   }
 
   // Semantic checks
