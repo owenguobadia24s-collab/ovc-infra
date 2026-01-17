@@ -39,6 +39,22 @@ exp_bid     = exp_ymd + "-" + exp_seg + "-" + exp_sym
 
 exp_ready = (is2H and hasHist) ? 1 : 0
 
+/*
+MIN contract: contracts/export_contract_v0.1.1_min.json (schema export_contract_v0.1_min_r1)
+Derived fields:
+- block_id = exp_ymd + "-" + exp_seg + "-" + exp_sym
+- block2h = exp_seg
+- block4h = exp_4h
+- rng = high - low
+- body = abs(close - open)
+- dir = c > o ? 1 : c < o ? -1 : 0
+- ret = o != 0 ? (c - o) / o : 0
+*/
+int exp_dir = close > open ? 1 : close < open ? -1 : 0
+float exp_rng = high - low
+float exp_body = math.abs(close - open)
+float exp_ret = open != 0 ? (close - open) / open : 0
+
 // ─────────────────────────────────────────────────────────────────────────────
 // IDS (available if you want to display later)
 string instrument = syminfo.ticker
@@ -50,66 +66,67 @@ string block_4h_id = f_block4h_id(t_ms, instrument)
 // --- MIN (WEBHOOK SAFE): everything needed to reconstruct the market state + decisions
 exportMin = (
     // META / VIEW
-    "ver=" + f_txt(exp_schema) +
+    "ver=" + f_s(f_txt(exp_schema)) +
     "|profile=MIN" +
-    "|schema_min=OVC_MIN_V0_1" +
-    "|sym=" + f_txt(exp_sym) +
-    "|tz=" + f_txt(EXP_TZ) +
-    "|date_ny=" + f_txt(exp_date) +
+    "|scheme_min=export_contract_v0.1_min_r1" +
+    "|block_id=" + f_s(exp_bid) +
+    "|sym=" + f_s(f_txt(exp_sym)) +
+    "|tz=" + f_s(f_txt(EXP_TZ)) +
+    "|date_ny=" + f_s(f_txt(exp_date)) +
     "|bar_close_ms=" + str.tostring(t2) +
-    "|block2h_id=" + f_txt(block_2h_id) +
-    "|block4h_id=" + f_txt(block_4h_id) +
-    "|bid=" + f_txt(exp_bid) +
-    "|seg=" + f_txt(exp_seg) +
-    "|news_flag=" + str.tostring(exp_news) +
+    "|block2h=" + f_s(f_txt(exp_seg)) +
+    "|block4h=" + f_s(f_txt(exp_4h)) +
 
     // OHLC
     "|o=" + f_px(open) +
     "|h=" + f_px(high) +
     "|l=" + f_px(low) +
     "|c=" + f_px(close) +
-    "|dir=" + (close > open ? "UP" : close < open ? "DN" : "0") +
+    "|rng=" + f_px(exp_rng) +
+    "|body=" + f_px(exp_body) +
+    "|dir=" + str.tostring(exp_dir) +
+    "|ret=" + f_num(exp_ret) +
 
     // L1 MAIN (tags + critical scalars)
-    "|state_tag=" + f_txt(StateTag) +
-    "|value_tag=" + f_txt(ValueTag) +
+    "|state_tag=" + f_s(f_txt(StateTag)) +
+    "|value_tag=" + f_s(f_txt(ValueTag)) +
     "|event=" + f_s(DominantEvent) +
-    "|tt=" + str.tostring(TT) +
-    "|cp_tag=" + f_txt(CPTag) +
+    "|tt=" + str.tostring(int(TT)) +
+    "|cp_tag=" + f_s(f_txt(CPTag)) +
     "|tis=" + f_i(TiS) +
 
     // L2 CORE (context tags)
     "|rrc=" + f_px(RRc) +
     "|vrc=" + f_num(VRc) +
-    "|tr=" + f_txt(TrendTag) +
-    "|ss=" + f_txt(SS) +
-    "|sp=" + f_txt(SpaceTag) +
+    "|trend_tag=" + f_s(f_txt(TrendTag)) +
+    "|struct_state=" + f_s(f_txt(StructState)) +
+    "|space_tag=" + f_s(f_txt(SpaceTag)) +
     "|htf_stack=" + f_s(HTFStack) +
-    "|with_htf=" + f_txt(WithHTF) +
+    "|with_htf=" + f_s(f_txt(WithHTF)) +
 
     // RD + BlockStack (regime)
-    "|rd_state=" + f_txt(RD_State) +
-    "|regime_tag=" + f_txt(RegimeTag) +
-    "|trans_risk=" + f_txt(TransitionRisk) +
+    "|rd_state=" + f_s(f_txt(RD_State)) +
+    "|regime_tag=" + f_s(f_txt(RegimeTag)) +
+    "|trans_risk=" + f_s(f_txt(TransitionRisk)) +
 
     // L3 DECISION (what you actually trade)
-    "|bias_mode=" + f_txt(BiasMode) +
-    "|bias_dir=" + f_txt(BiasDir) +
-    "|perm_state=" + f_txt(PermissionState) +
-    "|rail_loc=" + f_txt(RailLoc) +
-    "|tradeable=" + f_txt(TradeableNow) +
-    "|conf_l3=" + f_txt(Conf_L3) +
-    "|play=" + f_txt(Play) +
-    "|pred_dir=" + f_txt(PredDir) +
+    "|bias_mode=" + f_s(f_txt(BiasMode)) +
+    "|bias_dir=" + f_s(f_txt(BiasDir)) +
+    "|perm_state=" + f_s(f_txt(PermissionState)) +
+    "|rail_loc=" + f_s(f_txt(RailLoc)) +
+    "|tradeable=" + (TradeableNow == "Y" ? "1" : "0") +
+    "|conf_l3=" + f_s(f_txt(Conf_L3)) +
+    "|play=" + f_s(f_txt(Play)) +
+    "|pred_dir=" + f_s(f_txt(PredDir)) +
     "|pred_target=" + f_s(PredTarget) +
-    "|timebox=" + f_txt(Timebox) +
+    "|timebox=" + f_s(f_txt(Timebox)) +
     "|invalidation=" + f_s(Invalidation) +
 
     // META FOOTER
-    "|source=" + f_txt(exp_source) +
-    "|build_id=" + f_txt(exp_buildId) +
+    "|source=" + f_s(f_txt(exp_source)) +
+    "|build_id=" + f_s(f_txt(exp_buildId)) +
     "|note=" + f_s(exp_note) +
-    "|ready=" + str.tostring(exp_ready)
+    "|ready=" + (exp_ready == 1 ? "1" : "0")
 )
 
 // --- FULL (COPY/DEBUG): “every computed piece” grouped by module
