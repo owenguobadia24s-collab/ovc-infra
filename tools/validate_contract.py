@@ -29,6 +29,20 @@ def _ordered_fields(contract: Dict) -> List[Dict]:
 def _expected_keys(fields: List[Dict]) -> List[str]:
     return [field["key"] for field in fields]
 
+
+def _keys_in_contract_order(keys: List[str], expected_keys: List[str]) -> bool:
+    index = {key: idx for idx, key in enumerate(expected_keys)}
+    last = -1
+    for key in keys:
+        idx = index.get(key)
+        if idx is None:
+            continue
+        if idx < last:
+            return False
+        last = idx
+    return True
+
+
 def _norm(value: str) -> str:
     # Treat TradingView/Pine "na" as empty
     if value is None:
@@ -98,6 +112,7 @@ def _check_type(value: str, field: Dict) -> Tuple[bool, str]:
 
     # ✅ critical: never fall off the end
     return False, f"unknown field type '{field_type}'"
+
 def validate_export_string(export_str: str, contract_path: str) -> List[str]:
     contract = load_contract(contract_path)
     delimiter = contract.get("delimiter", "|")
@@ -125,7 +140,7 @@ def validate_export_string(export_str: str, contract_path: str) -> List[str]:
     if extras:
         errors.append(f"unexpected keys: {extras}")
 
-    if keys != expected_keys:
+    if not _keys_in_contract_order(keys, expected_keys):
         errors.append("key order mismatch")
 
     for field in ordered_fields:
@@ -159,26 +174,39 @@ def main(argv=None) -> int:
         lines = [ln.strip() for ln in f.readlines() if ln.strip()]
 
     def _clean_line(s: str) -> str:
-     return s.strip().lstrip("<").lstrip('"').lstrip("'").strip()
+        return s.strip().lstrip("<").lstrip('"').lstrip("'").strip()
     export_line = next((_clean_line(ln) for ln in lines if _clean_line(ln).startswith("ver=")), "")
     if not export_line:
         print("ERROR: No line starting with 'ver=' found.")
-    return 2
-
+        return 2
 
     errors = validate_export_string(export_line, args.contract_json)
 
     if errors:
-        print("FAIL")
-        for e in errors:
-            print(f"- {e}")
+        import ast
+
+        missing_items = []
+        invalid_items = []
+        for err in errors:
+            if err.startswith("missing required keys:"):
+                raw = err.split(":", 1)[1].strip()
+                try:
+                    missing_items.extend(ast.literal_eval(raw))
+                except (ValueError, SyntaxError):
+                    missing_items.append(raw)
+            else:
+                invalid_items.append(err)
+        parts = ["FAIL"]
+        if missing_items:
+            parts.append(f"missing={missing_items}")
+        if invalid_items:
+            parts.append(f"invalid={invalid_items}")
+        print(" ".join(parts))
         return 1
 
-    print("PASS")
+    print("OK")
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
