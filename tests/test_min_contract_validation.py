@@ -50,3 +50,13 @@ class TestMinContractValidation(unittest.TestCase):
         errors = validate_export_string(sample, str(CONTRACT_PATH))
         self.assertTrue(any("tradeable: expected 0 or 1" in e for e in errors), msg=str(errors))
         self.assertTrue(any("bar_close_ms: expected int" in e for e in errors), msg=str(errors))
+
+    def test_type_error_float(self) -> None:
+        sample = _replace_value(self.sample, "rrc", "badfloat")
+        errors = validate_export_string(sample, str(CONTRACT_PATH))
+        self.assertTrue(any("rrc: expected float" in e for e in errors), msg=str(errors))
+
+    def test_unknown_key_rejected(self) -> None:
+        sample = self.sample + "|extra_key=surprise"
+        errors = validate_export_string(sample, str(CONTRACT_PATH))
+        self.assertTrue(any(e.startswith("unexpected keys:") and "extra_key" in e for e in errors), msg=str(errors))
