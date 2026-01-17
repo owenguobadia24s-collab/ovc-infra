@@ -1,0 +1,33 @@
+{
+  "eval_version": "v0.1",
+  "horizons": [1, 2, 6, 12],
+  "required_inputs": {
+    "table": "ovc.ovc_blocks_v01_1_min",
+    "columns": [
+      "block_id",
+      "sym",
+      "date_ny",
+      "block2h",
+      "block4h",
+      "bar_close_ms",
+      "o",
+      "h",
+      "l",
+      "c",
+      "rng",
+      "body",
+      "dir",
+      "ret",
+      "pred_dir"
+    ]
+  },
+  "formula_hash": {
+    "policy": "md5 of eval_contract_v0.1.json + outcomes_definitions_v0.1.md (canonical string)",
+    "seed": "derived.ovc_outcomes_v0_1:v0.1:K=1,2,6,12:ref=c:dir=sign:exc=max(h)-c,min(l)-c"
+  },
+  "run_id": {
+    "optional": true,
+    "format": "text",
+    "usage": "Use for immutable runs recorded in derived.eval_runs."
+  }
+}
