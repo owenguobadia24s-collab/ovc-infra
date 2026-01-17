@@ -1,0 +1,103 @@
+name: OVC Option C Schedule
+
+on:
+  schedule:
+    - cron: "15 6 * * *"
+  workflow_dispatch:
+    inputs:
+      strict:
+        type: boolean
+        default: false
+        description: "Treat WARN as FAIL"
+      spotchecks_only:
+        type: boolean
+        default: false
+        description: "Skip apply; run spotchecks + report only"
+
+jobs:
+  option_c_run:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set run id
+        shell: bash
+        run: |
+          echo "RUN_ID=c_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}_${GITHUB_SHA::7}_${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+
+      - name: Guardrail - require Option C version bump
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
+            echo "Not enough history for guardrail diff. Skipping."
+            exit 0
+          fi
+          changed="$(git diff --name-only HEAD~1..HEAD)"
+          if [ -z "$changed" ]; then
+            echo "No changes detected in last commit."
+            exit 0
+          fi
+          sensitive_regex='^(sql/|contracts/eval_contract_v0\.1\.json|docs/outcomes_definitions_v0\.1\.md)'
+          version_regex='^VERSION_OPTION_C$'
+          if command -v rg >/dev/null 2>&1; then
+            sensitive_changed="$(printf "%s\n" "$changed" | rg -n "$sensitive_regex" || true)"
+            version_changed="$(printf "%s\n" "$changed" | rg -n "$version_regex" || true)"
+          else
+            sensitive_changed="$(printf "%s\n" "$changed" | grep -E "$sensitive_regex" || true)"
+            version_changed="$(printf "%s\n" "$changed" | grep -E "$version_regex" || true)"
+          fi
+          if [ -n "$sensitive_changed" ] && [ -z "$version_changed" ]; then
+            echo "Option C core files changed without a VERSION_OPTION_C bump."
+            echo "Changed files:"
+            printf "%s\n" "$sensitive_changed"
+            exit 1
+          fi
+
+      - name: Validate DATABASE_URL
+        shell: bash
+        run: |
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "DATABASE_URL secret is required."
+            exit 1
+          fi
+
+      - name: Run Option C automation
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--run-id "$RUN_ID")
+          if [[ "${{ inputs.strict }}" == "true" ]]; then
+            args+=(--strict)
+          fi
+          if [[ "${{ inputs.spotchecks_only }}" == "true" ]]; then
+            args+=(--spotchecks-only)
+          fi
+          set +e
+          bash scripts/run_option_c.sh "${args[@]}"
+          exit_code=$?
+          set -e
+          if [[ $exit_code -eq 0 ]]; then
+            exit 0
+          fi
+          if [[ $exit_code -eq 1 ]]; then
+            if [[ "${{ inputs.strict }}" == "true" ]]; then
+              exit 1
+            fi
+            echo "WARN status (non-strict); continuing."
+            exit 0
+          fi
+          exit 1
+
+      - name: Upload run reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: option-c-reports-${{ env.RUN_ID }}
+          path: reports/
+          if-no-files-found: warn
