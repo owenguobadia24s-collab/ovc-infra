@@ -1,0 +1,420 @@
+{
+  "version": "v0.1",
+  "name": "block_physics",
+  "description": "Canonical v0.1 derived feature set focused on block geometry plus explicit time context windows.",
+  "fields": [
+    {
+      "name": "derived_version",
+      "type": "text",
+      "class": "PMETA",
+      "formula": "constant 'v0.1'",
+      "dependencies": []
+    },
+    {
+      "name": "formula_hash",
+      "type": "text",
+      "class": "PMETA",
+      "formula": "md5('derived.ovc_block_features_v0_1:v0.1:block_physics')",
+      "dependencies": []
+    },
+    {
+      "name": "window_spec",
+      "type": "text",
+      "class": "PMETA",
+      "formula": "constant 'N=12;session=date_ny'",
+      "dependencies": []
+    },
+    {
+      "name": "run_id",
+      "type": "uuid",
+      "class": "PMETA",
+      "formula": "latest run_id from derived.derived_runs for v0.1 (nullable for views)",
+      "dependencies": [
+        "derived.derived_runs"
+      ]
+    },
+    {
+      "name": "computed_at",
+      "type": "timestamptz",
+      "class": "PMETA",
+      "formula": "computed_at from derived.derived_runs for v0.1 (nullable for views)",
+      "dependencies": [
+        "derived.derived_runs"
+      ]
+    },
+    {
+      "name": "block_id",
+      "type": "text",
+      "class": "PMETA",
+      "formula": "pass-through ingest block_id",
+      "dependencies": [
+        "block_id"
+      ]
+    },
+    {
+      "name": "sym",
+      "type": "text",
+      "class": "PMETA",
+      "formula": "pass-through ingest sym (instrument/symbol)",
+      "dependencies": [
+        "sym"
+      ]
+    },
+    {
+      "name": "date_ny",
+      "type": "date",
+      "class": "PMETA",
+      "formula": "pass-through ingest date_ny (NY session id)",
+      "dependencies": [
+        "date_ny"
+      ]
+    },
+    {
+      "name": "block2h",
+      "type": "text",
+      "class": "PMETA",
+      "formula": "pass-through ingest block2h",
+      "dependencies": [
+        "block2h"
+      ]
+    },
+    {
+      "name": "block4h",
+      "type": "text",
+      "class": "PMETA",
+      "formula": "pass-through ingest block4h",
+      "dependencies": [
+        "block4h"
+      ]
+    },
+    {
+      "name": "bar_close_ms",
+      "type": "bigint",
+      "class": "PMETA",
+      "formula": "pass-through ingest bar_close_ms",
+      "dependencies": [
+        "bar_close_ms"
+      ]
+    },
+    {
+      "name": "ts_end",
+      "type": "timestamptz",
+      "class": "PMETA",
+      "formula": "to_timestamp(bar_close_ms / 1000.0)",
+      "dependencies": [
+        "bar_close_ms"
+      ]
+    },
+    {
+      "name": "ts_start",
+      "type": "timestamptz",
+      "class": "PMETA",
+      "formula": "ts_end - interval '2 hours'",
+      "dependencies": [
+        "bar_close_ms"
+      ]
+    },
+    {
+      "name": "o",
+      "type": "double",
+      "class": "DBF",
+      "formula": "pass-through ingest open",
+      "dependencies": [
+        "o"
+      ]
+    },
+    {
+      "name": "h",
+      "type": "double",
+      "class": "DBF",
+      "formula": "pass-through ingest high",
+      "dependencies": [
+        "h"
+      ]
+    },
+    {
+      "name": "l",
+      "type": "double",
+      "class": "DBF",
+      "formula": "pass-through ingest low",
+      "dependencies": [
+        "l"
+      ]
+    },
+    {
+      "name": "c",
+      "type": "double",
+      "class": "DBF",
+      "formula": "pass-through ingest close",
+      "dependencies": [
+        "c"
+      ]
+    },
+    {
+      "name": "range",
+      "type": "double",
+      "class": "DBF",
+      "formula": "h - l",
+      "dependencies": [
+        "h",
+        "l"
+      ]
+    },
+    {
+      "name": "body",
+      "type": "double",
+      "class": "DBF",
+      "formula": "abs(c - o)",
+      "dependencies": [
+        "c",
+        "o"
+      ]
+    },
+    {
+      "name": "upper_wick",
+      "type": "double",
+      "class": "DBF",
+      "formula": "h - greatest(o, c)",
+      "dependencies": [
+        "h",
+        "o",
+        "c"
+      ]
+    },
+    {
+      "name": "lower_wick",
+      "type": "double",
+      "class": "DBF",
+      "formula": "least(o, c) - l",
+      "dependencies": [
+        "o",
+        "c",
+        "l"
+      ]
+    },
+    {
+      "name": "body_ratio",
+      "type": "double",
+      "class": "DBF",
+      "formula": "body / range with range = 0 -> null",
+      "dependencies": [
+        "body",
+        "range"
+      ]
+    },
+    {
+      "name": "upper_wick_ratio",
+      "type": "double",
+      "class": "DBF",
+      "formula": "upper_wick / range with range = 0 -> null",
+      "dependencies": [
+        "upper_wick",
+        "range"
+      ]
+    },
+    {
+      "name": "lower_wick_ratio",
+      "type": "double",
+      "class": "DBF",
+      "formula": "lower_wick / range with range = 0 -> null",
+      "dependencies": [
+        "lower_wick",
+        "range"
+      ]
+    },
+    {
+      "name": "close_pos",
+      "type": "double",
+      "class": "DBF",
+      "formula": "(c - l) / range with range = 0 -> null",
+      "dependencies": [
+        "c",
+        "l",
+        "range"
+      ]
+    },
+    {
+      "name": "direction",
+      "type": "integer",
+      "class": "DBF",
+      "formula": "sign(c - o) mapped to 1, -1, 0",
+      "dependencies": [
+        "c",
+        "o"
+      ]
+    },
+    {
+      "name": "ret",
+      "type": "double",
+      "class": "DBF",
+      "formula": "(c / o) - 1 with o = 0 -> null",
+      "dependencies": [
+        "c",
+        "o"
+      ]
+    },
+    {
+      "name": "logret",
+      "type": "double",
+      "class": "DBF",
+      "formula": "ln(c / o) when c > 0 and o > 0",
+      "dependencies": [
+        "c",
+        "o"
+      ]
+    },
+    {
+      "name": "gap",
+      "type": "double",
+      "class": "WDF",
+      "formula": "o - prev_c (lag 1)",
+      "dependencies": [
+        "o",
+        "c"
+      ]
+    },
+    {
+      "name": "sess_high",
+      "type": "double",
+      "class": "WDF",
+      "formula": "session-to-date high (NY date_ny window)",
+      "dependencies": [
+        "h",
+        "date_ny"
+      ]
+    },
+    {
+      "name": "sess_low",
+      "type": "double",
+      "class": "WDF",
+      "formula": "session-to-date low (NY date_ny window)",
+      "dependencies": [
+        "l",
+        "date_ny"
+      ]
+    },
+    {
+      "name": "dist_sess_high",
+      "type": "double",
+      "class": "WDF",
+      "formula": "sess_high - c",
+      "dependencies": [
+        "sess_high",
+        "c"
+      ]
+    },
+    {
+      "name": "dist_sess_low",
+      "type": "double",
+      "class": "WDF",
+      "formula": "c - sess_low",
+      "dependencies": [
+        "sess_low",
+        "c"
+      ]
+    },
+    {
+      "name": "roll_avg_range_12",
+      "type": "double",
+      "class": "WDF",
+      "formula": "avg(range) over last 12 blocks",
+      "dependencies": [
+        "range"
+      ]
+    },
+    {
+      "name": "roll_std_logret_12",
+      "type": "double",
+      "class": "WDF",
+      "formula": "stddev_samp(logret) over last 12 blocks",
+      "dependencies": [
+        "logret"
+      ]
+    },
+    {
+      "name": "range_z_12",
+      "type": "double",
+      "class": "WDF",
+      "formula": "(range - roll_avg_range_12) / stddev_samp(range) over last 12 blocks",
+      "dependencies": [
+        "range",
+        "roll_avg_range_12"
+      ]
+    },
+    {
+      "name": "hh_12",
+      "type": "boolean",
+      "class": "WDF",
+      "formula": "h > max(h) over prior 12 blocks",
+      "dependencies": [
+        "h"
+      ]
+    },
+    {
+      "name": "ll_12",
+      "type": "boolean",
+      "class": "WDF",
+      "formula": "l < min(l) over prior 12 blocks",
+      "dependencies": [
+        "l"
+      ]
+    },
+    {
+      "name": "took_prev_high",
+      "type": "boolean",
+      "class": "WDF",
+      "formula": "h > lag(h, 1)",
+      "dependencies": [
+        "h"
+      ]
+    },
+    {
+      "name": "took_prev_low",
+      "type": "boolean",
+      "class": "WDF",
+      "formula": "l < lag(l, 1)",
+      "dependencies": [
+        "l"
+      ]
+    },
+    {
+      "name": "range_zero",
+      "type": "boolean",
+      "class": "QAF",
+      "formula": "range = 0",
+      "dependencies": [
+        "range"
+      ]
+    },
+    {
+      "name": "any_missing_inputs",
+      "type": "boolean",
+      "class": "QAF",
+      "formula": "o or h or l or c is null",
+      "dependencies": [
+        "o",
+        "h",
+        "l",
+        "c"
+      ]
+    },
+    {
+      "name": "ret_extreme_flag",
+      "type": "boolean",
+      "class": "QAF",
+      "formula": "abs(ret) >= 0.05",
+      "dependencies": [
+        "ret"
+      ]
+    },
+    {
+      "name": "range_extreme_flag",
+      "type": "boolean",
+      "class": "QAF",
+      "formula": "abs(range_z_12) >= 3",
+      "dependencies": [
+        "range_z_12"
+      ]
+    }
+  ]
+}
