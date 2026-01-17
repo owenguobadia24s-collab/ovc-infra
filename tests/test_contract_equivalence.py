@@ -9,7 +9,7 @@ from tools.validate_contract import validate_export_string  # noqa: E402
 
 
 CONTRACTS = {
-    "MIN": ROOT / "contracts" / "export_contract_v0.1_min.json",
+    "MIN": ROOT / "contracts" / "export_contract_v0.1.1_min.json",
     "FULL": ROOT / "contracts" / "export_contract_v0.1_full.json",
 }
 
