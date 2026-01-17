@@ -1,0 +1,1889 @@
+//@version=6
+indicator("OVC v0.1 — L1 / L2 / L3 Panels (Toggle) + Dedicated Range Detector", overlay=true, scale=scale.right)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GROUP NAMES
+string G_VIEW   = "VIEW"
+string G_UI     = "UI"
+string G_L1_TH  = "L1 — THRESHOLDS"
+string G_L1_TTCP= "L1 — TT / CP"
+string G_L1_KLS = "L1 — KLS"
+string G_L1_PLOT= "L1 — PLOTS"
+
+string G_L2_CTX    = "L2 — Context"
+string G_L2_STRUCT = "L2 — Structure"
+string G_L2_TREND  = "L2 — Trend"
+string G_L2_SPACE  = "L2 — Space"
+string G_L2_HTF    = "L2 — HTF"
+string G_L2_KLS    = "L2 — KLS-LITE"
+
+string G_L3_DET    = "L3 — Deterministic (Decision Object v0.1)"
+
+// NEW
+string G_RD        = "RANGE DETECTOR (Dedicated)"
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VIEW + UI
+showL1Panel = input.bool(true,  "Show L1 Panel", group=G_VIEW, inline="pv")
+showL2Panel = input.bool(true,  "Show L2 Panel", group=G_VIEW, inline="pv")
+showL3Panel = input.bool(true,  "Show L3 Panel", group=G_VIEW, inline="pv")
+
+showLevels  = input.bool(true,  "Show L1 levels", group=G_UI, inline="ui1")
+showPanel   = input.bool(true,  "Show panel",     group=G_UI, inline="ui1")
+compact     = input.bool(true,  "Compact",        group=G_UI, inline="ui2")
+useDarkTable= input.bool(true,  "Dark body",      group=G_UI, inline="ui2")
+decimals    = input.int(3,      "Decimals",       minval=0, maxval=6, group=G_UI)
+
+showSeps = input.bool(false, "Show separators", group=G_UI, inline="ui2")
+
+// NEW: Range detector visuals
+rd_on         = input.bool(true,  "Enable Range Detector", group=G_RD, inline="rdv")
+rd_showLevels = input.bool(true, "Show RD levels", group=G_RD, inline="rdv")
+rd_useForL3   = input.bool(true, "Use RD rails in L3", group=G_RD, inline="rdv")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPORT (OVC_LOG_V0.1)
+string G_EXP = "EXPORT (OVC_LOG_V0.1)"
+
+exp_on      = input.bool(true,  "Enable Export", group=G_EXP, inline="e0")
+exp_showBox = input.bool(true,  "Show Export Box", group=G_EXP, inline="e0")
+exp_profile = input.string("MIN", "profile", options=["MIN","FULL"], group=G_EXP, inline="e0")
+
+exp_schema  = input.string("OVC_LOG_V0.1", "schema_ver", group=G_EXP, inline="e1")
+exp_buildId = input.string("OVC_v0.1",     "build_id",   group=G_EXP, inline="e1")
+exp_source  = input.string("TV",           "source",     group=G_EXP, inline="e2")
+exp_news    = input.int(0, "news_flag (0/1)", minval=0, maxval=1, group=G_EXP, inline="e2")
+exp_note    = input.string("", "note", group=G_EXP)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L1 INPUTS (unchanged)
+th_rotate_OR = input.float(0.70, "Rotate if OR ≥",        step=0.05, group=G_L1_TH, inline="th1")
+th_move_OR   = input.float(0.50, "Move if OR ≤",          step=0.05, group=G_L1_TH, inline="th1")
+th_move_RER  = input.float(0.90, "and RER ≥",             step=0.05, group=G_L1_TH, inline="th2")
+th_move_CLV  = input.float(0.40, "and |CLV| ≥",           step=0.05, group=G_L1_TH, inline="th2")
+th_accept_SD = input.float(0.10, "Accept if |SD| >",      step=0.05, group=G_L1_TH)
+
+tt_orMax    = input.float(0.85, "TT OR ≤",        step=0.05, group=G_L1_TTCP, inline="tt1")
+tt_minSD    = input.float(0.10, "TT |SD| ≥",      step=0.05, group=G_L1_TTCP, inline="tt1")
+tt_needFlip = input.bool(true,  "TT needs VFlip",          group=G_L1_TTCP)
+
+cp_wOR   = input.float(0.45, "CP wOR",   step=0.05, group=G_L1_TTCP, inline="cp1")
+cp_wMC   = input.float(0.20, "wMC3",     step=0.05, group=G_L1_TTCP, inline="cp1")
+cp_wVF   = input.float(0.20, "wVF3",     step=0.05, group=G_L1_TTCP, inline="cp2")
+cp_wWick = input.float(0.15, "wWick",    step=0.05, group=G_L1_TTCP, inline="cp2")
+cp_hi = input.float(0.70, "CP HIGH ≥", step=0.05, group=G_L1_TTCP, inline="cp3")
+cp_lo = input.float(0.35, "CP LOW ≤",  step=0.05, group=G_L1_TTCP, inline="cp3")
+
+// L1 KLS
+l1_kls_on      = input.bool(true,  "Enable", group=G_L1_KLS)
+l1_kls_mode    = input.string("ALL", "Mode", options=["ALL","MICRO","MESO","MACRO","DAY","SESS"], group=G_L1_KLS)
+l1_mesoN       = input.int(4,  "Meso lookback (2H)",  minval=3,  maxval=200, group=G_L1_KLS)
+l1_macroN      = input.int(12, "Macro lookback (2H)", minval=6,  maxval=500, group=G_L1_KLS)
+l1_dayN        = input.int(12, "Day lookback (2H)",   minval=6,  maxval=500, group=G_L1_KLS)
+l1_sessStartHr = input.int(17, "Session start (NY)",  minval=0,  maxval=23,  group=G_L1_KLS)
+
+l1_kls_confW    = input.float(0.25, "Width (RR)", step=0.05, group=G_L1_KLS, inline="k1")
+l1_kls_hitsN    = input.int(20, "Hits N",         minval=5,  maxval=500, group=G_L1_KLS, inline="k1")
+l1_kls_halfLife = input.float(50.0, "Half-life",  step=5.0, group=G_L1_KLS)
+
+l1_kls_wConf   = input.float(0.35, "wConf",  step=0.05, group=G_L1_KLS, inline="kw1")
+l1_kls_wNear   = input.float(0.35, "wNear",  step=0.05, group=G_L1_KLS, inline="kw1")
+l1_kls_wHits   = input.float(0.15, "wHits",  step=0.05, group=G_L1_KLS, inline="kw2")
+l1_kls_wDecay  = input.float(0.15, "wDecay", step=0.05, group=G_L1_KLS, inline="kw2")
+
+l1_kls_hiScore = input.float(0.70, "HIGH ≥", step=0.05, group=G_L1_KLS, inline="kt")
+l1_kls_loScore = input.float(0.35, "LOW ≤",  step=0.05, group=G_L1_KLS, inline="kt")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L2 INPUTS (unchanged)
+rrcLen = input.int(20, "RRc length (SMA of micro RR)", group=G_L2_CTX, minval=5, maxval=200)
+
+pivotL = input.int(3, "Pivot L", group=G_L2_STRUCT, minval=1, maxval=20, inline="pv")
+pivotR = input.int(3, "Pivot R", group=G_L2_STRUCT, minval=1, maxval=20, inline="pv")
+
+dirMinSD   = input.float(0.10, "DirRun: min |SDmicro|", group=G_L2_TREND, step=0.05)
+driftN     = input.int(10,     "RMdrift: N bars",       group=G_L2_TREND, minval=3, maxval=100)
+driftThr   = input.float(0.02, "TrendTag: drift thr",   group=G_L2_TREND, step=0.01)
+runMinCamp = input.int(3,      "TrendTag: DirRun min",  group=G_L2_TREND, minval=1, maxval=20, inline="run")
+runMaxRng  = input.int(2,      "TrendTag: DirRun max",  group=G_L2_TREND, minval=0, maxval=20, inline="run")
+
+spaceLo = input.float(0.75, "SpaceTag: LOW if <", group=G_L2_SPACE, step=0.05, inline="sp")
+spaceMd = input.float(1.50, "SpaceTag: MID if <", group=G_L2_SPACE, step=0.05, inline="sp")
+
+htf_on = input.bool(true, "Enable HTF", group=G_L2_HTF, inline="htf1")
+tf4    = input.timeframe("240", "HTF4 TF", group=G_L2_HTF, inline="htf1")
+tfD    = input.timeframe("D",   "HTFD TF", group=G_L2_HTF, inline="htf2")
+
+// L2 KLS-lite
+l2_kls_on      = input.bool(true,  "Enable", group=G_L2_KLS)
+l2_kls_mode    = input.string("ALL", "Mode", options=["ALL","MICRO","MESO","MACRO","DAY","SESS"], group=G_L2_KLS)
+
+l2_mesoN       = input.int(4,  "Meso lookback (2H bars)",  group=G_L2_KLS, minval=3, maxval=200)
+l2_macroN      = input.int(12, "Macro lookback (2H bars)", group=G_L2_KLS, minval=6, maxval=500)
+l2_dayN        = input.int(12, "Day lookback (2H bars)",   group=G_L2_KLS, minval=6, maxval=500)
+l2_sessStartHr = input.int(17, "Session start hour (NY)",  group=G_L2_KLS, minval=0, maxval=23)
+
+l2_kls_confW    = input.float(0.25, "Touch/Conf width (RR units)", group=G_L2_KLS, step=0.05)
+l2_kls_hitsN    = input.int(20,     "Hits lookback (bars)",       group=G_L2_KLS, minval=5, maxval=500)
+l2_kls_halfLife = input.float(50.0, "Age half-life (bars)",       group=G_L2_KLS, step=5.0)
+
+l2_kls_wConf   = input.float(0.35, "Weight: Conf",  group=G_L2_KLS, step=0.05, inline="w")
+l2_kls_wNear   = input.float(0.35, "Weight: Near",  group=G_L2_KLS, step=0.05, inline="w")
+l2_kls_wHits   = input.float(0.15, "Weight: Hits",  group=G_L2_KLS, step=0.05, inline="w2")
+l2_kls_wDecay  = input.float(0.15, "Weight: Decay", group=G_L2_KLS, step=0.05, inline="w2")
+
+l2_kls_hiScore = input.float(0.70, "HIGH threshold", group=G_L2_KLS, step=0.05, inline="thr")
+l2_kls_loScore = input.float(0.35, "LOW threshold",  group=G_L2_KLS, step=0.05, inline="thr")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L3 INPUTS (deterministic decision object)
+l3_on = input.bool(true, "Enable L3 Decision Object", group=G_L3_DET)
+l3_minTgtDR = input.float(0.35, "Min target DR (RRc units)", step=0.05, group=G_L3_DET, inline="l3a")
+l3_zRailPct = input.float(0.20, "Rail zone %", minval=0.05, maxval=0.40, step=0.01, group=G_L3_DET, inline="l3b")
+l3_zMidPct  = input.float(0.20, "Mid zone %",  minval=0.05, maxval=0.40, step=0.01, group=G_L3_DET, inline="l3b")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RD INPUTS
+rd_len      = input.int(12,   "Lookback (2H bars)",  group=G_RD, minval=3, maxval=200, inline="rd1")
+rd_maxW     = input.float(1.2,"Max width (RRc)",     group=G_RD, step=0.05, inline="rd1")
+
+rd_maxDrift = input.float(0.02,"Max |RMdrift|",      group=G_RD, step=0.01, inline="rd2")
+rd_preferRot= input.bool(true, "Prefer ROTATE",      group=G_RD, inline="rd2")
+
+rd_breakTol   = input.float(0.05, "Break tol (RRc)",       group=G_RD, step=0.01, inline="rd3")
+rd_breakNeeds = input.bool(true,  "Break needs MOVE/TT",   group=G_RD, inline="rd3")
+
+// “Usable” mode: allow SOFT_RANGE before strict fails
+rd_softWmult  = input.float(1.25, "Soft width mult", group=G_RD, step=0.05, inline="rd4")
+rd_softDmult  = input.float(1.50, "Soft drift mult", group=G_RD, step=0.05, inline="rd4")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THEME
+bodyBg   = useDarkTable ? color.new(color.black, 82) : color.new(color.white, 0)
+bodyTxt  = useDarkTable ? color.white : color.black
+mutedTxt = useDarkTable ? color.new(color.white, 35) : color.new(color.black, 45)
+barTxt   = useDarkTable ? color.new(color.white, 70) : color.new(color.black, 70)
+hdrBg    = useDarkTable ? color.new(color.gray, 65)  : color.new(color.gray, 80)
+hdrTxt   = useDarkTable ? color.white : color.black
+
+f_size() => compact ? size.tiny : size.small
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+f_sdiv(float x, float y) => y == 0.0 ? na : x / y
+
+fmt = (decimals == 0 ? "0" :
+       decimals == 1 ? "0.0" :
+       decimals == 2 ? "0.00" :
+       decimals == 3 ? "0.000" :
+       decimals == 4 ? "0.0000" :
+       decimals == 5 ? "0.00000" : "0.000000")
+
+f_fmtRatio(float x) => na(x) ? "na" : str.tostring(x, fmt)
+f_fmtPrice(float x) => na(x) ? "na" : str.tostring(x, format.mintick)
+
+f_clampInt(int v, int lo, int hi) => int(math.max(lo, math.min(hi, v)))
+f_clamp(float x, float lo, float hi) => math.max(lo, math.min(hi, x))
+
+f_rollsum(float x, int n) =>
+    float c = ta.cum(x)
+    float cN = na(c[n]) ? 0.0 : c[n]
+    c - cN
+
+// EXPORT sanitizers (prevents '|' breaking your log format)
+f_txt(string s) =>
+    string t = na(s) ? "" : s
+    t := str.replace_all(t, "|", ";")
+    t := str.replace_all(t, "\n", " ")
+    t
+
+f_num(float x) => na(x) ? "" : str.tostring(x, fmt)
+f_px(float x)  => na(x) ? "" : str.tostring(x, format.mintick)
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OVC CONTAINER HELPERS (NY-anchored @ 17:00, never returns "?")
+string EXP_TZ        = "America/New_York"
+int    EXP_ANCHOR_HR = 17
+int    MS_DAY        = 24 * 60 * 60 * 1000
+
+f_pad2(int x) => x < 10 ? "0" + str.tostring(x) : str.tostring(x)
+
+f_ymd(int ms, string tz) =>
+    str.tostring(year(ms, tz)) + "-" + f_pad2(month(ms, tz)) + "-" + f_pad2(dayofmonth(ms, tz))
+
+f_ymd_compact(int ms, string tz) =>
+    str.tostring(year(ms, tz)) + f_pad2(month(ms, tz)) + f_pad2(dayofmonth(ms, tz))
+
+// Returns the OVC "day start" timestamp (17:00 NY) for the bar's time.
+f_ovc_day_start_ms(int t_ms) =>
+    int y = year(t_ms, EXP_TZ)
+    int m = month(t_ms, EXP_TZ)
+    int d = dayofmonth(t_ms, EXP_TZ)
+    int startToday = timestamp(EXP_TZ, y, m, d, EXP_ANCHOR_HR, 0)
+    t_ms < startToday ? (startToday - MS_DAY) : startToday
+
+// Segment index 0..11 from bar time, anchored at 17:00 NY, step=2H
+f_seg_index(int t_ms) =>
+    int h = hour(t_ms, EXP_TZ)
+    int offset = (h - EXP_ANCHOR_HR + 24) % 24
+    int idx = int(math.floor(offset / 2))
+    idx
+
+f_seg_letter(int idx) =>
+    switch idx
+        0 => "A"
+        1 => "B"
+        2 => "C"
+        3 => "D"
+        4 => "E"
+        5 => "F"
+        6 => "G"
+        7 => "H"
+        8 => "I"
+        9 => "J"
+        10 => "K"
+        11 => "L"
+        => "A"
+
+// Needed by EXPORT module (hour-based, anchor-based, never "?")
+f_seg_from_hour(int h) =>
+    int offset = (h - EXP_ANCHOR_HR + 24) % 24
+    int idx = int(math.floor(offset / 2))
+    f_seg_letter(idx)
+
+f_block4h_from_seg(string s) =>
+    switch s
+        "A" => "AB"
+        "B" => "AB"
+        "C" => "CD"
+        "D" => "CD"
+        "E" => "EF"
+        "F" => "EF"
+        "G" => "GH"
+        "H" => "GH"
+        "I" => "IJ"
+        "J" => "IJ"
+        "K" => "KL"
+        "L" => "KL"
+        => "AB"
+
+
+// Build canonical IDs
+f_block2h_id(int t_ms, string instrument) =>
+    int dayStart = f_ovc_day_start_ms(t_ms)
+    int idx = f_seg_index(t_ms)
+    string seg = f_seg_letter(idx)
+    f_ymd_compact(dayStart, EXP_TZ) + "-" + seg + "-" + instrument
+
+f_block4h_id(int t_ms, string instrument) =>
+    int dayStart = f_ovc_day_start_ms(t_ms)
+    int idx = f_seg_index(t_ms)
+    string seg = f_seg_letter(idx)
+    string b4 = f_block4h_from_seg(seg)
+    f_ymd_compact(dayStart, EXP_TZ) + "-" + b4 + "-" + instrument
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TABLE
+int COLS = 4
+int ROWS = 240
+var table t = table.new(position.top_right, COLS, ROWS, frame_width=1)
+
+f_hdr(string title, int r) =>
+    table.cell(t, 0, r, title, text_color=hdrTxt, bgcolor=hdrBg, text_size=f_size())
+    table.cell(t, 1, r, "",    text_color=hdrTxt, bgcolor=hdrBg, text_size=f_size())
+    table.cell(t, 2, r, "",    text_color=hdrTxt, bgcolor=hdrBg, text_size=f_size())
+    table.cell(t, 3, r, "",    text_color=hdrTxt, bgcolor=hdrBg, text_size=f_size())
+
+f_row2(string m1, string v1, string m2, string v2, int r) =>
+    table.cell(t, 0, r, m1, text_color=mutedTxt, bgcolor=bodyBg, text_size=f_size())
+    table.cell(t, 1, r, v1, text_color=bodyTxt,  bgcolor=bodyBg, text_size=f_size())
+    table.cell(t, 2, r, m2, text_color=mutedTxt, bgcolor=bodyBg, text_size=f_size())
+    table.cell(t, 3, r, v2, text_color=bodyTxt,  bgcolor=bodyBg, text_size=f_size())
+
+f_div(int r) =>
+    if showSeps and not compact
+        table.cell(t, 0, r, "—", text_color=barTxt, bgcolor=bodyBg, text_size=f_size(), text_halign=text.align_center)
+        table.cell(t, 1, r, "—", text_color=barTxt, bgcolor=bodyBg, text_size=f_size(), text_halign=text.align_center)
+        table.cell(t, 2, r, "—", text_color=barTxt, bgcolor=bodyBg, text_size=f_size(), text_halign=text.align_center)
+        table.cell(t, 3, r, "—", text_color=barTxt, bgcolor=bodyBg, text_size=f_size(), text_halign=text.align_center)
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GUARDS
+is2H    = timeframe.isminutes and timeframe.multiplier == 120
+hasHist = not na(high[2]) and not na(low[2])
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SHARED MICRO RR2 (used by L1 + L2)
+rrHigh = hasHist ? math.max(high[1], high[2]) : na
+rrLow  = hasHist ? math.min(low[1],  low[2])  : na
+rr     = hasHist ? (rrHigh - rrLow) : na
+rm     = hasHist ? (rrHigh + rrLow) / 2.0 : na
+q1     = hasHist ? rrLow + 0.25 * rr : na
+q3     = hasHist ? rrLow + 0.75 * rr : na
+
+barRange = high - low
+overlap  = hasHist ? math.max(0.0, math.min(high, rrHigh) - math.max(low, rrLow)) : na
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L1 CORE METRICS
+RER = f_sdiv(barRange, rr)
+OR  = f_sdiv(overlap, rr)
+
+CLV        = f_sdiv(close - low, barRange)
+CLV_signed = na(CLV) ? na : (2.0 * CLV - 1.0)
+
+SD  = f_sdiv(close - rm, rr)
+
+// Body
+body   = math.abs(close - open)
+BRB    = f_sdiv(body, barRange)
+BodyRR = f_sdiv(body, rr)
+
+// Midcross + 3-bar memory
+MC  = (hasHist and low <= rm and high >= rm) ? 1 : 0
+MC3 = MC + nz(MC[1]) + nz(MC[2])
+
+// Value flip + 3-bar memory
+VFlip = (not na(SD) and not na(SD[1]) and ((SD > 0 and SD[1] < 0) or (SD < 0 and SD[1] > 0))) ? 1 : 0
+VF3   = VFlip + nz(VFlip[1]) + nz(VFlip[2])
+
+// Outside acceptance (signed)
+OA_high = hasHist ? math.max(0.0, f_sdiv(close - rrHigh, rr)) : na
+OA_low  = hasHist ? math.max(0.0, f_sdiv(rrLow - close, rr))  : na
+OA      = hasHist ? (OA_high - OA_low) : na
+
+// Liquidity sweeps
+SweepHigh = hasHist ? math.max(0.0, f_sdiv(high - rrHigh, rr)) : na
+SweepLow  = hasHist ? math.max(0.0, f_sdiv(rrLow - low, rr))   : na
+
+TookHigh = hasHist and (SweepHigh > 0) ? 1 : 0
+TookLow  = hasHist and (SweepLow  > 0) ? 1 : 0
+
+HighRan = (TookHigh == 1 and close >= rrHigh) ? 1 : 0
+HighRev = (TookHigh == 1 and close <  rrHigh) ? 1 : 0
+LowRan  = (TookLow  == 1 and close <= rrLow)  ? 1 : 0
+LowRev  = (TookLow  == 1 and close >  rrLow)  ? 1 : 0
+
+// Close band
+bandRaw   = hasHist ? f_sdiv(close - rrLow, rr) : na
+closeBand = na(bandRaw) ? na : f_clampInt(int(math.floor(bandRaw * 4)), 0, 3)
+
+// VR + TS
+rrSMA20 = ta.sma(rr, 20)
+VR      = f_sdiv(rr, rrSMA20)
+
+CleanMove   = (na(RER) or na(OR)) ? na : (RER * (1.0 - OR))
+Commit      = na(CLV_signed) ? na : (0.5 + 0.5 * math.abs(CLV_signed))
+TrapPenalty = (TookHigh == 1 and TookLow == 1) ? 0.65 : 1.0
+TS          = (na(CleanMove) or na(Commit)) ? na : (CleanMove * Commit * TrapPenalty)
+
+// TT / CP
+hasAccept  = not na(SD) and math.abs(SD) > tt_minSD
+hasSweep   = (TookHigh == 1) or (TookLow == 1)
+hasOutside = not na(OA) and OA != 0
+orLoose    = not na(OR) and OR <= tt_orMax
+
+stateMove = not na(OR) and not na(RER) and not na(CLV_signed) and
+     (OR <= th_move_OR and RER >= th_move_RER and math.abs(CLV_signed) >= th_move_CLV)
+
+flipOK = (not tt_needFlip) or (VFlip == 1)
+
+TT = (hasHist and flipOK and hasAccept and (hasSweep or hasOutside or orLoose or stateMove)) ? 1 : 0
+
+cp_or   = na(OR)  ? na : f_clamp(OR, 0.0, 1.0)
+cp_mc   = f_clamp(float(MC3) / 3.0, 0.0, 1.0)
+cp_vf   = f_clamp(float(VF3) / 3.0, 0.0, 1.0)
+cp_wick = na(BRB) ? na : f_clamp(1.0 - BRB, 0.0, 1.0)
+
+CP = (na(cp_or) or na(cp_wick)) ? na :
+     f_clamp(cp_wOR*cp_or + cp_wMC*cp_mc + cp_wVF*cp_vf + cp_wWick*cp_wick, 0.0, 1.0)
+
+CPTag = na(CP) ? "na" : (CP >= cp_hi ? "HIGH" : (CP <= cp_lo ? "LOW" : "MID"))
+
+// Tags
+StateTag = (
+    (na(OR) or na(RER) or na(CLV_signed)) ? "na" :
+    (OR >= th_rotate_OR) ? "ROTATE" :
+    ((OR <= th_move_OR and RER >= th_move_RER and math.abs(CLV_signed) >= th_move_CLV) ? "MOVE" : "ROTATE")
+)
+
+ValueTag = (
+    na(SD) ? "na" :
+    (SD > th_accept_SD) ? "ACCEPT+" :
+    (SD < -th_accept_SD) ? "ACCEPT-" : "NEUTRAL"
+)
+
+OutsideTag = (
+    na(OA) ? "na" :
+    (OA > 0) ? "OUT+" :
+    (OA < 0) ? "OUT-" : "IN"
+)
+
+DominantEvent = (
+    (TookHigh == 1 and TookLow == 1) ? "BothSides" :
+    ((not na(OA) and OA != 0) ? "OutsideAcc" :
+    ((TookHigh == 1) ? "SweepHi" :
+    ((TookLow == 1) ? "SweepLo" : "PureIn")))
+)
+
+bsState = ta.barssince(StateTag != StateTag[1])
+TiS = (not hasHist or StateTag == "na") ? na : (bsState + 1)
+
+// D2K
+D2RM  = SD
+D2Q1  = hasHist ? f_sdiv(close - q1, rr) : na
+D2Q3  = hasHist ? f_sdiv(close - q3, rr) : na
+D2RRH = hasHist ? f_sdiv(close - rrHigh, rr) : na
+D2RRL = hasHist ? f_sdiv(close - rrLow,  rr) : na
+
+// OUT (X-1)
+rr_prev    = rr[1]
+rm_prev    = rm[1]
+sd_prev    = SD[1]
+canOutcome = not na(rr_prev) and rr_prev != 0 and not na(rm_prev) and not na(sd_prev)
+
+RtRM   = canOutcome and (low <= rm_prev and high >= rm_prev) ? 1 : 0
+ExtUp  = canOutcome ? (high - rm_prev) / rr_prev : na
+ExtDn  = canOutcome ? (rm_prev - low) / rr_prev : na
+NxtExt = not canOutcome ? na : (sd_prev >= 0 ? ExtUp : -ExtDn)
+NxtSD  = canOutcome ? (close - rm_prev) / rr_prev : na
+
+Hint1 = RtRM == 1 ? "Revert" : "NoRM"
+Hint2 = na(NxtExt) ? "na" : (math.abs(NxtExt) >= 0.50 ? "Strong" : "Weak")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L1 KLS (full)
+hiN(int n) => ta.highest(high[1], n)
+loN(int n) => ta.lowest(low[1], n)
+
+nyHour  = hour(time, "America/New_York")
+nyMin   = minute(time, "America/New_York")
+l1_newSess = (nyHour == l1_sessStartHr and nyMin == 0)
+
+var float l1_sessHi = na
+var float l1_sessLo = na
+if not is2H
+    l1_sessHi := na
+    l1_sessLo := na
+else
+    if l1_newSess or na(l1_sessHi) or na(l1_sessLo)
+        l1_sessHi := high
+        l1_sessLo := low
+    else
+        l1_sessHi := math.max(l1_sessHi, high)
+        l1_sessLo := math.min(l1_sessLo, low)
+
+l1_sessRR = (not na(l1_sessHi) and not na(l1_sessLo)) ? (l1_sessHi - l1_sessLo) : na
+l1_sessRM = na(l1_sessRR) ? na : (l1_sessHi + l1_sessLo) / 2.0
+
+l1_mesoHi = hiN(l1_mesoN)
+l1_mesoLo = loN(l1_mesoN)
+l1_mesoRR = (not na(l1_mesoHi) and not na(l1_mesoLo)) ? (l1_mesoHi - l1_mesoLo) : na
+l1_mesoRM = na(l1_mesoRR) ? na : (l1_mesoHi + l1_mesoLo) / 2.0
+
+l1_macroHi = hiN(l1_macroN)
+l1_macroLo = loN(l1_macroN)
+l1_macroRR = (not na(l1_macroHi) and not na(l1_macroLo)) ? (l1_macroHi - l1_macroLo) : na
+l1_macroRM = na(l1_macroRR) ? na : (l1_macroHi + l1_macroLo) / 2.0
+
+l1_dayHi = hiN(l1_dayN)
+l1_dayLo = loN(l1_dayN)
+l1_dayRR = (not na(l1_dayHi) and not na(l1_dayLo)) ? (l1_dayHi - l1_dayLo) : na
+l1_dayRM = na(l1_dayRR) ? na : (l1_dayHi + l1_dayLo) / 2.0
+
+var float[]  l1_pool    = array.new_float()
+var string[] l1_poolSrc = array.new_string()
+
+float  NearLvl = na
+float  NearDR  = na
+int    PoolN   = 0
+int    Conf_L1 = na
+float  Age_L1  = na
+float  HitsN_L1= na
+float  Decay_L1= na
+float  KScore_L1 = na
+string KTag_L1   = "na"
+string NearSrc   = "na"
+
+bool l1_klsOK = l1_kls_on and is2H and hasHist and not na(rr) and rr != 0.0
+
+f_touchLevel_l1(float lvl) =>
+    (l1_klsOK and not na(lvl)) ? (math.abs(f_sdiv(close - lvl, rr)) <= l1_kls_confW) : false
+
+array.clear(l1_pool)
+array.clear(l1_poolSrc)
+
+if l1_klsOK
+    bool useMicro = (l1_kls_mode == "ALL" or l1_kls_mode == "MICRO")
+    bool useMeso  = (l1_kls_mode == "ALL" or l1_kls_mode == "MESO")
+    bool useMacro = (l1_kls_mode == "ALL" or l1_kls_mode == "MACRO")
+    bool useDay   = (l1_kls_mode == "ALL" or l1_kls_mode == "DAY")
+    bool useSess  = (l1_kls_mode == "ALL" or l1_kls_mode == "SESS")
+
+    if useMicro
+        array.push(l1_pool, rrHigh), array.push(l1_poolSrc, "RRH")
+        array.push(l1_pool, rrLow),  array.push(l1_poolSrc, "RRL")
+        array.push(l1_pool, rm),     array.push(l1_poolSrc, "RM")
+        array.push(l1_pool, q1),     array.push(l1_poolSrc, "Q1")
+        array.push(l1_pool, q3),     array.push(l1_poolSrc, "Q3")
+
+    if useMeso
+        array.push(l1_pool, l1_mesoHi), array.push(l1_poolSrc, "MesoHi")
+        array.push(l1_pool, l1_mesoLo), array.push(l1_poolSrc, "MesoLo")
+        array.push(l1_pool, l1_mesoRM), array.push(l1_poolSrc, "MesoRM")
+
+    if useMacro
+        array.push(l1_pool, l1_macroHi), array.push(l1_poolSrc, "MacroHi")
+        array.push(l1_pool, l1_macroLo), array.push(l1_poolSrc, "MacroLo")
+        array.push(l1_pool, l1_macroRM), array.push(l1_poolSrc, "MacroRM")
+
+    if useDay
+        array.push(l1_pool, l1_dayHi), array.push(l1_poolSrc, "DayHi")
+        array.push(l1_pool, l1_dayLo), array.push(l1_poolSrc, "DayLo")
+        array.push(l1_pool, l1_dayRM), array.push(l1_poolSrc, "DayRM")
+
+    if useSess
+        array.push(l1_pool, l1_sessHi), array.push(l1_poolSrc, "SessHi")
+        array.push(l1_pool, l1_sessLo), array.push(l1_poolSrc, "SessLo")
+        array.push(l1_pool, l1_sessRM), array.push(l1_poolSrc, "SessRM")
+
+PoolN := array.size(l1_pool)
+
+// nearest
+float  bestDR  = na
+float  bestLv  = na
+string bestSrc = "na"
+
+if l1_klsOK and PoolN > 0
+    for j = 0 to PoolN - 1
+        float  lvl = array.get(l1_pool, j)
+        string src = array.get(l1_poolSrc, j)
+        float  dr  = (not na(lvl)) ? math.abs(f_sdiv(lvl - close, rr)) : na
+        bool take = na(bestDR) ? (not na(dr)) : (not na(dr) and dr < bestDR)
+        if take
+            bestDR  := dr
+            bestLv  := lvl
+            bestSrc := src
+
+NearLvl := bestLv
+NearDR  := bestDR
+NearSrc := (l1_klsOK ? bestSrc : "na")
+
+// confluence
+int c_l1 = 0
+if l1_klsOK and PoolN > 0 and not na(NearLvl)
+    for j = 0 to PoolN - 1
+        float lvl = array.get(l1_pool, j)
+        float drn = (not na(lvl)) ? math.abs(f_sdiv(lvl - NearLvl, rr)) : na
+        c_l1 += (not na(drn) and drn <= l1_kls_confW) ? 1 : 0
+Conf_L1 := l1_klsOK ? c_l1 : na
+
+// age/hits/decay
+bool touchNear_l1 = f_touchLevel_l1(NearLvl)
+int  Age_raw_l1   = ta.barssince(touchNear_l1)
+float Hits_raw_l1 = f_rollsum(touchNear_l1 ? 1.0 : 0.0, l1_kls_hitsN)
+
+Age_L1   := l1_klsOK ? float(Age_raw_l1) : na
+HitsN_L1 := l1_klsOK ? Hits_raw_l1 : na
+
+float hl_l1 = math.max(l1_kls_halfLife, 0.1)
+Decay_L1 := l1_klsOK ? (na(Age_L1) ? 0.0 : math.pow(0.5, Age_L1 / hl_l1)) : na
+
+float confNorm_l1 = l1_klsOK ? f_clamp(float(Conf_L1) / 6.0, 0.0, 1.0) : na
+float nearNorm_l1 = l1_klsOK ? f_clamp(1.0 - nz(NearDR, 1.0), 0.0, 1.0) : na
+float hitsNorm_l1 = (l1_klsOK and not na(HitsN_L1)) ? f_clamp(HitsN_L1 / float(l1_kls_hitsN), 0.0, 1.0) : na
+float decyNorm_l1 = l1_klsOK ? f_clamp(Decay_L1, 0.0, 1.0) : na
+
+KScore_L1 := na
+if l1_klsOK and not na(confNorm_l1) and not na(nearNorm_l1) and not na(hitsNorm_l1) and not na(decyNorm_l1)
+    KScore_L1 := f_clamp(
+        l1_kls_wConf*confNorm_l1 +
+        l1_kls_wNear*nearNorm_l1 +
+        l1_kls_wHits*hitsNorm_l1 +
+        l1_kls_wDecay*decyNorm_l1,
+        0.0, 1.0
+    )
+
+KTag_L1 := na(KScore_L1) ? "na" : (KScore_L1 >= l1_kls_hiScore ? "HIGH" : (KScore_L1 <= l1_kls_loScore ? "LOW" : "MID"))
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L2 METRICS
+RRm = rr
+RMm = rm
+SDm = SD
+
+RRc = ta.sma(RRm, rrcLen)
+VRc = f_sdiv(RRm, RRc)
+
+// pivots
+ph = ta.pivothigh(high, pivotL, pivotR)
+pl = ta.pivotlow(low,  pivotL, pivotR)
+
+var float lastPH = na
+var float prevPH = na
+var float lastPL = na
+var float prevPL = na
+var bool  lastPivotWasLow = false
+var bool  hasPivot        = false
+
+if not na(ph)
+    prevPH := lastPH
+    lastPH := ph
+    lastPivotWasLow := false
+    hasPivot := true
+
+if not na(pl)
+    prevPL := lastPL
+    lastPL := pl
+    lastPivotWasLow := true
+    hasPivot := true
+
+var string hiState = "na"
+var string loState = "na"
+if not na(ph) and not na(prevPH)
+    hiState := (lastPH > prevPH) ? "HH" : "LH"
+if not na(pl) and not na(prevPL)
+    loState := (lastPL > prevPL) ? "HL" : "LL"
+
+StructState = (hiState == "na" and loState == "na") ? "na" :
+              (hiState != "na" and loState != "na") ? (hiState + "/" + loState) :
+              (hiState != "na" ? hiState : loState)
+
+SwingDir  = not hasPivot ? "na" : (lastPivotWasLow ? "+1" : "-1")
+LastPivot = not hasPivot ? "na" : (lastPivotWasLow ? "Lo" : "Hi")
+
+PHiDR = (not na(lastPH) and not na(RRc) and RRc != 0.0) ? f_sdiv(lastPH - close, RRc) : na
+PLoDR = (not na(lastPL) and not na(RRc) and RRc != 0.0) ? f_sdiv(close - lastPL, RRc) : na
+
+// containers for L2
+l2_nyHour  = hour(time, "America/New_York")
+l2_nyMin   = minute(time, "America/New_York")
+l2_newSess = (l2_nyHour == l2_sessStartHr and l2_nyMin == 0)
+
+var float l2_sessHi = na
+var float l2_sessLo = na
+if not is2H
+    l2_sessHi := na
+    l2_sessLo := na
+else
+    if l2_newSess or na(l2_sessHi) or na(l2_sessLo)
+        l2_sessHi := high
+        l2_sessLo := low
+    else
+        l2_sessHi := math.max(l2_sessHi, high)
+        l2_sessLo := math.min(l2_sessLo, low)
+
+sessRM = (not na(l2_sessHi) and not na(l2_sessLo)) ? (l2_sessHi + l2_sessLo) / 2.0 : na
+
+dayHi  = hiN(l2_dayN)
+dayLo  = loN(l2_dayN)
+dayRM  = (not na(dayHi) and not na(dayLo)) ? (dayHi + dayLo) / 2.0 : na
+
+mesoHi = hiN(l2_mesoN)
+mesoLo = loN(l2_mesoN)
+mesoRM = (not na(mesoHi) and not na(mesoLo)) ? (mesoHi + mesoLo) / 2.0 : na
+
+macroHi = hiN(l2_macroN)
+macroLo = loN(l2_macroN)
+macroRM = (not na(macroHi) and not na(macroLo)) ? (macroHi + macroLo) / 2.0 : na
+
+// trend persistence + drift
+dir = (not na(SDm) and math.abs(SDm) >= dirMinSD) ? (SDm > 0 ? 1 : -1) : 0
+var int DirRun = 0
+if dir == 0
+    DirRun := 0
+else
+    DirRun := (dir == nz(dir[1])) ? (nz(DirRun[1]) + 1) : 1
+
+RMdrift = (not na(dayRM) and not na(dayRM[driftN]) and not na(RRc) and RRc != 0.0) ? f_sdiv(dayRM - dayRM[driftN], RRc * float(driftN)) : na
+
+TrendTag =
+     (na(RMdrift) ? "na" :
+     (math.abs(RMdrift) >= driftThr and DirRun >= runMinCamp) ? "CAMPAIGN" :
+     (math.abs(RMdrift) <  driftThr and DirRun <= runMaxRng)  ? "RANGE" :
+     "MIXED")
+
+// HTF SD
+f_sd_htf() =>
+    float rrH = math.max(high[1], high[2])
+    float rrL = math.min(low[1],  low[2])
+    float rrt = rrH - rrL
+    float rmt = (rrH + rrL) / 2.0
+    rrt == 0.0 ? na : (close - rmt) / rrt
+
+SD4 = htf_on ? request.security(syminfo.tickerid, tf4, f_sd_htf(), barmerge.gaps_off, barmerge.lookahead_off) : na
+SDD = htf_on ? request.security(syminfo.tickerid, tfD, f_sd_htf(), barmerge.gaps_off, barmerge.lookahead_off) : na
+
+HTF4 = not htf_on or na(SD4) ? "na" : (SD4 > 0 ? "UP" : (SD4 < 0 ? "DN" : "0"))
+HTFD = not htf_on or na(SDD) ? "na" : (SDD > 0 ? "UP" : (SDD < 0 ? "DN" : "0"))
+
+microDir = dir
+htfDir4  = na(SD4) ? 0 : (SD4 > 0 ? 1 : (SD4 < 0 ? -1 : 0))
+htfDirD  = na(SDD) ? 0 : (SDD > 0 ? 1 : (SDD < 0 ? -1 : 0))
+
+WithHTF = (microDir != 0 and htfDir4 != 0 and microDir == htfDir4) ? "Y" : "N"
+
+HTFStack = (
+    (htfDir4 == 0 or htfDirD == 0) ? "NA" :
+    (htfDir4 != htfDirD)           ? "SPLIT" :
+    (microDir == 0)                ? "NA" :
+    (microDir == htfDir4)          ? "ALIGNED" :
+                                     "CONTRA"
+)
+
+// KLS-lite
+var float[] l2_pool = array.new_float()
+bool l2_klsOK = l2_kls_on and is2H and hasHist and not na(RRm) and RRm != 0.0
+
+array.clear(l2_pool)
+if l2_klsOK
+    bool useMicro2 = (l2_kls_mode == "ALL" or l2_kls_mode == "MICRO")
+    bool useMeso2  = (l2_kls_mode == "ALL" or l2_kls_mode == "MESO")
+    bool useMacro2 = (l2_kls_mode == "ALL" or l2_kls_mode == "MACRO")
+    bool useDay2   = (l2_kls_mode == "ALL" or l2_kls_mode == "DAY")
+    bool useSess2  = (l2_kls_mode == "ALL" or l2_kls_mode == "SESS")
+
+    if useMicro2
+        array.push(l2_pool, rrHigh), array.push(l2_pool, rrLow), array.push(l2_pool, RMm)
+    if useMeso2
+        array.push(l2_pool, mesoHi), array.push(l2_pool, mesoLo), array.push(l2_pool, mesoRM)
+    if useMacro2
+        array.push(l2_pool, macroHi), array.push(l2_pool, macroLo), array.push(l2_pool, macroRM)
+    if useDay2
+        array.push(l2_pool, dayHi), array.push(l2_pool, dayLo), array.push(l2_pool, dayRM)
+    if useSess2
+        array.push(l2_pool, l2_sessHi), array.push(l2_pool, l2_sessLo), array.push(l2_pool, sessRM)
+
+int l2_PoolN = array.size(l2_pool)
+
+float l2_NearLvl = na
+float l2_NearDR  = na
+int   l2_Conf    = na
+
+float bestDR2 = na
+float bestLv2 = na
+if l2_klsOK and l2_PoolN > 0
+    for j = 0 to l2_PoolN - 1
+        float lvl = array.get(l2_pool, j)
+        float dr2  = (not na(lvl)) ? math.abs(f_sdiv(lvl - close, RRm)) : na
+        bool take2 = na(bestDR2) ? (not na(dr2)) : (not na(dr2) and dr2 < bestDR2)
+        if take2
+            bestDR2 := dr2
+            bestLv2 := lvl
+
+l2_NearLvl := bestLv2
+l2_NearDR  := bestDR2
+
+int c2 = 0
+if l2_klsOK and l2_PoolN > 0 and not na(l2_NearLvl)
+    for j = 0 to l2_PoolN - 1
+        float lvl = array.get(l2_pool, j)
+        float drn = (not na(lvl)) ? math.abs(f_sdiv(lvl - l2_NearLvl, RRm)) : na
+        c2 += (not na(drn) and drn <= l2_kls_confW) ? 1 : 0
+l2_Conf := l2_klsOK ? c2 : na
+
+f_touchLevel_l2(float lvl) =>
+    (l2_klsOK and not na(lvl)) ? (math.abs(f_sdiv(close - lvl, RRm)) <= l2_kls_confW) : false
+
+touchNear2 = f_touchLevel_l2(l2_NearLvl)
+Age_raw2   = ta.barssince(touchNear2)
+Hits_raw2  = f_rollsum(touchNear2 ? 1.0 : 0.0, l2_kls_hitsN)
+
+Age2  = l2_klsOK ? float(Age_raw2) : na
+Hits2 = l2_klsOK ? Hits_raw2 : na
+
+hl2 = math.max(l2_kls_halfLife, 0.1)
+Decay2 = l2_klsOK ? (na(Age2) ? 0.0 : math.pow(0.5, Age2 / hl2)) : na
+
+confNorm2 = l2_klsOK ? f_clamp(float(nz(l2_Conf)) / 6.0, 0.0, 1.0) : na
+nearNorm2 = l2_klsOK ? f_clamp(1.0 - nz(l2_NearDR, 1.0), 0.0, 1.0) : na
+hitsNorm2 = (l2_klsOK and not na(Hits2)) ? f_clamp(Hits2 / float(l2_kls_hitsN), 0.0, 1.0) : na
+decyNorm2 = l2_klsOK ? f_clamp(Decay2, 0.0, 1.0) : na
+
+float KScore2 = na
+if l2_klsOK and not na(confNorm2) and not na(nearNorm2) and not na(hitsNorm2) and not na(decyNorm2)
+    KScore2 := f_clamp(
+        l2_kls_wConf*confNorm2 +
+        l2_kls_wNear*nearNorm2 +
+        l2_kls_wHits*hitsNorm2 +
+        l2_kls_wDecay*decyNorm2,
+        0.0, 1.0
+    )
+
+string KTag2 = na(KScore2) ? "na" : (KScore2 >= l2_kls_hiScore ? "HIGH" : (KScore2 <= l2_kls_loScore ? "LOW" : "MID"))
+
+// nearest above/below in RRc units
+float aboveLv = na
+float aboveDR = na
+float belowLv = na
+float belowDR = na
+
+if l2_klsOK and l2_PoolN > 0 and not na(RRc) and RRc != 0.0
+    for j = 0 to l2_PoolN - 1
+        float lvl = array.get(l2_pool, j)
+        if not na(lvl)
+            if lvl > close
+                float d = f_sdiv(lvl - close, RRc)
+                bool takeA = na(aboveDR) ? true : (d < aboveDR)
+                if takeA
+                    aboveDR := d
+                    aboveLv := lvl
+            if lvl < close
+                float d2 = f_sdiv(close - lvl, RRc)
+                bool takeB = na(belowDR) ? true : (d2 < belowDR)
+                if takeB
+                    belowDR := d2
+                    belowLv := lvl
+
+KUpDR = aboveDR
+KDnDR = belowDR
+
+// space candidates (RRc)
+f_minCandidateUp(float current, float lvl, float rrc) =>
+    (not na(lvl) and lvl > current and not na(rrc) and rrc != 0.0) ? f_sdiv(lvl - current, rrc) : na
+
+f_minCandidateDn(float current, float lvl, float rrc) =>
+    (not na(lvl) and lvl < current and not na(rrc) and rrc != 0.0) ? f_sdiv(current - lvl, rrc) : na
+
+upPH   = f_minCandidateUp(close, lastPH,  RRc)
+upSess = f_minCandidateUp(close, l2_sessHi,  RRc)
+upDay  = f_minCandidateUp(close, dayHi,   RRc)
+upMac  = f_minCandidateUp(close, macroHi, RRc)
+upKLS  = aboveDR
+
+dnPL   = f_minCandidateDn(close, lastPL,  RRc)
+dnSess = f_minCandidateDn(close, l2_sessLo,  RRc)
+dnDay  = f_minCandidateDn(close, dayLo,   RRc)
+dnMac  = f_minCandidateDn(close, macroLo, RRc)
+dnKLS  = belowDR
+
+float SpaceUp = na
+string UpSrc  = "na"
+float UpLvl   = na
+float bestUp  = na
+
+if not na(upPH) and (na(bestUp) or upPH < bestUp)
+    bestUp := upPH, UpSrc := "PHi", UpLvl := lastPH
+if not na(upSess) and (na(bestUp) or upSess < bestUp)
+    bestUp := upSess, UpSrc := "SessHi", UpLvl := l2_sessHi
+if not na(upDay) and (na(bestUp) or upDay < bestUp)
+    bestUp := upDay, UpSrc := "DayHi", UpLvl := dayHi
+if not na(upMac) and (na(bestUp) or upMac < bestUp)
+    bestUp := upMac, UpSrc := "MacroHi", UpLvl := macroHi
+if not na(upKLS) and (na(bestUp) or upKLS < bestUp)
+    bestUp := upKLS, UpSrc := "KLS", UpLvl := aboveLv
+
+SpaceUp := bestUp
+
+float SpaceDn = na
+string DnSrc  = "na"
+float DnLvl   = na
+float bestDn  = na
+
+if not na(dnPL) and (na(bestDn) or dnPL < bestDn)
+    bestDn := dnPL, DnSrc := "PLo", DnLvl := lastPL
+if not na(dnSess) and (na(bestDn) or dnSess < bestDn)
+    bestDn := dnSess, DnSrc := "SessLo", DnLvl := l2_sessLo
+if not na(dnDay) and (na(bestDn) or dnDay < bestDn)
+    bestDn := dnDay, DnSrc := "DayLo", DnLvl := dayLo
+if not na(dnMac) and (na(bestDn) or dnMac < bestDn)
+    bestDn := dnMac, DnSrc := "MacroLo", DnLvl := macroLo
+if not na(dnKLS) and (na(bestDn) or dnKLS < bestDn)
+    bestDn := dnKLS, DnSrc := "KLS", DnLvl := belowLv
+
+SpaceDn := bestDn
+
+SpaceMin = (na(SpaceUp) and na(SpaceDn)) ? na :
+           na(SpaceUp) ? SpaceDn :
+           na(SpaceDn) ? SpaceUp : math.min(SpaceUp, SpaceDn)
+
+SpaceTag = na(SpaceMin) ? "na" : (SpaceMin < spaceLo ? "LOW" : (SpaceMin < spaceMd ? "MID" : "HIGH"))
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OPTIONAL PLOTS (L1 micro RR levels)
+plot(showLevels and is2H ? rrHigh : na, "RR High", style=plot.style_linebr)
+plot(showLevels and is2H ? rrLow  : na, "RR Low",  style=plot.style_linebr)
+plot(showLevels and is2H ? rm     : na, "RM Mid",  style=plot.style_linebr)
+plot(showLevels and is2H ? q1     : na, "Q1",      style=plot.style_linebr)
+plot(showLevels and is2H ? q3     : na, "Q3",      style=plot.style_linebr)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEDICATED RANGE DETECTOR (v0.1) — FIXED UNITS + ROTATE GATE
+
+bool rdOK = rd_on and is2H and hasHist and not na(RRc) and RRc != 0.0
+
+float rdHi  = rdOK ? ta.highest(high[1], rd_len) : na
+float rdLo  = rdOK ? ta.lowest(low[1],  rd_len)  : na
+float rdMid = (not na(rdHi) and not na(rdLo)) ? (rdHi + rdLo) / 2.0 : na
+
+// ROTATE preference (was disabled)
+bool rdRotOK = (not rd_preferRot) or (StateTag == "ROTATE")
+
+// width in RRc units (keep your safety, but make it harmless)
+float RRc_safe = math.max(RRc, syminfo.mintick * 10)
+float rdW_RRc  = (not na(rdHi) and not na(rdLo)) ? (rdHi - rdLo) / RRc_safe : na
+
+// Drift: RMdrift is ALREADY in RRc units per bar. Do NOT divide by RRc again.
+float rdDriftAbs = na(RMdrift) ? na : math.abs(RMdrift)
+
+// strict vs soft thresholds
+float rd_softW     = rd_maxW * rd_softWmult
+float rd_softDrift = rd_maxDrift * rd_softDmult
+
+bool rdWidthOK    = not na(rdW_RRc)     and rdW_RRc     <= rd_maxW
+bool rdWidthSoft  = not na(rdW_RRc)     and rdW_RRc     <= rd_softW
+
+bool rdDriftOK    = not na(rdDriftAbs)  and rdDriftAbs  <= rd_maxDrift
+bool rdDriftSoft  = not na(rdDriftAbs)  and rdDriftAbs  <= rd_softDrift
+
+string RD_State = "na"
+if rdOK and rdRotOK
+    if rdWidthOK and rdDriftOK
+        RD_State := "RANGE"
+    else if rdWidthSoft and rdDriftSoft
+        RD_State := "SOFT_RANGE"
+    else
+        RD_State := "NO_RANGE"
+else if rdOK
+    RD_State := "NO_RANGE"
+else
+    RD_State := "na"
+
+// Break direction (gated)
+bool breakAllowed = (not rd_breakNeeds) or ((StateTag == "MOVE") and (TT == 1))
+float brkTolPts   = rdOK ? (rd_breakTol * RRc) : na
+
+bool brkUp = breakAllowed and not na(rdHi) and not na(brkTolPts) and close > (rdHi + brkTolPts)
+bool brkDn = breakAllowed and not na(rdLo) and not na(brkTolPts) and close < (rdLo - brkTolPts)
+string RD_BrkDir = brkUp ? "UP" : brkDn ? "DN" : "0"
+
+// Why (diagnostic)
+string RD_Why =
+     "W=" + str.tostring(rdW_RRc, fmt) +
+     ">D=" + str.tostring(rdDriftAbs, fmt) +
+     (rdRotOK ? ">ROT_OK" : ">ROT_NO") +
+     (breakAllowed ? ">BRK_OK" : ">BRK_GATED")
+
+
+// RD levels plots
+plot(rd_showLevels and rdOK ? rdHi : na,  "RD Hi",  style=plot.style_linebr)
+plot(rd_showLevels and rdOK ? rdLo : na,  "RD Lo",  style=plot.style_linebr)
+plot(rd_showLevels and rdOK ? rdMid : na, "RD Mid", style=plot.style_linebr)
+
+string RD_Debug =
+     "rdOK=" + str.tostring(rdOK) +
+     " rotOK=" + str.tostring(rdRotOK) +
+     "\nW=" + str.tostring(rdW_RRc, fmt) + " (max " + str.tostring(rd_maxW, fmt) + " / soft " + str.tostring(rd_softW, fmt) + ")" +
+     "\nD=" + str.tostring(rdDriftAbs, fmt) + " (max " + str.tostring(rd_maxDrift, fmt) + " / soft " + str.tostring(rd_softDrift, fmt) + ")" +
+     "\nStateTag=" + StateTag + " RRc=" + str.tostring(RRc, fmt) + " RMdrift=" + str.tostring(RMdrift, fmt)
+
+var label rdLbl = na
+if barstate.islast
+    if na(rdLbl)
+        rdLbl := label.new(bar_index, high, RD_Debug, style=label.style_label_left)
+    else
+        label.set_x(rdLbl, bar_index)
+        label.set_y(rdLbl, high)
+        label.set_text(rdLbl, RD_Debug)
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L3 + STATE INDEX
+bool ssHasHH = (StructState != "na") and str.contains(StructState, "HH")
+bool ssHasHL = (StructState != "na") and str.contains(StructState, "HL")
+bool ssHasLH = (StructState != "na") and str.contains(StructState, "LH")
+bool ssHasLL = (StructState != "na") and str.contains(StructState, "LL")
+
+bool ssUp = ssHasHH or ssHasHL
+bool ssDn = ssHasLH or ssHasLL
+
+SS = StructState == "na" ? "na" : (ssUp and ssDn ? "MIX" : ssUp ? "UP" : ssDn ? "DN" : "na")
+
+TR  = TrendTag
+HTF = HTFStack
+SP  = SpaceTag
+KT  = KTag2
+
+ST  = StateTag
+VAL = ValueTag
+EV  = DominantEvent
+CPt = CPTag
+
+mDirStr = microDir == 1 ? "UP" : microDir == -1 ? "DN" : "0"
+
+f_tagString(string TR_, string SS_, string HTF_, string SP_, string KT_,
+            string ST_, string VAL_, string EV_, string CP_, int TT_) =>
+    "L2[TR=" + TR_ + ",SS=" + SS_ + ",HTF=" + HTF_ + ",SP=" + SP_ + ",KT=" + KT_ + "]" + "|L1[ST=" + ST_ + ",VAL=" + VAL_ + ",EV=" + EV_ + ",CP=" + CP_ + ",TT=" + str.tostring(TT_) + "]"
+
+f_biasMode(string TR_, string HTF_, string SS_, string ST_, string CP_, int TT_) =>
+    string bm = "TRANSITION"
+    bool chop = (CP_ == "HIGH") and (ST_ == "ROTATE") and (TT_ == 0)
+    if chop
+        bm := "NOISE"
+    else if (TR_ == "CAMPAIGN") and (HTF_ != "CONTRA") and (CP_ != "HIGH")
+        bm := "TREND"
+    else if (TR_ == "RANGE")
+        bm := "RANGE"
+    else if (TR_ == "MIXED") or (SS_ == "MIX") or (HTF_ == "SPLIT")
+        bm := "TRANSITION"
+    bm
+
+f_biasDir(string bm, string TR_, string SS_, string HTF_, string WithHTF_, string mDirStr_, float RMdrift_) =>
+    string bd = "0"
+    if bm == "NOISE"
+        bd := "0"
+    else if HTF_ == "CONTRA"
+        bd := "0"
+    else if (HTF_ == "ALIGNED") and (TR_ == "CAMPAIGN") and (WithHTF_ == "Y")
+        bd := mDirStr_
+    else if (TR_ == "CAMPAIGN") and (HTF_ != "CONTRA")
+        bd := na(RMdrift_) ? "0" : (RMdrift_ > 0 ? "UP" : (RMdrift_ < 0 ? "DN" : "0"))
+    else
+        bd := SS_ == "UP" ? "UP" : SS_ == "DN" ? "DN" : "0"
+    bd
+
+f_biasWhy(string bm, string bd, string TR_, string SS_, string HTF_, string SP_, string KT_,
+          string ST_, string VAL_, string EV_, string CP_, int TT_, string WithHTF_) =>
+    string t0 = "SYS_OK"
+    string t1 = bm == "TREND" ? "BM_TREND" : bm == "RANGE" ? "BM_RANGE" : bm == "NOISE" ? "BM_NOISE" : "BM_TRANS"
+    string t2 = (CP_ == "HIGH" and ST_ == "ROTATE" and TT_ == 0) ? "VETO_CHOP" : "OK"
+    string t3 = HTF_ == "ALIGNED" ? "HTF_ALIGNED" : HTF_ == "SPLIT" ? "HTF_SPLIT" : HTF_ == "CONTRA" ? "HTF_CONTRA" : "HTF_NA"
+    string t4 = TR_ == "CAMPAIGN" ? "TR_CAMPAIGN" : TR_ == "RANGE" ? "TR_RANGE" : TR_ == "MIXED" ? "TR_MIXED" : "TR_NA"
+    string t5 = SS_ == "UP" ? "SS_UP" : SS_ == "DN" ? "SS_DN" : SS_ == "MIX" ? "SS_MIX" : "SS_NA"
+    string t6 = SP_ == "HIGH" ? "SP_HIGH" : SP_ == "MID" ? "SP_MID" : SP_ == "LOW" ? "SP_LOW" : "SP_NA"
+    string t7 = KT_ == "HIGH" ? "KT_HIGH" : KT_ == "MID" ? "KT_MID" : KT_ == "LOW" ? "KT_LOW" : "KT_NA"
+    t0 + ">" + t1 + ">" + t2 + ">" + t3 + (WithHTF_ == "Y" ? ">HTF_WITH" : ">HTF_WITHOUT") + ">" + t4 + ">" + t5 + ">" + t6 + ">" + t7
+
+string TagString = f_tagString(TR, SS, HTF, SP, KT, ST, VAL, EV, CPt, TT)
+string BiasMode  = f_biasMode(TR, HTF, SS, ST, CPt, TT)
+string BiasDir   = f_biasDir(BiasMode, TR, SS, HTF, WithHTF, mDirStr, RMdrift)
+string BiasWhy   = f_biasWhy(BiasMode, BiasDir, TR, SS, HTF, SP, KT, ST, VAL, EV, CPt, TT, WithHTF)
+
+f_permissionState(string bm, string HTF_, string SP_, string KT_, string ST_, string CP_, int TT_) =>
+    bool chop = (CP_ == "HIGH") and (ST_ == "ROTATE") and (TT_ == 0)
+    bool redCluster = (SP_ == "LOW") and (KT_ == "HIGH") and (CP_ == "HIGH")
+    bool contraTight = (HTF_ == "CONTRA") and (SP_ == "LOW")
+    string ps = "YELLOW"
+    if bm == "NOISE" or chop or redCluster or contraTight
+        ps := "RED"
+    else if bm == "TREND" and HTF_ == "ALIGNED" and SP_ == "HIGH" and CP_ != "HIGH" and KT_ != "HIGH"
+        ps := "GREEN"
+    else if bm == "RANGE" and SP_ != "HIGH" and CP_ != "LOW"
+        ps := "ORANGE"
+    ps
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RD -> BiasMode hook
+bool rdIsRange = (RD_State == "RANGE" or RD_State == "SOFT_RANGE")
+bool microChop = (CPt == "HIGH") and (ST == "ROTATE") and (TT == 0)
+
+if rdIsRange and (HTFStack != "CONTRA") and not microChop and BiasMode != "NOISE"
+    BiasMode := "RANGE"
+    BiasDir  := "0"
+    BiasWhy := BiasWhy + (RD_State == "RANGE" ? ">RD_RANGE" : ">RD_SOFT")
+
+
+string PermissionState = f_permissionState(BiasMode, HTF, SP, KT, ST, CPt, TT)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L3 Decision Object v0.1
+CONF_MOVE  = (ST == "MOVE") and (TT == 1) and (CPt != "HIGH")
+CONF_RANGE = (ST == "ROTATE") and (TT == 0) and (CPt != "LOW")
+
+// Rail source selection
+bool rdRailsValid = rdOK and not na(rdHi) and not na(rdLo) and rdHi > rdLo
+bool rdRailsStateOK = (RD_State == "RANGE") or (RD_State == "SOFT_RANGE")
+bool useRDrailsNow = rd_useForL3 and rdRailsValid and rdRailsStateOK
+
+bool sessRailsValid = not na(l2_sessHi) and not na(l2_sessLo) and l2_sessHi > l2_sessLo
+float RangeHi = useRDrailsNow ? rdHi : (sessRailsValid ? l2_sessHi : na)
+float RangeLo = useRDrailsNow ? rdLo : (sessRailsValid ? l2_sessLo : na)
+string RailSrc = useRDrailsNow ? "RD" : (sessRailsValid ? "SESS" : "na")
+
+float W = (not na(RangeHi) and not na(RangeLo)) ? (RangeHi - RangeLo) : na
+float Mid = na(W) ? na : (RangeHi + RangeLo) / 2.0
+float tol = na(W) ? na : math.max(2 * syminfo.mintick, 0.02 * W)
+float zRail = na(W) ? na : (l3_zRailPct * W)
+float zMid  = na(W) ? na : (l3_zMidPct * W)
+
+bool railsValid = not na(W) and W > 0
+
+string RailLoc = "na"
+if railsValid and not na(tol) and not na(zRail) and not na(zMid) and not na(Mid)
+    if close > RangeHi + tol or close < RangeLo - tol
+        RailLoc := "OUTSIDE"
+    else if close >= RangeHi - zRail
+        RailLoc := "UP_RAIL"
+    else if close <= RangeLo + zRail
+        RailLoc := "DN_RAIL"
+    else if math.abs(close - Mid) <= zMid
+        RailLoc := "MID"
+    else
+        RailLoc := "IN_RANGE"
+
+// Target availability using L2 space objects
+bool hasUpTarget = (UpSrc != "na") and not na(UpLvl) and not na(SpaceUp) and (SpaceUp >= l3_minTgtDR)
+bool hasDnTarget = (DnSrc != "na") and not na(DnLvl) and not na(SpaceDn) and (SpaceDn >= l3_minTgtDR)
+
+f_fmtTarget(string src, float lvl) =>
+    (src == "na" or na(lvl)) ? "na" : (src + "@" + str.tostring(lvl, format.mintick))
+
+string TradeableNow = "N"
+string Play = "NONE"
+string PredDir = "na"
+string PredTarget = "na"
+string Invalidation = "INV_SYS_NA"
+string Conf_L3 = "D"
+string Timebox = "TB_0"
+string Reasons_L3 = "SYS_NA"
+string Blocker = "BLK_DIR_NA"
+
+if l3_on
+    if PermissionState == "RED"
+        TradeableNow := "N"
+        Play := "NONE"
+        PredDir := "0"
+        PredTarget := "na"
+        Invalidation := "INV_RED_STATE"
+        Conf_L3 := "D"
+        Timebox := "TB_0"
+        Reasons_L3 := "PS_RED"
+        Blocker := "BLK_RED"
+
+    else if PermissionState == "GREEN"
+        Play := "TREND_CONT"
+        PredDir := BiasDir
+        Timebox := "TB_BLOCK"
+        Reasons_L3 := "PS_GREEN>BM_TREND" + (CONF_MOVE ? ">CONF_MOVE" : ">NO_CONFIRM")
+
+        bool dirOK = (PredDir == "UP" or PredDir == "DN")
+        bool tgtOK = (PredDir == "UP" ? hasUpTarget : hasDnTarget)
+
+        if not CONF_MOVE
+            TradeableNow := "N"
+            Invalidation := "INV_NO_CONFIRM"
+            Blocker := "BLK_NO_CONFIRM"
+            Conf_L3 := "C"
+        else if not dirOK
+            TradeableNow := "N"
+            Invalidation := "INV_GATE_LOSS"
+            Blocker := "BLK_DIR_NA"
+            Conf_L3 := "D"
+        else if not tgtOK
+            TradeableNow := "N"
+            Invalidation := "INV_NO_TARGET"
+            Blocker := "BLK_NO_TARGET"
+            Conf_L3 := "D"
+        else
+            TradeableNow := "Y"
+            PredTarget := PredDir == "UP" ? f_fmtTarget(UpSrc, UpLvl) : f_fmtTarget(DnSrc, DnLvl)
+            Invalidation := "INV_GATE_LOSS"
+            bool fricHigh = (SP == "LOW") or (KT == "HIGH")
+            Conf_L3 := fricHigh ? "B" : "A"
+            Blocker := "BLK_NONE"
+
+    else if PermissionState == "YELLOW"
+        Play := "SELECTIVE_CONT"
+        PredDir := BiasDir
+        Timebox := "TB_6bars"
+        Reasons_L3 := "PS_YELLOW" + (CONF_MOVE ? ">CONF_MOVE" : ">NO_CONFIRM")
+
+        bool dirOK = (PredDir == "UP" or PredDir == "DN")
+        bool okFric = (SP != "LOW") and (KT != "HIGH")
+        bool tgtOK = (PredDir == "UP" ? hasUpTarget : hasDnTarget)
+
+        if not (CONF_MOVE and dirOK and okFric)
+            TradeableNow := "N"
+            Invalidation := "INV_NO_CONFIRM"
+            Blocker := "BLK_NO_CONFIRM"
+            Conf_L3 := "D"
+        else if not tgtOK
+            TradeableNow := "N"
+            Invalidation := "INV_NO_TARGET"
+            Blocker := "BLK_NO_TARGET"
+            Conf_L3 := "D"
+        else
+            TradeableNow := "Y"
+            PredTarget := PredDir == "UP" ? f_fmtTarget(UpSrc, UpLvl) : f_fmtTarget(DnSrc, DnLvl)
+            Invalidation := "INV_GATE_LOSS"
+            Conf_L3 := "C"
+            Blocker := "BLK_NONE"
+
+    else if PermissionState == "ORANGE"
+        Timebox := "TB_4bars"
+        bool isSweepHi = (EV == "SweepHi")
+        bool isSweepLo = (EV == "SweepLo")
+        bool sweepOk = (isSweepHi or isSweepLo) and CONF_RANGE
+
+        if sweepOk
+            Play := "SWEEP_FADE"
+            PredDir := isSweepHi ? "DN" : "UP"
+            Reasons_L3 := "PS_ORANGE>EV_SWEEP>CONF_RANGE"
+        else
+            Play := "RANGE_FADE"
+            PredDir := RailLoc == "UP_RAIL" ? "DN" : RailLoc == "DN_RAIL" ? "UP" : "0"
+            Reasons_L3 := "PS_ORANGE>RAIL_" + (RailLoc == "UP_RAIL" ? "UP" : RailLoc == "DN_RAIL" ? "DN" : "NA") + ">CONF_RANGE"
+
+        bool dirOK = (PredDir == "UP" or PredDir == "DN")
+        bool tgtOK = (PredDir == "UP" ? hasUpTarget : hasDnTarget)
+
+        if not (dirOK and CONF_RANGE and (sweepOk or (RailLoc == "UP_RAIL" or RailLoc == "DN_RAIL")))
+            TradeableNow := "N"
+            Invalidation := "INV_NO_LOCATION"
+            Blocker := "BLK_EVENT_AMBIG"
+            Conf_L3 := "D"
+        else if not tgtOK
+            TradeableNow := "N"
+            Invalidation := "INV_NO_TARGET"
+            Blocker := "BLK_NO_TARGET"
+            Conf_L3 := "D"
+        else
+            TradeableNow := "Y"
+            PredTarget := PredDir == "UP" ? f_fmtTarget(UpSrc, UpLvl) : f_fmtTarget(DnSrc, DnLvl)
+            Invalidation := (Play == "RANGE_FADE") ? "INV_RAIL_LOST" : "INV_GATE_LOSS"
+            bool fricHigh = (SP == "LOW") or (KT == "HIGH")
+            Conf_L3 := fricHigh ? "C" : "B"
+            Blocker := "BLK_NONE"
+
+// FINAL OVERRIDE: micro chop invalidation dominates
+if microChop
+    PermissionState := "RED"
+    TradeableNow    := "N"
+    Invalidation    := "INV_MICRO_CHOP"
+    Blocker         := "BLK_MICRO_CHOP"
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L2.5 — BlockStack (2H Memory)
+string G_L25 = "L2.5 — BlockStack (2H Memory)"
+
+bs_on         = input.bool(true,  "Enable BlockStack", group=G_L25, inline="bs0")
+bs_N          = input.int(12,     "Lookback N (2H bars)", group=G_L25, minval=3, maxval=200, inline="bs0")
+
+bs_trendPct   = input.float(0.65, "Trend stable ≥", group=G_L25, step=0.05, inline="bs1")
+bs_rangePct   = input.float(0.65, "Range stable ≥", group=G_L25, step=0.05, inline="bs1")
+
+bs_chopMax    = input.float(0.35, "Max chop for stable", group=G_L25, step=0.05, inline="bs2")
+bs_flipN      = input.int(12,     "Flip window (bars)", group=G_L25, minval=3, maxval=200, inline="bs2")
+
+bs_spaceLowThr   = input.float(0.75, "Space LOW thr (RRc)", group=G_L25, step=0.05, inline="bs3")
+bs_htfSplitMax   = input.float(0.40, "Max HTF split for stable", group=G_L25, step=0.05, inline="bs3")
+
+bool bsOK = bs_on and is2H and hasHist
+float bsDen = float(bs_N)
+
+bool bs_isCampaign = (TrendTag == "CAMPAIGN")
+bool bs_isRDRange  = (RD_State == "RANGE" or RD_State == "SOFT_RANGE")
+
+bool bs_isConfMove  = (TT == 1) and (StateTag == "MOVE") and (CPt != "HIGH")
+bool bs_isChop      = (CPt == "HIGH") and (StateTag == "ROTATE") and (TT == 0)
+
+bool bs_isHTFSplit  = (HTFStack == "SPLIT")
+bool bs_isHTFContra = (HTFStack == "CONTRA")
+
+bool bs_isSpaceLow = not na(SpaceMin) and (SpaceMin < bs_spaceLowThr)
+
+
+bool bs_dirUp = (BiasDir == "UP")
+bool bs_dirDn = (BiasDir == "DN")
+
+float pCampaign = bsOK ? (f_rollsum(bs_isCampaign ? 1.0 : 0.0, bs_N) / bsDen) : na
+float pRDRange  = bsOK ? (f_rollsum(bs_isRDRange  ? 1.0 : 0.0, bs_N) / bsDen) : na
+float pConfMove = bsOK ? (f_rollsum(bs_isConfMove ? 1.0 : 0.0, bs_N) / bsDen) : na
+float pChop     = bsOK ? (f_rollsum(bs_isChop     ? 1.0 : 0.0, bs_N) / bsDen) : na
+float pSplit    = bsOK ? (f_rollsum(bs_isHTFSplit ? 1.0 : 0.0, bs_N) / bsDen) : na
+float pContra   = bsOK ? (f_rollsum(bs_isHTFContra? 1.0 : 0.0, bs_N) / bsDen) : na
+float pSpaceLow = bsOK ? (f_rollsum(bs_isSpaceLow ? 1.0 : 0.0, bs_N) / bsDen) : na
+
+float vUp = bsOK ? f_rollsum(bs_dirUp ? 1.0 : 0.0, bs_N) : na
+float vDn = bsOK ? f_rollsum(bs_dirDn ? 1.0 : 0.0, bs_N) : na
+
+string RegimeDir = (not bsOK or na(vUp) or na(vDn)) ? "na" :
+     (vUp > vDn ? "UP" : (vDn > vUp ? "DN" : "0"))
+
+float avgDrift = bsOK ? ta.sma(RMdrift, bs_N) : na
+float avgSpace = bsOK ? ta.sma(SpaceMin, bs_N) : na
+
+string RegimeTag = "na"
+if bsOK
+    bool hardVeto = (not na(pContra) and pContra > 0.25)
+    bool trendStable =
+         (not na(pCampaign) and pCampaign >= bs_trendPct) and
+         (not na(avgDrift) and math.abs(avgDrift) >= driftThr) and
+         (not na(pChop) and pChop <= bs_chopMax) and
+         (not na(pSplit) and pSplit <= bs_htfSplitMax)
+
+    bool rangeStable =
+         (not na(pRDRange) and pRDRange >= bs_rangePct) and
+         (not na(avgDrift) and math.abs(avgDrift) < driftThr) and
+         (not na(pConfMove) and pConfMove < 0.25) and
+         (not na(pChop) and pChop <= 0.50)
+
+    if hardVeto
+        RegimeTag := "TRANSITION"
+    else if trendStable
+        RegimeTag := "TREND_STABLE"
+    else if rangeStable
+        RegimeTag := "RANGE_STABLE"
+    else
+        RegimeTag := "TRANSITION"
+
+string RegimeConf = "na"
+if bsOK
+    bool chaotic = (not na(pChop) and pChop > 0.50) or (not na(pSplit) and pSplit > 0.50)
+    if RegimeTag == "TREND_STABLE"
+        bool strong = (pCampaign >= 0.75) and (pSplit <= 0.25) and (pSpaceLow <= 0.35)
+        RegimeConf := strong ? "A" : "B"
+    else if RegimeTag == "RANGE_STABLE"
+        bool strong = (pRDRange >= 0.75) and (pChop <= 0.35)
+        RegimeConf := strong ? "A" : "B"
+    else
+        RegimeConf := chaotic ? "D" : "C"
+
+float bmChanged = (not bsOK or na(BiasMode[1])) ? na : (BiasMode != BiasMode[1] ? 1.0 : 0.0)
+float flipRate  = (bsOK and not na(bmChanged)) ? (f_rollsum(bmChanged, bs_flipN) / float(bs_flipN)) : na
+
+string TransitionRisk = na(flipRate) ? "na" :
+     (flipRate < 0.20 ? "LOW" : (flipRate < 0.40 ? "MID" : "HIGH"))
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPORT STRINGS (MIN + FULL) — MODULE GROUPED
+f_s(string s) =>
+    string x = na(s) ? "" : s
+    x := str.replace_all(x, "|", "/")
+    x := str.replace_all(x, "=", ":")
+    x := str.replace_all(x, "\n", " ")
+    x
+
+
+// Helpers for ints (keeps empty on na)
+f_i(float x) => na(x) ? "" : str.tostring(int(x))
+
+// Build pool dump (optional; can get long)
+f_pool_dump(float[] lvls, string[] srcs, int maxN) =>
+    string out = ""
+    int n = math.min(array.size(lvls), array.size(srcs))
+    int k = math.min(n, maxN)
+    for i = 0 to k - 1
+        float lvl = array.get(lvls, i)
+        string src = array.get(srcs, i)
+        string item = (na(lvl) ? "" : (src + "@" + str.tostring(lvl, format.mintick)))
+        out := out + (i == 0 ? "" : ",") + item
+    out
+
+// --- CORE IDS (already in your code)
+t2          = time("120")
+nyH2        = hour(t2, EXP_TZ)
+ovc_ms      = f_ovc_day_start_ms(t2)
+
+exp_date    = f_ymd(ovc_ms, EXP_TZ)
+exp_ymd     = f_ymd_compact(ovc_ms, EXP_TZ)
+exp_seg     = f_seg_from_hour(nyH2)
+exp_4h      = f_block4h_from_seg(exp_seg)
+
+exp_sym     = syminfo.ticker
+exp_bid     = exp_ymd + "-" + exp_seg + "-" + exp_sym
+
+
+exp_ready = (is2H and hasHist) ? 1 : 0
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IDS (available if you want to display later)
+string instrument = syminfo.ticker
+int t_ms = t2  // anchor IDs to the 2H container, not the current chart bar
+string block_2h_id = f_block2h_id(t_ms, instrument)
+string block_4h_id = f_block4h_id(t_ms, instrument)
+
+
+// --- MIN (WEBHOOK SAFE): everything needed to reconstruct the market state + decisions
+exportMin = (
+    // META / VIEW
+    "ver=" + f_txt(exp_schema) +
+    "|profile=MIN" +
+    "|schema_min=OVC_MIN_V0_1" +
+    "|sym=" + f_txt(exp_sym) +
+    "|tz=" + f_txt(EXP_TZ) +
+    "|date_ny=" + f_txt(exp_date) +
+    "|bar_close_ms=" + str.tostring(t2) +
+    "|block2h_id=" + f_txt(block_2h_id) +
+    "|block4h_id=" + f_txt(block_4h_id) +
+    "|bid=" + f_txt(exp_bid) +
+    "|seg=" + f_txt(exp_seg) +
+    "|news_flag=" + str.tostring(exp_news) +
+
+    // OHLC
+    "|o=" + f_px(open) +
+    "|h=" + f_px(high) +
+    "|l=" + f_px(low) +
+    "|c=" + f_px(close) +
+    "|dir=" + (close > open ? "UP" : close < open ? "DN" : "0") +
+
+    // L1 MAIN (tags + critical scalars)
+    "|state_tag=" + f_txt(StateTag) +
+    "|value_tag=" + f_txt(ValueTag) +
+    "|event=" + f_s(DominantEvent) +
+    "|tt=" + str.tostring(TT) +
+    "|cp_tag=" + f_txt(CPTag) +
+    "|tis=" + f_i(TiS) +
+
+    // L2 CORE (context tags)
+    "|rrc=" + f_px(RRc) +
+    "|vrc=" + f_num(VRc) +
+    "|tr=" + f_txt(TrendTag) +
+    "|ss=" + f_txt(SS) +
+    "|sp=" + f_txt(SpaceTag) +
+    "|htf_stack=" + f_s(HTFStack) +
+    "|with_htf=" + f_txt(WithHTF) +
+
+    // RD + BlockStack (regime)
+    "|rd_state=" + f_txt(RD_State) +
+    "|regime_tag=" + f_txt(RegimeTag) +
+    "|trans_risk=" + f_txt(TransitionRisk) +
+
+    // L3 DECISION (what you actually trade)
+    "|bias_mode=" + f_txt(BiasMode) +
+    "|bias_dir=" + f_txt(BiasDir) +
+    "|perm_state=" + f_txt(PermissionState) +
+    "|rail_loc=" + f_txt(RailLoc) +
+    "|tradeable=" + f_txt(TradeableNow) +
+    "|conf_l3=" + f_txt(Conf_L3) +
+    "|play=" + f_txt(Play) +
+    "|pred_dir=" + f_txt(PredDir) +
+    "|pred_target=" + f_s(PredTarget) +
+    "|timebox=" + f_txt(Timebox) +
+    "|invalidation=" + f_s(Invalidation) +
+
+    // META FOOTER
+    "|source=" + f_txt(exp_source) +
+    "|build_id=" + f_txt(exp_buildId) +
+    "|note=" + f_s(exp_note) +
+    "|ready=" + str.tostring(exp_ready)
+)
+
+// --- FULL (COPY/DEBUG): “every computed piece” grouped by module
+// Warning: this can get VERY long.
+string exp_bid4h = exp_ymd + "-" + exp_4h + "-" + exp_sym
+f_b(bool x) => x ? "1" : "0"
+
+exportFull = (
+    // META
+    "ver=" + f_txt(exp_schema) +
+    "|profile=FULL" +
+    "|schema_full=OVC_FULL_V0_1" +
+    "|g0=META" +   
+    "|sym=" + f_txt(exp_sym) +
+    "|tz=" + f_txt(EXP_TZ) +
+    "|date_ny=" + f_txt(exp_date) +
+    "|bar_close_ms=" + str.tostring(t2) +
+    "|block2h_id=" + f_txt(block_2h_id) +
+    "|block4h_id=" + f_txt(block_4h_id) +
+    "|bid=" + f_txt(exp_bid) +
+    "|bid4h=" + f_txt(exp_bid4h) +
+    "|ymd=" + f_txt(exp_ymd) +
+    "|seg=" + f_txt(exp_seg) +
+    "|news_flag=" + str.tostring(exp_news) +
+    
+
+    // BAR
+    "|g1=BAR" +
+    "|o=" + f_px(open) +
+    "|h=" + f_px(high) +
+    "|l=" + f_px(low) +
+    "|c=" + f_px(close) +
+    "|rng=" + f_px(high - low) +
+    "|body=" + f_px(math.abs(close - open)) +
+    "|dir=" + (close > open ? "UP" : close < open ? "DN" : "0") +
+
+    // L1 MAIN
+    "|g2=L1_MAIN" +
+    "|state_tag=" + f_txt(StateTag) +
+    "|value_tag=" + f_txt(ValueTag) +
+    "|event=" + f_s(DominantEvent) +
+    "|vr=" + f_num(VR) +
+    "|ts=" + f_num(TS) +
+    "|cp=" + f_num(CP) +
+    "|cp_tag=" + f_txt(CPTag) +
+    "|tt=" + str.tostring(TT) +
+    "|tis=" + (na(TiS) ? "" : str.tostring(TiS)) +
+
+    // L1 REF
+    "|g3=L1_REF" +
+    "|rr=" + f_px(rr) +
+    "|rm=" + f_px(rm) +
+    "|q1=" + f_px(q1) +
+    "|q3=" + f_px(q3) +
+    "|band=" + (na(closeBand) ? "" : str.tostring(closeBand)) +
+
+    // L1 STATE
+    "|g4=L1_STATE" +
+    "|rer=" + f_num(RER) +
+    "|or=" + f_num(OR) +
+    "|clv=" + f_num(CLV_signed) +
+    "|brb=" + f_num(BRB) +
+    "|bodyrr=" + f_num(BodyRR) +
+
+    // L1 VALUE
+    "|g5=L1_VALUE" +
+    "|sd=" + f_num(SD) +
+    "|out=" + f_txt(OutsideTag) +
+    "|oa=" + f_num(OA) +
+    "|mc=" + str.tostring(MC) +
+    "|mc3=" + str.tostring(MC3) +
+    "|vflip=" + str.tostring(VFlip) +
+    "|vf3=" + str.tostring(VF3) +
+
+    // L1 LIQ
+    "|g6=L1_LIQ" +
+    "|swhi=" + f_num(SweepHigh) +
+    "|swlo=" + f_num(SweepLow) +
+    "|took_hi=" + str.tostring(TookHigh) +
+    "|took_lo=" + str.tostring(TookLow) +
+    "|hi_ran=" + str.tostring(HighRan) +
+    "|hi_rev=" + str.tostring(HighRev) +
+    "|lo_ran=" + str.tostring(LowRan) +
+    "|lo_rev=" + str.tostring(LowRev) +
+
+    // L1 D2K
+    "|g7=L1_D2K" +
+    "|d2rm=" + f_num(D2RM) +
+    "|d2q1=" + f_num(D2Q1) +
+    "|d2q3=" + f_num(D2Q3) +
+    "|d2rrh=" + f_num(D2RRH) +
+    "|d2rrl=" + f_num(D2RRL) +
+
+    // L1 OUT (X-1)
+    "|g8=L1_OUT" +
+    "|out_ready=" + f_b(canOutcome) +
+    "|rtrm=" + (canOutcome ? str.tostring(RtRM) : "") +
+    "|nxtext=" + (canOutcome ? f_num(NxtExt) : "") +
+    "|nxtsd=" + (canOutcome ? f_num(NxtSD) : "") +
+    "|hint1=" + (canOutcome ? f_txt(Hint1) : "") +
+    "|hint2=" + (canOutcome ? f_txt(Hint2) : "") +
+
+    // L1 KLS (FULL)
+    "|g9=L1_KLS" +
+    "|kls_mode_l1=" + f_txt(l1_kls_mode) +
+    "|pooln_l1=" + str.tostring(PoolN) +
+    "|near_lvl=" + f_px(NearLvl) +
+    "|near_src=" + f_txt(NearSrc) +
+    "|near_dr=" + f_num(NearDR) +
+    "|conf_l1=" + (na(Conf_L1) ? "" : str.tostring(Conf_L1)) +
+    "|age_l1=" + (na(Age_L1) ? "" : str.tostring(int(Age_L1))) +
+    "|hitsn_l1=" + (na(HitsN_L1) ? "" : str.tostring(int(HitsN_L1))) +
+    "|width_l1=" + f_num(l1_kls_confW) +
+    "|decay_l1=" + f_num(Decay_L1) +
+    "|kscore_l1=" + f_num(KScore_L1) +
+    "|ktag_l1=" + f_txt(KTag_L1) +
+
+    // L2 CONTEXT UNIT
+    "|g10=L2_CTX" +
+    "|rrc=" + f_px(RRc) +
+    "|vrc=" + f_num(VRc) +
+
+    // L2 STRUCTURE
+    "|g11=L2_STRUCT" +
+    "|lastpivot=" + f_txt(LastPivot) +
+    "|swingdir=" + f_txt(SwingDir) +
+    "|phidr=" + f_num(PHiDR) +
+    "|plodr=" + f_num(PLoDR) +
+    "|struct=" + f_txt(StructState) +
+    "|ss=" + f_txt(SS) +
+
+    // L2 TREND
+    "|g12=L2_TREND" +
+    "|rmdrift=" + f_num(RMdrift) +
+    "|dirrun=" + str.tostring(DirRun) +
+    "|tr=" + f_txt(TrendTag) +
+
+    // L2 SPACE
+    "|g13=L2_SPACE" +
+    "|sp=" + f_txt(SpaceTag) +
+    "|space_up=" + f_num(SpaceUp) +
+    "|space_dn=" + f_num(SpaceDn) +
+    "|space_min=" + f_num(SpaceMin) +
+    "|up_src=" + f_txt(UpSrc) +
+    "|dn_src=" + f_txt(DnSrc) +
+    "|up_lvl=" + f_px(UpLvl) +
+    "|dn_lvl=" + f_px(DnLvl) +
+
+    // L2 HTF
+    "|g14=L2_HTF" +
+    "|htf4=" + f_txt(HTF4) +
+    "|htfd=" + f_txt(HTFD) +
+    "|sd4=" + f_num(SD4) +
+    "|sdd=" + f_num(SDD) +
+    "|htf_stack=" + f_s(HTFStack) +
+    "|with_htf=" + f_txt(WithHTF) +
+    "|mdir=" + f_txt(mDirStr) +
+
+    // L2 KLS-LITE
+    "|g15=L2_KLS" +
+    "|kt=" + f_txt(KTag2) +
+    "|kscore2=" + f_num(KScore2) +
+    "|kup_dr=" + f_num(KUpDR) +
+    "|kdn_dr=" + f_num(KDnDR) +
+    "|conf2=" + (na(l2_Conf) ? "" : str.tostring(l2_Conf)) +
+    "|age2=" + (na(Age2) ? "" : str.tostring(int(Age2))) +
+    "|hits2=" + (na(Hits2) ? "" : str.tostring(int(Hits2))) +
+    "|decay2=" + f_num(Decay2) +
+    "|width2=" + f_num(l2_kls_confW) +
+
+    // RD
+    "|g16=RD" +
+    "|rd_state=" + f_txt(RD_State) +
+    "|rd_brkdir=" + f_txt(RD_BrkDir) +
+    "|rd_w_rrc=" + f_num(rdW_RRc) +
+    "|rd_hi=" + f_px(rdHi) +
+    "|rd_lo=" + f_px(rdLo) +
+    "|rd_mid=" + f_px(rdMid) +
+    "|rd_why=" + f_txt(RD_Why) +
+
+    // BLOCKSTACK
+    "|g17=BLOCKSTACK" +
+    "|regime_tag=" + f_txt(RegimeTag) +
+    "|regime_dir=" + f_txt(RegimeDir) +
+    "|regime_conf=" + f_txt(RegimeConf) +
+    "|trans_risk=" + f_txt(TransitionRisk) +
+    "|p_campaign=" + f_num(pCampaign) +
+    "|p_rdrange=" + f_num(pRDRange) +
+    "|p_confmove=" + f_num(pConfMove) +
+    "|p_chop=" + f_num(pChop) +
+    "|p_split=" + f_num(pSplit) +
+    "|p_contra=" + f_num(pContra) +
+    "|p_spacelow=" + f_num(pSpaceLow) +
+    "|avg_drift=" + f_num(avgDrift) +
+    "|avg_space=" + f_num(avgSpace) +
+    "|flip_rate=" + f_num(flipRate) +
+
+    // L3
+    "|g18=L3" +
+    "|tagstring=" + f_s(TagString) +
+    "|bias_mode=" + f_txt(BiasMode) +
+    "|bias_dir=" + f_txt(BiasDir) +
+    "|bias_why=" + f_s(BiasWhy) +
+    "|perm_state=" + f_txt(PermissionState) +
+    "|rail_src=" + f_txt(useRDrailsNow ? "RD" : "SESS") +
+    "|rail_loc=" + f_txt(RailLoc) +
+    "|tradeable=" + f_txt(TradeableNow) +
+    "|conf_l3=" + f_txt(Conf_L3) +
+    "|play=" + f_txt(Play) +
+    "|pred_dir=" + f_txt(PredDir) +
+    "|pred_target=" + f_s(PredTarget) +
+    "|timebox=" + f_txt(Timebox) +
+    "|invalidation=" + f_s(Invalidation) +
+    "|blocker=" + f_txt(Blocker) +
+    "|reasons=" + f_s(Reasons_L3) +
+
+    // FOOTER
+    "|g19=FOOTER" +
+    "|source=" + f_txt(exp_source) +
+    "|build_id=" + f_txt(exp_buildId) +
+    "|note=" + f_s(exp_note) +
+    "|ready=" + str.tostring(exp_ready)
+)
+
+// Choose which string is active
+string activeProfile = exp_profile  // MIN or FULL
+string rawExport = (activeProfile == "FULL") ? exportFull : exportMin
+exportStr = (exp_ready == 1) ? rawExport : ""
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ALERT EXPORT (TradingView webhook)
+// Fires only on 2H bar close, when exp_ready == 1
+if exp_on and exp_ready == 1 and barstate.isconfirmed
+    alert(exportStr, alert.freq_once_per_bar_close)
+
+
+
+
+// Separate export table
+var table tExp = table.new(position.bottom_right, 1, 2, frame_width=1)
+
+if exp_on and exp_showBox and barstate.islast
+    table.cell(tExp, 0, 0, "OVC EXPORT (copy)", text_color=hdrTxt, bgcolor=hdrBg, text_size=f_size())
+    table.cell(tExp, 0, 1, (exp_ready == 1 ? exportStr : "NOT READY (need TF=2H + 2 prior bars)"),
+         text_color=bodyTxt, bgcolor=bodyBg, text_size=size.tiny)
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER FUNCTIONS
+f_render_L1(int r0) =>
+    int r = r0
+    f_hdr("OVC L1 MAIN", r), r += 1
+
+    f_row2("StateTag", StateTag, "TiS", na(TiS) ? "na" : str.tostring(TiS), r), r += 1
+    f_row2("ValueTag", ValueTag, "Event", DominantEvent, r), r += 1
+    f_row2("VR/TS", f_fmtRatio(VR) + "/" + f_fmtRatio(TS), "TT/CP", str.tostring(TT) + " / " + f_fmtRatio(CP), r), r += 1
+    f_row2("CPTag", CPTag, "", "", r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("KLS (KeyLevelStack)", r), r += 1
+    f_row2("Mode", l1_kls_mode, "Pool", str.tostring(PoolN), r), r += 1
+    f_row2("NearLvl", f_fmtPrice(NearLvl), "NearDR", f_fmtRatio(NearDR), r), r += 1
+    f_row2("NearSrc", NearSrc, "Conf", na(Conf_L1) ? "na" : str.tostring(Conf_L1), r), r += 1
+    f_row2("Age", na(Age_L1) ? "na" : str.tostring(int(Age_L1)), "HitsN", na(HitsN_L1) ? "na" : str.tostring(int(HitsN_L1)), r), r += 1
+    f_row2("Width", f_fmtRatio(l1_kls_confW), "Decay", f_fmtRatio(Decay_L1), r), r += 1
+    f_row2("KScore", f_fmtRatio(KScore_L1), "KTag", KTag_L1, r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("REF (Micro RR2)", r), r += 1
+    f_row2("RR", f_fmtPrice(rr), "RM", f_fmtPrice(rm), r), r += 1
+    f_row2("Q1/Q3", f_fmtPrice(q1) + "/" + f_fmtPrice(q3), "Band", na(closeBand) ? "na" : str.tostring(closeBand), r), r += 1
+    f_row2("D2RM", f_fmtRatio(D2RM), "D2Q1", f_fmtRatio(D2Q1), r), r += 1
+    f_row2("D2Q3", f_fmtRatio(D2Q3), "D2RRH", f_fmtRatio(D2RRH), r), r += 1
+    f_row2("D2RRL", f_fmtRatio(D2RRL), "", "", r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("STATE", r), r += 1
+    f_row2("RER", f_fmtRatio(RER), "OR", f_fmtRatio(OR), r), r += 1
+    f_row2("CLV", f_fmtRatio(CLV_signed), "BRB", f_fmtRatio(BRB), r), r += 1
+    f_row2("BodyRR", f_fmtRatio(BodyRR), "", "", r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("VALUE", r), r += 1
+    f_row2("SD", f_fmtRatio(SD), "Out", OutsideTag, r), r += 1
+    f_row2("OA", f_fmtRatio(OA), "MC", str.tostring(MC), r), r += 1
+    f_row2("MC3", str.tostring(MC3), "VFlip", str.tostring(VFlip), r), r += 1
+    f_row2("VF3", str.tostring(VF3), "", "", r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("LIQ", r), r += 1
+    f_row2("SwHi", f_fmtRatio(SweepHigh), "SwLo", f_fmtRatio(SweepLow), r), r += 1
+    f_row2("Hi R/R", str.tostring(HighRan) + "/" + str.tostring(HighRev), "Lo R/R", str.tostring(LowRan) + "/" + str.tostring(LowRev), r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("OUT (X-1)", r), r += 1
+    if not canOutcome
+        f_row2("Status", "Not ready", "", "", r), r += 1
+    else
+        f_row2("RtRM", str.tostring(RtRM), "NxtExt", f_fmtRatio(NxtExt), r), r += 1
+        f_row2("NxtSD", f_fmtRatio(NxtSD), "Hint", Hint1, r), r += 1
+        f_row2("Hint2", Hint2, "", "", r), r += 1
+
+    r
+
+f_render_L2(int r0) =>
+    int r = r0
+    f_hdr("OVC L2 (CONTEXT)", r), r += 1
+
+    f_hdr("CONTEXT UNIT", r), r += 1
+    f_row2("RRc", f_fmtPrice(RRc), "VRc", f_fmtRatio(VRc), r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("RANGE DETECTOR", r), r += 1
+    f_row2("RD_State", RD_State, "RD_BrkDir", RD_BrkDir, r), r += 1
+    f_row2("RD_W(RRc)", f_fmtRatio(rdW_RRc), "RD_|drift|", na(RMdrift) ? "na" : f_fmtRatio(math.abs(RMdrift)), r), r += 1
+    f_row2("RD_Hi", f_fmtPrice(rdHi), "RD_Lo", f_fmtPrice(rdLo), r), r += 1
+    f_row2("RD_Mid", f_fmtPrice(rdMid), "RD_Why", RD_Why, r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("BLOCKSTACK (2H MEMORY)", r), r += 1
+    f_row2("RegimeTag", RegimeTag, "RegDir", RegimeDir, r), r += 1
+    f_row2("RegConf", RegimeConf, "TransRisk", TransitionRisk, r), r += 1
+    f_row2("pCampaign", na(pCampaign) ? "na" : f_fmtRatio(pCampaign), "pRDRange", na(pRDRange) ? "na" : f_fmtRatio(pRDRange), r), r += 1
+    f_row2("pConfMove", na(pConfMove) ? "na" : f_fmtRatio(pConfMove), "pChop", na(pChop) ? "na" : f_fmtRatio(pChop), r), r += 1
+    f_row2("pSplit", na(pSplit) ? "na" : f_fmtRatio(pSplit), "pSpaceLow", na(pSpaceLow) ? "na" : f_fmtRatio(pSpaceLow), r), r += 1
+    f_row2("avgDrift", f_fmtRatio(avgDrift), "avgSpace", f_fmtRatio(avgSpace), r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("STRUCTURE (PIVOTS)", r), r += 1
+    f_row2("LastPivot", LastPivot, "SwingDir", SwingDir, r), r += 1
+    f_row2("PLoDR", f_fmtRatio(PLoDR), "PHiDR", f_fmtRatio(PHiDR), r), r += 1
+    f_row2("StructSt", StructState, "SS", SS, r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("TREND (PERSIST/DRIFT)", r), r += 1
+    f_row2("RMdrift", f_fmtRatio(RMdrift), "DirRun", str.tostring(DirRun), r), r += 1
+    f_row2("TrendTag", TrendTag, "", "", r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("SPACE (RUNWAY)", r), r += 1
+    f_row2("SpaceUp", f_fmtRatio(SpaceUp), "SpaceDn", f_fmtRatio(SpaceDn), r), r += 1
+    f_row2("UpSrc", UpSrc, "DnSrc", DnSrc, r), r += 1
+    f_row2("UpLvl", f_fmtPrice(UpLvl), "DnLvl", f_fmtPrice(DnLvl), r), r += 1
+    f_row2("SpaceTag", SpaceTag, "", "", r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("HTF ALIGNMENT", r), r += 1
+    f_row2("HTF4", HTF4 + " " + f_fmtRatio(SD4), "HTFD", HTFD + " " + f_fmtRatio(SDD), r), r += 1
+    f_row2("HTFStack", HTFStack, "WithHTF", WithHTF, r), r += 1
+    f_row2("mDir", mDirStr, "", "", r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("CONSTRAINTS (KLS-LITE)", r), r += 1
+    f_row2("Mode", l2_kls_mode, "Pool", str.tostring(l2_PoolN), r), r += 1
+    f_row2("KTag", KTag2, "KScore", f_fmtRatio(KScore2), r), r += 1
+    f_row2("K↑DR", f_fmtRatio(KUpDR), "K↓DR", f_fmtRatio(KDnDR), r), r += 1
+    f_row2("Conf", na(l2_Conf) ? "na" : str.tostring(l2_Conf), "Age", na(Age2) ? "na" : str.tostring(int(Age2)), r), r += 1
+    f_row2("HitsN", na(Hits2) ? "na" : str.tostring(int(Hits2)), "Decay", f_fmtRatio(Decay2), r), r += 1
+    f_row2("Width", f_fmtRatio(l2_kls_confW), "", "", r), r += 1
+
+    r
+
+f_render_L3(int r0) =>
+    int r = r0
+    f_hdr("OVC L3 (DECISION OBJECT v0.1)", r), r += 1
+
+    f_hdr("STATE INDEX", r), r += 1
+    f_row2("TagString", TagString, "", "", r), r += 1
+    f_row2("BiasMode", BiasMode, "BiasDir", BiasDir, r), r += 1
+    f_row2("BiasWhy", BiasWhy, "PermState", PermissionState, r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("RAILS (L3)", r), r += 1
+    f_row2("RailSrc", useRDrailsNow ? "RD" : "SESSION", "RD_State", RD_State, r), r += 1
+    f_row2("RangeHi", f_fmtPrice(RangeHi), "RangeLo", f_fmtPrice(RangeLo), r), r += 1
+    f_row2("RailLoc", RailLoc, "CONF", "MOVE=" + (CONF_MOVE ? "1" : "0") + " RANGE=" + (CONF_RANGE ? "1" : "0"), r), r += 1
+
+    f_div(r), r += (showSeps and not compact) ? 1 : 0
+
+    f_hdr("DECISION", r), r += 1
+    f_row2("Tradeable", TradeableNow, "Conf", Conf_L3, r), r += 1
+    f_row2("Play", Play, "PredDir", PredDir, r), r += 1
+    f_row2("PredTarget", PredTarget, "Timebox", Timebox, r), r += 1
+    f_row2("Invalidation", Invalidation, "Blocker", Blocker, r), r += 1
+    f_row2("Reasons", Reasons_L3, "", "", r), r += 1
+
+    r
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN RENDER
+if showPanel and barstate.islast
+    table.clear(t, 0, 0, COLS - 1, ROWS - 1)
+    int r = 0
+
+    string head = "OVC PANEL"
+    head := head + (showL1Panel ? " — L1" : "")
+    head := head + (showL2Panel ? (showL1Panel ? "+L2" : " — L2") : "")
+    head := head + (showL3Panel ? ((showL1Panel or showL2Panel) ? "+L3" : " — L3") : "")
+    f_hdr(head, r), r += 1
+
+    if not is2H
+        f_row2("TF", "NOT 2H", "", "", r), r += 1
+    else if not hasHist
+        f_row2("Status", "Need 2 prior bars", "", "", r), r += 1
+    else
+        if showL1Panel
+            r := f_render_L1(r)
+            f_div(r), r += (showSeps and not compact) ? 1 : 0
+        if showL2Panel
+            r := f_render_L2(r)
+            f_div(r), r += (showSeps and not compact) ? 1 : 0
+        if showL3Panel
+            r := f_render_L3(r)
