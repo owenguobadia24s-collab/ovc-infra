@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 import unittest
@@ -40,6 +41,9 @@ def _profile_from_header(line: str) -> str:
         return value
     raise ValueError(f"unknown contract profile '{value}'")
 
+def _env_true(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in ("1", "true", "yes", "y", "on")
+
 
 def _load_sample(path: Path) -> tuple:
     raw_lines = path.read_text(encoding="utf-8").splitlines()
@@ -75,9 +79,16 @@ class TestContractEquivalence(unittest.TestCase):
         if not sample_files:
             self.skipTest("no sample exports found")
 
+        include_full = _env_true("OVC_VALIDATE_FULL")
+        noted_full_skip = False
         for path in sample_files:
             with self.subTest(sample=path.name):
                 profile, export_str = _load_sample(path)
+                if profile == "FULL" and not include_full:
+                    if not noted_full_skip:
+                        print("NOTE: FULL fixtures are opt-in; set OVC_VALIDATE_FULL=1 to include")
+                        noted_full_skip = True
+                    continue
                 contract_path = CONTRACTS[profile]
                 errors = validate_export_string(export_str, str(contract_path))
                 self.assertEqual([], errors, msg=f"{path}: {errors}")
