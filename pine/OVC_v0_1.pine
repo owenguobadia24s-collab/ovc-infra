@@ -52,7 +52,7 @@ exportMin = (
     // META / VIEW
     "ver=" + f_txt(exp_schema) +
     "|profile=MIN" +
-    "|schema_min=OVC_MIN_V0_1" +
+    "|scheme_min=export_contract_v0.1_min_r1" +
     "|sym=" + f_txt(exp_sym) +
     "|tz=" + f_txt(EXP_TZ) +
     "|date_ny=" + f_txt(exp_date) +
