@@ -91,25 +91,39 @@ mkdir -p "$reports_dir"
 started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 if [[ "$spotchecks_only" != "true" ]]; then
+  if ! psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+    -v run_id="$run_id" \
+    -c "select :'run_id' as _run_id_check;"; then
+    echo "psql variable substitution failed - aborting Option C run" >&2
+    exit 2
+  fi
   echo "Applying Option C SQL..."
-  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/option_c_v0_1.sql
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+    -v run_id="$run_id" \
+    -v eval_version="$eval_version" \
+    -v formula_hash="$formula_hash" \
+    -v horizon_spec="$horizon_spec" \
+    -f sql/option_c_v0_1.sql
 fi
 
 echo "Registering eval run..."
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-  -v run_id="$run_id" \
-  -v eval_version="$eval_version" \
-  -v formula_hash="$formula_hash" \
-  -v horizon_spec="$horizon_spec" \
-  -v notes="$notes" \
-  -c "insert into derived.eval_runs (run_id, eval_version, formula_hash, horizon_spec, computed_at, notes)
+psql -d "$DATABASE_URL" \
+  --set=ON_ERROR_STOP=1 \
+  --set=run_id="$run_id" \
+  --set=eval_version="$eval_version" \
+  --set=formula_hash="$formula_hash" \
+  --set=horizon_spec="$horizon_spec" \
+  --set=notes="$notes" \
+  -f - <<'SQL'
+insert into derived.eval_runs (run_id, eval_version, formula_hash, horizon_spec, computed_at, notes)
 values (:'run_id', :'eval_version', :'formula_hash', :'horizon_spec', now(), :'notes')
 on conflict (run_id) do update
 set eval_version = excluded.eval_version,
     formula_hash = excluded.formula_hash,
     horizon_spec = excluded.horizon_spec,
     computed_at = excluded.computed_at,
-    notes = excluded.notes;"
+    notes = excluded.notes;
+SQL
 
 echo "Running Option C spotchecks..."
 spotchecks_file="$reports_dir/spotchecks_${run_id}.txt"

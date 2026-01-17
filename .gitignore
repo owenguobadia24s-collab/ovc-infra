@@ -223,3 +223,6 @@ __marimo__/
 **/.dev.vars
 .env
 .env.*
+
+# Option D run artifacts
+reports/

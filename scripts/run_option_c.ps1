@@ -42,8 +42,23 @@ try {
   $startedAt = (Get-Date -AsUTC).ToString("yyyy-MM-ddTHH:mm:ssZ")
 
   if (-not $SpotchecksOnly) {
+    $checkSql = "select :'run_id' as _run_id_check;"
+    $checkSql | & $psql.Path -d $env:DATABASE_URL `
+      --set=ON_ERROR_STOP=1 `
+      --set=run_id=$RunId `
+      -f -
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "psql variable substitution failed - aborting Option C run"
+      exit 2
+    }
     Write-Host "Applying Option C SQL..."
-    & $psql.Path $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/option_c_v0_1.sql
+    & $psql.Path -d $env:DATABASE_URL `
+      --set=ON_ERROR_STOP=1 `
+      --set=run_id=$RunId `
+      --set=eval_version=$EvalVersion `
+      --set=formula_hash=$FormulaHash `
+      --set=horizon_spec=$HorizonSpec `
+      -f sql/option_c_v0_1.sql
     if ($LASTEXITCODE -ne 0) {
       exit 2
     }
@@ -60,20 +75,21 @@ set eval_version = excluded.eval_version,
     computed_at = excluded.computed_at,
     notes = excluded.notes;
 "@
-  & $psql.Path $env:DATABASE_URL -v ON_ERROR_STOP=1 `
-    -v run_id=$RunId `
-    -v eval_version=$evalVersion `
-    -v formula_hash=$formulaHash `
-    -v horizon_spec=$horizonSpec `
-    -v notes=$notes `
-    -c $registerSql
+  $registerSql | & $psql.Path -d $env:DATABASE_URL `
+    --set=ON_ERROR_STOP=1 `
+    --set=run_id="$RunId" `
+    --set=eval_version="$evalVersion" `
+    --set=formula_hash="$formulaHash" `
+    --set=horizon_spec="$horizonSpec" `
+    --set=notes="$notes" `
+    -f -
   if ($LASTEXITCODE -ne 0) {
     exit 2
   }
 
   Write-Host "Running Option C spotchecks..."
   $spotcheckFile = Join-Path $reportsDir ("spotchecks_{0}.txt" -f $RunId)
-  & $psql.Path $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/option_c_spotchecks.sql | Tee-Object -FilePath $spotcheckFile
+  & $psql.Path -d $env:DATABASE_URL --set=ON_ERROR_STOP=1 -f sql/option_c_spotchecks.sql | Tee-Object -FilePath $spotcheckFile
   if ($LASTEXITCODE -ne 0) {
     exit 2
   }
@@ -92,13 +108,13 @@ set eval_version = excluded.eval_version,
 
   Write-Host "Generating run report..."
   $reportJson = Join-Path $reportsDir ("run_report_{0}.json" -f $RunId)
-  $reportContent = & $psql.Path $env:DATABASE_URL -v ON_ERROR_STOP=1 `
-    -v run_id=$RunId `
-    -v started_at=$startedAt `
-    -v finished_at=$finishedAt `
-    -v spotcheck_status=$spotcheckStatus `
-    -v spotcheck_reason=$spotcheckReason `
-    -v strict=$strictValue `
+  $reportContent = & $psql.Path -d $env:DATABASE_URL --set=ON_ERROR_STOP=1 `
+    --set=run_id="$RunId" `
+    --set=started_at="$startedAt" `
+    --set=finished_at="$finishedAt" `
+    --set=spotcheck_status="$spotcheckStatus" `
+    --set=spotcheck_reason="$spotcheckReason" `
+    --set=strict="$strictValue" `
     -t -A -f sql/option_c_run_report.sql
   if ($LASTEXITCODE -ne 0) {
     exit 2
