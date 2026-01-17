@@ -1,34 +1,55 @@
 import argparse
 import os
 import uuid
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import date, datetime
+from pathlib import Path
 
 import psycopg2
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
-def load_env(path=".env"):
-    if not os.path.exists(path):
-        return
-    with open(path, "r", encoding="utf-8") as handle:
+
+def _load_env_fallback(path: Path) -> None:
+    with path.open("r", encoding="utf-8") as handle:
         for line in handle:
             line = line.strip()
             if not line or line.startswith("#") or "=" not in line:
                 continue
             key, value = line.split("=", 1)
-            os.environ.setdefault(key.strip(), value.strip())
+            value = value.strip().strip('"').strip("'")
+            os.environ.setdefault(key.strip(), value)
+
+
+def load_env(path=None) -> bool:
+    env_path = Path(path) if path else REPO_ROOT / ".env"
+    if not env_path.exists():
+        return False
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        _load_env_fallback(env_path)
+    else:
+        load_dotenv(env_path, override=False)
+    return True
 
 
 def parse_date(value: str):
-    return datetime.strptime(value, "%Y-%m-%d").date()
+    if value == "YYYY-MM-DD":
+        raise SystemExit("You must pass a real date like 2026-01-16")
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError as exc:
+        raise SystemExit("Invalid date format. Use YYYY-MM-DD, e.g. 2026-01-16.") from exc
 
 
 def resolve_contract_version() -> str:
     default_version = "v0.1"
-    path = "VERSION_OPTION_C"
-    if not os.path.exists(path):
+    path = REPO_ROOT / "VERSION_OPTION_C"
+    if not path.exists():
         return default_version
     try:
-        with open(path, "r", encoding="utf-8") as handle:
+        with path.open("r", encoding="utf-8") as handle:
             raw = handle.read().strip()
         return raw or default_version
     except OSError:
@@ -119,6 +140,98 @@ where sym = %s and date_ny = %s;
 """
 
 
+def resolve_dsn():
+    neon_dsn = os.environ.get("NEON_DSN")
+    if neon_dsn:
+        return neon_dsn, "NEON_DSN"
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        return database_url, "DATABASE_URL"
+    raise SystemExit(
+        "Missing NEON_DSN or DATABASE_URL. Add one to .env, for example:\n"
+        "NEON_DSN=postgres://user:pass@host/db\n"
+        "DATABASE_URL=postgres://user:pass@host/db"
+    )
+
+
+@dataclass(frozen=True)
+class BackfillResult:
+    run_id: str
+    symbol: str
+    date_ny: date
+    min_count: int
+    derived_count: int
+    outcome_count: int
+
+
+def seed_expected_blocks(cur, run_id: str, symbol: str, date_ny) -> None:
+    cur.execute(DELETE_EXPECTED_SQL, (run_id,))
+    cur.execute(INSERT_EXPECTED_SQL, (run_id, symbol, date_ny))
+
+
+def fetch_counts(cur, symbol: str, date_ny):
+    cur.execute(COUNT_MIN_SQL, (symbol, date_ny))
+    (min_count,) = cur.fetchone()
+
+    cur.execute(COUNT_DERIVED_SQL, (symbol, date_ny))
+    (derived_count,) = cur.fetchone()
+
+    cur.execute(COUNT_OUTCOMES_SQL, (symbol, date_ny))
+    (outcome_count,) = cur.fetchone()
+
+    return int(min_count), int(derived_count), int(outcome_count)
+
+
+def run_backfill(
+    *,
+    symbol: str,
+    date_ny,
+    run_id: str = None,
+    contract_version: str = None,
+    status: str = "pending",
+    notes: str = None,
+    strict: bool = False,
+    dsn: str = None,
+) -> BackfillResult:
+    if dsn is None:
+        dsn, _ = resolve_dsn()
+    run_id = run_id or str(uuid.uuid4())
+    contract_version = contract_version or resolve_contract_version()
+
+    with psycopg2.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                VALIDATION_RUN_SQL,
+                (run_id, symbol, date_ny, contract_version, status, notes),
+            )
+            seed_expected_blocks(cur, run_id, symbol, date_ny)
+            min_count, derived_count, outcome_count = fetch_counts(cur, symbol, date_ny)
+
+    result = BackfillResult(
+        run_id=run_id,
+        symbol=symbol,
+        date_ny=date_ny,
+        min_count=min_count,
+        derived_count=derived_count,
+        outcome_count=outcome_count,
+    )
+
+    if strict and result.min_count != 12:
+        raise SystemExit("Block count is not 12; run in non-strict mode to continue.")
+
+    return result
+
+
+def print_backfill_summary(result: BackfillResult) -> None:
+    print(f"run_id: {result.run_id}")
+    print(f"symbol: {result.symbol}")
+    print(f"date_ny: {result.date_ny}")
+    print("expected_blocks: 12")
+    print(f"ovc_blocks: {result.min_count}")
+    print(f"derived_blocks: {result.derived_count}")
+    print(f"outcome_blocks: {result.outcome_count}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="OVC single-day QA backfill (expected blocks + checks).")
     parser.add_argument("--symbol", default="GBPUSD")
@@ -131,42 +244,20 @@ def main() -> int:
     args = parser.parse_args()
 
     load_env()
-    neon_dsn = os.environ.get("NEON_DSN")
-    if not neon_dsn:
-        raise SystemExit("Missing NEON_DSN in .env")
-
-    run_id = args.run_id or str(uuid.uuid4())
-    contract_version = args.contract_version or resolve_contract_version()
+    dsn, _ = resolve_dsn()
     date_ny = parse_date(args.date_ny)
 
-    with psycopg2.connect(neon_dsn) as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                VALIDATION_RUN_SQL,
-                (run_id, args.symbol, date_ny, contract_version, args.status, args.notes),
-            )
-            cur.execute(DELETE_EXPECTED_SQL, (run_id,))
-            cur.execute(INSERT_EXPECTED_SQL, (run_id, args.symbol, date_ny))
-
-            cur.execute(COUNT_MIN_SQL, (args.symbol, date_ny))
-            (min_count,) = cur.fetchone()
-
-            cur.execute(COUNT_DERIVED_SQL, (args.symbol, date_ny))
-            (derived_count,) = cur.fetchone()
-
-            cur.execute(COUNT_OUTCOMES_SQL, (args.symbol, date_ny))
-            (outcome_count,) = cur.fetchone()
-
-    print(f"run_id: {run_id}")
-    print(f"symbol: {args.symbol}")
-    print(f"date_ny: {date_ny}")
-    print(f"expected_blocks: 12")
-    print(f"ovc_blocks: {min_count}")
-    print(f"derived_blocks: {derived_count}")
-    print(f"outcome_blocks: {outcome_count}")
-
-    if args.strict and int(min_count) != 12:
-        raise SystemExit("Block count is not 12; run in non-strict mode to continue.")
+    result = run_backfill(
+        symbol=args.symbol,
+        date_ny=date_ny,
+        run_id=args.run_id,
+        contract_version=args.contract_version,
+        status=args.status,
+        notes=args.notes,
+        strict=args.strict,
+        dsn=dsn,
+    )
+    print_backfill_summary(result)
 
     return 0
 
