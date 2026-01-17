@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS ovc_blocks_v01 (
   symbol         TEXT        NOT NULL,        -- e.g. 'GBPUSD'
   block_type     TEXT        NOT NULL,        -- '2H' (Step 1 scope)
   block_start    TIMESTAMPTZ NOT NULL,        -- start of the 2H bar (UTC)
+  bid            TEXT,                        -- TradingView block id (if present)
+  export_min     TEXT,                        -- raw MIN export string
+  payload_min    JSONB,                       -- parsed MIN payload
 
   open           NUMERIC(18,8) NOT NULL,
   high           NUMERIC(18,8) NOT NULL,

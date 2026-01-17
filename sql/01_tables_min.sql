@@ -68,6 +68,8 @@ create table if not exists ovc.ovc_blocks_v01_1_min (
 
   -- derived + ingest
   state_key       text not null,
+  export_str      text not null,
+  payload         jsonb not null,
   ingest_ts       timestamptz not null default now()
 );
 
