@@ -4,8 +4,8 @@ import sys
 import time
 from datetime import datetime, timezone
 
-import psycopg
-from psycopg.rows import dict_row
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import requests
 
 
@@ -46,6 +46,8 @@ def notion_request(method, url, token, payload=None, max_retries=5):
         return {}
     raise RuntimeError("Notion API rate limit exceeded after retries")
 
+token = os.environ.get("NOTIOM_TOKEN")
+print("Notion token present:", bool(token), "length:", len(token) if token else 0)
 
 def notion_find_page(db_id, token, title_property, title_value):
     url = f"{NOTION_BASE_URL}/databases/{db_id}/query"
@@ -113,9 +115,9 @@ def checkbox_prop(name, value):
     return {name: {"checkbox": bool(value)}}
 
 
-def ensure_sync_state(conn):
-    conn.execute("create schema if not exists ops;")
-    conn.execute(
+def ensure_sync_state(cursor):
+    cursor.execute("create schema if not exists ops;")
+    cursor.execute(
         """
         create table if not exists ops.notion_sync_state (
           name text primary key,
@@ -124,7 +126,7 @@ def ensure_sync_state(conn):
         );
         """
     )
-    conn.execute(
+    cursor.execute(
         """
         insert into ops.notion_sync_state (name, last_ts, updated_at)
         values
@@ -136,27 +138,28 @@ def ensure_sync_state(conn):
     )
 
 
-def get_watermark(conn, name):
-    row = conn.execute(
+def get_watermark(cursor, name):
+    cursor.execute(
         "select last_ts from ops.notion_sync_state where name = %s",
         (name,),
-    ).fetchone()
+    )
+    row = cursor.fetchone()
     if row:
         return row["last_ts"]
     return None
 
 
-def update_watermark(conn, name, last_ts):
-    conn.execute(
+def update_watermark(cursor, name, last_ts):
+    cursor.execute(
         "update ops.notion_sync_state set last_ts = %s, updated_at = now() where name = %s",
         (last_ts, name),
     )
 
 
-def sync_blocks(conn, token, db_id):
-    last_ts = get_watermark(conn, "blocks_min")
+def sync_blocks(cursor, token, db_id):
+    last_ts = get_watermark(cursor, "blocks_min")
     base_ts = last_ts or datetime(1970, 1, 1, tzinfo=timezone.utc)
-    rows = conn.execute(
+    cursor.execute(
         """
         select
           block_id,
@@ -170,7 +173,8 @@ def sync_blocks(conn, token, db_id):
         order by ingest_ts asc;
         """,
         (base_ts,),
-    ).fetchall()
+    )
+    rows = cursor.fetchall()
 
     synced = 0
     watermark = last_ts
@@ -188,16 +192,16 @@ def sync_blocks(conn, token, db_id):
         )
         synced += 1
         watermark = row["ingest_ts"]
-        update_watermark(conn, "blocks_min", watermark)
+        update_watermark(cursor, "blocks_min", watermark)
 
     final_ts = watermark or last_ts
     print(f"blocks_min synced {synced} rows, watermark -> {final_ts}")
 
 
-def sync_outcomes(conn, token, db_id):
-    last_ts = get_watermark(conn, "outcomes")
+def sync_outcomes(cursor, token, db_id):
+    last_ts = get_watermark(cursor, "outcomes")
     base_ts = last_ts or datetime(1970, 1, 1, tzinfo=timezone.utc)
-    rows = conn.execute(
+    cursor.execute(
         """
         select
           o.block_id,
@@ -220,7 +224,8 @@ def sync_outcomes(conn, token, db_id):
         order by r.computed_at asc, o.block_id asc;
         """,
         (base_ts,),
-    ).fetchall()
+    )
+    rows = cursor.fetchall()
 
     synced = 0
     watermark = last_ts
@@ -246,16 +251,16 @@ def sync_outcomes(conn, token, db_id):
         synced += 1
         watermark = row["computed_at"]
         if watermark is not None:
-            update_watermark(conn, "outcomes", watermark)
+            update_watermark(cursor, "outcomes", watermark)
 
     final_ts = watermark or last_ts
     print(f"outcomes synced {synced} rows, watermark -> {final_ts}")
 
 
-def sync_eval_runs(conn, token, db_id):
-    last_ts = get_watermark(conn, "eval_runs")
+def sync_eval_runs(cursor, token, db_id):
+    last_ts = get_watermark(cursor, "eval_runs")
     base_ts = last_ts or datetime(1970, 1, 1, tzinfo=timezone.utc)
-    rows = conn.execute(
+    cursor.execute(
         """
         select run_id, eval_version, formula_hash, computed_at
         from derived.eval_runs
@@ -263,7 +268,8 @@ def sync_eval_runs(conn, token, db_id):
         order by computed_at asc;
         """,
         (base_ts,),
-    ).fetchall()
+    )
+    rows = cursor.fetchall()
 
     synced = 0
     watermark = last_ts
@@ -279,7 +285,7 @@ def sync_eval_runs(conn, token, db_id):
         )
         synced += 1
         watermark = row["computed_at"]
-        update_watermark(conn, "eval_runs", watermark)
+        update_watermark(cursor, "eval_runs", watermark)
 
     final_ts = watermark or last_ts
     print(f"eval_runs synced {synced} rows, watermark -> {final_ts}")
@@ -287,19 +293,20 @@ def sync_eval_runs(conn, token, db_id):
 
 def main():
     database_url = require_env("DATABASE_URL")
-    notion_token = require_env("NOTION_TOKEN")
+    notion_token = require_env("NOTIOM_TOKEN")
     blocks_db_id = require_env("NOTION_BLOCKS_DB_ID")
     outcomes_db_id = require_env("NOTION_OUTCOMES_DB_ID")
     runs_db_id = os.getenv("NOTION_RUNS_DB_ID")
 
-    with psycopg.connect(database_url, row_factory=dict_row) as conn:
-        ensure_sync_state(conn)
-        sync_blocks(conn, notion_token, blocks_db_id)
-        sync_outcomes(conn, notion_token, outcomes_db_id)
-        if runs_db_id:
-            sync_eval_runs(conn, notion_token, runs_db_id)
-        else:
-            print("eval_runs skipped (NOTION_RUNS_DB_ID not set)")
+    with psycopg2.connect(database_url) as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            ensure_sync_state(cursor)
+            sync_blocks(cursor, notion_token, blocks_db_id)
+            sync_outcomes(cursor, notion_token, outcomes_db_id)
+            if runs_db_id:
+                sync_eval_runs(cursor, notion_token, runs_db_id)
+            else:
+                print("eval_runs skipped (NOTION_RUNS_DB_ID not set)")
 
 
 if __name__ == "__main__":
