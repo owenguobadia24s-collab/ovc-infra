@@ -1,5 +1,10 @@
 {
   "schema": "export_contract_v0.1_min_r1",
+  "meta": {
+    "status": "IMMUTABLE",
+    "superseded_by": "v0.1.2+",
+    "notes": "Do not edit in place. Create new version file."
+  },
   "profile": "MIN",
   "delimiter": "|",
   "kv_separator": "=",

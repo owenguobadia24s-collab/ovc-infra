@@ -15,9 +15,11 @@ def load_env(path=".env"):
 
 load_env()
 
-DSN = os.environ.get("NEON_DSN")
-if not DSN:
-    raise SystemExit("Missing NEON_DSN in .env")
+DSN = os.environ.get("NEON_DSN") or os.environ.get("DATABASE_URL")
+if not DSN and __name__ != "__main__":
+    import pytest
+
+    pytest.skip("NEON_DSN not set; skipping DB insert tests", allow_module_level=True)
 
 row = {
     "schema_ver": "v0.1-min",
@@ -60,5 +62,7 @@ def run_once(label: str):
     print(f"{label}: inserted={inserted}, row_exists={got is not None}")
 
 if __name__ == "__main__":
+    if not DSN:
+        raise SystemExit("Missing NEON_DSN or DATABASE_URL in environment")
     run_once("FIRST RUN")
     run_once("SECOND RUN (should be 0)")
