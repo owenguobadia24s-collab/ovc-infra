@@ -1,0 +1,7 @@
+{
+  "min_body_bp": 5,
+  "max_wick_ratio_bp": 250,
+  "lookback": 20,
+  "min_range_bp": 10,
+  "volatility_threshold_bp": 50
+}
