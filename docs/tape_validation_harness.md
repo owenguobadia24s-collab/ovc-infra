@@ -82,6 +82,25 @@ Block letter mapping (NY 17:00 -> 17:00):
 | K | 13:00-15:00 |
 | L | 15:00-17:00 |
 
+## Oanda-backed green run (no TradingView export)
+Use the existing GitHub Actions workflow to fetch Oanda H1 data, export 12x 2H bars,
+and run validation for a single NY day.
+
+Workflow: `OVC FULL Ingest (manual)`
+Inputs:
+- symbol: GBPUSD
+- start_date: YYYY-MM-DD
+- end_date: YYYY-MM-DD
+- run_full_ingest: false
+- run_validation: true
+- validate_date_ny: YYYY-MM-DD (optional; defaults to start_date)
+
+Local equivalent:
+```
+python .\scripts\oanda_export_2h_day.py --symbol GBPUSD --date-ny 2026-01-16
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --csv-search "*GBPUSD*dateNY_2026-01-16*2h*oanda*.csv" --auto-pick
+```
+
 Optional convenience wrapper:
 ```
 .\scripts\validate_day.ps1 -DateNy 2026-01-16 -Symbol GBPUSD

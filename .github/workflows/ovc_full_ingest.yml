@@ -7,12 +7,23 @@ on:
         description: "Symbol to ingest (DB symbol, e.g. GBPUSD)"
         required: true
         default: "GBPUSD"
+      run_full_ingest:
+        type: boolean
+        description: "Run FULL ingest stub"
+        default: false
+      run_validation:
+        type: boolean
+        description: "Run OANDA CSV export + validate_day after ingest"
+        default: true
       start_date:
         description: "Start date (YYYY-MM-DD)"
         required: true
       end_date:
         description: "End date (YYYY-MM-DD)"
         required: true
+      validate_date_ny:
+        description: "NY date to validate (YYYY-MM-DD); defaults to start_date"
+        required: false
 
 jobs:
   full_ingest:
@@ -21,6 +32,8 @@ jobs:
 
     env:
       NEON_DSN: ${{ secrets.NEON_DSN }}
+      OANDA_API_TOKEN: ${{ secrets.OANDA_API_TOKEN }}
+      OANDA_ENV: ${{ secrets.OANDA_ENV }}
 
     steps:
       - name: Checkout
@@ -31,12 +44,17 @@ jobs:
           python - << 'PY'
           import os, sys
           required = ["NEON_DSN"]
+          run_validation = os.environ.get("RUN_VALIDATION", "false").lower() == "true"
+          if run_validation:
+              required += ["OANDA_API_TOKEN", "OANDA_ENV"]
           missing = [k for k in required if not os.environ.get(k)]
           if missing:
               print("Missing required env vars:", missing)
               sys.exit(1)
           print("Secrets OK:", required)
           PY
+        env:
+          RUN_VALIDATION: ${{ inputs.run_validation }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,9 +66,44 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Resolve validation date
+        if: ${{ inputs.run_validation }}
+        shell: bash
+        run: |
+          if [[ -n "${{ inputs.validate_date_ny }}" ]]; then
+            echo "VALIDATE_DATE_NY=${{ inputs.validate_date_ny }}" >> "$GITHUB_ENV"
+          else
+            echo "VALIDATE_DATE_NY=${{ inputs.start_date }}" >> "$GITHUB_ENV"
+          fi
+
       - name: Run FULL ingest stub
+        if: ${{ inputs.run_full_ingest }}
         run: |
           python src/full_ingest_stub.py \
             --symbol "${{ inputs.symbol }}" \
             --start-date "${{ inputs.start_date }}" \
             --end-date "${{ inputs.end_date }}"
+
+      - name: Export OANDA 2H CSV (NY day)
+        if: ${{ inputs.run_validation }}
+        run: |
+          python scripts/oanda_export_2h_day.py \
+            --symbol "${{ inputs.symbol }}" \
+            --date-ny "${{ env.VALIDATE_DATE_NY }}"
+
+      - name: Run validation harness (OANDA CSV)
+        if: ${{ inputs.run_validation }}
+        run: |
+          python ./src/validate_day.py \
+            --symbol "${{ inputs.symbol }}" \
+            --date_ny "${{ env.VALIDATE_DATE_NY }}" \
+            --csv-search "*${{ inputs.symbol }}*dateNY_${{ env.VALIDATE_DATE_NY }}*2h*oanda*.csv" \
+            --auto-pick
+
+      - name: Upload OANDA CSV
+        if: ${{ inputs.run_validation }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: oanda-2h-csv-${{ inputs.symbol }}-${{ env.VALIDATE_DATE_NY }}
+          path: data/tv/*.csv
+          if-no-files-found: warn
