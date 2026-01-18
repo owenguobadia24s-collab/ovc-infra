@@ -30,6 +30,11 @@ psql -d $env:DATABASE_URL -f sql/option_c_v0_1.sql
 ```
 python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16
 ```
+For first-pass sanity checks, use a weekday date (e.g., 2024-01-10) since weekend sessions can yield 0 candles.
+
+Validation packs:
+- Core pack always runs (facts/tape checks).
+- Derived pack runs only if `derived.ovc_block_features_v0_1` exists; otherwise it prints a SKIPPED message.
 
 Optional TradingView CSV load (2H export):
 ```

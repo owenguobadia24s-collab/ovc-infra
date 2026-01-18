@@ -15,7 +15,8 @@ from ingest_history_day import DEFAULT_SOURCE as HISTORY_DEFAULT_SOURCE, ingest_
 from utils.csv_locator import resolve_csv_path, set_auto_pick
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SQL_PACK_PATH = REPO_ROOT / "sql" / "qa_validation_pack.sql"
+SQL_PACK_CORE_PATH = REPO_ROOT / "sql" / "qa_validation_pack_core.sql"
+SQL_PACK_DERIVED_PATH = REPO_ROOT / "sql" / "qa_validation_pack_derived.sql"
 NY_TZ = ZoneInfo("America/New_York")
 PSQL_TOLERANCE_SECONDS = 10
 
@@ -156,7 +157,15 @@ def _insert_tv_rows(dsn: str, rows) -> None:
             cur.executemany(TV_INSERT_SQL, rows)
 
 
-def _build_psql_command(run_id: str, symbol: str, date_ny, tolerance, dsn: str, dsn_name: str):
+def _build_psql_command(
+    run_id: str,
+    symbol: str,
+    date_ny,
+    tolerance,
+    dsn: str,
+    dsn_name: str,
+    pack_path: Path,
+):
     date_str = date_ny.isoformat()
     tolerance_value = str(tolerance)
     dsn_ref = f"$env:{dsn_name}"
@@ -168,7 +177,7 @@ def _build_psql_command(run_id: str, symbol: str, date_ny, tolerance, dsn: str, 
         f"-v date_ny='{date_str}' "
         f"-v tolerance_seconds={PSQL_TOLERANCE_SECONDS} "
         f"-v tolerance={tolerance_value} "
-        f"-f '{SQL_PACK_PATH}'"
+        f"-f '{pack_path}'"
     )
     args = [
         "psql",
@@ -185,9 +194,19 @@ def _build_psql_command(run_id: str, symbol: str, date_ny, tolerance, dsn: str, 
         "-v",
         f"tolerance={tolerance_value}",
         "-f",
-        str(SQL_PACK_PATH),
+        str(pack_path),
     ]
     return command, args
+
+
+def _derived_pack_exists(dsn: str) -> bool:
+    with psycopg2.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "select to_regclass('derived.ovc_block_features_v0_1') is not null;"
+            )
+            (exists,) = cur.fetchone()
+    return bool(exists)
 
 
 def main() -> int:
@@ -261,15 +280,40 @@ def main() -> int:
         tolerance,
         dsn,
         dsn_name,
+        SQL_PACK_CORE_PATH,
     )
-    print("psql_command (PowerShell):")
+    derived_pack_exists = _derived_pack_exists(dsn)
+    derived_command = None
+    derived_args = None
+    if derived_pack_exists:
+        derived_command, derived_args = _build_psql_command(
+            result.run_id,
+            result.symbol,
+            result.date_ny,
+            tolerance,
+            dsn,
+            dsn_name,
+            SQL_PACK_DERIVED_PATH,
+        )
+    else:
+        print("derived: SKIPPED (missing derived.ovc_block_features_v0_1)")
+
+    print("psql_command_core (PowerShell):")
     print(psql_command)
+    if derived_command:
+        print("psql_command_derived (PowerShell):")
+        print(derived_command)
 
     if shutil.which("psql"):
-        print("Running SQL validation pack via psql...")
+        print("Running SQL validation pack (core) via psql...")
         completed = subprocess.run(psql_args, check=False)
         if completed.returncode != 0:
             raise SystemExit(f"psql exited with code {completed.returncode}")
+        if derived_args:
+            print("Running SQL validation pack (derived) via psql...")
+            completed = subprocess.run(derived_args, check=False)
+            if completed.returncode != 0:
+                raise SystemExit(f"psql exited with code {completed.returncode}")
     else:
         print("psql not found; run the command above manually.")
 
