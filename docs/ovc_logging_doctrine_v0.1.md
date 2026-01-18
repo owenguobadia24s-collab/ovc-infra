@@ -4,6 +4,11 @@ This doctrine records the current logging and validation pipeline as implemented
 in the repo. It is descriptive (what exists), not prescriptive (what should
 change).
 
+## Option A status (Logging Foundations & Validation Normalization)
+- Status: COMPLETE and LOCKED.
+- Guarantees: canonical MIN facts land in `ovc.ovc_blocks_v01_1_min` via P1/P2; core validation always runs; derived validation is conditional and skipped when absent.
+- Not covered: derived features, new pipelines, or any Option B meaning layers; no changes to ingestion logic or Neon schemas.
+
 ## Species (data layers)
 - A) Capture Ledger (Raw Events) - R2 append-only.
 - B) Canonical Facts - Neon (`ovc` schema).
@@ -22,13 +27,14 @@ legacy/non-canonical.
 - Canonical facts table: `sql/01_tables_min.sql` (`ovc.ovc_blocks_v01_1_min`)
 - Run reports table: `sql/02_tables_run_reports.sql` (`ovc.ovc_run_reports_v01`)
 - Tests: `infra/ovc-webhook/test/index.spec.ts`
+- Status: PARTIAL (env-dependent, structurally sound).
 
 ### P2 Historical Backfill -> Facts (Oanda -> Neon MIN)
 - Backfill workflow: `.github/workflows/backfill.yml`
 - Canonical P2 backfill (Historical Backfill -> Facts): `src/backfill_oanda_2h_checkpointed.py`
 - Oanda export utility (CSV-only): `scripts/oanda_export_2h_day.py`
 - Canonical MIN target table: `ovc.ovc_blocks_v01_1_min` (PK: `block_id`)
-- Status: PASS (canonical backfill writes MIN facts with idempotent upsert)
+- Status: PASS (canonical backfill writes to `ovc.ovc_blocks_v01_1_min`)
 
 Proof / Evidence:
 - Test date: 2024-01-10 (weekday)
@@ -43,12 +49,16 @@ Proof / Evidence:
 - Outcomes/eval views: `sql/option_c_v0_1.sql`
 - Runner (applies eval views): `scripts/run_option_c.sh`
 - Scheduled runner: `.github/workflows/ovc_option_c_schedule.yml`
+- Status: OPTIONAL / PARTIAL (derived, non-blocking).
 
 ### P4 Facts + Tape -> Validation (validate_day QA)
 - Entrypoint: `src/validate_day.py`
 - QA schema: `sql/qa_schema.sql`
 - Validation pack: `sql/qa_validation_pack.sql`
 - Harness doc: `docs/tape_validation_harness.md`
+- Status: PASS (core validation always runs; derived conditional).
+- Core validation: unconditional.
+- Derived validation: conditional and skipped when absent.
 
 ## Verb dictionary (logging vocabulary)
 - `capture`: accept raw export payloads and persist to R2 (A).
@@ -68,6 +78,11 @@ Proof / Evidence:
 
 ## Notes on gaps (current reality)
 - P2 backfill now targets the canonical MIN table `ovc.ovc_blocks_v01_1_min`.
+
+## Next Phase: Option B
+- Allowed inputs: canonical facts in `ovc.ovc_blocks_v01_1_min`, raw capture ledger, and existing validation artifacts.
+- Prohibited: mutating or reclassifying canonical facts.
+- Requirement: all meaning layers must be replayable and fully derived from canonical inputs.
 
 ## Minimal test procedure (P2 backfill + validation)
 Backfill one NY date (YYYY-MM-DD):
