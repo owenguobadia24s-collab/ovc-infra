@@ -25,10 +25,9 @@ legacy/non-canonical.
 
 ### P2 Historical Backfill -> Facts (Oanda -> Neon MIN)
 - Backfill workflow: `.github/workflows/backfill.yml`
-- Backfill script: `src/backfill_oanda_2h_checkpointed.py`
+- Canonical P2 backfill (Historical Backfill -> Facts): `src/backfill_oanda_2h_checkpointed.py`
 - Oanda export utility (CSV-only): `scripts/oanda_export_2h_day.py`
-- Current target table used by backfill scripts: `ovc_blocks_v01` (no schema qualifier)
-- Canonical MIN target table (spec): `ovc.ovc_blocks_v01_1_min`
+- Canonical MIN target table: `ovc.ovc_blocks_v01_1_min` (PK: `block_id`)
 
 ### P3 Facts -> Derived (Derived/eval tables)
 - Derived feature view: `sql/derived_v0_1.sql`
@@ -59,6 +58,28 @@ legacy/non-canonical.
 - Mixing sources inside a single `run_id` invalidates the run.
 
 ## Notes on gaps (current reality)
-- P2 backfill scripts currently write to `ovc_blocks_v01`, not the canonical
-  MIN table `ovc.ovc_blocks_v01_1_min`. This is a schema alignment gap and is
-  reported as PARTIAL/FAIL by the status harness when detected.
+- P2 backfill now targets the canonical MIN table `ovc.ovc_blocks_v01_1_min`.
+
+## Minimal test procedure (P2 backfill + validation)
+Backfill one NY date (YYYY-MM-DD):
+```
+$env:BACKFILL_DATE_NY="2026-01-16"
+python .\src\backfill_oanda_2h_checkpointed.py
+```
+
+Check pipeline status (optional strict mode):
+```
+python .\scripts\pipeline_status.py --mode detect --strict
+```
+
+Validate the same date:
+```
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16
+```
+
+Rerun the same date and confirm rowcount is unchanged:
+```
+psql -d $env:NEON_DSN -c "select count(*) from ovc.ovc_blocks_v01_1_min where sym='GBPUSD' and date_ny='2026-01-16';"
+python .\src\backfill_oanda_2h_checkpointed.py
+psql -d $env:NEON_DSN -c "select count(*) from ovc.ovc_blocks_v01_1_min where sym='GBPUSD' and date_ny='2026-01-16';"
+```
