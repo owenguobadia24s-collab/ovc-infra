@@ -4,8 +4,10 @@ import uuid
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
+from typing import Optional
 
 import psycopg2
+from psycopg2 import sql
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -127,17 +129,8 @@ from ovc.ovc_blocks_v01_1_min
 where sym = %s and date_ny = %s;
 """
 
-COUNT_DERIVED_SQL = """
-select count(*)
-from derived.ovc_block_features_v0_1
-where sym = %s and date_ny = %s;
-"""
-
-COUNT_OUTCOMES_SQL = """
-select count(*)
-from derived.ovc_outcomes_v0_1
-where sym = %s and date_ny = %s;
-"""
+COUNT_DERIVED_DEFAULT = "derived.ovc_block_features_v0_1"
+COUNT_OUTCOMES_DEFAULT = "derived.ovc_outcomes_v0_1"
 
 
 def resolve_dsn():
@@ -154,14 +147,37 @@ def resolve_dsn():
     )
 
 
+def resolve_qualified_table(env_key: str, default_name: str) -> str:
+    value = os.environ.get(env_key, default_name).strip()
+    parts = value.split(".")
+    if len(parts) != 2 or not all(parts):
+        raise SystemExit(f"{env_key} must be in schema.table format (got '{value}').")
+    return value
+
+
+def table_exists(cur, qualified_name: str) -> bool:
+    cur.execute("select to_regclass(%s);", (qualified_name,))
+    (regclass_name,) = cur.fetchone()
+    return regclass_name is not None
+
+
+def build_count_sql(qualified_name: str):
+    schema, table = qualified_name.split(".", 1)
+    return sql.SQL("select count(*) from {} where sym = %s and date_ny = %s;").format(
+        sql.Identifier(schema, table)
+    )
+
+
 @dataclass(frozen=True)
 class BackfillResult:
     run_id: str
     symbol: str
     date_ny: date
     min_count: int
-    derived_count: int
-    outcome_count: int
+    derived_count: Optional[int]
+    outcome_count: Optional[int]
+    derived_table: str
+    outcomes_table: str
 
 
 def seed_expected_blocks(cur, run_id: str, symbol: str, date_ny) -> None:
@@ -169,17 +185,23 @@ def seed_expected_blocks(cur, run_id: str, symbol: str, date_ny) -> None:
     cur.execute(INSERT_EXPECTED_SQL, (run_id, symbol, date_ny))
 
 
-def fetch_counts(cur, symbol: str, date_ny):
+def fetch_counts(cur, symbol: str, date_ny, derived_table: str, outcomes_table: str):
     cur.execute(COUNT_MIN_SQL, (symbol, date_ny))
     (min_count,) = cur.fetchone()
 
-    cur.execute(COUNT_DERIVED_SQL, (symbol, date_ny))
-    (derived_count,) = cur.fetchone()
+    derived_count = None
+    if table_exists(cur, derived_table):
+        cur.execute(build_count_sql(derived_table), (symbol, date_ny))
+        (derived_count,) = cur.fetchone()
+        derived_count = int(derived_count)
 
-    cur.execute(COUNT_OUTCOMES_SQL, (symbol, date_ny))
-    (outcome_count,) = cur.fetchone()
+    outcome_count = None
+    if table_exists(cur, outcomes_table):
+        cur.execute(build_count_sql(outcomes_table), (symbol, date_ny))
+        (outcome_count,) = cur.fetchone()
+        outcome_count = int(outcome_count)
 
-    return int(min_count), int(derived_count), int(outcome_count)
+    return int(min_count), derived_count, outcome_count
 
 
 def run_backfill(
@@ -197,6 +219,8 @@ def run_backfill(
         dsn, _ = resolve_dsn()
     run_id = run_id or str(uuid.uuid4())
     contract_version = contract_version or resolve_contract_version()
+    derived_table = resolve_qualified_table("OVC_DERIVED_TABLE", COUNT_DERIVED_DEFAULT)
+    outcomes_table = resolve_qualified_table("OVC_OUTCOMES_TABLE", COUNT_OUTCOMES_DEFAULT)
 
     with psycopg2.connect(dsn) as conn:
         with conn.cursor() as cur:
@@ -205,7 +229,9 @@ def run_backfill(
                 (run_id, symbol, date_ny, contract_version, status, notes),
             )
             seed_expected_blocks(cur, run_id, symbol, date_ny)
-            min_count, derived_count, outcome_count = fetch_counts(cur, symbol, date_ny)
+            min_count, derived_count, outcome_count = fetch_counts(
+                cur, symbol, date_ny, derived_table, outcomes_table
+            )
 
     result = BackfillResult(
         run_id=run_id,
@@ -214,7 +240,14 @@ def run_backfill(
         min_count=min_count,
         derived_count=derived_count,
         outcome_count=outcome_count,
+        derived_table=derived_table,
+        outcomes_table=outcomes_table,
     )
+
+    if result.derived_count is None and strict:
+        raise SystemExit(f"Derived table missing: {result.derived_table}")
+    if result.outcome_count is None and strict:
+        raise SystemExit(f"Outcomes table missing: {result.outcomes_table}")
 
     if strict and result.min_count != 12:
         raise SystemExit("Block count is not 12; run in non-strict mode to continue.")
@@ -228,8 +261,14 @@ def print_backfill_summary(result: BackfillResult) -> None:
     print(f"date_ny: {result.date_ny}")
     print("expected_blocks: 12")
     print(f"ovc_blocks: {result.min_count}")
-    print(f"derived_blocks: {result.derived_count}")
-    print(f"outcome_blocks: {result.outcome_count}")
+    if result.derived_count is None:
+        print(f"derived_blocks: SKIPPED (missing {result.derived_table})")
+    else:
+        print(f"derived_blocks: {int(result.derived_count)}")
+    if result.outcome_count is None:
+        print(f"outcome_blocks: SKIPPED (missing {result.outcomes_table})")
+    else:
+        print(f"outcome_blocks: {int(result.outcome_count)}")
 
 
 def main() -> int:

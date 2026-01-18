@@ -43,6 +43,10 @@ Optional convenience wrapper:
 The command prints the `run_id` and a ready-to-paste psql invocation. If `psql`
 exists on PATH, it will run the validation pack automatically.
 
+Derived/outcomes counts are optional: if the tables are missing, the harness
+prints `SKIPPED` and continues. Use `--strict` to force a failure when those
+tables are absent.
+
 ## Manual psql validation (PowerShell)
 ```
 psql -d $env:DATABASE_URL `
