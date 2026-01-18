@@ -4,6 +4,8 @@ Scope: validate OVC outputs vs TradingView 2H candles for a single NY trading da
 (17:00 to 17:00 America/New_York). This harness writes validation artifacts to
 `ovc_qa` only.
 
+See `docs/ovc_logging_doctrine_v0.1.md` for the pipeline map and canonical paths.
+
 ## Env vars (set once)
 Set one of these in `.env` at repo root. `validate_day.py` prefers `NEON_DSN` and
 falls back to `DATABASE_URL`:
@@ -35,7 +37,9 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --tv-csv C:\pa
 ```
 Expected headers include `time`, `open`, `high`, `low`, `close` (2H timeframe).
 
-## HISTORICAL INGESTION (CSV)
+## HISTORICAL INGESTION (CSV) (EXPERIMENTAL - NON-CANONICAL)
+Status: EXPERIMENTAL. This CSV path is not the canonical P2 workflow; P2 is still
+unselected.
 Use this to backfill one NY trading day into `ovc.ovc_blocks_v01_1_min` before validation.
 
 Steps:
@@ -60,7 +64,7 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --csv-search "
 CSV timezone assumptions:
 - CSV timestamps are treated as bar start times.
 - Default CSV timezone is `America/New_York`.
-- If your CSV uses a different timezone, run:
+- If your CSV uses a different timezone and `src/ingest_history_day.py` is present, run:
 ```
 python .\src\ingest_history_day.py --symbol GBPUSD --date_ny 2026-01-16 --csv C:\path\to\tv_2h.csv --tz Europe/London
 ```

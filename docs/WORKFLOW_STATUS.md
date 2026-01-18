@@ -12,6 +12,8 @@
 - Contract: `contracts/export_contract_v0.1.1_min.json`
 - Validator: `tools/validate_contract.py`, `tools/validate_contract.ps1`
 - Fixtures: `tests/sample_exports/min_001.txt`
+- Logging doctrine: `docs/ovc_logging_doctrine_v0.1.md`
+- Pipeline status harness: `scripts/pipeline_status.py`
 
 ## What changed today
 - Added/locked MIN v0.1.1 contract + fixture sample (scheme_min = `export_contract_v0.1_min_r1`).
@@ -24,6 +26,11 @@
 ### Repeatable local verification (validator + optional tests)
 ```powershell
 .\scripts\verify_local.ps1
+```
+
+### Pipeline status harness (detect-only)
+```powershell
+python .\scripts\pipeline_status.py --mode detect
 ```
 
 ### Validate an export locally
