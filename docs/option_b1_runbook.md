@@ -29,7 +29,7 @@ Option B.1 implements replayable, deterministic derived features computed from B
 
 ```powershell
 # Required environment variables
-$env:NEON_DSN = 'postgresql://user:pass@host/db'  # or DATABASE_URL
+$env:NEON_DSN = "postgresql://neondb_owner:npg_3h4uoZdcJHsy@ep-misty-resonance-aby1fuoy-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"  # or DATABASE_URL
 
 # Verify connection
 python -c "import psycopg2; psycopg2.connect('$env:NEON_DSN')"

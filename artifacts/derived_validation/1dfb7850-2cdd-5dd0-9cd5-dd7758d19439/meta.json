@@ -1,0 +1,22 @@
+{
+  "run_id": "1dfb7850-2cdd-5dd0-9cd5-dd7758d19439",
+  "component": "derived_validation",
+  "created_utc": "2026-01-18T21:23:32.512152+00:00",
+  "argv": [
+    "src/validate/validate_derived_range_v0_1.py",
+    "--symbol",
+    "GBPUSD",
+    "--start-date",
+    "2026-01-13",
+    "--end-date",
+    "2026-01-17",
+    "--sample-size",
+    "10",
+    "--out",
+    "artifacts"
+  ],
+  "status": "PASS",
+  "b_count": 1,
+  "c1_count": 1,
+  "c2_count": 1
+}
