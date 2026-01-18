@@ -42,6 +42,35 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --tv-csv C:\pa
 ```
 Expected headers include `time`, `open`, `high`, `low`, `close` (2H timeframe).
 
+## B.2 Range Validation (multi-day)
+Run a range of NY dates and write reports to `reports/validation/` (gitignored).
+Outputs include per-day JSONL plus summary JSON/CSV keyed by the run id.
+
+Example (weekdays only, default):
+```
+python .\src\validate_range.py --symbol GBPUSD --start_ny 2024-01-01 --end_ny 2024-01-31
+```
+
+Include weekends:
+```
+python .\src\validate_range.py --symbol GBPUSD --start_ny 2024-01-01 --end_ny 2024-01-31 --include_weekends
+```
+
+Safety cap:
+```
+python .\src\validate_range.py --symbol GBPUSD --start_ny 2024-01-01 --end_ny 2024-06-30 --max_days 120
+```
+
+Outputs:
+- `reports/validation/validate_range_<run_id>_days.jsonl`
+- `reports/validation/validate_range_<run_id>_summary.json`
+- `reports/validation/validate_range_<run_id>_summary.csv`
+
+Status semantics:
+- PASS: counts ok, boundary checks ok, and OHLC matches when TV rows exist for the run id.
+- SKIP: weekend or missing TV rows for the run id (no tape loaded).
+- FAIL: missing blocks, boundary issues, or OHLC mismatches.
+
 ## HISTORICAL INGESTION (CSV) (EXPERIMENTAL - NON-CANONICAL)
 Status: EXPERIMENTAL. This CSV path is not the canonical P2 workflow; canonical
 P2 is `src/backfill_oanda_2h_checkpointed.py`.
