@@ -78,7 +78,9 @@ To add new fields: create `export_contract_v0.1.2_min.json` (never edit existing
 ### P2 – Historical Backfill (OANDA → Neon)
 - **Flow**: OANDA API → H1 candles → aggregate to 2H blocks → `ovc.ovc_blocks_v01_1_min`
 - **Script**: [src/backfill_oanda_2h_checkpointed.py](src/backfill_oanda_2h_checkpointed.py)
-- **Run**: `$env:BACKFILL_DATE_NY="2026-01-16"; python .\src\backfill_oanda_2h_checkpointed.py`
+- **Run (single day)**: `$env:BACKFILL_DATE_NY="2026-01-16"; python .\src\backfill_oanda_2h_checkpointed.py`
+- **Run (date range)**: `python .\src\backfill_oanda_2h_checkpointed.py --start_ny 2026-01-13 --end_ny 2026-01-17`
+- **GitHub Action**: `.github/workflows/backfill_then_validate.yml` (backfill + validate range)
 - **Status**: PASS (idempotent upsert, same PK as P1)
 - **Note**: Weekends/holidays return 0 candles; use weekday dates
 
