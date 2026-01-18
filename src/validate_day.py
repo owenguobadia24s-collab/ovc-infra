@@ -215,6 +215,11 @@ def main() -> int:
         dsn=dsn,
     )
     print_backfill_summary(result)
+    derived_summary = "SKIPPED" if result.derived_count is None else str(result.derived_count)
+    outcomes_summary = "SKIPPED" if result.outcome_count is None else str(result.outcome_count)
+    print(f"blocks_count: {result.min_count}")
+    print(f"derived_count: {derived_summary}")
+    print(f"outcomes_count: {outcomes_summary}")
 
     if args.tv_csv:
         rows, skipped = _load_tv_csv(args.tv_csv, result.symbol, result.date_ny, result.run_id)
