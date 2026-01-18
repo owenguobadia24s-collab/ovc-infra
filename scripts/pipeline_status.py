@@ -358,22 +358,26 @@ def check_p3(
 
 def check_p4(env: dict, db: DbState, rowcount_enabled: bool, ignore_unknown: bool) -> PipelineReport:
     entry_rel = "src/validate_day.py"
+    range_rel = "src/validate_range.py"
     schema_rel = "sql/qa_schema.sql"
     pack_rel = "sql/qa_validation_pack.sql"
     doc_rel = "docs/tape_validation_harness.md"
 
     entry_path = REPO_ROOT / entry_rel
+    range_path = REPO_ROOT / range_rel
     schema_path = REPO_ROOT / schema_rel
     pack_path = REPO_ROOT / pack_rel
     doc_path = REPO_ROOT / doc_rel
 
-    paths = [entry_rel, schema_rel, pack_rel, doc_rel]
+    paths = [entry_rel, range_rel, schema_rel, pack_rel, doc_rel]
 
     repo_fail: list[str] = []
     repo_warn: list[str] = []
 
     if not file_exists(entry_path):
         repo_fail.append("validate_day.py missing")
+    if not file_exists(range_path):
+        repo_warn.append("validate_range.py missing")
     if not file_exists(schema_path):
         repo_fail.append("qa schema SQL missing")
     if not file_exists(pack_path):
