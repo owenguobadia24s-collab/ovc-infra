@@ -7,8 +7,25 @@
 - Branches still carrying unmerged commits: `pr/infra-min-v0.1.1` (contains two commits not on main; review before merge/delete).
 - Branches already merged into main: `pr/pine-min-export-v0.1_min_r1` and `origin/wip/infra-contract-validation`.
 
+## Option A status (Logging Foundations & Validation Normalization)
+- Status: COMPLETE and LOCKED.
+- Guarantees: canonical MIN facts land in `ovc.ovc_blocks_v01_1_min` via P1/P2; core validation always runs; derived validation is conditional and skipped when absent.
+- Not covered: derived features, new pipelines, or any Option B meaning layers; no changes to ingestion logic or Neon schemas.
+
 ## Pipeline status summary
-- P2: PASS (canonical backfill writes MIN facts into `ovc.ovc_blocks_v01_1_min`).
+- P1: PARTIAL (env-dependent, structurally sound).
+- P2: PASS (canonical backfill writes to `ovc.ovc_blocks_v01_1_min`).
+- P3: OPTIONAL / PARTIAL (derived, non-blocking).
+- P4: PASS (core validation always runs; derived conditional).
+
+## Validation pack behavior
+- Core validation is unconditional.
+- Derived validation is conditional and skipped when absent.
+
+## Next Phase: Option B
+- Allowed inputs: canonical facts in `ovc.ovc_blocks_v01_1_min`, raw capture ledger, and existing validation artifacts.
+- Prohibited: mutating or reclassifying canonical facts.
+- Requirement: all meaning layers must be replayable and fully derived from canonical inputs.
 
 ## Source of truth paths
 - Worker: `infra/ovc-webhook/src/index.ts`
