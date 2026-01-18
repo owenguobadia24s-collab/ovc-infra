@@ -1,3 +1,4 @@
+import argparse
 import os
 from datetime import datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -182,6 +183,26 @@ def parse_date(value: str):
         return datetime.strptime(value, "%Y-%m-%d").date()
     except ValueError as exc:
         raise SystemExit("Invalid date format. Use YYYY-MM-DD, e.g. 2026-01-16.") from exc
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse CLI arguments (optional). Env vars take precedence for backward compatibility."""
+    parser = argparse.ArgumentParser(
+        description="OVC OANDA 2H backfill (checkpointed). Uses BACKFILL_DATE_NY env var or CLI args."
+    )
+    parser.add_argument(
+        "--start_ny",
+        type=str,
+        default=None,
+        help="Start date (NY, YYYY-MM-DD). If set with --end_ny, overrides env vars.",
+    )
+    parser.add_argument(
+        "--end_ny",
+        type=str,
+        default=None,
+        help="End date (NY, YYYY-MM-DD, inclusive). If set with --start_ny, overrides env vars.",
+    )
+    return parser.parse_args()
 
 
 def _build_state_key(values: dict) -> str:
@@ -482,7 +503,45 @@ def insert_blocks(rows: list[tuple]):
 
 
 if __name__ == "__main__":
+    args = parse_args()
     single_date_mode = False
+    range_mode = False
+
+    # CLI range mode (--start_ny + --end_ny) takes precedence
+    if args.start_ny and args.end_ny:
+        range_mode = True
+        start_date_ny = parse_date(args.start_ny)
+        end_date_ny = parse_date(args.end_ny)
+        if end_date_ny < start_date_ny:
+            raise SystemExit("--end_ny must be >= --start_ny")
+        # Process each day in range
+        current_date = start_date_ny
+        total_inserted = 0
+        while current_date <= end_date_ny:
+            session_start_ny = datetime.combine(current_date, time(17, 0), tzinfo=NY_TZ)
+            day_start_utc = session_start_ny.astimezone(timezone.utc)
+            day_end_utc = (session_start_ny + timedelta(hours=24)).astimezone(timezone.utc)
+
+            if day_end_utc <= BACKFILL_START_UTC:
+                print(f"SKIP: {current_date} is before BACKFILL_START_UTC")
+                current_date += timedelta(days=1)
+                continue
+
+            before = count_blocks_between(day_start_utc, day_end_utc)
+            df_h1 = fetch_oanda_h1(day_start_utc, day_end_utc)
+            df_2h = resample_to_2h_ny(df_h1)
+            rows = build_min_rows(df_2h)
+            insert_blocks(rows)
+            after = count_blocks_between(day_start_utc, day_end_utc)
+            inserted_est = after - before
+            total_inserted += inserted_est
+            print(f"{current_date}: H1={len(df_h1)} 2H={len(df_2h)} inserted_est={inserted_est}")
+            current_date += timedelta(days=1)
+
+        print(f"RANGE BACKFILL COMPLETE: {start_date_ny} to {end_date_ny}, total_inserted_est={total_inserted}")
+        raise SystemExit(0)
+
+    # Single-date mode via env var (existing behavior)
     if BACKFILL_DATE_NY:
         single_date_mode = True
         date_ny = parse_date(BACKFILL_DATE_NY)

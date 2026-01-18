@@ -158,6 +158,94 @@ python .\scripts\oanda_export_2h_day.py --symbol GBPUSD --date-ny 2026-01-16
 python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --csv-search "*GBPUSD*dateNY_2026-01-16*2h*oanda*.csv" --auto-pick
 ```
 
+## GitHub Action: Backfill then Validate (Range)
+
+**Workflow file:** `.github/workflows/backfill_then_validate.yml`
+
+This workflow runs canonical OANDA backfill followed by range validation for a
+specified NY date range. It's the recommended way to backfill historical data
+and immediately verify correctness.
+
+### Required Secrets
+Add these to your repository settings (Settings → Secrets and variables → Actions):
+
+| Secret | Description |
+|--------|-------------|
+| `NEON_DSN` | PostgreSQL connection string for Neon database |
+| `OANDA_API_TOKEN` | OANDA API access token |
+| `OANDA_ENV` | OANDA environment (`practice` or `live`) |
+
+### Workflow Inputs
+
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `start_date` | Yes | — | Start date (NY, YYYY-MM-DD) |
+| `end_date` | Yes | — | End date (NY, YYYY-MM-DD, inclusive) |
+| `strict` | No | `false` | Strict derived validation |
+| `missing_facts` | No | `fail` | Missing facts policy (`fail` or `skip`) |
+
+### How to Trigger
+
+1. Go to **Actions** tab in GitHub
+2. Select **OVC Backfill then Validate (Range)** workflow
+3. Click **Run workflow**
+4. Fill in the inputs:
+   - `start_date`: e.g., `2026-01-13`
+   - `end_date`: e.g., `2026-01-17`
+   - `strict`: `false` (default) or `true`
+   - `missing_facts`: `fail` (default) or `skip`
+5. Click **Run workflow**
+
+### Example Runs
+
+**Basic backfill + validate (one week):**
+```
+start_date: 2026-01-13
+end_date: 2026-01-17
+strict: false
+missing_facts: fail
+```
+
+**Scan a large range (skip missing facts):**
+```
+start_date: 2024-01-01
+end_date: 2024-03-31
+strict: false
+missing_facts: skip
+```
+
+**Strict validation with derived checks:**
+```
+start_date: 2026-01-16
+end_date: 2026-01-16
+strict: true
+missing_facts: fail
+```
+
+### Artifacts
+
+Each run uploads artifacts to:
+`ovc-run-gh_<run_id>_<attempt>/`
+
+Contents:
+- `backfill.log` — OANDA backfill output
+- `validate.log` — Validation output
+- `run_meta.json` — Run metadata (inputs, timestamps)
+- `days.jsonl` — Per-day validation results (if generated)
+- `summary.json` / `summary.csv` — Aggregate validation summary
+
+Download artifacts from the workflow run page in GitHub Actions UI.
+
+### Local Equivalent
+
+```powershell
+# Step 1: Backfill
+python .\src\backfill_oanda_2h_checkpointed.py --start_ny 2026-01-13 --end_ny 2026-01-17
+
+# Step 2: Validate
+python .\src\validate_range.py --symbol GBPUSD --start_ny 2026-01-13 --end_ny 2026-01-17 --missing_facts fail
+```
+
 Optional convenience wrapper:
 ```
 .\scripts\validate_day.ps1 -DateNy 2026-01-16 -Symbol GBPUSD
