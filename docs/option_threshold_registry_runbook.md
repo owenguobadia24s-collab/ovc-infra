@@ -471,3 +471,143 @@ python -m pytest tests/test_c3_regime_trend.py --cov=src/derived --cov-report=te
 | `configs/threshold_packs/c3_regime_trend_v1.json` | Default threshold pack |
 | `tests/test_c3_regime_trend.py` | Test suite |
 | `src/validate/validate_derived_range_v0_1.py` | Validator with C3 support |
+
+---
+
+## C3 Lifecycle
+
+Every C3 tag follows a strict lifecycle to ensure determinism, provenance, and validation guarantees. **No shortcuts are allowed.**
+
+### Lifecycle Stages
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  DRAFT          THRESHOLD PACK       COMPUTE         VALIDATE          │
+│    │                  │                 │               │               │
+│    ▼                  ▼                 │               │               │
+│ ┌──────┐        ┌──────────┐           │               │               │
+│ │Design│───────▶│  Create  │           │               │               │
+│ │ Spec │        │   Pack   │           │               │               │
+│ └──────┘        └────┬─────┘           │               │               │
+│                      │                 │               │               │
+│                      ▼                 ▼               │               │
+│                ┌──────────┐      ┌──────────┐         │               │
+│                │ Activate │─────▶│  Run     │         │               │
+│                │   Pack   │      │ Compute  │         │               │
+│                └──────────┘      └────┬─────┘         │               │
+│                                       │               ▼               │
+│                                       │         ┌──────────┐          │
+│                                       └────────▶│ Validate │          │
+│                                                 │  B.2+C3  │          │
+│                                                 └────┬─────┘          │
+│                                                      │                │
+│                                                      ▼                │
+│                                              ┌─────────────┐          │
+│                                              │  CERTIFIED  │          │
+│                                              └─────────────┘          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Stage 1: Draft
+
+**Purpose**: Define classification logic and threshold parameters.
+
+- Review `docs/c3_semantic_contract_v0_1.md` for rules and invariants
+- Design classification logic using C1/C2 inputs only
+- Define threshold parameters with integer basis points (not floats)
+- Create config file: `configs/threshold_packs/c3_<tag>_v1.json`
+
+**Exit Criteria**: Config file exists with all required thresholds.
+
+### Stage 2: Threshold Pack
+
+**Purpose**: Register immutable, versioned thresholds in the database.
+
+```powershell
+# Create pack (DRAFT status)
+python -m src.config.threshold_registry_cli create \
+  --pack-id c3_<tag> --version 1 --scope GLOBAL \
+  --config-file configs/threshold_packs/c3_<tag>_v1.json
+
+# Activate pack (sets active pointer)
+python -m src.config.threshold_registry_cli activate \
+  --pack-id c3_<tag> --version 1 --scope GLOBAL
+```
+
+**Exit Criteria**: Pack exists in `ovc_cfg.threshold_pack` with `status=ACTIVE` pointer.
+
+### Stage 3: Compute
+
+**Purpose**: Generate C3 classifications with full provenance.
+
+```powershell
+python src/derived/compute_c3_<tag>_v0_1.py \
+  --symbol GBPUSD \
+  --threshold-pack c3_<tag> \
+  --scope GLOBAL
+```
+
+**Requirements**:
+- Resolve threshold pack ONCE at start
+- Store `pack_id`, `version`, `hash` in every row
+- Use C1/C2 data only—no B-layer OHLC
+- Upsert semantics for idempotence
+
+**Exit Criteria**: Rows exist in `derived.ovc_c3_<tag>_v0_1` with non-null provenance.
+
+### Stage 4: Validate
+
+**Purpose**: Verify determinism, provenance integrity, and classification validity.
+
+```powershell
+python src/validate/validate_derived_range_v0_1.py \
+  --symbol GBPUSD \
+  --start-date 2026-01-13 \
+  --end-date 2026-01-17 \
+  --validate-c3 \
+  --c3-classifiers c3_<tag>
+```
+
+**Checks Performed**:
+- Table exists
+- No NULL provenance columns
+- All referenced packs exist in registry
+- Stored hash matches registry hash
+- Classification values are valid
+- Determinism quickcheck passes
+
+**Exit Criteria**: Validation status = PASS.
+
+### Stage 5: Certified
+
+A C3 tag is **certified** when:
+- All lifecycle stages complete
+- Validation passes for representative date range
+- Tests pass (determinism + registry integrity)
+- Documentation exists
+
+**Certified tags can be used in downstream analysis (Option C evaluation).**
+
+### Why No Shortcuts?
+
+| Shortcut | Consequence |
+|----------|-------------|
+| Skip threshold pack | Cannot audit which thresholds produced results |
+| Hardcode thresholds | Cannot update thresholds without code change |
+| Skip validation | Silent data corruption goes undetected |
+| Skip provenance | Cannot replay or verify historical classifications |
+| Use B-layer directly | Breaks C1/C2 abstraction; future schema changes break C3 |
+
+**The lifecycle exists to make C3 tags replay-certifiable.** If you can't prove a classification was computed correctly, it has no value.
+
+### Adding New C3 Tags
+
+Before implementing a new C3 tag:
+
+1. Read `docs/c3_semantic_contract_v0_1.md` (rules and invariants)
+2. Complete `docs/c3_entry_checklist.md` (all items must be checked)
+3. Use `compute_c3_regime_trend_v0_1.py` as reference implementation
+4. Follow the lifecycle stages in order
+
+**No exceptions without explicit approval.**
+
