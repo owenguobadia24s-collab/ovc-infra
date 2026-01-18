@@ -116,12 +116,42 @@ jobs:
             $STRICT_FLAG \
             2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/validate.log
 
+      - name: Step 3 - Compute C1 Features (Option B.1)
+        run: |
+          echo "=== COMPUTE C1: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
+          python src/derived/compute_c1_v0_1.py \
+            --symbol GBPUSD \
+            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c1.log
+
+      - name: Step 4 - Compute C2 Features (Option B.1)
+        run: |
+          echo "=== COMPUTE C2: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
+          python src/derived/compute_c2_v0_1.py \
+            --symbol GBPUSD \
+            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c2.log
+
+      - name: Step 5 - Validate Derived Features (Option B.2)
+        run: |
+          echo "=== VALIDATE DERIVED: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
+          MODE_FLAG="--mode ${{ inputs.missing_facts }}"
+          python src/validate/validate_derived_range_v0_1.py \
+            --symbol GBPUSD \
+            --start-date "${{ inputs.start_date }}" \
+            --end-date "${{ inputs.end_date }}" \
+            $MODE_FLAG \
+            --out "artifacts/runs/${{ steps.run_id.outputs.run_id }}" \
+            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/validate_derived.log
+
       - name: Copy validation reports to artifacts
         if: always()
         run: |
           # Copy any generated reports to artifacts folder
           if [ -d "reports/validation" ]; then
             cp -r reports/validation/* artifacts/runs/${{ steps.run_id.outputs.run_id }}/ 2>/dev/null || true
+          fi
+          # Copy derived validation artifacts
+          if [ -d "artifacts/runs/${{ steps.run_id.outputs.run_id }}/derived_validation" ]; then
+            echo "Derived validation artifacts already in place"
           fi
           # Write run metadata
           cat > artifacts/runs/${{ steps.run_id.outputs.run_id }}/run_meta.json << EOF
@@ -135,7 +165,8 @@ jobs:
             "missing_facts": "${{ inputs.missing_facts }}",
             "triggered_by": "${{ github.actor }}",
             "triggered_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "workflow": "backfill_then_validate"
+            "workflow": "backfill_then_validate",
+            "steps": ["backfill", "validate_facts", "compute_c1", "compute_c2", "validate_derived"]
           }
           EOF
 
@@ -159,5 +190,12 @@ jobs:
           echo "| End Date | ${{ inputs.end_date }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Strict | ${{ inputs.strict }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Missing Facts | ${{ inputs.missing_facts }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pipeline Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. ✅ Backfill (OANDA → Neon)" >> $GITHUB_STEP_SUMMARY
+          echo "2. ✅ Validate Facts (B-layer vs Tape)" >> $GITHUB_STEP_SUMMARY
+          echo "3. ✅ Compute C1 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
+          echo "4. ✅ Compute C2 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
+          echo "5. ✅ Validate Derived (Option B.2)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Artifacts uploaded to: \`ovc-run-${{ steps.run_id.outputs.run_id }}\`" >> $GITHUB_STEP_SUMMARY

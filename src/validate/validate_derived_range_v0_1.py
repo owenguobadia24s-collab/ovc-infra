@@ -1,0 +1,1013 @@
+"""
+OVC Option B.2: Derived Feature Pack Validator (v0.1)
+
+Purpose: Validate C1/C2 derived feature packs against B-layer facts,
+         with optional TradingView reference comparison.
+
+Validation Checks:
+    1. Coverage parity: count(B) == count(C1) == count(C2)
+    2. Key uniqueness: no duplicate block_id in C1/C2
+    3. Null/invalid checks: no NaN/Inf, deterministic nulls
+    4. Window_spec enforcement: C2 has required window specs
+    5. Determinism quickcheck: recompute sample blocks and verify
+
+Usage:
+    python src/validate/validate_derived_range_v0_1.py \\
+        --symbol GBPUSD \\
+        --start-date 2026-01-13 \\
+        --end-date 2026-01-17 \\
+        [--mode fail|skip] \\
+        [--compare-tv] \\
+        [--out artifacts]
+
+Environment:
+    NEON_DSN or DATABASE_URL: PostgreSQL connection string
+
+Artifacts Output:
+    - derived_validation_report.json (machine-readable)
+    - derived_validation_report.md (human-readable)
+    - derived_validation_diffs.csv (if --compare-tv enabled)
+"""
+
+import argparse
+import csv
+import json
+import math
+import os
+import random
+import sys
+import uuid
+from dataclasses import dataclass, field, asdict
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
+from pathlib import Path
+from typing import Optional
+from zoneinfo import ZoneInfo
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+# ---------- Add parent to path for local imports ----------
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from ovc_artifacts import make_run_dir, write_meta, write_latest
+
+# ---------- Tiny .env loader ----------
+def load_env(path: str = ".env") -> None:
+    if not os.path.exists(path):
+        return
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip())
+
+
+load_env()
+
+# ---------- Constants ----------
+VERSION = "v0.1"
+NY_TZ = ZoneInfo("America/New_York")
+
+# Required window_spec components per C2 spec
+REQUIRED_WINDOW_SPECS = ["N=1", "N=12", "session=date_ny", "rd_len="]
+
+# C1 feature columns for null rate analysis
+C1_FEATURE_COLUMNS = [
+    "range", "body", "direction", "ret", "logret", 
+    "body_ratio", "close_pos", "upper_wick", "lower_wick", "clv",
+    "range_zero", "inputs_valid"
+]
+
+# C2 feature columns for null rate analysis
+C2_FEATURE_COLUMNS = [
+    "gap", "took_prev_high", "took_prev_low",
+    "sess_high", "sess_low", "dist_sess_high", "dist_sess_low",
+    "roll_avg_range_12", "roll_std_logret_12", "range_z_12",
+    "hh_12", "ll_12", "rd_hi", "rd_lo", "rd_mid",
+    "prev_block_exists", "sess_block_count", "roll_12_count", "rd_count"
+]
+
+
+@dataclass
+class ValidationResult:
+    """Container for validation results."""
+    run_id: str
+    version: str
+    symbol: str
+    start_date: str
+    end_date: str
+    mode: str
+    compare_tv: bool
+    
+    # Counts
+    b_block_count: int = 0
+    c1_row_count: int = 0
+    c2_row_count: int = 0
+    
+    # Integrity checks
+    coverage_parity: bool = True
+    c1_duplicates: int = 0
+    c2_duplicates: int = 0
+    c1_null_rates: dict = field(default_factory=dict)
+    c2_null_rates: dict = field(default_factory=dict)
+    c2_window_spec_valid: bool = True
+    c2_window_spec_errors: list = field(default_factory=list)
+    
+    # Determinism check
+    determinism_sample_size: int = 0
+    determinism_mismatches: int = 0
+    determinism_details: list = field(default_factory=list)
+    
+    # TV comparison (optional)
+    tv_comparison_enabled: bool = False
+    tv_reference_available: bool = False
+    tv_matched_blocks: int = 0
+    tv_diff_summary: dict = field(default_factory=dict)
+    tv_top_mismatches: list = field(default_factory=list)
+    
+    # Overall status
+    errors: list = field(default_factory=list)
+    warnings: list = field(default_factory=list)
+    status: str = "PASS"
+    
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def resolve_dsn() -> str:
+    """Resolve database connection string from environment."""
+    dsn = os.environ.get("NEON_DSN") or os.environ.get("DATABASE_URL")
+    if not dsn:
+        raise SystemExit("Missing NEON_DSN or DATABASE_URL in environment")
+    return dsn
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Validate C1/C2 derived feature packs against B-layer facts."
+    )
+    parser.add_argument("--symbol", default="GBPUSD", help="Symbol to validate")
+    parser.add_argument("--start-date", required=True, help="Start date (NY, YYYY-MM-DD)")
+    parser.add_argument("--end-date", required=True, help="End date (NY, YYYY-MM-DD, inclusive)")
+    parser.add_argument(
+        "--mode",
+        choices=["fail", "skip"],
+        default="fail",
+        help="Behavior for missing facts/rows (default: fail)"
+    )
+    parser.add_argument(
+        "--compare-tv",
+        action="store_true",
+        help="Enable TradingView reference comparison (if available)"
+    )
+    parser.add_argument(
+        "--tv-source",
+        default=None,
+        help="TradingView reference source (table or file path)"
+    )
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=50,
+        help="Number of blocks to sample for determinism check (default: 50)"
+    )
+    parser.add_argument(
+        "--out",
+        default="artifacts",
+        help="Output directory for artifacts (default: artifacts)"
+    )
+    parser.add_argument(
+        "--run-id",
+        default=None,
+        help="Override run ID (default: auto-generated)"
+    )
+    return parser.parse_args()
+
+
+def parse_date(value: str):
+    """Parse YYYY-MM-DD date string."""
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError as exc:
+        raise SystemExit(f"Invalid date format: {value}. Use YYYY-MM-DD.") from exc
+
+
+def build_run_id(symbol: str, start_date, end_date, mode: str, compare_tv: bool) -> str:
+    """Build deterministic run ID for reproducibility."""
+    seed = f"validate_derived:{symbol}:{start_date}:{end_date}:{mode}:{compare_tv}"
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, seed))
+
+
+def table_exists(cur, qualified_name: str) -> bool:
+    """Check if a table exists in the database."""
+    cur.execute("SELECT to_regclass(%s);", (qualified_name,))
+    (regclass,) = cur.fetchone()
+    return regclass is not None
+
+
+# ---------- Validation Check Functions ----------
+
+def check_coverage_parity(cur, symbol: str, start_date, end_date) -> dict:
+    """
+    Check that B, C1, and C2 have matching block counts.
+    """
+    # Count B-layer blocks
+    cur.execute("""
+        SELECT COUNT(*) FROM ovc.ovc_blocks_v01_1_min
+        WHERE sym = %s AND date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    b_count = cur.fetchone()[0]
+    
+    # Count C1 rows
+    cur.execute("""
+        SELECT COUNT(*) FROM derived.ovc_c1_features_v0_1 c1
+        JOIN ovc.ovc_blocks_v01_1_min b ON c1.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    c1_count = cur.fetchone()[0]
+    
+    # Count C2 rows
+    cur.execute("""
+        SELECT COUNT(*) FROM derived.ovc_c2_features_v0_1 c2
+        JOIN ovc.ovc_blocks_v01_1_min b ON c2.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    c2_count = cur.fetchone()[0]
+    
+    return {
+        "b_count": b_count,
+        "c1_count": c1_count,
+        "c2_count": c2_count,
+        "parity": b_count == c1_count == c2_count,
+    }
+
+
+def check_duplicates(cur, table: str, symbol: str, start_date, end_date) -> int:
+    """Check for duplicate block_id values in derived table."""
+    cur.execute(f"""
+        SELECT COUNT(*) - COUNT(DISTINCT d.block_id) as duplicates
+        FROM {table} d
+        JOIN ovc.ovc_blocks_v01_1_min b ON d.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    return cur.fetchone()[0]
+
+
+def check_null_rates(cur, table: str, columns: list, symbol: str, start_date, end_date) -> dict:
+    """
+    Calculate null rates for each column in the specified table.
+    Returns dict of {column: null_rate}.
+    """
+    null_rates = {}
+    
+    # Build query to count nulls for each column
+    col_cases = ", ".join([
+        f"SUM(CASE WHEN d.{col} IS NULL THEN 1 ELSE 0 END) as null_{col}"
+        for col in columns
+    ])
+    
+    cur.execute(f"""
+        SELECT COUNT(*) as total, {col_cases}
+        FROM {table} d
+        JOIN ovc.ovc_blocks_v01_1_min b ON d.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    
+    row = cur.fetchone()
+    total = row[0] if row[0] > 0 else 1  # Avoid division by zero
+    
+    for i, col in enumerate(columns):
+        null_count = row[i + 1] or 0
+        null_rates[col] = round(null_count / total, 4)
+    
+    return null_rates
+
+
+def check_nan_inf(cur, table: str, columns: list, symbol: str, start_date, end_date) -> list:
+    """Check for NaN or Inf values in numeric columns."""
+    issues = []
+    
+    for col in columns:
+        # Check for special float values
+        cur.execute(f"""
+            SELECT COUNT(*) FROM {table} d
+            JOIN ovc.ovc_blocks_v01_1_min b ON d.block_id = b.block_id
+            WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+            AND (d.{col} = 'NaN'::float OR d.{col} = 'Infinity'::float OR d.{col} = '-Infinity'::float)
+        """, (symbol, start_date, end_date))
+        count = cur.fetchone()[0]
+        if count > 0:
+            issues.append(f"{table}.{col}: {count} NaN/Inf values")
+    
+    return issues
+
+
+def check_window_spec(cur, symbol: str, start_date, end_date) -> dict:
+    """
+    Validate that C2 rows have window_spec populated and contain required components.
+    """
+    # Check for NULL window_spec
+    cur.execute("""
+        SELECT COUNT(*) FROM derived.ovc_c2_features_v0_1 c2
+        JOIN ovc.ovc_blocks_v01_1_min b ON c2.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+        AND c2.window_spec IS NULL
+    """, (symbol, start_date, end_date))
+    null_count = cur.fetchone()[0]
+    
+    # Get distinct window_specs
+    cur.execute("""
+        SELECT DISTINCT c2.window_spec FROM derived.ovc_c2_features_v0_1 c2
+        JOIN ovc.ovc_blocks_v01_1_min b ON c2.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+        AND c2.window_spec IS NOT NULL
+    """, (symbol, start_date, end_date))
+    window_specs = [row[0] for row in cur.fetchall()]
+    
+    # Validate each window_spec contains required components
+    errors = []
+    for ws in window_specs:
+        for req in REQUIRED_WINDOW_SPECS:
+            if req not in ws:
+                errors.append(f"window_spec '{ws}' missing required component '{req}'")
+    
+    return {
+        "null_count": null_count,
+        "distinct_specs": window_specs,
+        "errors": errors,
+        "valid": null_count == 0 and len(errors) == 0,
+    }
+
+
+def determinism_quickcheck(cur, symbol: str, start_date, end_date, sample_size: int) -> dict:
+    """
+    Sample blocks and recompute C1 values to verify determinism.
+    Compare stored values vs freshly computed values.
+    """
+    # Fetch sample of blocks with B-layer OHLC and stored C1 values
+    cur.execute("""
+        SELECT 
+            b.block_id, b.o, b.h, b.l, b.c,
+            c1.range, c1.body, c1.direction, c1.ret, c1.logret,
+            c1.body_ratio, c1.close_pos, c1.upper_wick, c1.lower_wick, c1.clv
+        FROM ovc.ovc_blocks_v01_1_min b
+        JOIN derived.ovc_c1_features_v0_1 c1 ON b.block_id = c1.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+        ORDER BY RANDOM()
+        LIMIT %s
+    """, (symbol, start_date, end_date, sample_size))
+    
+    samples = cur.fetchall()
+    mismatches = []
+    
+    for row in samples:
+        block_id, o, h, l, c = row[0], row[1], row[2], row[3], row[4]
+        stored = {
+            "range": row[5], "body": row[6], "direction": row[7],
+            "ret": row[8], "logret": row[9], "body_ratio": row[10],
+            "close_pos": row[11], "upper_wick": row[12], "lower_wick": row[13],
+            "clv": row[14]
+        }
+        
+        # Recompute C1 values
+        computed = compute_c1_inline(o, h, l, c)
+        
+        # Compare with tolerance
+        for key in ["range", "body", "upper_wick", "lower_wick"]:
+            if not values_match(stored[key], computed[key]):
+                mismatches.append({
+                    "block_id": block_id,
+                    "field": key,
+                    "stored": stored[key],
+                    "computed": computed[key],
+                })
+        
+        # Integer comparison for direction
+        if stored["direction"] != computed["direction"]:
+            mismatches.append({
+                "block_id": block_id,
+                "field": "direction",
+                "stored": stored["direction"],
+                "computed": computed["direction"],
+            })
+        
+        # Float comparisons with None handling
+        for key in ["ret", "logret", "body_ratio", "close_pos", "clv"]:
+            if not values_match(stored[key], computed[key]):
+                mismatches.append({
+                    "block_id": block_id,
+                    "field": key,
+                    "stored": stored[key],
+                    "computed": computed[key],
+                })
+    
+    return {
+        "sample_size": len(samples),
+        "mismatches": len(mismatches),
+        "details": mismatches[:20],  # Limit to first 20
+    }
+
+
+def compute_c1_inline(o: float, h: float, l: float, c: float) -> dict:
+    """
+    Compute C1 features inline for determinism verification.
+    Must match logic in compute_c1_v0_1.py exactly.
+    """
+    range_val = h - l
+    body = abs(c - o)
+    direction = 1 if c > o else (-1 if c < o else 0)
+    
+    ret = (c - o) / o if o != 0 else None
+    logret = math.log(c / o) if o > 0 and c > 0 else None
+    
+    range_zero = (range_val == 0)
+    body_ratio = body / range_val if not range_zero else None
+    close_pos = (c - l) / range_val if not range_zero else None
+    
+    upper_wick = h - max(o, c)
+    lower_wick = min(o, c) - l
+    
+    clv = ((c - l) - (h - c)) / (h - l) if not range_zero else None
+    
+    return {
+        "range": range_val,
+        "body": body,
+        "direction": direction,
+        "ret": ret,
+        "logret": logret,
+        "body_ratio": body_ratio,
+        "close_pos": close_pos,
+        "upper_wick": upper_wick,
+        "lower_wick": lower_wick,
+        "clv": clv,
+    }
+
+
+def values_match(stored, computed, tolerance: float = 1e-9) -> bool:
+    """Compare two values with tolerance for floats and None handling."""
+    if stored is None and computed is None:
+        return True
+    if stored is None or computed is None:
+        return False
+    if isinstance(stored, (int, float)) and isinstance(computed, (int, float)):
+        return abs(stored - computed) < tolerance
+    return stored == computed
+
+
+# ---------- TV Reference Comparison ----------
+
+def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
+    """
+    Compare C1/C2 derived features against TradingView reference data.
+    TV data is in ovc.ovc_blocks_v01_1_min (rng, body, dir, ret fields).
+    """
+    # Check what TV-sourced blocks exist
+    cur.execute("""
+        SELECT COUNT(*) FROM ovc.ovc_blocks_v01_1_min
+        WHERE sym = %s AND date_ny BETWEEN %s AND %s
+        AND source = 'tv'
+    """, (symbol, start_date, end_date))
+    tv_count = cur.fetchone()[0]
+    
+    if tv_count == 0:
+        return {
+            "available": False,
+            "message": "REFERENCE_NOT_AVAILABLE: No TV-sourced blocks in range",
+        }
+    
+    # Compare C1 features against TV-stored values (rng, body, dir, ret)
+    cur.execute("""
+        SELECT 
+            c1.block_id,
+            b.rng as tv_range, c1.range as c1_range,
+            b.body as tv_body, c1.body as c1_body,
+            b.dir as tv_dir, c1.direction as c1_dir,
+            b.ret as tv_ret, c1.ret as c1_ret
+        FROM derived.ovc_c1_features_v0_1 c1
+        JOIN ovc.ovc_blocks_v01_1_min b ON c1.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+        AND b.source = 'tv'
+    """, (symbol, start_date, end_date))
+    
+    rows = cur.fetchall()
+    
+    # Calculate diff statistics
+    diffs = {
+        "range": {"sum_abs_diff": 0, "max_diff": 0, "mismatches": 0},
+        "body": {"sum_abs_diff": 0, "max_diff": 0, "mismatches": 0},
+        "direction": {"mismatches": 0},
+        "ret": {"sum_abs_diff": 0, "max_diff": 0, "mismatches": 0},
+    }
+    
+    top_mismatches = []
+    
+    for row in rows:
+        block_id = row[0]
+        tv_range, c1_range = row[1], row[2]
+        tv_body, c1_body = row[3], row[4]
+        tv_dir, c1_dir = row[5], row[6]
+        tv_ret, c1_ret = row[7], row[8]
+        
+        # Range diff
+        if tv_range is not None and c1_range is not None:
+            diff = abs(tv_range - c1_range)
+            diffs["range"]["sum_abs_diff"] += diff
+            diffs["range"]["max_diff"] = max(diffs["range"]["max_diff"], diff)
+            if diff > 1e-6:
+                diffs["range"]["mismatches"] += 1
+                top_mismatches.append({
+                    "block_id": block_id,
+                    "field": "range",
+                    "tv": tv_range,
+                    "c1": c1_range,
+                    "diff": diff,
+                })
+        
+        # Body diff
+        if tv_body is not None and c1_body is not None:
+            diff = abs(tv_body - c1_body)
+            diffs["body"]["sum_abs_diff"] += diff
+            diffs["body"]["max_diff"] = max(diffs["body"]["max_diff"], diff)
+            if diff > 1e-6:
+                diffs["body"]["mismatches"] += 1
+                top_mismatches.append({
+                    "block_id": block_id,
+                    "field": "body",
+                    "tv": tv_body,
+                    "c1": c1_body,
+                    "diff": diff,
+                })
+        
+        # Direction diff
+        if tv_dir is not None and c1_dir is not None:
+            if tv_dir != c1_dir:
+                diffs["direction"]["mismatches"] += 1
+                top_mismatches.append({
+                    "block_id": block_id,
+                    "field": "direction",
+                    "tv": tv_dir,
+                    "c1": c1_dir,
+                    "diff": abs(tv_dir - c1_dir),
+                })
+        
+        # Ret diff
+        if tv_ret is not None and c1_ret is not None:
+            diff = abs(tv_ret - c1_ret)
+            diffs["ret"]["sum_abs_diff"] += diff
+            diffs["ret"]["max_diff"] = max(diffs["ret"]["max_diff"], diff)
+            if diff > 1e-6:
+                diffs["ret"]["mismatches"] += 1
+                top_mismatches.append({
+                    "block_id": block_id,
+                    "field": "ret",
+                    "tv": tv_ret,
+                    "c1": c1_ret,
+                    "diff": diff,
+                })
+    
+    # Calculate mean abs diff
+    n = len(rows) if rows else 1
+    for key in ["range", "body", "ret"]:
+        diffs[key]["mean_abs_diff"] = diffs[key]["sum_abs_diff"] / n
+        diffs[key]["mismatch_rate"] = diffs[key]["mismatches"] / n
+    diffs["direction"]["mismatch_rate"] = diffs["direction"]["mismatches"] / n
+    
+    # Sort top mismatches by diff (descending)
+    top_mismatches.sort(key=lambda x: x.get("diff", 0), reverse=True)
+    
+    return {
+        "available": True,
+        "matched_blocks": len(rows),
+        "diff_summary": diffs,
+        "top_mismatches": top_mismatches[:50],
+    }
+
+
+# ---------- QA Storage ----------
+
+def store_validation_run(cur, result: ValidationResult) -> None:
+    """Store validation run summary in ovc_qa schema."""
+    cur.execute("""
+        INSERT INTO ovc_qa.derived_validation_run (
+            run_id, created_at, symbol, start_date, end_date,
+            b_block_count, c1_row_count, c2_row_count,
+            coverage_parity, c1_duplicates, c2_duplicates,
+            c2_window_spec_valid, determinism_sample_size, determinism_mismatches,
+            tv_comparison_enabled, tv_reference_available, tv_matched_blocks,
+            status, errors, warnings
+        ) VALUES (
+            %s, NOW(), %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s,
+            %s, %s, %s
+        )
+        ON CONFLICT (run_id) DO UPDATE SET
+            created_at = NOW(),
+            b_block_count = EXCLUDED.b_block_count,
+            c1_row_count = EXCLUDED.c1_row_count,
+            c2_row_count = EXCLUDED.c2_row_count,
+            coverage_parity = EXCLUDED.coverage_parity,
+            status = EXCLUDED.status,
+            errors = EXCLUDED.errors,
+            warnings = EXCLUDED.warnings
+    """, (
+        result.run_id, result.symbol, result.start_date, result.end_date,
+        result.b_block_count, result.c1_row_count, result.c2_row_count,
+        result.coverage_parity, result.c1_duplicates, result.c2_duplicates,
+        result.c2_window_spec_valid, result.determinism_sample_size, result.determinism_mismatches,
+        result.tv_comparison_enabled, result.tv_reference_available, result.tv_matched_blocks,
+        result.status, json.dumps(result.errors), json.dumps(result.warnings),
+    ))
+
+
+# ---------- Artifact Generation ----------
+
+def generate_report_json(result: ValidationResult, out_path: Path) -> Path:
+    """Generate machine-readable JSON report."""
+    json_path = out_path / "derived_validation_report.json"
+    with json_path.open("w", encoding="utf-8") as f:
+        json.dump(result.to_dict(), f, indent=2, default=str)
+    return json_path
+
+
+def generate_report_md(result: ValidationResult, out_path: Path) -> Path:
+    """Generate human-readable Markdown report."""
+    md_path = out_path / "derived_validation_report.md"
+    
+    lines = [
+        f"# OVC Derived Validation Report",
+        f"",
+        f"**Run ID**: `{result.run_id}`",
+        f"**Version**: {result.version}",
+        f"**Symbol**: {result.symbol}",
+        f"**Date Range**: {result.start_date} to {result.end_date}",
+        f"**Mode**: {result.mode}",
+        f"**Status**: **{result.status}**",
+        f"",
+        f"---",
+        f"",
+        f"## 1. Coverage Parity",
+        f"",
+        f"| Layer | Count |",
+        f"|-------|-------|",
+        f"| B-layer blocks | {result.b_block_count} |",
+        f"| C1 rows | {result.c1_row_count} |",
+        f"| C2 rows | {result.c2_row_count} |",
+        f"",
+        f"**Parity**: {'✅ PASS' if result.coverage_parity else '❌ FAIL'}",
+        f"",
+        f"## 2. Key Uniqueness",
+        f"",
+        f"| Table | Duplicates |",
+        f"|-------|------------|",
+        f"| C1 | {result.c1_duplicates} |",
+        f"| C2 | {result.c2_duplicates} |",
+        f"",
+        f"## 3. Null Rates (C1)",
+        f"",
+        f"| Column | Null Rate |",
+        f"|--------|-----------|",
+    ]
+    
+    # Sort by null rate descending (top offenders first)
+    sorted_c1_nulls = sorted(result.c1_null_rates.items(), key=lambda x: x[1], reverse=True)
+    for col, rate in sorted_c1_nulls[:10]:
+        lines.append(f"| {col} | {rate:.2%} |")
+    
+    lines.extend([
+        f"",
+        f"## 4. Null Rates (C2)",
+        f"",
+        f"| Column | Null Rate |",
+        f"|--------|-----------|",
+    ])
+    
+    sorted_c2_nulls = sorted(result.c2_null_rates.items(), key=lambda x: x[1], reverse=True)
+    for col, rate in sorted_c2_nulls[:10]:
+        lines.append(f"| {col} | {rate:.2%} |")
+    
+    lines.extend([
+        f"",
+        f"## 5. Window Spec Enforcement (C2)",
+        f"",
+        f"**Valid**: {'✅ PASS' if result.c2_window_spec_valid else '❌ FAIL'}",
+        f"",
+    ])
+    
+    if result.c2_window_spec_errors:
+        lines.append("**Errors**:")
+        for err in result.c2_window_spec_errors[:10]:
+            lines.append(f"- {err}")
+    
+    lines.extend([
+        f"",
+        f"## 6. Determinism Quickcheck",
+        f"",
+        f"- Sample Size: {result.determinism_sample_size}",
+        f"- Mismatches: {result.determinism_mismatches}",
+        f"- **Result**: {'✅ PASS' if result.determinism_mismatches == 0 else '❌ FAIL'}",
+        f"",
+    ])
+    
+    if result.determinism_details:
+        lines.append("**Top Mismatches**:")
+        lines.append("| Block ID | Field | Stored | Computed |")
+        lines.append("|----------|-------|--------|----------|")
+        for d in result.determinism_details[:10]:
+            lines.append(f"| {d['block_id']} | {d['field']} | {d['stored']} | {d['computed']} |")
+    
+    if result.tv_comparison_enabled:
+        lines.extend([
+            f"",
+            f"## 7. TradingView Reference Comparison",
+            f"",
+            f"**Enabled**: Yes",
+            f"**Reference Available**: {'Yes' if result.tv_reference_available else 'No'}",
+            f"**Matched Blocks**: {result.tv_matched_blocks}",
+            f"",
+        ])
+        
+        if result.tv_diff_summary:
+            lines.append("**Diff Summary**:")
+            lines.append("| Field | Mean Abs Diff | Max Diff | Mismatch Rate |")
+            lines.append("|-------|---------------|----------|---------------|")
+            for field, stats in result.tv_diff_summary.items():
+                mean = stats.get("mean_abs_diff", 0)
+                max_d = stats.get("max_diff", 0)
+                rate = stats.get("mismatch_rate", 0)
+                lines.append(f"| {field} | {mean:.6f} | {max_d:.6f} | {rate:.2%} |")
+    
+    lines.extend([
+        f"",
+        f"---",
+        f"",
+        f"## Errors",
+        f"",
+    ])
+    
+    if result.errors:
+        for e in result.errors:
+            lines.append(f"- ❌ {e}")
+    else:
+        lines.append("None")
+    
+    lines.extend([
+        f"",
+        f"## Warnings",
+        f"",
+    ])
+    
+    if result.warnings:
+        for w in result.warnings:
+            lines.append(f"- ⚠️ {w}")
+    else:
+        lines.append("None")
+    
+    lines.extend([
+        f"",
+        f"---",
+        f"*Generated: {datetime.now(timezone.utc).isoformat()}*",
+    ])
+    
+    md_path.write_text("\n".join(lines), encoding="utf-8")
+    return md_path
+
+
+def generate_diffs_csv(result: ValidationResult, out_path: Path) -> Optional[Path]:
+    """Generate CSV of TV comparison diffs (if enabled and available)."""
+    if not result.tv_comparison_enabled or not result.tv_reference_available:
+        return None
+    
+    if not result.tv_top_mismatches:
+        return None
+    
+    csv_path = out_path / "derived_validation_diffs.csv"
+    with csv_path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["block_id", "field", "tv", "c1", "diff"])
+        writer.writeheader()
+        writer.writerows(result.tv_top_mismatches)
+    
+    return csv_path
+
+
+# ---------- Main ----------
+
+def main() -> int:
+    args = parse_args()
+    
+    start_date = parse_date(args.start_date)
+    end_date = parse_date(args.end_date)
+    
+    if end_date < start_date:
+        raise SystemExit("end-date must be on or after start-date")
+    
+    run_id = args.run_id or build_run_id(
+        args.symbol, start_date, end_date, args.mode, args.compare_tv
+    )
+    
+    result = ValidationResult(
+        run_id=run_id,
+        version=VERSION,
+        symbol=args.symbol,
+        start_date=str(start_date),
+        end_date=str(end_date),
+        mode=args.mode,
+        compare_tv=args.compare_tv,
+        tv_comparison_enabled=args.compare_tv,
+    )
+    
+    print(f"OVC Derived Validation v{VERSION}")
+    print(f"Run ID: {run_id}")
+    print(f"Symbol: {args.symbol}")
+    print(f"Range: {start_date} to {end_date}")
+    print(f"Mode: {args.mode}")
+    print(f"Compare TV: {args.compare_tv}")
+    print()
+    
+    dsn = resolve_dsn()
+    
+    with psycopg2.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            # Check required tables exist
+            if not table_exists(cur, "derived.ovc_c1_features_v0_1"):
+                result.errors.append("Table derived.ovc_c1_features_v0_1 does not exist")
+                result.status = "FAIL"
+                print("ERROR: C1 table not found")
+                return 1
+            
+            if not table_exists(cur, "derived.ovc_c2_features_v0_1"):
+                result.errors.append("Table derived.ovc_c2_features_v0_1 does not exist")
+                result.status = "FAIL"
+                print("ERROR: C2 table not found")
+                return 1
+            
+            # 1. Coverage parity
+            print("Checking coverage parity...")
+            coverage = check_coverage_parity(cur, args.symbol, start_date, end_date)
+            result.b_block_count = coverage["b_count"]
+            result.c1_row_count = coverage["c1_count"]
+            result.c2_row_count = coverage["c2_count"]
+            result.coverage_parity = coverage["parity"]
+            
+            if not coverage["parity"]:
+                msg = f"Coverage mismatch: B={coverage['b_count']}, C1={coverage['c1_count']}, C2={coverage['c2_count']}"
+                if args.mode == "fail":
+                    result.errors.append(msg)
+                else:
+                    result.warnings.append(msg)
+            
+            print(f"  B={coverage['b_count']}, C1={coverage['c1_count']}, C2={coverage['c2_count']}")
+            
+            # 2. Key uniqueness
+            print("Checking key uniqueness...")
+            result.c1_duplicates = check_duplicates(
+                cur, "derived.ovc_c1_features_v0_1", args.symbol, start_date, end_date
+            )
+            result.c2_duplicates = check_duplicates(
+                cur, "derived.ovc_c2_features_v0_1", args.symbol, start_date, end_date
+            )
+            
+            if result.c1_duplicates > 0:
+                result.errors.append(f"C1 has {result.c1_duplicates} duplicate block_ids")
+            if result.c2_duplicates > 0:
+                result.errors.append(f"C2 has {result.c2_duplicates} duplicate block_ids")
+            
+            print(f"  C1 duplicates: {result.c1_duplicates}, C2 duplicates: {result.c2_duplicates}")
+            
+            # 3. Null rates
+            print("Checking null rates...")
+            result.c1_null_rates = check_null_rates(
+                cur, "derived.ovc_c1_features_v0_1", C1_FEATURE_COLUMNS,
+                args.symbol, start_date, end_date
+            )
+            result.c2_null_rates = check_null_rates(
+                cur, "derived.ovc_c2_features_v0_1", C2_FEATURE_COLUMNS,
+                args.symbol, start_date, end_date
+            )
+            
+            # Check for NaN/Inf
+            nan_issues = check_nan_inf(
+                cur, "derived.ovc_c1_features_v0_1",
+                ["range", "body", "ret", "logret", "body_ratio", "close_pos", "upper_wick", "lower_wick", "clv"],
+                args.symbol, start_date, end_date
+            )
+            nan_issues.extend(check_nan_inf(
+                cur, "derived.ovc_c2_features_v0_1",
+                ["gap", "sess_high", "sess_low", "roll_avg_range_12", "roll_std_logret_12", "range_z_12", "rd_hi", "rd_lo", "rd_mid"],
+                args.symbol, start_date, end_date
+            ))
+            
+            for issue in nan_issues:
+                result.errors.append(issue)
+            
+            print(f"  C1 columns with >10% null: {sum(1 for r in result.c1_null_rates.values() if r > 0.1)}")
+            print(f"  C2 columns with >10% null: {sum(1 for r in result.c2_null_rates.values() if r > 0.1)}")
+            
+            # 4. Window_spec enforcement
+            print("Checking window_spec enforcement...")
+            ws_result = check_window_spec(cur, args.symbol, start_date, end_date)
+            result.c2_window_spec_valid = ws_result["valid"]
+            result.c2_window_spec_errors = ws_result["errors"]
+            
+            if not ws_result["valid"]:
+                if ws_result["null_count"] > 0:
+                    result.errors.append(f"C2 has {ws_result['null_count']} rows with NULL window_spec")
+                for err in ws_result["errors"]:
+                    result.errors.append(err)
+            
+            print(f"  Window_spec valid: {ws_result['valid']}")
+            
+            # 5. Determinism quickcheck
+            print(f"Running determinism quickcheck (sample={args.sample_size})...")
+            det_result = determinism_quickcheck(cur, args.symbol, start_date, end_date, args.sample_size)
+            result.determinism_sample_size = det_result["sample_size"]
+            result.determinism_mismatches = det_result["mismatches"]
+            result.determinism_details = det_result["details"]
+            
+            if det_result["mismatches"] > 0:
+                result.errors.append(f"Determinism check failed: {det_result['mismatches']} mismatches in {det_result['sample_size']} samples")
+            
+            print(f"  Sampled: {det_result['sample_size']}, Mismatches: {det_result['mismatches']}")
+            
+            # 6. TV comparison (optional)
+            if args.compare_tv:
+                print("Checking TV reference comparison...")
+                tv_result = check_tv_reference(cur, args.symbol, start_date, end_date)
+                result.tv_reference_available = tv_result.get("available", False)
+                
+                if result.tv_reference_available:
+                    result.tv_matched_blocks = tv_result.get("matched_blocks", 0)
+                    result.tv_diff_summary = tv_result.get("diff_summary", {})
+                    result.tv_top_mismatches = tv_result.get("top_mismatches", [])
+                    print(f"  TV blocks matched: {result.tv_matched_blocks}")
+                else:
+                    result.warnings.append(tv_result.get("message", "TV reference not available"))
+                    print(f"  {tv_result.get('message', 'TV reference not available')}")
+            
+            # Determine final status
+            if result.errors:
+                result.status = "FAIL"
+            elif result.warnings:
+                result.status = "PASS_WITH_WARNINGS"
+            else:
+                result.status = "PASS"
+            
+            # Store in QA schema if available
+            if table_exists(cur, "ovc_qa.derived_validation_run"):
+                print("Storing validation run in QA schema...")
+                store_validation_run(cur, result)
+                conn.commit()
+            else:
+                print("QA table not found, skipping storage")
+    
+    # Generate artifacts
+    print("\nGenerating artifacts...")
+    out_dir = Path(args.out) / "derived_validation" / run_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    
+    json_path = generate_report_json(result, out_dir)
+    md_path = generate_report_md(result, out_dir)
+    csv_path = generate_diffs_csv(result, out_dir)
+    
+    # Write meta
+    write_meta(out_dir, "derived_validation", run_id, sys.argv, {
+        "status": result.status,
+        "b_count": result.b_block_count,
+        "c1_count": result.c1_row_count,
+        "c2_count": result.c2_row_count,
+    })
+    
+    # Write LATEST pointer
+    component_root = Path(args.out) / "derived_validation"
+    write_latest(component_root, run_id)
+    
+    print(f"  JSON: {json_path}")
+    print(f"  Markdown: {md_path}")
+    if csv_path:
+        print(f"  Diffs CSV: {csv_path}")
+    
+    print(f"\n{'=' * 50}")
+    print(f"VALIDATION RESULT: {result.status}")
+    print(f"{'=' * 50}")
+    
+    if result.errors:
+        print("\nErrors:")
+        for e in result.errors:
+            print(f"  - {e}")
+    
+    if result.warnings:
+        print("\nWarnings:")
+        for w in result.warnings:
+            print(f"  - {w}")
+    
+    return 0 if result.status != "FAIL" else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
