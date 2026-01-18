@@ -43,8 +43,8 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --tv-csv C:\pa
 Expected headers include `time`, `open`, `high`, `low`, `close` (2H timeframe).
 
 ## B.2 Range Validation (multi-day)
-Run a range of NY dates and write reports to `reports/validation/` (gitignored).
-Outputs include per-day JSONL plus summary JSON/CSV keyed by the run id.
+Run a range of NY dates and write reports to `reports/validation/runs/<run_id>/`
+(gitignored). The latest run id is stored in `reports/validation/LATEST.txt`.
 
 Example (weekdays only, default):
 ```
@@ -62,9 +62,10 @@ python .\src\validate_range.py --symbol GBPUSD --start_ny 2024-01-01 --end_ny 20
 ```
 
 Outputs:
-- `reports/validation/validate_range_<run_id>_days.jsonl`
-- `reports/validation/validate_range_<run_id>_summary.json`
-- `reports/validation/validate_range_<run_id>_summary.csv`
+- `reports/validation/runs/<run_id>/days.jsonl`
+- `reports/validation/runs/<run_id>/summary.json`
+- `reports/validation/runs/<run_id>/summary.csv`
+- `reports/validation/LATEST.txt` (latest run id)
 
 Status semantics:
 - PASS: counts ok, boundary checks ok, and OHLC matches when TV rows exist for the run id.

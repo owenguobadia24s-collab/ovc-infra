@@ -19,6 +19,7 @@ from backfill_day import (
     resolve_dsn,
     resolve_qualified_table,
 )
+from ovc_artifacts import make_run_dir, write_latest, write_meta
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -150,7 +151,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tolerance", default="0.00001")
     parser.add_argument("--strict_derived", action="store_true")
     parser.add_argument("--max_days", type=int, default=None)
-    parser.add_argument("--out_dir", default="reports/validation")
+    parser.add_argument("--out_dir", default="reports")
+    parser.add_argument("--component_name", default="validation")
     return parser.parse_args()
 
 
@@ -360,9 +362,6 @@ def main() -> int:
     if args.max_days is not None and total_days > args.max_days:
         raise SystemExit(f"Range has {total_days} days, exceeds --max_days {args.max_days}.")
 
-    out_dir = Path(args.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
     range_run_id = build_range_run_id(
         args.symbol,
         start_ny,
@@ -373,9 +372,10 @@ def main() -> int:
         args.strict_derived,
     )
 
-    jsonl_path = out_dir / f"validate_range_{range_run_id}_days.jsonl"
-    csv_path = out_dir / f"validate_range_{range_run_id}_summary.csv"
-    summary_path = out_dir / f"validate_range_{range_run_id}_summary.json"
+    run_dir = make_run_dir(args.out_dir, args.component_name, range_run_id)
+    jsonl_path = run_dir / "days.jsonl"
+    csv_path = run_dir / "summary.csv"
+    summary_path = run_dir / "summary.json"
 
     weekend_days = sum(1 for day in iter_dates(start_ny, end_ny) if day.weekday() >= 5)
     eligible_days = total_days - weekend_days if args.weekdays_only else total_days
@@ -568,6 +568,29 @@ def main() -> int:
     }
 
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    write_meta(
+        run_dir,
+        args.component_name,
+        range_run_id,
+        list(sys.argv),
+        extra={
+            "args": {
+                "symbol": args.symbol,
+                "start_ny": start_ny.isoformat(),
+                "end_ny": end_ny.isoformat(),
+                "weekdays_only": args.weekdays_only,
+                "tolerance_seconds": args.tolerance_seconds,
+                "tolerance": str(tolerance),
+                "strict_derived": args.strict_derived,
+                "max_days": args.max_days,
+                "out_dir": args.out_dir,
+                "component_name": args.component_name,
+            },
+            "totals": totals,
+            "coverage": coverage_stats,
+        },
+    )
+    latest_path = write_latest(Path(args.out_dir) / args.component_name, range_run_id)
 
     print(f"range_run_id: {range_run_id}")
     print(f"summary_json: {summary_path}")
@@ -578,6 +601,7 @@ def main() -> int:
         f"attempted={totals['attempted']} passed={totals['passed']} "
         f"failed={totals['failed']} skipped={totals['skipped']}"
     )
+    print(f"latest_path: {latest_path}")
 
     return 2 if totals["failed"] else 0
 
