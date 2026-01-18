@@ -7,6 +7,9 @@
 - Branches still carrying unmerged commits: `pr/infra-min-v0.1.1` (contains two commits not on main; review before merge/delete).
 - Branches already merged into main: `pr/pine-min-export-v0.1_min_r1` and `origin/wip/infra-contract-validation`.
 
+## Pipeline status summary
+- P2: PASS (canonical backfill writes MIN facts into `ovc.ovc_blocks_v01_1_min`).
+
 ## Source of truth paths
 - Worker: `infra/ovc-webhook/src/index.ts`
 - Contract: `contracts/export_contract_v0.1.1_min.json`
@@ -32,6 +35,15 @@
 ```powershell
 python .\scripts\pipeline_status.py --mode detect
 ```
+
+### P2 weekday green run (canonical backfill + validation)
+```powershell
+$env:BACKFILL_DATE_NY="2024-01-10"
+python .\src\backfill_oanda_2h_checkpointed.py
+python .\scripts\pipeline_status.py --mode detect --ignore-unknown
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2024-01-10
+```
+Idempotency check: rerun the backfill command; expect `inserted_est=0`.
 
 ### Validate an export locally
 ```powershell

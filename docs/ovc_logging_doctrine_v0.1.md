@@ -28,6 +28,15 @@ legacy/non-canonical.
 - Canonical P2 backfill (Historical Backfill -> Facts): `src/backfill_oanda_2h_checkpointed.py`
 - Oanda export utility (CSV-only): `scripts/oanda_export_2h_day.py`
 - Canonical MIN target table: `ovc.ovc_blocks_v01_1_min` (PK: `block_id`)
+- Status: PASS (canonical backfill writes MIN facts with idempotent upsert)
+
+Proof / Evidence:
+- Test date: 2024-01-10 (weekday)
+- Observed: H1 candles fetched=24; 2H blocks computed=12
+- Rerun: inserted_est=0 (idempotent)
+- Target: `ovc.ovc_blocks_v01_1_min`
+- Key: `block_id` upsert aligned with P1
+- Note: Weekend/market-closure sessions may return 0 candles; use weekday dates for sanity tests.
 
 ### P3 Facts -> Derived (Derived/eval tables)
 - Derived feature view: `sql/derived_v0_1.sql`

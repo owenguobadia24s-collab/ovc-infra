@@ -267,7 +267,6 @@ def fetch_oanda_h1(start_utc: datetime, end_utc: datetime) -> pd.DataFrame:
         access_token=OANDA_API_TOKEN,
         environment="practice" if OANDA_ENV == "practice" else "live",
     )
-
     slice_days = int(os.environ.get("OANDA_SLICE_DAYS", "3"))
     step = timedelta(days=slice_days)
 
