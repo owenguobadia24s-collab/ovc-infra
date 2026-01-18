@@ -150,6 +150,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tolerance_seconds", type=int, default=10)
     parser.add_argument("--tolerance", default="0.00001")
     parser.add_argument("--strict_derived", action="store_true")
+    parser.add_argument(
+        "--missing_facts",
+        choices=("fail", "skip"),
+        default="fail",
+        help=(
+            "Behavior when no canonical MIN facts exist for an eligible weekday. "
+            "'fail' (default) enforces backfill-before-validation; 'skip' marks the day as SKIP "
+            "with reason 'facts_not_backfilled'."
+        ),
+    )
     parser.add_argument("--max_days", type=int, default=None)
     parser.add_argument("--out_dir", default="reports")
     parser.add_argument("--component_name", default="validation")
@@ -171,10 +181,11 @@ def build_range_run_id(
     tolerance_seconds: int,
     tolerance: Decimal,
     strict_derived: bool,
+    missing_facts_policy: str,
 ) -> str:
     seed = (
         f"validate_range:{symbol}:{start_ny.isoformat()}:{end_ny.isoformat()}:"
-        f"{weekdays_only}:{tolerance_seconds}:{tolerance}:{strict_derived}"
+        f"{weekdays_only}:{tolerance_seconds}:{tolerance}:{strict_derived}:{missing_facts_policy}"
     )
     return str(uuid.uuid5(uuid.NAMESPACE_URL, seed))
 
@@ -268,10 +279,52 @@ def evaluate_day(
     tv_available: bool,
     outcomes_table: str,
     outcomes_exists: bool,
+    missing_facts_policy: str,
 ):
     cur.execute(COUNT_OVC_SQL, (symbol, date_ny))
     (ovc_blocks,) = cur.fetchone()
     ovc_blocks = int(ovc_blocks)
+
+    weekend = date_ny.weekday() >= 5
+    outcome_blocks = fetch_outcome_blocks(cur, symbol, date_ny, outcomes_table, outcomes_exists)
+
+    tv_rows = 0
+    if tv_available:
+        cur.execute(TV_ROWS_SQL, (run_id, symbol, date_ny))
+        (tv_rows,) = cur.fetchone()
+        tv_rows = int(tv_rows)
+
+    if ovc_blocks == 0:
+        reasons = []
+        skip_reasons = []
+
+        if weekend:
+            skip_reasons.append("weekend_no_blocks")
+        else:
+            tag = "facts_not_backfilled"
+            if missing_facts_policy == "skip":
+                skip_reasons.append(tag)
+            else:
+                reasons.append(tag)
+
+        if tv_available:
+            if tv_rows == 0:
+                skip_reasons.append("tv_ohlc_missing")
+        else:
+            skip_reasons.append("tv_table_missing")
+
+        return {
+            "expected_blocks": 12,
+            "ovc_blocks": ovc_blocks,
+            "outcome_blocks": outcome_blocks,
+            "mismatch_count": None,
+            "tv_rows": tv_rows,
+            "missing_letters": [],
+            "duration_issues": None,
+            "schedule_issues": None,
+            "reasons": reasons,
+            "skip_reasons": skip_reasons,
+        }
 
     cur.execute(MISSING_BLOCKS_SQL, (symbol, date_ny))
     missing_letters = [row[0] for row in cur.fetchall()]
@@ -284,14 +337,8 @@ def evaluate_day(
     (schedule_issues,) = cur.fetchone()
     schedule_issues = int(schedule_issues)
 
-    outcome_blocks = fetch_outcome_blocks(cur, symbol, date_ny, outcomes_table, outcomes_exists)
-
-    tv_rows = 0
     mismatch_count = 0
     if tv_available:
-        cur.execute(TV_ROWS_SQL, (run_id, symbol, date_ny))
-        (tv_rows,) = cur.fetchone()
-        tv_rows = int(tv_rows)
         if tv_rows:
             cur.execute(
                 MISMATCH_SQL,
@@ -303,20 +350,14 @@ def evaluate_day(
     reasons = []
     skip_reasons = []
 
-    weekend_no_blocks = ovc_blocks == 0 and date_ny.weekday() >= 5
-    if weekend_no_blocks:
-        skip_reasons.append("weekend_no_blocks")
-    else:
-        if ovc_blocks == 0:
-            reasons.append("missing_ovc_blocks")
-        if ovc_blocks != 12:
-            reasons.append("block_count_mismatch")
-        if missing_letters:
-            reasons.append("missing_block_letters")
-        if duration_issues:
-            reasons.append("duration_gap_mismatch")
-        if schedule_issues:
-            reasons.append("schedule_mismatch")
+    if ovc_blocks != 12:
+        reasons.append("block_count_mismatch")
+    if missing_letters:
+        reasons.append("missing_block_letters")
+    if duration_issues:
+        reasons.append("duration_gap_mismatch")
+    if schedule_issues:
+        reasons.append("schedule_mismatch")
 
     if tv_available:
         if tv_rows == 0:
@@ -370,6 +411,7 @@ def main() -> int:
         args.tolerance_seconds,
         tolerance,
         args.strict_derived,
+        args.missing_facts,
     )
 
     run_dir = make_run_dir(args.out_dir, args.component_name, range_run_id)
@@ -464,6 +506,7 @@ def main() -> int:
                         tv_available,
                         outcomes_table,
                         outcomes_exists,
+                        args.missing_facts,
                     )
 
                 reasons = list(eval_result["reasons"])
@@ -557,7 +600,10 @@ def main() -> int:
         "tolerance_seconds": args.tolerance_seconds,
         "tolerance": str(tolerance),
         "strict_derived": args.strict_derived,
+        "missing_facts": args.missing_facts,
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "validated_days": totals["attempted"],
+        "skipped_days": totals["skipped"],
         "totals": totals,
         "coverage": coverage_stats,
         "top_failure_reasons": top_failure_reasons,
@@ -582,6 +628,7 @@ def main() -> int:
                 "tolerance_seconds": args.tolerance_seconds,
                 "tolerance": str(tolerance),
                 "strict_derived": args.strict_derived,
+                "missing_facts": args.missing_facts,
                 "max_days": args.max_days,
                 "out_dir": args.out_dir,
                 "component_name": args.component_name,

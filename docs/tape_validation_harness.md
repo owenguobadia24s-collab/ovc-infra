@@ -32,6 +32,11 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16
 ```
 For first-pass sanity checks, use a weekday date (e.g., 2024-01-10) since weekend sessions can yield 0 candles.
 
+If you run `validate_day.py` on a weekday with no canonical facts, it fails by default (enforces ordering). To explicitly skip:
+```
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2024-01-10 --missing_facts skip
+```
+
 Validation packs:
 - Core pack always runs (facts/tape checks).
 - Derived pack runs only if `derived.ovc_block_features_v0_1` exists; otherwise it prints a SKIPPED message.
@@ -43,6 +48,10 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --tv-csv C:\pa
 Expected headers include `time`, `open`, `high`, `low`, `close` (2H timeframe).
 
 ## B.2 Range Validation (multi-day)
+Ordering rule (enforced by default):
+- Backfill must precede validation for any weekday you expect to validate.
+- If canonical MIN facts are missing for an eligible weekday, `validate_range.py` fails by default with reason `facts_not_backfilled` (use `--missing_facts skip` only when you explicitly want coverage scanning).
+
 Run a range of NY dates and write reports to `reports/validation/runs/<run_id>/`
 (gitignored). The latest run id is stored in `reports/validation/LATEST.txt`.
 
@@ -54,6 +63,11 @@ python .\src\validate_range.py --symbol GBPUSD --start_ny 2024-01-01 --end_ny 20
 Include weekends:
 ```
 python .\src\validate_range.py --symbol GBPUSD --start_ny 2024-01-01 --end_ny 2024-01-31 --include_weekends
+```
+
+Skip missing facts instead of failing (useful when scanning large ranges before backfill coverage is complete):
+```
+python .\src\validate_range.py --symbol GBPUSD --start_ny 2024-01-01 --end_ny 2024-01-31 --missing_facts skip
 ```
 
 Safety cap:
@@ -70,7 +84,11 @@ Outputs:
 Status semantics:
 - PASS: counts ok, boundary checks ok, and OHLC matches when TV rows exist for the run id.
 - SKIP: weekend or missing TV rows for the run id (no tape loaded).
-- FAIL: missing blocks, boundary issues, or OHLC mismatches.
+- FAIL: missing canonical facts (not backfilled), missing blocks, boundary issues, or OHLC mismatches.
+
+Missing facts policy (range runner):
+- Default: missing facts on an eligible weekday is `FAIL` with reason `facts_not_backfilled` (enforces backfill-before-validation).
+- Optional: `--missing_facts skip` marks those days as `SKIP` with reason `facts_not_backfilled`.
 
 ## HISTORICAL INGESTION (CSV) (EXPERIMENTAL - NON-CANONICAL)
 Status: EXPERIMENTAL. This CSV path is not the canonical P2 workflow; canonical

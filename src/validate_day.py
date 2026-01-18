@@ -13,6 +13,7 @@ import psycopg2
 from backfill_day import load_env, parse_date, print_backfill_summary, resolve_dsn, run_backfill
 from ingest_history_day import DEFAULT_SOURCE as HISTORY_DEFAULT_SOURCE, ingest_history_day
 from utils.csv_locator import resolve_csv_path, set_auto_pick
+from validate_range import evaluate_day as evaluate_range_day, table_exists as pg_table_exists
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SQL_PACK_CORE_PATH = REPO_ROOT / "sql" / "qa_validation_pack_core.sql"
@@ -216,6 +217,16 @@ def main() -> int:
     parser.add_argument("--run-id", dest="run_id")
     parser.add_argument("--tolerance", default="0.00001")
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument(
+        "--missing_facts",
+        choices=("fail", "skip"),
+        default="fail",
+        help=(
+            "Behavior when no canonical MIN facts exist for the date. "
+            "'fail' (default) enforces backfill-before-validation; 'skip' exits 0 after printing "
+            "status=SKIP and reason=facts_not_backfilled."
+        ),
+    )
     parser.add_argument("--tv-csv", dest="tv_csv")
     parser.add_argument("--ingest-history-csv", dest="ingest_history_csv")
     parser.add_argument("--auto-pick", action="store_true")
@@ -273,6 +284,23 @@ def main() -> int:
         if skipped:
             print(f"tv_ohlc_rows_skipped: {skipped}")
 
+    if result.min_count == 0:
+        if date_ny.weekday() >= 5:
+            print("status: SKIP")
+            print("skip_reason: weekend_no_blocks")
+            return 0
+
+        if args.missing_facts == "skip":
+            print("status: SKIP")
+            print("skip_reason: facts_not_backfilled")
+            print("skip_reason_code: FACTS_NOT_BACKFILLED")
+            return 0
+
+        raise SystemExit(
+            "No canonical MIN facts found for this weekday (facts_not_backfilled). "
+            "Run canonical backfill first, or pass --missing_facts skip."
+        )
+
     psql_command, psql_args = _build_psql_command(
         result.run_id,
         result.symbol,
@@ -316,6 +344,39 @@ def main() -> int:
                 raise SystemExit(f"psql exited with code {completed.returncode}")
     else:
         print("psql not found; run the command above manually.")
+
+    with psycopg2.connect(dsn) as conn:
+        with conn.cursor() as cur:
+            tv_available = pg_table_exists(cur, "ovc_qa.tv_ohlc_2h")
+            outcomes_exists = pg_table_exists(cur, result.outcomes_table)
+            eval_result = evaluate_range_day(
+                cur,
+                result.symbol,
+                result.date_ny,
+                result.run_id,
+                PSQL_TOLERANCE_SECONDS,
+                tolerance,
+                tv_available,
+                result.outcomes_table,
+                outcomes_exists,
+                args.missing_facts,
+            )
+
+    reasons = list(eval_result["reasons"])
+    skip_reasons = list(eval_result["skip_reasons"])
+    if reasons:
+        status = "FAIL"
+        merged = reasons + skip_reasons
+    elif skip_reasons:
+        status = "SKIP"
+        merged = skip_reasons
+    else:
+        status = "PASS"
+        merged = []
+
+    print(f"status: {status}")
+    if merged:
+        print(f"reasons: {';'.join(merged)}")
 
     return 0
 
