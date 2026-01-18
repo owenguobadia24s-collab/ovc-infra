@@ -46,6 +46,17 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --ingest-histo
 ```
 3. Expect `blocks_count=12`.
 
+CSV locator (resilient path resolution):
+- If the path is wrong, the tool searches common locations and can auto-pick the top match.
+- Example with a placeholder filename:
+```
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --ingest-history-csv "ovc_hist_test_2h.csv" --auto-pick
+```
+- Example using a search pattern:
+```
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --csv-search "*hist*2h*.csv" --auto-pick
+```
+
 CSV timezone assumptions:
 - CSV timestamps are treated as bar start times.
 - Default CSV timezone is `America/New_York`.

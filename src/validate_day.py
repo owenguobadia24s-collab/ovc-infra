@@ -12,6 +12,7 @@ import psycopg2
 
 from backfill_day import load_env, parse_date, print_backfill_summary, resolve_dsn, run_backfill
 from ingest_history_day import DEFAULT_SOURCE as HISTORY_DEFAULT_SOURCE, ingest_history_day
+from utils.csv_locator import resolve_csv_path, set_auto_pick
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SQL_PACK_PATH = REPO_ROOT / "sql" / "qa_validation_pack.sql"
@@ -198,6 +199,8 @@ def main() -> int:
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--tv-csv", dest="tv_csv")
     parser.add_argument("--ingest-history-csv", dest="ingest_history_csv")
+    parser.add_argument("--auto-pick", action="store_true")
+    parser.add_argument("--csv-search", dest="csv_search")
     args = parser.parse_args()
 
     load_env()
@@ -209,11 +212,18 @@ def main() -> int:
     except InvalidOperation as exc:
         raise SystemExit(f"Invalid tolerance value: {args.tolerance}") from exc
 
-    if args.ingest_history_csv:
+    if args.ingest_history_csv or args.csv_search:
+        set_auto_pick(args.auto_pick)
+        csv_path = resolve_csv_path(
+            args.ingest_history_csv,
+            args.csv_search,
+            args.symbol,
+            timeframe_hint="2h",
+        )
         ingest_result = ingest_history_day(
             symbol=args.symbol,
             date_ny=date_ny,
-            csv_path=args.ingest_history_csv,
+            csv_path=csv_path,
             source=HISTORY_DEFAULT_SOURCE,
             csv_tz=NY_TZ.key,
             strict=args.strict,
