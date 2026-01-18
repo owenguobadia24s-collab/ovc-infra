@@ -10,6 +10,7 @@ from psycopg2.extras import Json
 
 from backfill_day import load_env, parse_date, resolve_dsn
 from history_sources.tv_csv import load_tv_csv
+from utils.csv_locator import resolve_csv_path, set_auto_pick
 
 NY_TZ = ZoneInfo("America/New_York")
 
@@ -387,19 +388,30 @@ def main() -> int:
     parser.add_argument("--symbol", default="GBPUSD")
     parser.add_argument("--date_ny", required=True)
     parser.add_argument("--source", default=DEFAULT_SOURCE)
-    parser.add_argument("--csv", required=True)
+    parser.add_argument("--csv")
     parser.add_argument("--tz", default=NY_TZ.key, dest="csv_tz")
+    parser.add_argument("--auto-pick", action="store_true")
+    parser.add_argument("--csv-search", dest="csv_search")
     parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
 
     load_env()
     dsn, _ = resolve_dsn()
     date_ny = parse_date(args.date_ny)
+    if not args.csv and not args.csv_search:
+        raise SystemExit("You must pass --csv or --csv-search.")
+    set_auto_pick(args.auto_pick)
+    csv_path = resolve_csv_path(
+        args.csv,
+        args.csv_search,
+        args.symbol,
+        timeframe_hint="2h",
+    )
 
     result = ingest_history_day(
         symbol=args.symbol,
         date_ny=date_ny,
-        csv_path=args.csv,
+        csv_path=csv_path,
         source=args.source,
         csv_tz=args.csv_tz,
         strict=args.strict,
