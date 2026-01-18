@@ -11,6 +11,7 @@ from dateutil import parser as date_parser
 import psycopg2
 
 from backfill_day import load_env, parse_date, print_backfill_summary, resolve_dsn, run_backfill
+from ingest_history_day import DEFAULT_SOURCE as HISTORY_DEFAULT_SOURCE, ingest_history_day
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SQL_PACK_PATH = REPO_ROOT / "sql" / "qa_validation_pack.sql"
@@ -196,6 +197,7 @@ def main() -> int:
     parser.add_argument("--tolerance", default="0.00001")
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--tv-csv", dest="tv_csv")
+    parser.add_argument("--ingest-history-csv", dest="ingest_history_csv")
     args = parser.parse_args()
 
     load_env()
@@ -206,6 +208,20 @@ def main() -> int:
         tolerance = Decimal(args.tolerance)
     except InvalidOperation as exc:
         raise SystemExit(f"Invalid tolerance value: {args.tolerance}") from exc
+
+    if args.ingest_history_csv:
+        ingest_result = ingest_history_day(
+            symbol=args.symbol,
+            date_ny=date_ny,
+            csv_path=args.ingest_history_csv,
+            source=HISTORY_DEFAULT_SOURCE,
+            csv_tz=NY_TZ.key,
+            strict=args.strict,
+            dsn=dsn,
+        )
+        print(f"history_blocks_ingested: {ingest_result.row_count}")
+        if ingest_result.skipped:
+            print(f"history_rows_skipped: {ingest_result.skipped}")
 
     result = run_backfill(
         symbol=args.symbol,

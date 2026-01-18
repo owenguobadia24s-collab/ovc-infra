@@ -35,6 +35,42 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --tv-csv C:\pa
 ```
 Expected headers include `time`, `open`, `high`, `low`, `close` (2H timeframe).
 
+## HISTORICAL INGESTION (CSV)
+Use this to backfill one NY trading day into `ovc.ovc_blocks_v01_1_min` before validation.
+
+Steps:
+1. Export a 2H TradingView CSV for the target day.
+2. Run:
+```
+python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --ingest-history-csv C:\path\to\tv_2h.csv
+```
+3. Expect `blocks_count=12`.
+
+CSV timezone assumptions:
+- CSV timestamps are treated as bar start times.
+- Default CSV timezone is `America/New_York`.
+- If your CSV uses a different timezone, run:
+```
+python .\src\ingest_history_day.py --symbol GBPUSD --date_ny 2026-01-16 --csv C:\path\to\tv_2h.csv --tz Europe/London
+```
+Then rerun `validate_day.py` without `--ingest-history-csv`.
+
+Block letter mapping (NY 17:00 -> 17:00):
+| Block | NY Time |
+| --- | --- |
+| A | 17:00-19:00 |
+| B | 19:00-21:00 |
+| C | 21:00-23:00 |
+| D | 23:00-01:00 |
+| E | 01:00-03:00 |
+| F | 03:00-05:00 |
+| G | 05:00-07:00 |
+| H | 07:00-09:00 |
+| I | 09:00-11:00 |
+| J | 11:00-13:00 |
+| K | 13:00-15:00 |
+| L | 15:00-17:00 |
+
 Optional convenience wrapper:
 ```
 .\scripts\validate_day.ps1 -DateNy 2026-01-16 -Symbol GBPUSD
