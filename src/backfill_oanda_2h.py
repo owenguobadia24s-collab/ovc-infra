@@ -1,3 +1,4 @@
+﻿# LEGACY: use backfill_oanda_2h_checkpointed.py for canonical P2 backfill.
 import os
 from datetime import datetime, timedelta, timezone
 

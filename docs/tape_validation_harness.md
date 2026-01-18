@@ -38,8 +38,8 @@ python .\src\validate_day.py --symbol GBPUSD --date_ny 2026-01-16 --tv-csv C:\pa
 Expected headers include `time`, `open`, `high`, `low`, `close` (2H timeframe).
 
 ## HISTORICAL INGESTION (CSV) (EXPERIMENTAL - NON-CANONICAL)
-Status: EXPERIMENTAL. This CSV path is not the canonical P2 workflow; P2 is still
-unselected.
+Status: EXPERIMENTAL. This CSV path is not the canonical P2 workflow; canonical
+P2 is `src/backfill_oanda_2h_checkpointed.py`.
 Use this to backfill one NY trading day into `ovc.ovc_blocks_v01_1_min` before validation.
 
 Steps:
