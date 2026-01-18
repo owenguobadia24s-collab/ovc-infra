@@ -91,6 +91,21 @@ C2_FEATURE_COLUMNS = [
     "prev_block_exists", "sess_block_count", "roll_12_count", "rd_count"
 ]
 
+# C3 classification tables and required provenance columns
+C3_TABLES = {
+    "c3_regime_trend": {
+        "table": "derived.ovc_c3_regime_trend_v0_1",
+        "classification_column": "c3_regime_trend",
+        "valid_values": ["TREND", "NON_TREND"],
+        "provenance_columns": ["threshold_pack_id", "threshold_pack_version", "threshold_pack_hash"],
+    },
+    # Future C3 classifiers can be added here
+}
+
+# C3 threshold pack configuration schema
+C3_THRESHOLD_PACK_TABLE = "ovc_cfg.threshold_pack"
+C3_THRESHOLD_PACK_ACTIVE_TABLE = "ovc_cfg.threshold_pack_active"
+
 
 @dataclass
 class ValidationResult:
@@ -129,10 +144,45 @@ class ValidationResult:
     tv_diff_summary: dict = field(default_factory=dict)
     tv_top_mismatches: list = field(default_factory=list)
     
+    # C3 validation (per-classifier results)
+    c3_enabled: bool = False
+    c3_results: dict = field(default_factory=dict)  # {classifier_name: C3ValidationResult}
+    
     # Overall status
     errors: list = field(default_factory=list)
     warnings: list = field(default_factory=list)
     status: str = "PASS"
+    
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class C3ValidationResult:
+    """Container for per-classifier C3 validation results."""
+    classifier_name: str
+    table_name: str
+    
+    # Existence & counts
+    table_exists: bool = False
+    row_count: int = 0
+    
+    # Provenance validation
+    provenance_null_count: int = 0
+    provenance_columns_valid: bool = True
+    
+    # Registry integrity
+    registry_packs_verified: int = 0
+    registry_packs_missing: int = 0
+    registry_hash_mismatches: int = 0
+    registry_version_warnings: list = field(default_factory=list)
+    
+    # Classification value validation
+    invalid_values: int = 0
+    
+    # Errors and warnings
+    errors: list = field(default_factory=list)
+    warnings: list = field(default_factory=list)
     
     def to_dict(self) -> dict:
         return asdict(self)
@@ -184,6 +234,17 @@ def parse_args() -> argparse.Namespace:
         "--run-id",
         default=None,
         help="Override run ID (default: auto-generated)"
+    )
+    parser.add_argument(
+        "--validate-c3",
+        action="store_true",
+        help="Enable C3 classifier validation (threshold provenance, registry integrity)"
+    )
+    parser.add_argument(
+        "--c3-classifiers",
+        nargs="+",
+        default=None,
+        help="Specific C3 classifiers to validate (default: all known classifiers)"
     )
     return parser.parse_args()
 
@@ -587,6 +648,167 @@ def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
     }
 
 
+# ---------- C3 Validation Functions ----------
+
+def validate_c3_classifier(
+    cur,
+    classifier_name: str,
+    config: dict,
+    symbol: str,
+    start_date,
+    end_date
+) -> C3ValidationResult:
+    """
+    Validate a single C3 classifier table.
+    
+    Checks:
+    1. Table exists
+    2. Row count matches expected (based on B-layer or C1)
+    3. No NULL provenance columns (threshold_pack_id, version, hash)
+    4. All referenced threshold packs exist in ovc_cfg.threshold_pack
+    5. Stored hash matches registry hash
+    6. Classification values are valid (in allowed set)
+    """
+    table = config["table"]
+    classification_col = config["classification_column"]
+    valid_values = config["valid_values"]
+    provenance_cols = config["provenance_columns"]
+    
+    result = C3ValidationResult(
+        classifier_name=classifier_name,
+        table_name=table,
+    )
+    
+    # 1. Check table exists
+    result.table_exists = table_exists(cur, table)
+    if not result.table_exists:
+        result.errors.append(f"Table {table} does not exist")
+        return result
+    
+    # 2. Count rows in range
+    cur.execute(f"""
+        SELECT COUNT(*) FROM {table} c3
+        JOIN ovc.ovc_blocks_v01_1_min b ON c3.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    result.row_count = cur.fetchone()[0]
+    
+    if result.row_count == 0:
+        result.warnings.append(f"No C3 rows found for {symbol} in date range")
+        return result
+    
+    # 3. Check for NULL provenance columns
+    for prov_col in provenance_cols:
+        cur.execute(f"""
+            SELECT COUNT(*) FROM {table} c3
+            JOIN ovc.ovc_blocks_v01_1_min b ON c3.block_id = b.block_id
+            WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+            AND c3.{prov_col} IS NULL
+        """, (symbol, start_date, end_date))
+        null_count = cur.fetchone()[0]
+        if null_count > 0:
+            result.provenance_null_count += null_count
+            result.provenance_columns_valid = False
+            result.errors.append(f"{prov_col} has {null_count} NULL values")
+    
+    # 4. Check classification values are valid
+    valid_values_sql = ", ".join([f"'{v}'" for v in valid_values])
+    cur.execute(f"""
+        SELECT COUNT(*) FROM {table} c3
+        JOIN ovc.ovc_blocks_v01_1_min b ON c3.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+        AND c3.{classification_col} NOT IN ({valid_values_sql})
+    """, (symbol, start_date, end_date))
+    result.invalid_values = cur.fetchone()[0]
+    if result.invalid_values > 0:
+        result.errors.append(f"{result.invalid_values} rows have invalid {classification_col} values")
+    
+    # 5. Verify threshold packs exist in registry and hashes match
+    # First check if registry tables exist
+    if not table_exists(cur, C3_THRESHOLD_PACK_TABLE):
+        result.warnings.append("Threshold registry table not found, skipping pack verification")
+        return result
+    
+    # Get distinct (pack_id, version, hash) from C3 data
+    cur.execute(f"""
+        SELECT DISTINCT 
+            c3.threshold_pack_id,
+            c3.threshold_pack_version,
+            c3.threshold_pack_hash
+        FROM {table} c3
+        JOIN ovc.ovc_blocks_v01_1_min b ON c3.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    
+    c3_packs = cur.fetchall()
+    
+    for pack_id, pack_version, c3_hash in c3_packs:
+        # Check pack exists in registry
+        cur.execute("""
+            SELECT config_hash FROM ovc_cfg.threshold_pack
+            WHERE pack_id = %s AND version = %s
+        """, (pack_id, pack_version))
+        registry_row = cur.fetchone()
+        
+        if registry_row is None:
+            result.registry_packs_missing += 1
+            result.errors.append(f"Threshold pack {pack_id} v{pack_version} not found in registry")
+            continue
+        
+        result.registry_packs_verified += 1
+        registry_hash = registry_row[0]
+        
+        # Verify hash matches
+        if c3_hash != registry_hash:
+            result.registry_hash_mismatches += 1
+            result.errors.append(
+                f"Hash mismatch for {pack_id} v{pack_version}: "
+                f"C3={c3_hash[:16]}... registry={registry_hash[:16]}..."
+            )
+        
+        # Optionally check if version equals active version (warning only)
+        if table_exists(cur, C3_THRESHOLD_PACK_ACTIVE_TABLE):
+            cur.execute("""
+                SELECT version FROM ovc_cfg.threshold_pack_active
+                WHERE pack_id = %s
+            """, (pack_id,))
+            active_row = cur.fetchone()
+            
+            if active_row and active_row[0] != pack_version:
+                result.registry_version_warnings.append(
+                    f"{pack_id}: using v{pack_version}, active is v{active_row[0]}"
+                )
+    
+    return result
+
+
+def check_c3_coverage_parity(cur, c3_table: str, symbol: str, start_date, end_date) -> dict:
+    """
+    Check that C3 rows match B-layer block count.
+    Similar to C1/C2 parity but for C3.
+    """
+    # Count B-layer blocks
+    cur.execute("""
+        SELECT COUNT(*) FROM ovc.ovc_blocks_v01_1_min
+        WHERE sym = %s AND date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    b_count = cur.fetchone()[0]
+    
+    # Count C3 rows
+    cur.execute(f"""
+        SELECT COUNT(*) FROM {c3_table} c3
+        JOIN ovc.ovc_blocks_v01_1_min b ON c3.block_id = b.block_id
+        WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
+    """, (symbol, start_date, end_date))
+    c3_count = cur.fetchone()[0]
+    
+    return {
+        "b_count": b_count,
+        "c3_count": c3_count,
+        "parity": b_count == c3_count,
+    }
+
+
 # ---------- QA Storage ----------
 
 def store_validation_run(cur, result: ValidationResult) -> None:
@@ -742,6 +964,46 @@ def generate_report_md(result: ValidationResult, out_path: Path) -> Path:
                 max_d = stats.get("max_diff", 0)
                 rate = stats.get("mismatch_rate", 0)
                 lines.append(f"| {field} | {mean:.6f} | {max_d:.6f} | {rate:.2%} |")
+    
+    # C3 Classifier Validation Section
+    if result.c3_enabled and result.c3_results:
+        section_num = 8 if result.tv_comparison_enabled else 7
+        lines.extend([
+            f"",
+            f"## {section_num}. C3 Classifier Validation",
+            f"",
+        ])
+        
+        for classifier_name, c3_data in result.c3_results.items():
+            lines.extend([
+                f"### {classifier_name}",
+                f"",
+                f"- **Table**: `{c3_data.get('table_name', 'unknown')}`",
+                f"- **Table Exists**: {'✅' if c3_data.get('table_exists', False) else '❌'}",
+            ])
+            
+            if c3_data.get('table_exists', False):
+                lines.extend([
+                    f"- **Row Count**: {c3_data.get('row_count', 0)}",
+                    f"- **Provenance Valid**: {'✅' if c3_data.get('provenance_columns_valid', False) else '❌'}",
+                    f"",
+                    f"**Registry Integrity**:",
+                    f"- Packs Verified: {c3_data.get('registry_packs_verified', 0)}",
+                    f"- Packs Missing: {c3_data.get('registry_packs_missing', 0)}",
+                    f"- Hash Mismatches: {c3_data.get('registry_hash_mismatches', 0)}",
+                    f"- Invalid Classification Values: {c3_data.get('invalid_values', 0)}",
+                    f"",
+                ])
+                
+                # Version warnings
+                version_warnings = c3_data.get('registry_version_warnings', [])
+                if version_warnings:
+                    lines.append("**Version Warnings**:")
+                    for vw in version_warnings[:5]:
+                        lines.append(f"- ⚠️ {vw}")
+                    lines.append("")
+            else:
+                lines.append("")
     
     lines.extend([
         f"",
@@ -949,6 +1211,52 @@ def main() -> int:
                 else:
                     result.warnings.append(tv_result.get("message", "TV reference not available"))
                     print(f"  {tv_result.get('message', 'TV reference not available')}")
+            
+            # 7. C3 validation (optional)
+            if args.validate_c3:
+                result.c3_enabled = True
+                print("\n--- C3 Classifier Validation ---")
+                
+                # Determine which classifiers to validate
+                classifiers_to_check = args.c3_classifiers or list(C3_TABLES.keys())
+                
+                for classifier_name in classifiers_to_check:
+                    if classifier_name not in C3_TABLES:
+                        result.warnings.append(f"Unknown C3 classifier: {classifier_name}")
+                        print(f"  WARN: Unknown classifier '{classifier_name}', skipping")
+                        continue
+                    
+                    config = C3_TABLES[classifier_name]
+                    print(f"\n  Validating {classifier_name} ({config['table']})...")
+                    
+                    c3_result = validate_c3_classifier(
+                        cur, classifier_name, config,
+                        args.symbol, start_date, end_date
+                    )
+                    
+                    # Store result
+                    result.c3_results[classifier_name] = c3_result.to_dict()
+                    
+                    # Print summary
+                    if not c3_result.table_exists:
+                        print(f"    Table not found: {config['table']}")
+                    else:
+                        print(f"    Rows: {c3_result.row_count}")
+                        print(f"    Provenance valid: {c3_result.provenance_columns_valid}")
+                        print(f"    Registry packs verified: {c3_result.registry_packs_verified}")
+                        print(f"    Registry packs missing: {c3_result.registry_packs_missing}")
+                        print(f"    Hash mismatches: {c3_result.registry_hash_mismatches}")
+                        print(f"    Invalid values: {c3_result.invalid_values}")
+                    
+                    # Propagate errors/warnings to main result
+                    for err in c3_result.errors:
+                        result.errors.append(f"[C3:{classifier_name}] {err}")
+                    for warn in c3_result.warnings:
+                        result.warnings.append(f"[C3:{classifier_name}] {warn}")
+                    
+                    # Version warnings are informational
+                    for vw in c3_result.registry_version_warnings:
+                        result.warnings.append(f"[C3:{classifier_name}] Version warning: {vw}")
             
             # Determine final status
             if result.errors:

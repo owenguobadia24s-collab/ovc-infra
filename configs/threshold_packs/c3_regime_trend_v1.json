@@ -1,0 +1,6 @@
+{
+  "lookback": 12,
+  "min_range_bp": 30,
+  "min_direction_ratio_bp": 600,
+  "min_hh_ll_count": 3
+}

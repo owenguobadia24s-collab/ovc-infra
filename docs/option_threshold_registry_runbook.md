@@ -351,3 +351,123 @@ Global Options:
   --config        Inline JSON string
   --config-file   Path to JSON file
 ```
+
+---
+
+## First Real C3 Tag: c3_regime_trend
+
+The first fully implemented C3 classifier is **c3_regime_trend**, which classifies market regime as `TREND` or `NON_TREND` based on C1/C2 features.
+
+### Classification Logic
+
+The classifier evaluates a lookback window and returns `TREND` if ALL conditions are met:
+
+1. **Average range** ≥ `min_range_bp` (basis points)
+2. **Direction ratio** ≥ `min_direction_ratio_bp`
+   - `direction_ratio = abs(sum(direction)) / count * 1000`
+3. **HH/LL count** ≥ `min_hh_ll_count`
+   - Count of blocks where `hh_12 = true` OR `ll_12 = true`
+
+Otherwise, returns `NON_TREND`.
+
+### Threshold Pack Config
+
+Located at `configs/threshold_packs/c3_regime_trend_v1.json`:
+
+```json
+{
+  "lookback": 12,
+  "min_range_bp": 30,
+  "min_direction_ratio_bp": 600,
+  "min_hh_ll_count": 3
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `lookback` | int | Number of preceding blocks to analyze |
+| `min_range_bp` | int | Minimum average range (basis points) |
+| `min_direction_ratio_bp` | int | Min direction ratio (60% = 600bp) |
+| `min_hh_ll_count` | int | Min count of HH or LL signals |
+
+### End-to-End Setup
+
+```powershell
+# 1. Apply C3 table migration
+psql $env:NEON_DSN -f sql/05_c3_regime_trend_v0_1.sql
+
+# 2. Create threshold pack in registry
+python -m src.config.threshold_registry_cli create `
+  --pack-id c3_regime_trend `
+  --version 1 `
+  --scope GLOBAL `
+  --config-file configs/threshold_packs/c3_regime_trend_v1.json
+
+# 3. Activate the pack
+python -m src.config.threshold_registry_cli activate `
+  --pack-id c3_regime_trend `
+  --version 1 `
+  --scope GLOBAL
+
+# 4. Run C3 compute for a symbol
+python src/derived/compute_c3_regime_trend_v0_1.py `
+  --symbol GBPUSD `
+  --threshold-pack c3_regime_trend `
+  --scope GLOBAL
+
+# 5. Validate with B.2 validator (includes C3 checks)
+python src/validate/validate_derived_range_v0_1.py `
+  --symbol GBPUSD `
+  --start-date 2026-01-13 `
+  --end-date 2026-01-17 `
+  --validate-c3
+```
+
+### C3 Table Schema
+
+Table: `derived.ovc_c3_regime_trend_v0_1`
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `block_id` | TEXT | FK to B-layer |
+| `symbol` | TEXT | Trading symbol |
+| `ts` | TIMESTAMPTZ | Block timestamp |
+| `c3_regime_trend` | TEXT | `TREND` or `NON_TREND` |
+| `threshold_pack_id` | TEXT | Pack ID from registry |
+| `threshold_pack_version` | INT | Pack version used |
+| `threshold_pack_hash` | TEXT | SHA256 hash (64 hex) |
+| `run_id` | UUID | Compute run ID |
+| `created_at` | TIMESTAMPTZ | Row creation time |
+
+Primary Key: `(symbol, ts)`
+
+### Validation Checks
+
+The B.2 validator (`--validate-c3` flag) performs these C3-specific checks:
+
+1. **Table existence**: Verify C3 table exists
+2. **Provenance validation**: No NULL `threshold_pack_*` columns
+3. **Registry integrity**: All referenced packs exist in `ovc_cfg.threshold_pack`
+4. **Hash verification**: Stored hash matches registry hash
+5. **Value validation**: Only `TREND` or `NON_TREND` values
+6. **Version warnings**: Flag if using non-active pack versions
+
+### Testing
+
+```powershell
+# Run unit tests
+python -m pytest tests/test_c3_regime_trend.py -v
+
+# Run with coverage
+python -m pytest tests/test_c3_regime_trend.py --cov=src/derived --cov-report=term-missing
+```
+
+### Files Reference
+
+| File | Purpose |
+|------|---------|
+| `sql/05_c3_regime_trend_v0_1.sql` | C3 table migration |
+| `src/derived/compute_c3_regime_trend_v0_1.py` | C3 compute script |
+| `configs/threshold_packs/c3_regime_trend_v1.json` | Default threshold pack |
+| `tests/test_c3_regime_trend.py` | Test suite |
+| `src/validate/validate_derived_range_v0_1.py` | Validator with C3 support |
