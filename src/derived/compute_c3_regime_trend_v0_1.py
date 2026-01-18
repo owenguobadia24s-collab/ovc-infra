@@ -1,6 +1,23 @@
 """
 OVC C3 Regime Trend Classifier (v0.1)
 
+================================================================================
+REFERENCE IMPLEMENTATION FOR C3 TAGS
+================================================================================
+This script is the canonical reference for all future C3 classifiers.
+New C3 tags MUST follow the same patterns for:
+    - Threshold pack resolution (resolve once at start, not per-block)
+    - C1/C2 data fetching (never query B-layer OHLC directly)
+    - Classification logic structure (pure function of inputs + config)
+    - Provenance column population (pack_id, version, hash from resolved pack)
+    - Upsert mechanics (ON CONFLICT DO UPDATE for idempotence)
+
+Before implementing a new C3 tag, read:
+    - docs/c3_semantic_contract_v0_1.md (rules and invariants)
+    - docs/c3_entry_checklist.md (required artifacts)
+    - docs/option_threshold_registry_runbook.md (C3 Lifecycle section)
+================================================================================
+
 Purpose: Classify market regime as TREND or NON_TREND using C1/C2 features
          and versioned threshold packs from the registry.
 
