@@ -1,5 +1,40 @@
 import { neon } from "@neondatabase/serverless";
 
+// Public helpers exported for unit testing & deterministic behavior.
+// Do not change signatures without updating tests.
+
+/**
+ * Parse a pipe-delimited TradingView export string into a key-value map.
+ * Example: "a=1|sym=GBPUSD" -> { a: "1", sym: "GBPUSD" }
+ */
+export function parseExport(exportStr: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  const parts = exportStr.split("|");
+  for (const part of parts) {
+    if (!part) continue;
+    const idx = part.indexOf("=");
+    if (idx <= 0) continue;
+    const k = part.slice(0, idx).trim();
+    const v = part.slice(idx + 1).trim();
+    if (k) out[k] = v;
+  }
+  return out;
+}
+
+/**
+ * Compute the 2H block start timestamp from bar_close_ms.
+ * Block boundaries are at even hours: 00:00, 02:00, 04:00, etc.
+ * If bar_close_ms is 04:00 UTC, the block started at 02:00 UTC.
+ */
+export function msToTimestamptzStart2H(barCloseMs: number): string {
+  const d = new Date(barCloseMs);
+  // bar_close_ms is the END of a 2H block. Subtract 2 hours to get block start.
+  d.setUTCHours(d.getUTCHours() - 2);
+  // Align to even-hour boundary (floor to 2-hour blocks)
+  d.setUTCHours(Math.floor(d.getUTCHours() / 2) * 2, 0, 0, 0);
+  return d.toISOString();
+}
+
 type Env = {
   DATABASE_URL: string;
   OVC_TOKEN: string;
