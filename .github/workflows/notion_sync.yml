@@ -28,3 +28,12 @@ jobs:
           NOTION_RUNS_DB_ID: ${{ secrets.NOTION_RUNS_DB_ID }}
         run: |
           python scripts/notion_sync.py
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notion-sync-run-artifacts
+          path: reports/runs/
+          if-no-files-found: ignore
+          retention-days: 30

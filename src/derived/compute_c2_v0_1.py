@@ -39,6 +39,12 @@ from typing import Optional
 import psycopg2
 from psycopg2.extras import execute_values
 
+# ---------- Add parent to path for local imports ----------
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from ovc_ops.run_artifact import RunWriter, detect_trigger
+
 # ---------- Tiny .env loader (matches backfill convention) ----------
 def load_env(path: str = ".env") -> None:
     if not os.path.exists(path):
@@ -57,6 +63,9 @@ load_env()
 # ---------- Constants ----------
 VERSION = "v0.1"
 RUN_TYPE = "c2"
+PIPELINE_ID = "B1-DerivedC2"
+PIPELINE_VERSION = "0.1.0"
+REQUIRED_ENV_VARS = ["NEON_DSN"]
 
 # Default rd_len parameter (to be versioned in threshold_registry later)
 DEFAULT_RD_LEN = 12
@@ -554,115 +563,139 @@ def compute_all_c2_features(blocks: list, c1_features: dict, rd_len: int) -> lis
 
 def main() -> None:
     args = parse_args()
-    dsn = resolve_dsn()
     
-    rd_len = args.rd_len
-    formula_hash = compute_formula_hash(C2_FORMULA_DEFINITION, rd_len)
-    window_spec = build_aggregated_window_spec(rd_len)
-    
-    print(f"OVC C2 Feature Compute v{VERSION}")
-    print(f"Formula hash: {formula_hash}")
-    print(f"Window spec: {window_spec}")
-    print(f"RD length: {rd_len}")
-    print(f"Dry run: {args.dry_run}")
-    if args.symbol:
-        print(f"Symbol filter: {args.symbol}")
-    if args.limit:
-        print(f"Limit: {args.limit}")
-    print()
-    
-    run_id = uuid.uuid4()
-    config = {
-        "dry_run": args.dry_run,
-        "limit": args.limit,
-        "symbol": args.symbol,
-        "recompute": args.recompute,
-        "rd_len": rd_len,
-        "formula_hash": formula_hash,
-        "window_spec": window_spec,
-        "version": VERSION,
-    }
-    
-    conn = psycopg2.connect(dsn)
+    # Initialize run artifact writer
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    artifact_run_id = writer.start(trigger_type, trigger_source, actor)
     
     try:
-        if not args.dry_run:
-            create_run_record(conn, run_id, formula_hash, window_spec, config)
-            print(f"Run ID: {run_id}")
+        dsn = resolve_dsn()
         
-        # Fetch blocks to process
-        blocks = fetch_blocks_with_context(conn, args.symbol, args.limit, args.recompute)
-        print(f"Blocks to process: {len(blocks)}")
+        rd_len = args.rd_len
+        formula_hash = compute_formula_hash(C2_FORMULA_DEFINITION, rd_len)
+        window_spec = build_aggregated_window_spec(rd_len)
         
-        if not blocks:
-            print("No blocks to process.")
+        writer.log(f"OVC C2 Feature Compute v{VERSION}")
+        writer.log(f"Formula hash: {formula_hash}")
+        writer.log(f"Window spec: {window_spec}")
+        writer.log(f"RD length: {rd_len}")
+        writer.log(f"Dry run: {args.dry_run}")
+        if args.symbol:
+            writer.log(f"Symbol filter: {args.symbol}")
+        if args.limit:
+            writer.log(f"Limit: {args.limit}")
+        writer.log("")
+        
+        writer.add_input(type="neon_table", ref="ovc.ovc_blocks_v01_1_min")
+        writer.add_input(type="neon_table", ref="derived.ovc_block_features_c1_v0_1")
+        
+        run_id = uuid.uuid4()
+        config = {
+            "dry_run": args.dry_run,
+            "limit": args.limit,
+            "symbol": args.symbol,
+            "recompute": args.recompute,
+            "rd_len": rd_len,
+            "formula_hash": formula_hash,
+            "window_spec": window_spec,
+            "version": VERSION,
+        }
+        
+        conn = psycopg2.connect(dsn)
+        
+        try:
             if not args.dry_run:
-                complete_run_record(conn, run_id, 0, "completed")
-            return
-        
-        # Fetch C1 features for these blocks
-        block_ids = [b["block_id"] for b in blocks]
-        c1_features = fetch_c1_features(conn, block_ids)
-        print(f"C1 features loaded: {len(c1_features)}")
-        
-        # For complete context, we need ALL blocks for the symbol (for rolling windows)
-        # Fetch full history for symbols in our block set
-        symbols = list(set(b["sym"] for b in blocks))
-        
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT 
-                    block_id, sym, date_ny, bar_close_ms,
-                    o, h, l, c
-                FROM ovc.ovc_blocks_v01_1_min
-                WHERE sym = ANY(%s)
-                ORDER BY sym, bar_close_ms
-            """, (symbols,))
-            columns = [desc[0] for desc in cur.description]
-            all_blocks = [dict(zip(columns, row)) for row in cur.fetchall()]
-        
-        print(f"Total blocks with history: {len(all_blocks)}")
-        
-        # Fetch C1 features for all blocks (needed for rolling calcs)
-        all_block_ids = [b["block_id"] for b in all_blocks]
-        c1_features = fetch_c1_features(conn, all_block_ids)
-        
-        # Compute C2 features
-        all_c2_features = compute_all_c2_features(all_blocks, c1_features, rd_len)
-        
-        # Filter to only blocks we want to upsert
-        target_block_ids = set(block_ids)
-        features_batch = [f for f in all_c2_features if f["block_id"] in target_block_ids]
-        
-        if args.dry_run:
-            print("\nSample computed features (first 3):")
-            for f in features_batch[:3]:
-                print(f"  {f['block_id']}:")
-                print(f"    gap={f['gap']}, took_prev_high={f['took_prev_high']}")
-                print(f"    sess_high={f['sess_high']}, roll_avg_range_12={f['roll_avg_range_12']}")
-                print(f"    hh_12={f['hh_12']}, rd_hi={f['rd_hi']}")
-            print(f"\nDry run complete. Would upsert {len(features_batch)} rows.")
-            return
-        
-        # Upsert in batches
-        batch_size = 1000
-        total_upserted = 0
-        for i in range(0, len(features_batch), batch_size):
-            batch = features_batch[i:i + batch_size]
-            count = upsert_c2_features(conn, run_id, formula_hash, window_spec, batch)
-            total_upserted += count
-            conn.commit()
-            print(f"  Upserted batch {i // batch_size + 1}: {count} rows")
-        
-        complete_run_record(conn, run_id, total_upserted, "completed")
-        print(f"\nCompleted. Total rows upserted: {total_upserted}")
-        
+                create_run_record(conn, run_id, formula_hash, window_spec, config)
+                writer.log(f"Run ID: {run_id}")
+            
+            # Fetch blocks to process
+            blocks = fetch_blocks_with_context(conn, args.symbol, args.limit, args.recompute)
+            writer.log(f"Blocks to process: {len(blocks)}")
+            
+            if not blocks:
+                writer.log("No blocks to process.")
+                if not args.dry_run:
+                    complete_run_record(conn, run_id, 0, "completed")
+                writer.check("blocks_available", "Blocks available for processing", "skip", [])
+                writer.finish("success")
+                return
+            
+            # Fetch C1 features for these blocks
+            block_ids = [b["block_id"] for b in blocks]
+            c1_features = fetch_c1_features(conn, block_ids)
+            writer.log(f"C1 features loaded: {len(c1_features)}")
+            
+            # For complete context, we need ALL blocks for the symbol (for rolling windows)
+            # Fetch full history for symbols in our block set
+            symbols = list(set(b["sym"] for b in blocks))
+            
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT 
+                        block_id, sym, date_ny, bar_close_ms,
+                        o, h, l, c
+                    FROM ovc.ovc_blocks_v01_1_min
+                    WHERE sym = ANY(%s)
+                    ORDER BY sym, bar_close_ms
+                """, (symbols,))
+                columns = [desc[0] for desc in cur.description]
+                all_blocks = [dict(zip(columns, row)) for row in cur.fetchall()]
+            
+            writer.log(f"Total blocks with history: {len(all_blocks)}")
+            
+            # Fetch C1 features for all blocks (needed for rolling calcs)
+            all_block_ids = [b["block_id"] for b in all_blocks]
+            c1_features = fetch_c1_features(conn, all_block_ids)
+            
+            # Compute C2 features
+            all_c2_features = compute_all_c2_features(all_blocks, c1_features, rd_len)
+            
+            # Filter to only blocks we want to upsert
+            target_block_ids = set(block_ids)
+            features_batch = [f for f in all_c2_features if f["block_id"] in target_block_ids]
+            
+            if args.dry_run:
+                writer.log("\nSample computed features (first 3):")
+                for f in features_batch[:3]:
+                    writer.log(f"  {f['block_id']}:")
+                    writer.log(f"    gap={f['gap']}, took_prev_high={f['took_prev_high']}")
+                    writer.log(f"    sess_high={f['sess_high']}, roll_avg_range_12={f['roll_avg_range_12']}")
+                    writer.log(f"    hh_12={f['hh_12']}, rd_hi={f['rd_hi']}")
+                writer.log(f"\nDry run complete. Would upsert {len(features_batch)} rows.")
+                writer.check("dry_run", "Dry run completed", "pass", [])
+                writer.finish("success")
+                return
+            
+            # Upsert in batches
+            batch_size = 1000
+            total_upserted = 0
+            for i in range(0, len(features_batch), batch_size):
+                batch = features_batch[i:i + batch_size]
+                count = upsert_c2_features(conn, run_id, formula_hash, window_spec, batch)
+                total_upserted += count
+                conn.commit()
+                writer.log(f"  Upserted batch {i // batch_size + 1}: {count} rows")
+            
+            complete_run_record(conn, run_id, total_upserted, "completed")
+            writer.log(f"\nCompleted. Total rows upserted: {total_upserted}")
+            
+            writer.add_output(type="neon_table", ref="derived.ovc_block_features_c2_v0_1", rows_written=total_upserted)
+            writer.check("features_computed", "C2 features computed", "pass", ["run.json:$.outputs[0].rows_written"])
+            writer.finish("success")
+            
+        except Exception as e:
+            if not args.dry_run:
+                complete_run_record(conn, run_id, 0, "failed", str(e))
+            raise
+        finally:
+            conn.close()
+            
     except Exception as e:
-        if not args.dry_run:
-            complete_run_record(conn, run_id, 0, "failed", str(e))
+        writer.log(f"ERROR: {type(e).__name__}: {e}")
+        writer.check("execution_error", f"Execution failed: {type(e).__name__}", "fail", [])
+        writer.finish("failed")
         raise
-    finally:
-        conn.close()
 
 
 if __name__ == "__main__":

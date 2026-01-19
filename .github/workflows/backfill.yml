@@ -52,3 +52,12 @@ jobs:
       - name: Run checkpointed backfill
         run: |
           python src/backfill_oanda_2h_checkpointed.py
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backfill-run-artifacts
+          path: reports/runs/
+          if-no-files-found: ignore
+          retention-days: 30

@@ -52,6 +52,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from ovc_artifacts import make_run_dir, write_meta, write_latest
+from ovc_ops.run_artifact import RunWriter, detect_trigger
 
 # ---------- Tiny .env loader ----------
 def load_env(path: str = ".env") -> None:
@@ -71,6 +72,9 @@ load_env()
 # ---------- Constants ----------
 VERSION = "v0.1"
 NY_TZ = ZoneInfo("America/New_York")
+PIPELINE_ID = "B2-DerivedValidation"
+PIPELINE_VERSION = "0.1.0"
+REQUIRED_ENV_VARS = ["NEON_DSN"]
 
 # Required window_spec components per C2 spec
 REQUIRED_WINDOW_SPECS = ["N=1", "N=12", "session=date_ny", "rd_len="]
@@ -1063,36 +1067,48 @@ def generate_diffs_csv(result: ValidationResult, out_path: Path) -> Optional[Pat
 def main() -> int:
     args = parse_args()
     
-    start_date = parse_date(args.start_date)
-    end_date = parse_date(args.end_date)
+    # Initialize run artifact writer
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    artifact_run_id = writer.start(trigger_type, trigger_source, actor)
     
-    if end_date < start_date:
-        raise SystemExit("end-date must be on or after start-date")
-    
-    run_id = args.run_id or build_run_id(
-        args.symbol, start_date, end_date, args.mode, args.compare_tv
-    )
-    
-    result = ValidationResult(
-        run_id=run_id,
-        version=VERSION,
-        symbol=args.symbol,
-        start_date=str(start_date),
-        end_date=str(end_date),
-        mode=args.mode,
-        compare_tv=args.compare_tv,
-        tv_comparison_enabled=args.compare_tv,
-    )
-    
-    print(f"OVC Derived Validation v{VERSION}")
-    print(f"Run ID: {run_id}")
-    print(f"Symbol: {args.symbol}")
-    print(f"Range: {start_date} to {end_date}")
-    print(f"Mode: {args.mode}")
-    print(f"Compare TV: {args.compare_tv}")
-    print()
-    
-    dsn = resolve_dsn()
+    try:
+        start_date = parse_date(args.start_date)
+        end_date = parse_date(args.end_date)
+        
+        if end_date < start_date:
+            writer.log("ERROR: end-date must be on or after start-date")
+            writer.check("date_range_valid", "Date range valid", "fail", [])
+            writer.finish("failed")
+            raise SystemExit("end-date must be on or after start-date")
+        
+        run_id = args.run_id or build_run_id(
+            args.symbol, start_date, end_date, args.mode, args.compare_tv
+        )
+        
+        result = ValidationResult(
+            run_id=run_id,
+            version=VERSION,
+            symbol=args.symbol,
+            start_date=str(start_date),
+            end_date=str(end_date),
+            mode=args.mode,
+            compare_tv=args.compare_tv,
+            tv_comparison_enabled=args.compare_tv,
+        )
+        
+        writer.log(f"OVC Derived Validation v{VERSION}")
+        writer.log(f"Run ID: {run_id}")
+        writer.log(f"Symbol: {args.symbol}")
+        writer.log(f"Range: {start_date} to {end_date}")
+        writer.log(f"Mode: {args.mode}")
+        writer.log(f"Compare TV: {args.compare_tv}")
+        writer.log("")
+        
+        writer.add_input(type="neon_table", ref="derived.ovc_c1_features_v0_1")
+        writer.add_input(type="neon_table", ref="derived.ovc_c2_features_v0_1")
+        
+        dsn = resolve_dsn()
     
     with psycopg2.connect(dsn) as conn:
         with conn.cursor() as cur:
@@ -1295,26 +1311,42 @@ def main() -> int:
     component_root = Path(args.out) / "derived_validation"
     write_latest(component_root, run_id)
     
-    print(f"  JSON: {json_path}")
-    print(f"  Markdown: {md_path}")
+    writer.log(f"  JSON: {json_path}")
+    writer.log(f"  Markdown: {md_path}")
     if csv_path:
-        print(f"  Diffs CSV: {csv_path}")
+        writer.log(f"  Diffs CSV: {csv_path}")
     
-    print(f"\n{'=' * 50}")
-    print(f"VALIDATION RESULT: {result.status}")
-    print(f"{'=' * 50}")
+    writer.log(f"\n{'=' * 50}")
+    writer.log(f"VALIDATION RESULT: {result.status}")
+    writer.log(f"{'=' * 50}")
     
     if result.errors:
-        print("\nErrors:")
+        writer.log("\nErrors:")
         for e in result.errors:
-            print(f"  - {e}")
+            writer.log(f"  - {e}")
     
     if result.warnings:
-        print("\nWarnings:")
+        writer.log("\nWarnings:")
         for w in result.warnings:
-            print(f"  - {w}")
+            writer.log(f"  - {w}")
     
-    return 0 if result.status != "FAIL" else 1
+        # Record output and checks
+        writer.add_output(type="artifact", ref=str(out_dir))
+        
+        if result.status == "FAIL":
+            writer.check("validation_passed", "Derived validation passed", "fail", [])
+            writer.finish("failed")
+        else:
+            writer.check("validation_passed", "Derived validation passed", "pass", [])
+            writer.finish("success")
+        
+        return 0 if result.status != "FAIL" else 1
+        
+    except Exception as e:
+        writer.log(f"ERROR: {type(e).__name__}: {e}")
+        writer.check("execution_error", f"Execution failed: {type(e).__name__}", "fail", [])
+        writer.finish("failed")
+        raise
 
 
 if __name__ == "__main__":

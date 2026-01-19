@@ -2,6 +2,7 @@ import argparse
 import csv
 import shutil
 import subprocess
+import sys
 from datetime import datetime, time, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -12,8 +13,13 @@ import psycopg2
 
 from backfill_day import load_env, parse_date, print_backfill_summary, resolve_dsn, run_backfill
 from ingest_history_day import DEFAULT_SOURCE as HISTORY_DEFAULT_SOURCE, ingest_history_day
+from ovc_ops.run_artifact import RunWriter, detect_trigger
 from utils.csv_locator import resolve_csv_path, set_auto_pick
 from validate_range import evaluate_day as evaluate_range_day, table_exists as pg_table_exists
+
+PIPELINE_ID = "D-ValidationHarness"
+PIPELINE_VERSION = "0.1.0"
+REQUIRED_ENV_VARS = ["NEON_DSN|DATABASE_URL"]
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SQL_PACK_CORE_PATH = REPO_ROOT / "sql" / "qa_validation_pack_core.sql"
@@ -210,7 +216,7 @@ def _derived_pack_exists(dsn: str) -> bool:
     return bool(exists)
 
 
-def main() -> int:
+def main(writer: RunWriter) -> int:
     parser = argparse.ArgumentParser(description="OVC single-day validation harness entrypoint.")
     parser.add_argument("--symbol", default="GBPUSD")
     parser.add_argument("--date_ny", required=True)
@@ -236,6 +242,9 @@ def main() -> int:
     load_env()
     dsn, dsn_name = resolve_dsn()
     date_ny = parse_date(args.date_ny)
+    
+    writer.log(f"Validating {args.symbol} for {date_ny}")
+    writer.add_input(type="neon_table", ref="ovc.ovc_blocks_v01_1_min")
 
     try:
         tolerance = Decimal(args.tolerance)
@@ -377,9 +386,40 @@ def main() -> int:
     print(f"status: {status}")
     if merged:
         print(f"reasons: {';'.join(merged)}")
+    
+    # Record checks in run artifact
+    writer.check(
+        name="validation_status",
+        status="pass" if status == "PASS" else ("skip" if status == "SKIP" else "fail"),
+        evidence=f"status={status}",
+    )
+    if merged:
+        writer.check(
+            name="validation_reasons",
+            status="pass" if not reasons else "fail",
+            evidence=f"reasons={';'.join(merged)}",
+        )
 
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    writer.start(trigger_type=trigger_type, trigger_source=trigger_source, actor=actor)
+    
+    exit_code = 0
+    try:
+        exit_code = main(writer)
+        writer.finish(status="success" if exit_code == 0 else "failed")
+    except SystemExit as e:
+        exit_code = e.code if isinstance(e.code, int) else 1
+        writer.log(f"SystemExit: {e}")
+        writer.finish(status="failed" if exit_code != 0 else "success")
+        raise
+    except Exception as e:
+        writer.log(f"Exception: {e}")
+        writer.finish(status="failed")
+        raise
+    
+    sys.exit(exit_code)

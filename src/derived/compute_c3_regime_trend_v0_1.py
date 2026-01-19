@@ -83,6 +83,8 @@ from config.threshold_registry_v0_1 import (
     get_pack,
 )
 
+from ovc_ops.run_artifact import RunWriter, detect_trigger
+
 
 # ---------- Tiny .env loader (matches B.1/B.2 convention) ----------
 def load_env(path: str = ".env") -> None:
@@ -104,6 +106,9 @@ load_env()
 VERSION = "v0.1"
 RUN_TYPE = "c3_regime_trend"
 C3_TABLE = "derived.ovc_c3_regime_trend_v0_1"
+PIPELINE_ID = "B1-DerivedC3"
+PIPELINE_VERSION = "0.1.0"
+REQUIRED_ENV_VARS = ["NEON_DSN"]
 
 # Price reference for basis point calculations (default for forex)
 # 1 pip = 0.0001, 1 bp = 0.01% = 0.0001 for price ratio
@@ -409,111 +414,138 @@ def main() -> None:
     """Main entry point."""
     args = parse_args()
     
-    # Generate run ID if not provided
-    run_id = args.run_id or str(uuid.uuid4())
+    # Initialize run artifact writer
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    artifact_run_id = writer.start(trigger_type, trigger_source, actor)
     
-    print(f"[C3 Regime Trend v0.1] Starting classification")
-    print(f"  Symbol: {args.symbol}")
-    print(f"  Threshold Pack: {args.threshold_pack}")
-    print(f"  Scope: {args.scope}")
-    print(f"  Run ID: {run_id}")
-    print()
-    
-    # Resolve threshold pack
     try:
-        scope_symbol = args.scope_symbol if args.scope != "GLOBAL" else None
-        if args.scope == "SYMBOL" and scope_symbol is None:
-            scope_symbol = args.symbol
+        # Generate run ID if not provided
+        run_id = args.run_id or str(uuid.uuid4())
         
-        pack = resolve_threshold_pack(
-            pack_id=args.threshold_pack,
-            scope=args.scope,
-            symbol=scope_symbol,
-            timeframe=args.timeframe,
-            version_override=args.threshold_version,
-        )
-    except PackNotFoundError as e:
-        print(f"ERROR: {e}", file=sys.stderr)
-        print(file=sys.stderr)
-        print("To create and activate the threshold pack, run:", file=sys.stderr)
-        print(f'  python -m src.config.threshold_registry_cli create --pack-id {args.threshold_pack} --version 1 --scope {args.scope} --config-file configs/threshold_packs/c3_regime_trend_v1.json', file=sys.stderr)
-        print(f'  python -m src.config.threshold_registry_cli activate --pack-id {args.threshold_pack} --version 1 --scope {args.scope}', file=sys.stderr)
-        sys.exit(1)
-    except ScopeValidationError as e:
-        print(f"ERROR: {e}", file=sys.stderr)
-        sys.exit(1)
-    
-    pack_id = pack["pack_id"]
-    pack_version = pack["pack_version"]
-    pack_hash = pack["config_hash"]
-    config = pack["config_json"]
-    
-    print(f"Resolved threshold pack:")
-    print(f"  Pack ID: {pack_id}")
-    print(f"  Version: {pack_version}")
-    print(f"  Hash: {pack_hash}")
-    print(f"  Config: {config}")
-    print()
-    
-    # Connect to database
-    dsn = resolve_dsn()
-    
-    with psycopg2.connect(dsn) as conn:
-        with conn.cursor() as cur:
-            # Fetch C1/C2 data
-            print(f"Fetching C1/C2 data for {args.symbol}...")
-            blocks = fetch_c1_c2_data(
-                cur=cur,
-                symbol=args.symbol,
-                recompute=args.recompute,
-                limit=args.limit,
+        writer.log(f"[C3 Regime Trend v0.1] Starting classification")
+        writer.log(f"  Symbol: {args.symbol}")
+        writer.log(f"  Threshold Pack: {args.threshold_pack}")
+        writer.log(f"  Scope: {args.scope}")
+        writer.log(f"  Run ID: {run_id}")
+        writer.log("")
+        
+        writer.add_input(type="neon_table", ref="derived.ovc_block_features_c1_v0_1")
+        writer.add_input(type="neon_table", ref="derived.ovc_block_features_c2_v0_1")
+        
+        # Resolve threshold pack
+        try:
+            scope_symbol = args.scope_symbol if args.scope != "GLOBAL" else None
+            if args.scope == "SYMBOL" and scope_symbol is None:
+                scope_symbol = args.symbol
+            
+            pack = resolve_threshold_pack(
+                pack_id=args.threshold_pack,
+                scope=args.scope,
+                symbol=scope_symbol,
+                timeframe=args.timeframe,
+                version_override=args.threshold_version,
             )
-            print(f"  Found {len(blocks)} blocks to process")
-            
-            if not blocks:
-                print("No blocks to process. Done.")
-                return
-            
-            # Classify regime trend
-            print("Classifying regime trend...")
-            results = classify_regime_trend(blocks, config)
-            
-            # Count classifications
-            trend_count = sum(1 for r in results if r["c3_regime_trend"] == "TREND")
-            non_trend_count = len(results) - trend_count
-            print(f"  TREND: {trend_count}")
-            print(f"  NON_TREND: {non_trend_count}")
-            print()
-            
-            if args.dry_run:
-                print("[DRY-RUN] Would write to database:")
-                print(f"  Table: {C3_TABLE}")
-                print(f"  Rows: {len(results)}")
-                print(f"  Threshold pack: {pack_id} v{pack_version}")
-                print()
-                # Show sample rows
-                print("Sample rows (first 5):")
-                for r in results[:5]:
-                    print(f"  {r['block_id']}: {r['c3_regime_trend']}")
-                return
-            
-            # Write to database
-            print(f"Writing to {C3_TABLE}...")
-            rows_written = write_c3_rows(
-                cur=cur,
-                conn=conn,
-                results=results,
-                pack_id=pack_id,
-                pack_version=pack_version,
-                pack_hash=pack_hash,
-                run_id=run_id,
-            )
-            print(f"  Wrote {rows_written} rows")
-    
-    print()
-    print(f"[C3 Regime Trend v0.1] Completed successfully")
-    print(f"  Run ID: {run_id}")
-    print(f"  Threshold pack: {pack_id} v{pack_version} ({pack_hash[:16]}...)")
+        except PackNotFoundError as e:
+            writer.log(f"ERROR: {e}")
+            writer.log("")
+            writer.log("To create and activate the threshold pack, run:")
+            writer.log(f'  python -m src.config.threshold_registry_cli create --pack-id {args.threshold_pack} --version 1 --scope {args.scope} --config-file configs/threshold_packs/c3_regime_trend_v1.json')
+            writer.log(f'  python -m src.config.threshold_registry_cli activate --pack-id {args.threshold_pack} --version 1 --scope {args.scope}')
+            writer.check("threshold_pack_resolved", "Threshold pack resolved", "fail", [])
+            writer.finish("failed")
+            sys.exit(1)
+        except ScopeValidationError as e:
+            writer.log(f"ERROR: {e}")
+            writer.check("threshold_pack_resolved", "Threshold pack resolved", "fail", [])
+            writer.finish("failed")
+            sys.exit(1)
+        
+        pack_id = pack["pack_id"]
+        pack_version = pack["pack_version"]
+        pack_hash = pack["config_hash"]
+        config = pack["config_json"]
+        
+        writer.log(f"Resolved threshold pack:")
+        writer.log(f"  Pack ID: {pack_id}")
+        writer.log(f"  Version: {pack_version}")
+        writer.log(f"  Hash: {pack_hash}")
+        writer.log(f"  Config: {config}")
+        writer.log("")
+        
+        # Connect to database
+        dsn = resolve_dsn()
+        
+        with psycopg2.connect(dsn) as conn:
+            with conn.cursor() as cur:
+                # Fetch C1/C2 data
+                writer.log(f"Fetching C1/C2 data for {args.symbol}...")
+                blocks = fetch_c1_c2_data(
+                    cur=cur,
+                    symbol=args.symbol,
+                    recompute=args.recompute,
+                    limit=args.limit,
+                )
+                writer.log(f"  Found {len(blocks)} blocks to process")
+                
+                if not blocks:
+                    writer.log("No blocks to process. Done.")
+                    writer.check("blocks_available", "Blocks available for processing", "skip", [])
+                    writer.finish("success")
+                    return
+                
+                # Classify regime trend
+                writer.log("Classifying regime trend...")
+                results = classify_regime_trend(blocks, config)
+                
+                # Count classifications
+                trend_count = sum(1 for r in results if r["c3_regime_trend"] == "TREND")
+                non_trend_count = len(results) - trend_count
+                writer.log(f"  TREND: {trend_count}")
+                writer.log(f"  NON_TREND: {non_trend_count}")
+                writer.log("")
+                
+                if args.dry_run:
+                    writer.log("[DRY-RUN] Would write to database:")
+                    writer.log(f"  Table: {C3_TABLE}")
+                    writer.log(f"  Rows: {len(results)}")
+                    writer.log(f"  Threshold pack: {pack_id} v{pack_version}")
+                    writer.log("")
+                    # Show sample rows
+                    writer.log("Sample rows (first 5):")
+                    for r in results[:5]:
+                        writer.log(f"  {r['block_id']}: {r['c3_regime_trend']}")
+                    writer.check("dry_run", "Dry run completed", "pass", [])
+                    writer.finish("success")
+                    return
+                
+                # Write to database
+                writer.log(f"Writing to {C3_TABLE}...")
+                rows_written = write_c3_rows(
+                    cur=cur,
+                    conn=conn,
+                    results=results,
+                    pack_id=pack_id,
+                    pack_version=pack_version,
+                    pack_hash=pack_hash,
+                    run_id=run_id,
+                )
+                writer.log(f"  Wrote {rows_written} rows")
+        
+        writer.log("")
+        writer.log(f"[C3 Regime Trend v0.1] Completed successfully")
+        writer.log(f"  Run ID: {run_id}")
+        writer.log(f"  Threshold pack: {pack_id} v{pack_version} ({pack_hash[:16]}...)")
+        
+        writer.add_output(type="neon_table", ref=C3_TABLE, rows_written=rows_written)
+        writer.check("classification_complete", "C3 regime trend classification completed", "pass", ["run.json:$.outputs[0].rows_written"])
+        writer.finish("success")
+        
+    except Exception as e:
+        writer.log(f"ERROR: {type(e).__name__}: {e}")
+        writer.check("execution_error", f"Execution failed: {type(e).__name__}", "fail", [])
+        writer.finish("failed")
+        raise
 
 
 if __name__ == "__main__":

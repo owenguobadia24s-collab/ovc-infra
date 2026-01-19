@@ -178,6 +178,15 @@ jobs:
           path: artifacts/runs/${{ steps.run_id.outputs.run_id }}/
           retention-days: 30
 
+      - name: Upload run artifacts (standard format)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-artifacts-${{ steps.run_id.outputs.run_id }}
+          path: reports/runs/
+          if-no-files-found: ignore
+          retention-days: 30
+
       - name: Summary
         if: always()
         run: |

@@ -1,6 +1,8 @@
 import argparse
 import os
+import sys
 from datetime import datetime, time, timedelta, timezone
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import oandapyV20
@@ -8,6 +10,12 @@ import oandapyV20.endpoints.instruments as instruments
 import pandas as pd
 import psycopg2
 from psycopg2.extras import Json
+
+# Add parent to path for local imports
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from ovc_ops.run_artifact import RunWriter, detect_trigger
 
 # ---------- tiny .env loader ----------
 def load_env(path=".env"):
@@ -28,10 +36,21 @@ NEON_DSN = os.environ.get("NEON_DSN")
 OANDA_API_TOKEN = os.environ.get("OANDA_API_TOKEN")
 OANDA_ENV = os.environ.get("OANDA_ENV", "practice")
 
-if not NEON_DSN:
-    raise SystemExit("Missing NEON_DSN in .env")
-if not OANDA_API_TOKEN:
-    raise SystemExit("Missing OANDA_API_TOKEN in .env")
+# Pipeline metadata
+PIPELINE_ID = "P2-Backfill"
+PIPELINE_VERSION = "0.1.0"
+REQUIRED_ENV_VARS = ["NEON_DSN", "OANDA_API_TOKEN", "OANDA_ENV"]
+
+# Check required env vars (moved to run_artifact handling)
+_missing_env = [v for v in REQUIRED_ENV_VARS if not os.environ.get(v)]
+if _missing_env and "--help" not in sys.argv and "-h" not in sys.argv:
+    # Create run artifacts even on env failure
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    writer.start(trigger_type, trigger_source, actor)
+    writer.log(f"ERROR: Missing required environment variables: {_missing_env}")
+    writer.finish("failed")
+    raise SystemExit(f"Missing required env vars: {_missing_env}")
 
 NY_TZ = ZoneInfo("America/New_York")
 
@@ -504,89 +523,144 @@ def insert_blocks(rows: list[tuple]):
 
 if __name__ == "__main__":
     args = parse_args()
+    
+    # Initialize run artifact writer
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    run_id = writer.start(trigger_type, trigger_source, actor)
+    
     single_date_mode = False
     range_mode = False
+    total_rows_written = 0
+    
+    try:
+        # CLI range mode (--start_ny + --end_ny) takes precedence
+        if args.start_ny and args.end_ny:
+            range_mode = True
+            start_date_ny = parse_date(args.start_ny)
+            end_date_ny = parse_date(args.end_ny)
+            if end_date_ny < start_date_ny:
+                raise SystemExit("--end_ny must be >= --start_ny")
+            
+            # Record input
+            writer.add_input(
+                type="oanda",
+                ref=INSTRUMENT,
+                range=f"{start_date_ny} to {end_date_ny}"
+            )
+            
+            # Process each day in range
+            current_date = start_date_ny
+            total_inserted = 0
+            while current_date <= end_date_ny:
+                session_start_ny = datetime.combine(current_date, time(17, 0), tzinfo=NY_TZ)
+                day_start_utc = session_start_ny.astimezone(timezone.utc)
+                day_end_utc = (session_start_ny + timedelta(hours=24)).astimezone(timezone.utc)
 
-    # CLI range mode (--start_ny + --end_ny) takes precedence
-    if args.start_ny and args.end_ny:
-        range_mode = True
-        start_date_ny = parse_date(args.start_ny)
-        end_date_ny = parse_date(args.end_ny)
-        if end_date_ny < start_date_ny:
-            raise SystemExit("--end_ny must be >= --start_ny")
-        # Process each day in range
-        current_date = start_date_ny
-        total_inserted = 0
-        while current_date <= end_date_ny:
-            session_start_ny = datetime.combine(current_date, time(17, 0), tzinfo=NY_TZ)
-            day_start_utc = session_start_ny.astimezone(timezone.utc)
-            day_end_utc = (session_start_ny + timedelta(hours=24)).astimezone(timezone.utc)
+                if day_end_utc <= BACKFILL_START_UTC:
+                    writer.log(f"SKIP: {current_date} is before BACKFILL_START_UTC")
+                    current_date += timedelta(days=1)
+                    continue
 
-            if day_end_utc <= BACKFILL_START_UTC:
-                print(f"SKIP: {current_date} is before BACKFILL_START_UTC")
+                before = count_blocks_between(day_start_utc, day_end_utc)
+                df_h1 = fetch_oanda_h1(day_start_utc, day_end_utc)
+                df_2h = resample_to_2h_ny(df_h1)
+                rows = build_min_rows(df_2h)
+                insert_blocks(rows)
+                after = count_blocks_between(day_start_utc, day_end_utc)
+                inserted_est = after - before
+                total_inserted += inserted_est
+                total_rows_written += inserted_est
+                writer.log(f"{current_date}: H1={len(df_h1)} 2H={len(df_2h)} inserted_est={inserted_est}")
                 current_date += timedelta(days=1)
-                continue
 
-            before = count_blocks_between(day_start_utc, day_end_utc)
-            df_h1 = fetch_oanda_h1(day_start_utc, day_end_utc)
-            df_2h = resample_to_2h_ny(df_h1)
-            rows = build_min_rows(df_2h)
-            insert_blocks(rows)
-            after = count_blocks_between(day_start_utc, day_end_utc)
-            inserted_est = after - before
-            total_inserted += inserted_est
-            print(f"{current_date}: H1={len(df_h1)} 2H={len(df_2h)} inserted_est={inserted_est}")
-            current_date += timedelta(days=1)
-
-        print(f"RANGE BACKFILL COMPLETE: {start_date_ny} to {end_date_ny}, total_inserted_est={total_inserted}")
-        raise SystemExit(0)
-
-    # Single-date mode via env var (existing behavior)
-    if BACKFILL_DATE_NY:
-        single_date_mode = True
-        date_ny = parse_date(BACKFILL_DATE_NY)
-        session_start_ny = datetime.combine(date_ny, time(17, 0), tzinfo=NY_TZ)
-        start_utc = session_start_ny.astimezone(timezone.utc)
-        end_utc = (session_start_ny + timedelta(hours=24)).astimezone(timezone.utc)
-        mode = f"single-date ({date_ny})"
-    else:
-        min_ts = get_min_block_start()
-        now_utc = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
-
-        if min_ts is None:
-            end_utc = now_utc
-            start_utc = end_utc - timedelta(days=DAYS_PER_RUN)
-            mode = "seed (DB empty)"
-        else:
-            end_utc = min_ts
-            start_utc = end_utc - timedelta(days=DAYS_PER_RUN)
-            mode = "backfill (extend into past)"
-
-    if end_utc <= BACKFILL_START_UTC:
-        print(f"STOP: DB already at/earlier than BACKFILL_START_UTC ({BACKFILL_START_UTC.isoformat()})")
-        raise SystemExit(0)
-
-    if start_utc < BACKFILL_START_UTC:
-        if single_date_mode:
-            print(f"STOP: Requested date is earlier than BACKFILL_START_UTC ({BACKFILL_START_UTC.isoformat()})")
+            writer.log(f"RANGE BACKFILL COMPLETE: {start_date_ny} to {end_date_ny}, total_inserted_est={total_inserted}")
+            writer.add_output(
+                type="neon_table",
+                ref="ovc.ovc_blocks_v01_1_min",
+                rows_written=total_rows_written
+            )
+            writer.check("oanda_fetch_success", "OANDA API fetch succeeded", "pass", [])
+            writer.check("rows_inserted", "Rows inserted to Neon", "pass", ["run.json:$.outputs[0].rows_written"])
+            writer.finish("success")
             raise SystemExit(0)
-        start_utc = BACKFILL_START_UTC
 
-    print(f"MODE: {mode}")
-    print(f"WINDOW: {start_utc.isoformat()} -> {end_utc.isoformat()} (days={DAYS_PER_RUN})")
+        # Single-date mode via env var (existing behavior)
+        if BACKFILL_DATE_NY:
+            single_date_mode = True
+            date_ny = parse_date(BACKFILL_DATE_NY)
+            session_start_ny = datetime.combine(date_ny, time(17, 0), tzinfo=NY_TZ)
+            start_utc = session_start_ny.astimezone(timezone.utc)
+            end_utc = (session_start_ny + timedelta(hours=24)).astimezone(timezone.utc)
+            mode = f"single-date ({date_ny})"
+            writer.add_input(type="oanda", ref=INSTRUMENT, range=str(date_ny))
+        else:
+            min_ts = get_min_block_start()
+            now_utc = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
 
-    before = count_blocks_between(start_utc, end_utc)
-    df_h1 = fetch_oanda_h1(start_utc, end_utc)
-    print(f"H1 candles fetched: {len(df_h1)}")
+            if min_ts is None:
+                end_utc = now_utc
+                start_utc = end_utc - timedelta(days=DAYS_PER_RUN)
+                mode = "seed (DB empty)"
+            else:
+                end_utc = min_ts
+                start_utc = end_utc - timedelta(days=DAYS_PER_RUN)
+                mode = "backfill (extend into past)"
+            
+            writer.add_input(
+                type="oanda",
+                ref=INSTRUMENT,
+                range=f"{start_utc.date()} to {end_utc.date()}"
+            )
 
-    df_2h = resample_to_2h_ny(df_h1)
-    print(f"2H blocks computed: {len(df_2h)}")
+        if end_utc <= BACKFILL_START_UTC:
+            writer.log(f"STOP: DB already at/earlier than BACKFILL_START_UTC ({BACKFILL_START_UTC.isoformat()})")
+            writer.check("backfill_needed", "Backfill window valid", "skip", [])
+            writer.finish("success")
+            raise SystemExit(0)
 
-    rows = build_min_rows(df_2h)
-    insert_blocks(rows)
+        if start_utc < BACKFILL_START_UTC:
+            if single_date_mode:
+                writer.log(f"STOP: Requested date is earlier than BACKFILL_START_UTC ({BACKFILL_START_UTC.isoformat()})")
+                writer.check("backfill_needed", "Backfill window valid", "skip", [])
+                writer.finish("success")
+                raise SystemExit(0)
+            start_utc = BACKFILL_START_UTC
 
-    after = count_blocks_between(start_utc, end_utc)
-    inserted_est = after - before
+        writer.log(f"MODE: {mode}")
+        writer.log(f"WINDOW: {start_utc.isoformat()} -> {end_utc.isoformat()} (days={DAYS_PER_RUN})")
 
-    print(f"DB blocks in window before={before} after={after} inserted_est={inserted_est}")
-    print("STEP 4 RUN COMPLETE (rerun-safe).")
+        before = count_blocks_between(start_utc, end_utc)
+        df_h1 = fetch_oanda_h1(start_utc, end_utc)
+        writer.log(f"H1 candles fetched: {len(df_h1)}")
+
+        df_2h = resample_to_2h_ny(df_h1)
+        writer.log(f"2H blocks computed: {len(df_2h)}")
+
+        rows = build_min_rows(df_2h)
+        insert_blocks(rows)
+
+        after = count_blocks_between(start_utc, end_utc)
+        inserted_est = after - before
+        total_rows_written = inserted_est
+
+        writer.log(f"DB blocks in window before={before} after={after} inserted_est={inserted_est}")
+        writer.log("STEP 4 RUN COMPLETE (rerun-safe).")
+        
+        # Record output and checks
+        writer.add_output(
+            type="neon_table",
+            ref="ovc.ovc_blocks_v01_1_min",
+            rows_written=total_rows_written
+        )
+        writer.check("oanda_fetch_success", "OANDA API fetch succeeded", "pass", [])
+        writer.check("rows_inserted", "Rows inserted to Neon", "pass", ["run.json:$.outputs[0].rows_written"])
+        writer.finish("success")
+        
+    except SystemExit:
+        raise
+    except Exception as e:
+        writer.log(f"ERROR: {type(e).__name__}: {e}")
+        writer.check("execution_error", f"Execution failed: {type(e).__name__}", "fail", [])
+        writer.finish("failed")
+        raise

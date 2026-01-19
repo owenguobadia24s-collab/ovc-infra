@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OVC Run Artifact Spec v0.1",
+  "description": "Machine-readable specification for OVC run artifacts",
+  "version": "0.1.0",
+  "definitions": {
+    "run_id_format": {
+      "description": "Deterministic run ID format: <utc_yyyymmddThhmmssZ>__<pipeline_id>__<git_sha7>",
+      "pattern": "^[0-9]{8}T[0-9]{6}Z__[A-Za-z0-9-]+__[a-f0-9]{7}$",
+      "examples": [
+        "20260119T061512Z__P2-Backfill__a1b2c3d",
+        "20260119T143022Z__B1-DerivedC1__f4e5d6c"
+      ]
+    },
+    "pipeline_ids": {
+      "description": "Valid pipeline identifiers",
+      "enum": [
+        "P2-Backfill",
+        "B1-DerivedC1",
+        "B1-DerivedC2",
+        "B1-DerivedC3",
+        "B2-DerivedValidation",
+        "D-ValidationHarness",
+        "D-ValidationRange",
+        "D-NotionSync",
+        "C-Eval"
+      ]
+    },
+    "trigger_types": {
+      "description": "Valid trigger type values",
+      "enum": [
+        "github_schedule",
+        "github_dispatch",
+        "local_cli",
+        "worker_http",
+        "worker_cron"
+      ]
+    },
+    "status_values": {
+      "description": "Valid run status values",
+      "enum": ["success", "failed", "partial"]
+    },
+    "check_status_values": {
+      "description": "Valid check status values",
+      "enum": ["pass", "fail", "skip"]
+    },
+    "evidence_format": {
+      "description": "Valid evidence string formats",
+      "oneOf": [
+        {
+          "pattern": "^run\\.json:\\$\\..+$",
+          "description": "JSONPath reference to run.json"
+        },
+        {
+          "pattern": "^run\\.log:line:[0-9]+$",
+          "description": "Line number reference to run.log"
+        },
+        {
+          "pattern": "^artifacts/.+$",
+          "description": "Path to additional artifact file"
+        }
+      ]
+    },
+    "timestamp_format": {
+      "description": "UTC ISO8601 timestamp with Z suffix",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "examples": ["2026-01-19T06:15:12Z"]
+    }
+  },
+  "files": {
+    "run.json": {
+      "description": "Run manifest with inputs, outputs, metadata",
+      "required_keys": [
+        "run_id",
+        "pipeline_id",
+        "pipeline_version",
+        "started_utc",
+        "finished_utc",
+        "duration_ms",
+        "status",
+        "trigger",
+        "git",
+        "env",
+        "inputs",
+        "outputs"
+      ],
+      "key_types": {
+        "run_id": "string",
+        "pipeline_id": "string",
+        "pipeline_version": "string",
+        "started_utc": "timestamp",
+        "finished_utc": "timestamp",
+        "duration_ms": "integer",
+        "status": "status_values",
+        "trigger": {
+          "type": "trigger_types",
+          "source": "string",
+          "actor": "string"
+        },
+        "git": {
+          "sha": "string",
+          "sha7": "string",
+          "ref": "string"
+        },
+        "env": {
+          "present": "array<string>",
+          "missing": "array<string>"
+        },
+        "inputs": "array<input_object>",
+        "outputs": "array<output_object>"
+      }
+    },
+    "checks.json": {
+      "description": "Validation checks with evidence pointers",
+      "required_keys": [
+        "run_id",
+        "checks",
+        "summary"
+      ],
+      "key_types": {
+        "run_id": "string",
+        "checks": "array<check_object>",
+        "summary": {
+          "pass": "integer",
+          "fail": "integer",
+          "skip": "integer"
+        }
+      }
+    },
+    "run.log": {
+      "description": "Plain text log capturing stdout/stderr",
+      "first_line_format": "RUN_ID=<run_id>"
+    }
+  },
+  "input_object": {
+    "required_keys": ["type", "ref"],
+    "optional_keys": ["range"],
+    "type_examples": ["oanda", "neon_table", "csv", "notion_db"]
+  },
+  "output_object": {
+    "required_keys": ["type", "ref"],
+    "optional_keys": ["rows_written", "rows_updated", "extra"],
+    "type_examples": ["neon_table", "notion_page", "file", "artifact"]
+  },
+  "check_object": {
+    "required_keys": ["id", "name", "status", "evidence"],
+    "key_types": {
+      "id": "string (snake_case)",
+      "name": "string (human readable)",
+      "status": "check_status_values",
+      "evidence": "array<evidence_format>"
+    }
+  },
+  "formatting_rules": {
+    "json_indent": 2,
+    "json_sort_keys": true,
+    "encoding": "utf-8",
+    "no_secrets": true
+  }
+}
