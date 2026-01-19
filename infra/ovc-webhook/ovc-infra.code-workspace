@@ -8,6 +8,10 @@
 		}
 	],
 	"settings": {
-		"powershell.cwd": "ovc-infra"
+		"powershell.cwd": "ovc-infra",
+		"chat.tools.terminal.autoApprove": {
+			"ForEach-Object": true,
+			"npm test": true
+		}
 	}
 }
