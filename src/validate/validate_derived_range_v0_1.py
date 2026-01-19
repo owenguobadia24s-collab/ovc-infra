@@ -1110,226 +1110,226 @@ def main() -> int:
         
         dsn = resolve_dsn()
     
-    with psycopg2.connect(dsn) as conn:
-        with conn.cursor() as cur:
-            # Check required tables exist
-            if not table_exists(cur, "derived.ovc_c1_features_v0_1"):
-                result.errors.append("Table derived.ovc_c1_features_v0_1 does not exist")
-                result.status = "FAIL"
-                print("ERROR: C1 table not found")
-                return 1
-            
-            if not table_exists(cur, "derived.ovc_c2_features_v0_1"):
-                result.errors.append("Table derived.ovc_c2_features_v0_1 does not exist")
-                result.status = "FAIL"
-                print("ERROR: C2 table not found")
-                return 1
-            
-            # 1. Coverage parity
-            print("Checking coverage parity...")
-            coverage = check_coverage_parity(cur, args.symbol, start_date, end_date)
-            result.b_block_count = coverage["b_count"]
-            result.c1_row_count = coverage["c1_count"]
-            result.c2_row_count = coverage["c2_count"]
-            result.coverage_parity = coverage["parity"]
-            
-            if not coverage["parity"]:
-                msg = f"Coverage mismatch: B={coverage['b_count']}, C1={coverage['c1_count']}, C2={coverage['c2_count']}"
-                if args.mode == "fail":
-                    result.errors.append(msg)
-                else:
-                    result.warnings.append(msg)
-            
-            print(f"  B={coverage['b_count']}, C1={coverage['c1_count']}, C2={coverage['c2_count']}")
-            
-            # 2. Key uniqueness
-            print("Checking key uniqueness...")
-            result.c1_duplicates = check_duplicates(
-                cur, "derived.ovc_c1_features_v0_1", args.symbol, start_date, end_date
-            )
-            result.c2_duplicates = check_duplicates(
-                cur, "derived.ovc_c2_features_v0_1", args.symbol, start_date, end_date
-            )
-            
-            if result.c1_duplicates > 0:
-                result.errors.append(f"C1 has {result.c1_duplicates} duplicate block_ids")
-            if result.c2_duplicates > 0:
-                result.errors.append(f"C2 has {result.c2_duplicates} duplicate block_ids")
-            
-            print(f"  C1 duplicates: {result.c1_duplicates}, C2 duplicates: {result.c2_duplicates}")
-            
-            # 3. Null rates
-            print("Checking null rates...")
-            result.c1_null_rates = check_null_rates(
-                cur, "derived.ovc_c1_features_v0_1", C1_FEATURE_COLUMNS,
-                args.symbol, start_date, end_date
-            )
-            result.c2_null_rates = check_null_rates(
-                cur, "derived.ovc_c2_features_v0_1", C2_FEATURE_COLUMNS,
-                args.symbol, start_date, end_date
-            )
-            
-            # Check for NaN/Inf
-            nan_issues = check_nan_inf(
-                cur, "derived.ovc_c1_features_v0_1",
-                ["range", "body", "ret", "logret", "body_ratio", "close_pos", "upper_wick", "lower_wick", "clv"],
-                args.symbol, start_date, end_date
-            )
-            nan_issues.extend(check_nan_inf(
-                cur, "derived.ovc_c2_features_v0_1",
-                ["gap", "sess_high", "sess_low", "roll_avg_range_12", "roll_std_logret_12", "range_z_12", "rd_hi", "rd_lo", "rd_mid"],
-                args.symbol, start_date, end_date
-            ))
-            
-            for issue in nan_issues:
-                result.errors.append(issue)
-            
-            print(f"  C1 columns with >10% null: {sum(1 for r in result.c1_null_rates.values() if r > 0.1)}")
-            print(f"  C2 columns with >10% null: {sum(1 for r in result.c2_null_rates.values() if r > 0.1)}")
-            
-            # 4. Window_spec enforcement
-            print("Checking window_spec enforcement...")
-            ws_result = check_window_spec(cur, args.symbol, start_date, end_date)
-            result.c2_window_spec_valid = ws_result["valid"]
-            result.c2_window_spec_errors = ws_result["errors"]
-            
-            if not ws_result["valid"]:
-                if ws_result["null_count"] > 0:
-                    result.errors.append(f"C2 has {ws_result['null_count']} rows with NULL window_spec")
-                for err in ws_result["errors"]:
-                    result.errors.append(err)
-            
-            print(f"  Window_spec valid: {ws_result['valid']}")
-            
-            # 5. Determinism quickcheck
-            print(f"Running determinism quickcheck (sample={args.sample_size})...")
-            det_result = determinism_quickcheck(cur, args.symbol, start_date, end_date, args.sample_size)
-            result.determinism_sample_size = det_result["sample_size"]
-            result.determinism_mismatches = det_result["mismatches"]
-            result.determinism_details = det_result["details"]
-            
-            if det_result["mismatches"] > 0:
-                result.errors.append(f"Determinism check failed: {det_result['mismatches']} mismatches in {det_result['sample_size']} samples")
-            
-            print(f"  Sampled: {det_result['sample_size']}, Mismatches: {det_result['mismatches']}")
-            
-            # 6. TV comparison (optional)
-            if args.compare_tv:
-                print("Checking TV reference comparison...")
-                tv_result = check_tv_reference(cur, args.symbol, start_date, end_date)
-                result.tv_reference_available = tv_result.get("available", False)
+        with psycopg2.connect(dsn) as conn:
+            with conn.cursor() as cur:
+                # Check required tables exist
+                if not table_exists(cur, "derived.ovc_c1_features_v0_1"):
+                    result.errors.append("Table derived.ovc_c1_features_v0_1 does not exist")
+                    result.status = "FAIL"
+                    print("ERROR: C1 table not found")
+                    return 1
                 
-                if result.tv_reference_available:
-                    result.tv_matched_blocks = tv_result.get("matched_blocks", 0)
-                    result.tv_diff_summary = tv_result.get("diff_summary", {})
-                    result.tv_top_mismatches = tv_result.get("top_mismatches", [])
-                    print(f"  TV blocks matched: {result.tv_matched_blocks}")
-                else:
-                    result.warnings.append(tv_result.get("message", "TV reference not available"))
-                    print(f"  {tv_result.get('message', 'TV reference not available')}")
-            
-            # 7. C3 validation (optional)
-            if args.validate_c3:
-                result.c3_enabled = True
-                print("\n--- C3 Classifier Validation ---")
+                if not table_exists(cur, "derived.ovc_c2_features_v0_1"):
+                    result.errors.append("Table derived.ovc_c2_features_v0_1 does not exist")
+                    result.status = "FAIL"
+                    print("ERROR: C2 table not found")
+                    return 1
                 
-                # Determine which classifiers to validate
-                classifiers_to_check = args.c3_classifiers or list(C3_TABLES.keys())
+                # 1. Coverage parity
+                print("Checking coverage parity...")
+                coverage = check_coverage_parity(cur, args.symbol, start_date, end_date)
+                result.b_block_count = coverage["b_count"]
+                result.c1_row_count = coverage["c1_count"]
+                result.c2_row_count = coverage["c2_count"]
+                result.coverage_parity = coverage["parity"]
                 
-                for classifier_name in classifiers_to_check:
-                    if classifier_name not in C3_TABLES:
-                        result.warnings.append(f"Unknown C3 classifier: {classifier_name}")
-                        print(f"  WARN: Unknown classifier '{classifier_name}', skipping")
-                        continue
-                    
-                    config = C3_TABLES[classifier_name]
-                    print(f"\n  Validating {classifier_name} ({config['table']})...")
-                    
-                    c3_result = validate_c3_classifier(
-                        cur, classifier_name, config,
-                        args.symbol, start_date, end_date
-                    )
-                    
-                    # Store result
-                    result.c3_results[classifier_name] = c3_result.to_dict()
-                    
-                    # Print summary
-                    if not c3_result.table_exists:
-                        print(f"    Table not found: {config['table']}")
+                if not coverage["parity"]:
+                    msg = f"Coverage mismatch: B={coverage['b_count']}, C1={coverage['c1_count']}, C2={coverage['c2_count']}"
+                    if args.mode == "fail":
+                        result.errors.append(msg)
                     else:
-                        print(f"    Rows: {c3_result.row_count}")
-                        print(f"    Provenance valid: {c3_result.provenance_columns_valid}")
-                        print(f"    Registry packs verified: {c3_result.registry_packs_verified}")
-                        print(f"    Registry packs missing: {c3_result.registry_packs_missing}")
-                        print(f"    Hash mismatches: {c3_result.registry_hash_mismatches}")
-                        print(f"    Invalid values: {c3_result.invalid_values}")
+                        result.warnings.append(msg)
+                
+                print(f"  B={coverage['b_count']}, C1={coverage['c1_count']}, C2={coverage['c2_count']}")
+                
+                # 2. Key uniqueness
+                print("Checking key uniqueness...")
+                result.c1_duplicates = check_duplicates(
+                    cur, "derived.ovc_c1_features_v0_1", args.symbol, start_date, end_date
+                )
+                result.c2_duplicates = check_duplicates(
+                    cur, "derived.ovc_c2_features_v0_1", args.symbol, start_date, end_date
+                )
+                
+                if result.c1_duplicates > 0:
+                    result.errors.append(f"C1 has {result.c1_duplicates} duplicate block_ids")
+                if result.c2_duplicates > 0:
+                    result.errors.append(f"C2 has {result.c2_duplicates} duplicate block_ids")
+                
+                print(f"  C1 duplicates: {result.c1_duplicates}, C2 duplicates: {result.c2_duplicates}")
+                
+                # 3. Null rates
+                print("Checking null rates...")
+                result.c1_null_rates = check_null_rates(
+                    cur, "derived.ovc_c1_features_v0_1", C1_FEATURE_COLUMNS,
+                    args.symbol, start_date, end_date
+                )
+                result.c2_null_rates = check_null_rates(
+                    cur, "derived.ovc_c2_features_v0_1", C2_FEATURE_COLUMNS,
+                    args.symbol, start_date, end_date
+                )
+                
+                # Check for NaN/Inf
+                nan_issues = check_nan_inf(
+                    cur, "derived.ovc_c1_features_v0_1",
+                    ["range", "body", "ret", "logret", "body_ratio", "close_pos", "upper_wick", "lower_wick", "clv"],
+                    args.symbol, start_date, end_date
+                )
+                nan_issues.extend(check_nan_inf(
+                    cur, "derived.ovc_c2_features_v0_1",
+                    ["gap", "sess_high", "sess_low", "roll_avg_range_12", "roll_std_logret_12", "range_z_12", "rd_hi", "rd_lo", "rd_mid"],
+                    args.symbol, start_date, end_date
+                ))
+                
+                for issue in nan_issues:
+                    result.errors.append(issue)
+                
+                print(f"  C1 columns with >10% null: {sum(1 for r in result.c1_null_rates.values() if r > 0.1)}")
+                print(f"  C2 columns with >10% null: {sum(1 for r in result.c2_null_rates.values() if r > 0.1)}")
+                
+                # 4. Window_spec enforcement
+                print("Checking window_spec enforcement...")
+                ws_result = check_window_spec(cur, args.symbol, start_date, end_date)
+                result.c2_window_spec_valid = ws_result["valid"]
+                result.c2_window_spec_errors = ws_result["errors"]
+                
+                if not ws_result["valid"]:
+                    if ws_result["null_count"] > 0:
+                        result.errors.append(f"C2 has {ws_result['null_count']} rows with NULL window_spec")
+                    for err in ws_result["errors"]:
+                        result.errors.append(err)
+                
+                print(f"  Window_spec valid: {ws_result['valid']}")
+                
+                # 5. Determinism quickcheck
+                print(f"Running determinism quickcheck (sample={args.sample_size})...")
+                det_result = determinism_quickcheck(cur, args.symbol, start_date, end_date, args.sample_size)
+                result.determinism_sample_size = det_result["sample_size"]
+                result.determinism_mismatches = det_result["mismatches"]
+                result.determinism_details = det_result["details"]
+                
+                if det_result["mismatches"] > 0:
+                    result.errors.append(f"Determinism check failed: {det_result['mismatches']} mismatches in {det_result['sample_size']} samples")
+                
+                print(f"  Sampled: {det_result['sample_size']}, Mismatches: {det_result['mismatches']}")
+                
+                # 6. TV comparison (optional)
+                if args.compare_tv:
+                    print("Checking TV reference comparison...")
+                    tv_result = check_tv_reference(cur, args.symbol, start_date, end_date)
+                    result.tv_reference_available = tv_result.get("available", False)
                     
-                    # Propagate errors/warnings to main result
-                    for err in c3_result.errors:
-                        result.errors.append(f"[C3:{classifier_name}] {err}")
-                    for warn in c3_result.warnings:
-                        result.warnings.append(f"[C3:{classifier_name}] {warn}")
+                    if result.tv_reference_available:
+                        result.tv_matched_blocks = tv_result.get("matched_blocks", 0)
+                        result.tv_diff_summary = tv_result.get("diff_summary", {})
+                        result.tv_top_mismatches = tv_result.get("top_mismatches", [])
+                        print(f"  TV blocks matched: {result.tv_matched_blocks}")
+                    else:
+                        result.warnings.append(tv_result.get("message", "TV reference not available"))
+                        print(f"  {tv_result.get('message', 'TV reference not available')}")
+                
+                # 7. C3 validation (optional)
+                if args.validate_c3:
+                    result.c3_enabled = True
+                    print("\n--- C3 Classifier Validation ---")
                     
-                    # Version warnings are informational
-                    for vw in c3_result.registry_version_warnings:
-                        result.warnings.append(f"[C3:{classifier_name}] Version warning: {vw}")
-            
-            # Determine final status
-            if result.errors:
-                result.status = "FAIL"
-            elif result.warnings:
-                result.status = "PASS_WITH_WARNINGS"
-            else:
-                result.status = "PASS"
-            
-            # Store in QA schema if available
-            if table_exists(cur, "ovc_qa.derived_validation_run"):
-                print("Storing validation run in QA schema...")
-                store_validation_run(cur, result)
-                conn.commit()
-            else:
-                print("QA table not found, skipping storage")
-    
-    # Generate artifacts
-    print("\nGenerating artifacts...")
-    out_dir = Path(args.out) / "derived_validation" / run_id
-    out_dir.mkdir(parents=True, exist_ok=True)
-    
-    json_path = generate_report_json(result, out_dir)
-    md_path = generate_report_md(result, out_dir)
-    csv_path = generate_diffs_csv(result, out_dir)
-    
-    # Write meta
-    write_meta(out_dir, "derived_validation", run_id, sys.argv, {
-        "status": result.status,
-        "b_count": result.b_block_count,
-        "c1_count": result.c1_row_count,
-        "c2_count": result.c2_row_count,
-    })
-    
-    # Write LATEST pointer
-    component_root = Path(args.out) / "derived_validation"
-    write_latest(component_root, run_id)
-    
-    writer.log(f"  JSON: {json_path}")
-    writer.log(f"  Markdown: {md_path}")
-    if csv_path:
-        writer.log(f"  Diffs CSV: {csv_path}")
-    
-    writer.log(f"\n{'=' * 50}")
-    writer.log(f"VALIDATION RESULT: {result.status}")
-    writer.log(f"{'=' * 50}")
-    
-    if result.errors:
-        writer.log("\nErrors:")
-        for e in result.errors:
-            writer.log(f"  - {e}")
-    
-    if result.warnings:
-        writer.log("\nWarnings:")
-        for w in result.warnings:
-            writer.log(f"  - {w}")
-    
+                    # Determine which classifiers to validate
+                    classifiers_to_check = args.c3_classifiers or list(C3_TABLES.keys())
+                    
+                    for classifier_name in classifiers_to_check:
+                        if classifier_name not in C3_TABLES:
+                            result.warnings.append(f"Unknown C3 classifier: {classifier_name}")
+                            print(f"  WARN: Unknown classifier '{classifier_name}', skipping")
+                            continue
+                        
+                        config = C3_TABLES[classifier_name]
+                        print(f"\n  Validating {classifier_name} ({config['table']})...")
+                        
+                        c3_result = validate_c3_classifier(
+                            cur, classifier_name, config,
+                            args.symbol, start_date, end_date
+                        )
+                        
+                        # Store result
+                        result.c3_results[classifier_name] = c3_result.to_dict()
+                        
+                        # Print summary
+                        if not c3_result.table_exists:
+                            print(f"    Table not found: {config['table']}")
+                        else:
+                            print(f"    Rows: {c3_result.row_count}")
+                            print(f"    Provenance valid: {c3_result.provenance_columns_valid}")
+                            print(f"    Registry packs verified: {c3_result.registry_packs_verified}")
+                            print(f"    Registry packs missing: {c3_result.registry_packs_missing}")
+                            print(f"    Hash mismatches: {c3_result.registry_hash_mismatches}")
+                            print(f"    Invalid values: {c3_result.invalid_values}")
+                        
+                        # Propagate errors/warnings to main result
+                        for err in c3_result.errors:
+                            result.errors.append(f"[C3:{classifier_name}] {err}")
+                        for warn in c3_result.warnings:
+                            result.warnings.append(f"[C3:{classifier_name}] {warn}")
+                        
+                        # Version warnings are informational
+                        for vw in c3_result.registry_version_warnings:
+                            result.warnings.append(f"[C3:{classifier_name}] Version warning: {vw}")
+                
+                # Determine final status
+                if result.errors:
+                    result.status = "FAIL"
+                elif result.warnings:
+                    result.status = "PASS_WITH_WARNINGS"
+                else:
+                    result.status = "PASS"
+                
+                # Store in QA schema if available
+                if table_exists(cur, "ovc_qa.derived_validation_run"):
+                    print("Storing validation run in QA schema...")
+                    store_validation_run(cur, result)
+                    conn.commit()
+                else:
+                    print("QA table not found, skipping storage")
+        
+        # Generate artifacts
+        print("\nGenerating artifacts...")
+        out_dir = Path(args.out) / "derived_validation" / run_id
+        out_dir.mkdir(parents=True, exist_ok=True)
+        
+        json_path = generate_report_json(result, out_dir)
+        md_path = generate_report_md(result, out_dir)
+        csv_path = generate_diffs_csv(result, out_dir)
+        
+        # Write meta
+        write_meta(out_dir, "derived_validation", run_id, sys.argv, {
+            "status": result.status,
+            "b_count": result.b_block_count,
+            "c1_count": result.c1_row_count,
+            "c2_count": result.c2_row_count,
+        })
+        
+        # Write LATEST pointer
+        component_root = Path(args.out) / "derived_validation"
+        write_latest(component_root, run_id)
+        
+        writer.log(f"  JSON: {json_path}")
+        writer.log(f"  Markdown: {md_path}")
+        if csv_path:
+            writer.log(f"  Diffs CSV: {csv_path}")
+        
+        writer.log(f"\n{'=' * 50}")
+        writer.log(f"VALIDATION RESULT: {result.status}")
+        writer.log(f"{'=' * 50}")
+        
+        if result.errors:
+            writer.log("\nErrors:")
+            for e in result.errors:
+                writer.log(f"  - {e}")
+        
+        if result.warnings:
+            writer.log("\nWarnings:")
+            for w in result.warnings:
+                writer.log(f"  - {w}")
+        
         # Record output and checks
         writer.add_output(type="artifact", ref=str(out_dir))
         
