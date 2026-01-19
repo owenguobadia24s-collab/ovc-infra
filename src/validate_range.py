@@ -20,6 +20,11 @@ from backfill_day import (
     resolve_qualified_table,
 )
 from ovc_artifacts import make_run_dir, write_latest, write_meta
+from ovc_ops.run_artifact import RunWriter, detect_trigger
+
+PIPELINE_ID = "D-ValidationRange"
+PIPELINE_VERSION = "0.1.0"
+REQUIRED_ENV_VARS = ["NEON_DSN|DATABASE_URL"]
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -381,7 +386,7 @@ def evaluate_day(
     }
 
 
-def main() -> int:
+def main(writer: RunWriter) -> int:
     args = parse_args()
     load_env()
     dsn, _ = resolve_dsn()
@@ -390,6 +395,9 @@ def main() -> int:
     end_ny = parse_date(args.end_ny)
     if end_ny < start_ny:
         raise SystemExit("end_ny must be on or after start_ny.")
+    
+    writer.log(f"Validating {args.symbol} from {start_ny} to {end_ny}")
+    writer.add_input(type="neon_table", ref="ovc.ovc_blocks_v01_1_min")
 
     try:
         tolerance = Decimal(args.tolerance)
@@ -649,9 +657,38 @@ def main() -> int:
         f"failed={totals['failed']} skipped={totals['skipped']}"
     )
     print(f"latest_path: {latest_path}")
+    
+    # Record outputs and checks in run artifact
+    writer.add_output(type="file", ref=str(summary_path))
+    writer.add_output(type="file", ref=str(csv_path))
+    writer.add_output(type="file", ref=str(jsonl_path))
+    
+    writer.check(
+        name="validation_pass_rate",
+        status="pass" if totals["failed"] == 0 else "fail",
+        evidence=f"passed={totals['passed']}, failed={totals['failed']}, skipped={totals['skipped']}",
+    )
 
     return 2 if totals["failed"] else 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    writer.start(trigger_type=trigger_type, trigger_source=trigger_source, actor=actor)
+    
+    exit_code = 0
+    try:
+        exit_code = main(writer)
+        writer.finish(status="success" if exit_code == 0 else "failed")
+    except SystemExit as e:
+        exit_code = e.code if isinstance(e.code, int) else 1
+        writer.log(f"SystemExit: {e}")
+        writer.finish(status="failed" if exit_code != 0 else "success")
+        raise
+    except Exception as e:
+        writer.log(f"Exception: {e}")
+        writer.finish(status="failed")
+        raise
+    
+    sys.exit(exit_code)

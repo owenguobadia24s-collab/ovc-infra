@@ -3,19 +3,30 @@ import random
 import sys
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import requests
 
+# Add parent to path for local imports
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "src"))
 
-# Required env vars (NOTIOM_TOKEN is intentional spelling)
+from ovc_ops.run_artifact import RunWriter, detect_trigger
+
+
+# Required env vars (NOTIOM_TOKEN is intentional spelling - canonical)
 REQUIRED_ENV_VARS = [
     "DATABASE_URL",
     "NOTIOM_TOKEN",
     "NOTION_BLOCKS_DB_ID",
     "NOTION_OUTCOMES_DB_ID",
 ]
+
+# Pipeline metadata
+PIPELINE_ID = "D-NotionSync"
+PIPELINE_VERSION = "0.1.0"
 
 
 def check_required_env():
@@ -212,6 +223,7 @@ def sync_blocks(cursor, token, db_id):
 
     final_ts = watermark or last_ts
     print(f"blocks_min synced {synced} rows, watermark -> {final_ts}")
+    return synced
 
 
 def sync_outcomes(cursor, token, db_id):
@@ -271,6 +283,7 @@ def sync_outcomes(cursor, token, db_id):
 
     final_ts = watermark or last_ts
     print(f"outcomes synced {synced} rows, watermark -> {final_ts}")
+    return synced
 
 
 def sync_eval_runs(cursor, token, db_id):
@@ -305,32 +318,66 @@ def sync_eval_runs(cursor, token, db_id):
 
     final_ts = watermark or last_ts
     print(f"eval_runs synced {synced} rows, watermark -> {final_ts}")
+    return synced
 
 
-def main():
+def main(writer: RunWriter):
     database_url = require_env("DATABASE_URL")
     notion_token = require_env("NOTIOM_TOKEN")
     blocks_db_id = require_env("NOTION_BLOCKS_DB_ID")
     outcomes_db_id = require_env("NOTION_OUTCOMES_DB_ID")
     runs_db_id = os.getenv("NOTION_RUNS_DB_ID")
+    
+    writer.add_input(type="neon_table", ref="ovc.ovc_blocks_v01_1_min")
+    writer.add_input(type="neon_table", ref="derived.ovc_outcomes_v0_1")
+    
+    total_synced = 0
 
     with psycopg2.connect(database_url) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             ensure_sync_state(cursor)
-            sync_blocks(cursor, notion_token, blocks_db_id)
-            sync_outcomes(cursor, notion_token, outcomes_db_id)
+            
+            blocks_synced = sync_blocks(cursor, notion_token, blocks_db_id)
+            total_synced += blocks_synced
+            writer.log(f"blocks_min synced {blocks_synced} rows")
+            
+            outcomes_synced = sync_outcomes(cursor, notion_token, outcomes_db_id)
+            total_synced += outcomes_synced
+            writer.log(f"outcomes synced {outcomes_synced} rows")
+            
             if runs_db_id:
-                sync_eval_runs(cursor, notion_token, runs_db_id)
+                runs_synced = sync_eval_runs(cursor, notion_token, runs_db_id)
+                total_synced += runs_synced
+                writer.log(f"eval_runs synced {runs_synced} rows")
             else:
-                print("eval_runs skipped (NOTION_RUNS_DB_ID not set)")
+                writer.log("eval_runs skipped (NOTION_RUNS_DB_ID not set)")
+    
+    writer.add_output(type="notion_db", ref=blocks_db_id, rows_written=total_synced)
+    return total_synced
 
 
 if __name__ == "__main__":
-    check_required_env()
+    # Initialize run artifact writer
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    run_id = writer.start(trigger_type, trigger_source, actor)
+    
+    # Check env (also emits check via RunWriter)
+    missing = [name for name in REQUIRED_ENV_VARS if not os.getenv(name)]
+    if missing:
+        writer.log(f"NOTION_SYNC_MISSING_ENV={','.join(missing)}")
+        writer.log("NOTION_SYNC_STATUS=failed")
+        writer.finish("failed")
+        sys.exit(1)
+    
     try:
-        main()
-        print("NOTION_SYNC_STATUS=success")
+        total_synced = main(writer)
+        writer.log("NOTION_SYNC_STATUS=success")
+        writer.check("sync_completed", "Notion sync completed", "pass", ["run.json:$.outputs[0].rows_written"])
+        writer.finish("success")
     except Exception as exc:
-        print(f"notion_sync failed: {exc}", file=sys.stderr)
-        print("NOTION_SYNC_STATUS=failed")
+        writer.log(f"notion_sync failed: {exc}")
+        writer.log("NOTION_SYNC_STATUS=failed")
+        writer.check("sync_completed", f"Notion sync failed: {type(exc).__name__}", "fail", [])
+        writer.finish("failed")
         sys.exit(1)

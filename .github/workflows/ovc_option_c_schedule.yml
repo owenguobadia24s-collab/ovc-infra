@@ -101,3 +101,12 @@ jobs:
           name: option-c-reports-${{ env.RUN_ID }}
           path: reports/
           if-no-files-found: warn
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: option-c-run-artifacts-${{ env.RUN_ID }}
+          path: reports/runs/
+          if-no-files-found: ignore
+          retention-days: 30

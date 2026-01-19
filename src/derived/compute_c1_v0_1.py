@@ -35,6 +35,12 @@ from pathlib import Path
 import psycopg2
 from psycopg2.extras import execute_values
 
+# ---------- Add parent to path for local imports ----------
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from ovc_ops.run_artifact import RunWriter, detect_trigger
+
 # ---------- Tiny .env loader (matches backfill convention) ----------
 def load_env(path: str = ".env") -> None:
     if not os.path.exists(path):
@@ -53,6 +59,9 @@ load_env()
 # ---------- Constants ----------
 VERSION = "v0.1"
 RUN_TYPE = "c1"
+PIPELINE_ID = "B1-DerivedC1"
+PIPELINE_VERSION = "0.1.0"
+REQUIRED_ENV_VARS = ["NEON_DSN"]
 
 # Formula definition string for hash computation
 # This captures the exact computation logic; any change requires version bump
@@ -340,78 +349,101 @@ def upsert_c1_features(conn, run_id: uuid.UUID, features_batch: list) -> int:
 
 def main() -> None:
     args = parse_args()
-    dsn = resolve_dsn()
     
-    print(f"OVC C1 Feature Compute v{VERSION}")
-    print(f"Formula hash: {FORMULA_HASH}")
-    print(f"Dry run: {args.dry_run}")
-    if args.symbol:
-        print(f"Symbol filter: {args.symbol}")
-    if args.limit:
-        print(f"Limit: {args.limit}")
-    print()
-    
-    run_id = uuid.uuid4()
-    config = {
-        "dry_run": args.dry_run,
-        "limit": args.limit,
-        "symbol": args.symbol,
-        "recompute": args.recompute,
-        "formula_hash": FORMULA_HASH,
-        "version": VERSION,
-    }
-    
-    conn = psycopg2.connect(dsn)
+    # Initialize run artifact writer
+    trigger_type, trigger_source, actor = detect_trigger()
+    writer = RunWriter(PIPELINE_ID, PIPELINE_VERSION, REQUIRED_ENV_VARS)
+    artifact_run_id = writer.start(trigger_type, trigger_source, actor)
     
     try:
-        if not args.dry_run:
-            create_run_record(conn, run_id, config)
-            print(f"Run ID: {run_id}")
+        dsn = resolve_dsn()
         
-        # Fetch blocks to process
-        blocks = fetch_blocks(conn, args.symbol, args.limit, args.recompute)
-        print(f"Blocks to process: {len(blocks)}")
+        writer.log(f"OVC C1 Feature Compute v{VERSION}")
+        writer.log(f"Formula hash: {FORMULA_HASH}")
+        writer.log(f"Dry run: {args.dry_run}")
+        if args.symbol:
+            writer.log(f"Symbol filter: {args.symbol}")
+        if args.limit:
+            writer.log(f"Limit: {args.limit}")
+        writer.log("")
         
-        if not blocks:
-            print("No blocks to process.")
+        writer.add_input(type="neon_table", ref="ovc.ovc_blocks_v01_1_min")
+        
+        run_id = uuid.uuid4()
+        config = {
+            "dry_run": args.dry_run,
+            "limit": args.limit,
+            "symbol": args.symbol,
+            "recompute": args.recompute,
+            "formula_hash": FORMULA_HASH,
+            "version": VERSION,
+        }
+        
+        conn = psycopg2.connect(dsn)
+        
+        try:
             if not args.dry_run:
-                complete_run_record(conn, run_id, 0, "completed")
-            return
-        
-        # Compute C1 features
-        features_batch = []
-        for block_id, o, h, l, c in blocks:
-            features = compute_c1_features(o, h, l, c)
-            features["block_id"] = block_id
-            features_batch.append(features)
-        
-        if args.dry_run:
-            print("\nSample computed features (first 3):")
-            for f in features_batch[:3]:
-                print(f"  {f['block_id']}: range={f['range']:.5f}, body={f['body']:.5f}, "
-                      f"dir={f['direction']}, ret={f['ret']:.6f if f['ret'] else 'NULL'}")
-            print(f"\nDry run complete. Would upsert {len(features_batch)} rows.")
-            return
-        
-        # Upsert in batches
-        batch_size = 1000
-        total_upserted = 0
-        for i in range(0, len(features_batch), batch_size):
-            batch = features_batch[i:i + batch_size]
-            count = upsert_c1_features(conn, run_id, batch)
-            total_upserted += count
-            conn.commit()
-            print(f"  Upserted batch {i // batch_size + 1}: {count} rows")
-        
-        complete_run_record(conn, run_id, total_upserted, "completed")
-        print(f"\nCompleted. Total rows upserted: {total_upserted}")
-        
+                create_run_record(conn, run_id, config)
+                writer.log(f"Run ID: {run_id}")
+            
+            # Fetch blocks to process
+            blocks = fetch_blocks(conn, args.symbol, args.limit, args.recompute)
+            writer.log(f"Blocks to process: {len(blocks)}")
+            
+            if not blocks:
+                writer.log("No blocks to process.")
+                if not args.dry_run:
+                    complete_run_record(conn, run_id, 0, "completed")
+                writer.check("blocks_available", "Blocks available for processing", "skip", [])
+                writer.finish("success")
+                return
+            
+            # Compute C1 features
+            features_batch = []
+            for block_id, o, h, l, c in blocks:
+                features = compute_c1_features(o, h, l, c)
+                features["block_id"] = block_id
+                features_batch.append(features)
+            
+            if args.dry_run:
+                writer.log("\nSample computed features (first 3):")
+                for f in features_batch[:3]:
+                    writer.log(f"  {f['block_id']}: range={f['range']:.5f}, body={f['body']:.5f}, "
+                          f"dir={f['direction']}, ret={f['ret']:.6f if f['ret'] else 'NULL'}")
+                writer.log(f"\nDry run complete. Would upsert {len(features_batch)} rows.")
+                writer.check("dry_run", "Dry run completed", "pass", [])
+                writer.finish("success")
+                return
+            
+            # Upsert in batches
+            batch_size = 1000
+            total_upserted = 0
+            for i in range(0, len(features_batch), batch_size):
+                batch = features_batch[i:i + batch_size]
+                count = upsert_c1_features(conn, run_id, batch)
+                total_upserted += count
+                conn.commit()
+                writer.log(f"  Upserted batch {i // batch_size + 1}: {count} rows")
+            
+            complete_run_record(conn, run_id, total_upserted, "completed")
+            writer.log(f"\nCompleted. Total rows upserted: {total_upserted}")
+            
+            writer.add_output(type="neon_table", ref="derived.ovc_block_features_c1_v0_1", rows_written=total_upserted)
+            writer.check("features_computed", "C1 features computed", "pass", ["run.json:$.outputs[0].rows_written"])
+            writer.finish("success")
+            
+        except Exception as e:
+            if not args.dry_run:
+                complete_run_record(conn, run_id, 0, "failed", str(e))
+            raise
+        finally:
+            conn.close()
+            
     except Exception as e:
-        if not args.dry_run:
-            complete_run_record(conn, run_id, 0, "failed", str(e))
+        writer.log(f"ERROR: {type(e).__name__}: {e}")
+        writer.check("execution_error", f"Execution failed: {type(e).__name__}", "fail", [])
+        writer.finish("failed")
         raise
-    finally:
-        conn.close()
 
 
 if __name__ == "__main__":
