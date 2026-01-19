@@ -22,7 +22,7 @@ jobs:
       - name: Run Notion sync
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTIOM_TOKEN: ${{ secrets.NOTIOM_TOKEN }}
           NOTION_BLOCKS_DB_ID: ${{ secrets.NOTION_BLOCKS_DB_ID }}
           NOTION_OUTCOMES_DB_ID: ${{ secrets.NOTION_OUTCOMES_DB_ID }}
           NOTION_RUNS_DB_ID: ${{ secrets.NOTION_RUNS_DB_ID }}

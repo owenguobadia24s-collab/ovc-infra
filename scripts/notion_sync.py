@@ -9,6 +9,24 @@ from psycopg2.extras import RealDictCursor
 import requests
 
 
+# Required env vars (NOTIOM_TOKEN is intentional spelling)
+REQUIRED_ENV_VARS = [
+    "DATABASE_URL",
+    "NOTIOM_TOKEN",
+    "NOTION_BLOCKS_DB_ID",
+    "NOTION_OUTCOMES_DB_ID",
+]
+
+
+def check_required_env():
+    """Check required env vars at startup. Print missing names (not values) and exit if any missing."""
+    missing = [name for name in REQUIRED_ENV_VARS if not os.getenv(name)]
+    if missing:
+        print(f"NOTION_SYNC_MISSING_ENV={','.join(missing)}")
+        print("NOTION_SYNC_STATUS=failed")
+        sys.exit(1)
+
+
 NOTION_VERSION = "2022-06-28"
 NOTION_BASE_URL = "https://api.notion.com/v1"
 
@@ -46,8 +64,6 @@ def notion_request(method, url, token, payload=None, max_retries=5):
         return {}
     raise RuntimeError("Notion API rate limit exceeded after retries")
 
-token = os.environ.get("NOTIOM_TOKEN")
-print("Notion token present:", bool(token), "length:", len(token) if token else 0)
 
 def notion_find_page(db_id, token, title_property, title_value):
     url = f"{NOTION_BASE_URL}/databases/{db_id}/query"
@@ -310,8 +326,11 @@ def main():
 
 
 if __name__ == "__main__":
+    check_required_env()
     try:
         main()
+        print("NOTION_SYNC_STATUS=success")
     except Exception as exc:
         print(f"notion_sync failed: {exc}", file=sys.stderr)
+        print("NOTION_SYNC_STATUS=failed")
         sys.exit(1)

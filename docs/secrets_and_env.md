@@ -29,7 +29,7 @@ Notion sync (PowerShell):
 
 ```powershell
 $env:DATABASE_URL = 'postgresql://user:pass@host/db'
-$env:NOTION_TOKEN = 'secret_token'
+$env:NOTIOM_TOKEN = 'secret_token'  # Note: NOTIOM (not NOTION) is canonical
 $env:NOTION_BLOCKS_DB_ID = 'notion_db_id'
 $env:NOTION_OUTCOMES_DB_ID = 'notion_db_id'
 $env:NOTION_RUNS_DB_ID = 'notion_db_id' # optional
