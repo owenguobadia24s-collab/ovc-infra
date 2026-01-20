@@ -224,5 +224,7 @@ __marimo__/
 .env
 .env.*
 
-# Option D run artifacts
-reports/
+# Option D run artifacts (general reports ignored)
+reports/*
+# Exception: Path 1 evidence runs are observational outputs (append-only, tracked)
+!reports/path1/
