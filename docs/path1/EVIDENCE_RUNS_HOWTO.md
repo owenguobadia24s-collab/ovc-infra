@@ -260,3 +260,137 @@ Examples:
 - **Do NOT introduce** thresholds, signals, or decision logic
 - **Do NOT interpret** results beyond observational description
 - **All runs** produce observational outputs only
+
+---
+
+## 11. Automated Evidence Runs (GitHub Action)
+
+### 11.1 Overview
+
+The `path1_evidence_queue.yml` workflow enables on-demand execution of Path 1 Evidence runs from a queued CSV file. It replicates the exact behavior of manual Runs 001-003.
+
+**Key Features:**
+- On-demand execution via `workflow_dispatch`
+- Queue-based batch processing
+- Automatic date range substitution (when requested range has no data)
+- Artifact upload and optional branch commit
+- Never auto-merges (human review required)
+
+### 11.2 Queue File Format
+
+Queue file: `reports/path1/evidence/RUN_QUEUE.csv`
+
+```csv
+run_id,symbol,date_start,date_end
+p1_20260121_001,GBPUSD,2023-11-27,2023-12-01
+p1_20260121_002,GBPUSD,2023-11-20,2023-11-24
+p1_20260121_003,GBPUSD,2023-11-13,2023-11-17
+```
+
+| Column | Description |
+|--------|-------------|
+| `run_id` | Unique identifier (`p1_YYYYMMDD_SEQ`) |
+| `symbol` | Trading pair (e.g., `GBPUSD`) |
+| `date_start` | Requested start date (`YYYY-MM-DD`) |
+| `date_end` | Requested end date (`YYYY-MM-DD`) |
+
+**Note:** Lines starting with `#` are comments and ignored.
+
+### 11.3 Workflow Inputs
+
+| Input | Default | Description |
+|-------|---------|-------------|
+| `queue_path` | `reports/path1/evidence/RUN_QUEUE.csv` | Path to queue CSV |
+| `max_runs` | `10` | Maximum runs to execute |
+| `run_id` | *(empty)* | Filter to single run_id (optional) |
+| `commit_results` | `true` | Commit results to new branch |
+| `branch_name` | *(auto)* | Custom branch name (default: `evidence-run-{timestamp}`) |
+| `dry_run` | `false` | Validate without executing |
+
+### 11.4 Required Secrets
+
+Configure these in GitHub repository settings → Secrets:
+
+| Secret | Purpose |
+|--------|---------|
+| `DATABASE_URL` or `NEON_DSN` | Neon PostgreSQL connection string |
+
+### 11.5 Running the Workflow
+
+#### Via GitHub UI
+
+1. Go to **Actions** → **Path 1 Evidence Queue Runner**
+2. Click **Run workflow**
+3. Configure inputs
+4. Click **Run workflow**
+
+#### Via GitHub CLI
+
+```bash
+# Execute all queued runs
+gh workflow run path1_evidence_queue.yml
+
+# Execute specific run_id only
+gh workflow run path1_evidence_queue.yml -f run_id=p1_20260121_001
+
+# Dry run (validate only)
+gh workflow run path1_evidence_queue.yml -f dry_run=true
+
+# Custom branch name
+gh workflow run path1_evidence_queue.yml -f branch_name=evidence-batch-2026-01-21
+```
+
+### 11.6 Output Artifacts
+
+The workflow generates:
+
+| Artifact | Location |
+|----------|----------|
+| SQL wrappers | `sql/path1/evidence/runs/{run_id}/` |
+| Raw outputs | `reports/path1/evidence/runs/{run_id}/outputs/` |
+| Evidence reports | `reports/path1/evidence/runs/{run_id}/*.md` |
+| Updated index | `reports/path1/evidence/INDEX.md` |
+
+Artifacts are uploaded to GitHub Actions and optionally committed to a new branch.
+
+### 11.7 Post-Workflow Steps
+
+1. **Review** the generated branch or downloaded artifacts
+2. **Create PR** to merge into main:
+   ```bash
+   gh pr create --base main --head evidence-run-{timestamp} --title "Path 1 Evidence Runs"
+   ```
+3. **Manual merge** after human review (never auto-merge)
+4. **Clear queue** by removing executed entries from `RUN_QUEUE.csv`
+
+### 11.8 Date Range Substitution
+
+If a requested date range has zero rows, the runner automatically:
+1. Searches backwards in 7-day increments
+2. Finds nearest 5-weekday range with data
+3. Avoids overlap with existing runs in INDEX.md
+4. Documents substitution in RUN.md
+
+### 11.9 Local Testing
+
+Run the queue locally before using the GitHub Action:
+
+```powershell
+# Dry run (validate only)
+python scripts/path1/run_evidence_queue.py --dry-run
+
+# Execute single run
+python scripts/path1/run_evidence_queue.py --run-id p1_20260121_001
+
+# Execute all queued (max 3)
+python scripts/path1/run_evidence_queue.py --max-runs 3
+```
+
+### 11.10 Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| Queue file not found | Check `queue_path` input matches actual path |
+| Database connection failed | Verify `DATABASE_URL`/`NEON_DSN` secret is set |
+| No substitute range found | Verify data exists in evidence views |
+| Branch already exists | Use unique `branch_name` or delete existing branch |

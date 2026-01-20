@@ -1,0 +1,239 @@
+name: Path 1 Evidence Queue Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      queue_path:
+        description: 'Path to queue CSV file (relative to repo root)'
+        required: false
+        default: 'reports/path1/evidence/RUN_QUEUE.csv'
+        type: string
+      max_runs:
+        description: 'Maximum runs to execute'
+        required: false
+        default: '10'
+        type: string
+      run_id:
+        description: 'Execute only this specific run_id (leave empty for all queued)'
+        required: false
+        default: ''
+        type: string
+      commit_results:
+        description: 'Commit results to new branch'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      branch_name:
+        description: 'Branch name for results (auto-generated if empty)'
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: 'Dry run (validate only, no execution)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  run-evidence-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEON_DSN: ${{ secrets.NEON_DSN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate inputs
+        run: |
+          echo "Queue path: ${{ inputs.queue_path }}"
+          echo "Max runs: ${{ inputs.max_runs }}"
+          echo "Run ID filter: ${{ inputs.run_id || '(all)' }}"
+          echo "Commit results: ${{ inputs.commit_results }}"
+          echo "Dry run: ${{ inputs.dry_run }}"
+          
+          # Validate queue file exists
+          if [ ! -f "${{ inputs.queue_path }}" ]; then
+            echo "ERROR: Queue file not found: ${{ inputs.queue_path }}"
+            exit 1
+          fi
+          
+          # Count non-empty, non-comment lines
+          QUEUE_COUNT=$(grep -v '^#' "${{ inputs.queue_path }}" | grep -v '^run_id' | grep -v '^$' | wc -l)
+          echo "Runs in queue: $QUEUE_COUNT"
+          
+          if [ "$QUEUE_COUNT" -eq 0 ]; then
+            echo "WARNING: Queue is empty"
+          fi
+
+      - name: Validate required secrets
+        run: |
+          python3 - << 'PY'
+          import os, sys
+          
+          db_url = os.environ.get("DATABASE_URL") or os.environ.get("NEON_DSN")
+          if not db_url:
+              print("ERROR: DATABASE_URL or NEON_DSN secret not configured")
+              sys.exit(1)
+          
+          # Mask the secret
+          print("Database secret: configured ✓")
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql --version
+
+      - name: Determine branch name
+        id: branch
+        run: |
+          if [ -n "${{ inputs.branch_name }}" ]; then
+            BRANCH="${{ inputs.branch_name }}"
+          else
+            TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
+            BRANCH="evidence-run-${TIMESTAMP}"
+          fi
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "Branch for results: $BRANCH"
+
+      - name: Execute evidence queue runner
+        id: runner
+        run: |
+          # Build command
+          CMD="python scripts/path1/run_evidence_queue.py"
+          CMD="$CMD --queue '${{ inputs.queue_path }}'"
+          CMD="$CMD --max-runs ${{ inputs.max_runs }}"
+          CMD="$CMD --repo-root ."
+          
+          if [ -n "${{ inputs.run_id }}" ]; then
+            CMD="$CMD --run-id '${{ inputs.run_id }}'"
+          fi
+          
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            CMD="$CMD --dry-run"
+          fi
+          
+          echo "Executing: $CMD"
+          eval $CMD
+
+      - name: List generated artifacts
+        if: inputs.dry_run != 'true'
+        run: |
+          echo "=== SQL Files Generated ==="
+          find sql/path1/evidence/runs -name "*.sql" -type f 2>/dev/null | head -50 || echo "No SQL files"
+          
+          echo ""
+          echo "=== Report Files Generated ==="
+          find reports/path1/evidence/runs -name "*.md" -type f 2>/dev/null | head -50 || echo "No report files"
+          
+          echo ""
+          echo "=== Output Files Generated ==="
+          find reports/path1/evidence/runs -name "*.txt" -type f 2>/dev/null | head -50 || echo "No output files"
+
+      - name: Upload artifacts
+        if: inputs.dry_run != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-run-artifacts-${{ github.run_number }}
+          path: |
+            sql/path1/evidence/runs/
+            reports/path1/evidence/runs/
+            reports/path1/evidence/INDEX.md
+          retention-days: 90
+
+      - name: Configure Git
+        if: inputs.commit_results == 'true' && inputs.dry_run != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create branch and commit results
+        if: inputs.commit_results == 'true' && inputs.dry_run != 'true'
+        run: |
+          BRANCH="${{ steps.branch.outputs.branch }}"
+          
+          # Create new branch
+          git checkout -b "$BRANCH"
+          
+          # Stage generated files
+          git add sql/path1/evidence/runs/
+          git add reports/path1/evidence/runs/
+          git add reports/path1/evidence/INDEX.md
+          
+          # Check if there are changes to commit
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          # Commit
+          git commit -m "Path 1 Evidence Run(s) - Automated
+          
+          Queue: ${{ inputs.queue_path }}
+          Max runs: ${{ inputs.max_runs }}
+          Run ID filter: ${{ inputs.run_id || '(all)' }}
+          
+          Generated by: .github/workflows/path1_evidence_queue.yml
+          Workflow run: ${{ github.run_id }}"
+          
+          # Push branch
+          git push origin "$BRANCH"
+          
+          echo ""
+          echo "=========================================="
+          echo "Results committed to branch: $BRANCH"
+          echo "=========================================="
+          echo ""
+          echo "To merge, create a PR:"
+          echo "  gh pr create --base main --head $BRANCH --title 'Path 1 Evidence Run(s)'"
+          echo ""
+          echo "Or merge manually after review."
+
+      - name: Summary
+        run: |
+          echo "## Path 1 Evidence Queue Run Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Queue | \`${{ inputs.queue_path }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Max Runs | ${{ inputs.max_runs }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run ID Filter | ${{ inputs.run_id || '(all)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dry Run | ${{ inputs.dry_run }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit Results | ${{ inputs.commit_results }} |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.commit_results }}" = "true" ] && [ "${{ inputs.dry_run }}" != "true" ]; then
+            echo "| Results Branch | \`${{ steps.branch.outputs.branch }}\` |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "This was a **dry run**. No changes were made." >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ inputs.commit_results }}" = "true" ]; then
+            echo "1. Review the generated artifacts in branch \`${{ steps.branch.outputs.branch }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "2. Create a PR to merge into main" >> $GITHUB_STEP_SUMMARY
+            echo "3. **Never auto-merge** - human review required" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Artifacts uploaded but not committed to a branch." >> $GITHUB_STEP_SUMMARY
+            echo "Download from workflow artifacts." >> $GITHUB_STEP_SUMMARY
+          fi
