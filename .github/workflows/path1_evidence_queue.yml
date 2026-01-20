@@ -40,6 +40,10 @@ on:
           - 'false'
           - 'true'
 
+# Required permissions for pushing branches
+permissions:
+  contents: write
+
 jobs:
   run-evidence-queue:
     runs-on: ubuntu-latest
