@@ -335,8 +335,27 @@ jobs:
       - name: Create Pull Request and enable auto-merge
         if: inputs.commit_results == 'true' && inputs.dry_run != 'true' && steps.commit.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          # Use PAT for PR creation to enable auto-merge and trigger downstream workflows
+          # GITHUB_TOKEN cannot trigger workflows or enable auto-merge on PRs it creates
+          GH_TOKEN: ${{ secrets.OVC_PR_BOT_TOKEN }}
         run: |
+          # Validate PAT secret is configured
+          if [ -z "$GH_TOKEN" ]; then
+            echo "=========================================="
+            echo "ERROR: OVC_PR_BOT_TOKEN secret is not configured"
+            echo "=========================================="
+            echo ""
+            echo "This workflow requires a Personal Access Token (PAT) to create PRs"
+            echo "and enable auto-merge. The default GITHUB_TOKEN cannot do this."
+            echo ""
+            echo "To fix:"
+            echo "1. Create a PAT with 'repo' and 'workflow' scopes"
+            echo "2. Add it as a repository secret named: OVC_PR_BOT_TOKEN"
+            echo "   Settings → Secrets and variables → Actions → New repository secret"
+            echo ""
+            exit 1
+          fi
+          
           BRANCH="${{ steps.branch.outputs.branch }}"
           
           # Check if PR already exists for this branch
