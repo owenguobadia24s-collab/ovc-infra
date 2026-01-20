@@ -22,6 +22,11 @@
 - P3: OPTIONAL / PARTIAL (derived, non-blocking).
 - P4: PASS (core validation always runs; derived conditional).
 
+## [CHANGE][ADDED] Option B Layer Status
+| Layer | Status | Evidence | Date Promoted |
+|-------|--------|----------|---------------|
+| Option B – C1 | CANONICAL | [C1_v0_1_validation.md](../reports/validation/C1_v0_1_validation.md) | 2026-01-20 |
+
 ## [CHANGE][ADDED] GitHub Actions Schedules (UTC)
 | Workflow | Schedule | Purpose |
 |----------|----------|---------|
