@@ -2,6 +2,16 @@
 """
 Path 1 Evidence Run Post-Run Validator
 
+SCOPE: Structural integrity and content markers ONLY.
+       This validator does NOT verify:
+       - Statistical correctness of results
+       - Data accuracy or completeness
+       - Whether date ranges are sensible
+       - Business logic validity
+
+       A PASS means: files exist, are non-empty, contain expected sections,
+       and have no psql error markers. It does NOT mean results are correct.
+
 Validates the structural integrity and content sanity of a Path 1 evidence run.
 Does NOT interpret results or query the database.
 
@@ -493,6 +503,7 @@ def main():
         print(f"Validating run: {run_id}")
         print(f"Repo root: {repo_root}")
         print(f"Strict mode: {args.strict}")
+        print("NOTE: Validation checks STRUCTURE only, not data correctness.")
     
     # Step 2: Structure
     validate_structure(repo_root, run_id, result)

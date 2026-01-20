@@ -204,6 +204,8 @@ def run_sql_file(db_url: str, sql_file: Path, output_file: Path) -> str:
     output_file.write_text(output)
     
     # Fail-fast: propagate psql failures (Task A remediation)
+    # WARNING: Prior runs in this batch are already committed to filesystem.
+    # This exception stops the batch but does NOT roll back completed runs.
     if result.returncode != 0:
         print(f"ERROR: psql failed with exit code {result.returncode}")
         print(f"SQL file: {sql_file}")
@@ -738,7 +740,12 @@ def execute_single_run(
         date_end_actual = sub_end
         row_count = sub_count
         was_substituted = True
-        print(f"Substituted: {date_start_actual} to {date_end_actual} ({row_count} rows)")
+        print("=" * 60)
+        print("WARNING: DATE RANGE SUBSTITUTED")
+        print(f"  Requested: {date_start} to {date_end} (0 rows)")
+        print(f"  Executing: {date_start_actual} to {date_end_actual} ({row_count} rows)")
+        print("  This substitution is automatic and non-interactive.")
+        print("=" * 60)
     
     if dry_run:
         print("[DRY RUN] Would execute studies and generate artifacts")
@@ -748,6 +755,14 @@ def execute_single_run(
     sql_dir = repo_root / "sql" / "path1" / "evidence" / "runs" / run_id
     report_dir = repo_root / "reports" / "path1" / "evidence" / "runs" / run_id
     output_dir = report_dir / "outputs"
+    
+    # Check if run artifacts already exist (possible re-run)
+    if report_dir.exists():
+        print("=" * 60)
+        print(f"WARNING: Run folder already exists: {report_dir}")
+        print("         Files will be OVERWRITTEN. INDEX.md will NOT duplicate.")
+        print("         This may indicate an accidental re-run.")
+        print("=" * 60)
     
     sql_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -867,6 +882,9 @@ def main():
     print("=" * 60)
     print("PATH 1 EVIDENCE QUEUE RUNNER")
     print("=" * 60)
+    print("NOTE: Runs execute sequentially. On failure, prior runs remain")
+    print("      on disk and in INDEX.md. There is no rollback.")
+    print("      Queue status is LOCAL ONLY and not auto-committed.")
     
     # Validate environment
     db_url = validate_environment()
@@ -970,6 +988,9 @@ def main():
             if success
         }
         update_queue_status(queue_path, completed_runs)
+        print("")
+        print("WARNING: Queue status updated LOCALLY ONLY. Changes are not auto-committed.")
+        print("         INDEX.md is the canonical execution ledger, not the queue.")
     
     if failed > 0:
         sys.exit(1)
