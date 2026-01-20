@@ -1,5 +1,6 @@
 # Pipeline Reality Map v0.1
 
+> **[CHANGE][ADDED] [STATUS: ACTIVE]**  
 > **Generated:** 2026-01-19  
 > **Last Updated:** 2026-01-19 (run artifact system + fixes)  
 > **Audit Type:** Deterministic, evidence-based  
