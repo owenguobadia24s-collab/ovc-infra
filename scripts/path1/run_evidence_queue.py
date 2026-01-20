@@ -797,7 +797,7 @@ def main():
         print("NOOP: Queue empty or no matching run_id")
         print("="*60)
         print("No runs to execute. This is not an error if the queue is intentionally empty.")
-        print(f"Queue file: {args.queue_path}")
+        print(f"Queue file: {queue_path}")
         print(f"Run ID filter: {args.run_id or '(none)'}")
         
         # Create NOOP marker for artifact visibility (Task D remediation)
@@ -806,7 +806,7 @@ def main():
         noop_marker = noop_dir / f"NOOP_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         noop_marker.write_text(
             f"NOOP marker - queue was empty at {datetime.now().isoformat()}\n"
-            f"Queue file: {args.queue_path}\n"
+            f"Queue file: {queue_path}\n"
             f"Run ID filter: {args.run_id or '(none)'}\n"
         )
         print(f"Created NOOP marker: {noop_marker}")
