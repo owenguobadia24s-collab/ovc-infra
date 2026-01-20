@@ -1,35 +1,30 @@
-# Path 1 Evidence Run Queue,,,,
+# Path 1 Evidence Run Queue
 # Format: run_id,symbol,date_start,date_end,status
-# - run_id: unique identifier (p1_YYYYMMDD_SEQ),,,,
-# - symbol: trading pair (e.g., GBPUSD),,,
-# - date_start: requested start date (YYYY-MM-DD),,,,
-# - date_end: requested end date (YYYY-MM-DD),,,,
-# - status: pending | complete | failed (empty = pending),,,,
-#,,,,
-# Substitution: If requested range has 0 rows, runner will substitute,,,
-# with nearest non-overlapping 5-day weekday range.,,,,
-#,,,,
-# Existing completed runs (DO NOT RE-QUEUE):,,,,
-# - Run 001 actual: 2024-01-08 to 2024-01-12,,,,
-# - Run 002 actual: 2023-12-18 to 2023-12-22,,,,
-# - Run 003 actual: 2023-12-11 to 2023-12-15,,,,
-#,,,,
+# - run_id: unique identifier (p1_YYYYMMDD_SEQ)
+# - symbol: trading pair (e.g., GBPUSD)
+# - date_start: requested start date (YYYY-MM-DD)
+# - date_end: requested end date (YYYY-MM-DD)
+# - status: pending | complete | failed (empty = pending)
+#
+# Substitution: If requested range has 0 rows, runner will substitute
+# with nearest non-overlapping 5-day weekday range.
+#
+# Existing completed runs (DO NOT RE-QUEUE):
+# - Run 001 actual: 2024-01-08 to 2024-01-12
+# - Run 002 actual: 2023-12-18 to 2023-12-22
+# - Run 003 actual: 2023-12-11 to 2023-12-15
+#
 run_id,symbol,date_start,date_end,status
-p1_20260120_004,GBPUSD,04/12/2023,08/12/2023,complete
-p1_20260120_005,GBPUSD,27/11/2023,01/12/2023,complete
-p1_20260120_006,GBPUSD,20/11/2023,24/11/2023,complete
-p1_20260120_007,GBPUSD,13/11/2023,17/11/2023,complete
-p1_20260120_008,GBPUSD,06/11/2023,10/11/2023,complete
-p1_20260120_009,GBPUSD,30/10/2023,03/11/2023,complete
-p1_20260120_010,GBPUSD,23/10/2023,27/10/2023,complete
-p1_20260120_011,GBPUSD,16/10/2023,20/10/2023,complete
-p1_20260120_012,GBPUSD,09/10/2023,13/10/2023,pending
-p1_20260120_013,GBPUSD,02/10/2023,06/10/2023,pending
-p1_20260120_014,GBPUSD,25/09/2023,29/09/2023,pending
-p1_20260120_015,GBPUSD,18/09/2023,22/09/2023,pending
-p1_20260120_016,GBPUSD,11/09/2023,15/09/2023,pending
-p1_20260120_017,GBPUSD,04/09/2023,08/09/2023,pending
-p1_20260120_018,GBPUSD,28/08/2023,01/09/2023,pending
-p1_20260120_019,GBPUSD,21/08/2023,25/08/2023,pending
-p1_20260120_020,GBPUSD,14/08/2023,18/08/2023,pending
-p1_20260120_021,GBPUSD,07/08/2023,11/08/2023,pending
+p1_20260120_004,GBPUSD,2023-12-04,2023-12-08,complete
+p1_20260120_005,GBPUSD,2023-11-27,2023-12-01,complete
+p1_20260120_006,GBPUSD,2023-11-20,2023-11-24,complete
+p1_20260120_007,GBPUSD,2023-11-13,2023-11-17,complete
+p1_20260120_008,GBPUSD,2023-11-06,2023-11-10,complete
+p1_20260120_009,GBPUSD,2023-10-30,2023-11-03,complete
+p1_20260120_010,GBPUSD,2023-10-23,2023-10-27,complete
+p1_20260120_011,GBPUSD,2023-10-16,2023-10-20,complete
+p1_20260120_012,GBPUSD,2023-10-09,2023-10-13,complete
+p1_20260120_013,GBPUSD,2023-10-02,2023-10-06,pending
+p1_20260120_014,GBPUSD,2023-09-25,2023-09-29,pending
+p1_20260120_015,GBPUSD,2023-09-18,2023-09-22,pending
+p1_20260120_016,GBPUSD,2023-09-11,2023-09-15,pending
