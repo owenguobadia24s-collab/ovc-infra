@@ -44,6 +44,12 @@ on:
 permissions:
   contents: write
 
+# Task C remediation: Serialize workflow runs to prevent queue race conditions
+# cancel-in-progress: false ensures queue integrity (queued runs wait rather than cancel)
+concurrency:
+  group: path1-evidence-queue
+  cancel-in-progress: false
+
 jobs:
   run-evidence-queue:
     runs-on: ubuntu-latest
@@ -152,6 +158,37 @@ jobs:
           echo "=== Output Files Generated ==="
           find reports/path1/evidence/runs -name "*.txt" -type f 2>/dev/null | head -50 || echo "No output files"
 
+      # Task B remediation: Verify artifacts exist before upload
+      - name: Verify artifacts exist
+        if: inputs.dry_run != 'true'
+        run: |
+          echo "=== Artifact Verification (Task B) ==="
+          
+          # Count files in each artifact path
+          SQL_COUNT=$(find sql/path1/evidence/runs -type f 2>/dev/null | wc -l)
+          REPORT_COUNT=$(find reports/path1/evidence/runs -type f 2>/dev/null | wc -l)
+          
+          echo "SQL files found: $SQL_COUNT"
+          echo "Report files found: $REPORT_COUNT"
+          
+          TOTAL=$((SQL_COUNT + REPORT_COUNT))
+          echo "Total artifact files: $TOTAL"
+          
+          if [ "$TOTAL" -eq 0 ]; then
+            echo ""
+            echo "ERROR: No artifact files found!"
+            echo "Expected files in:"
+            echo "  - sql/path1/evidence/runs/"
+            echo "  - reports/path1/evidence/runs/"
+            echo ""
+            echo "This indicates the evidence run did not generate expected outputs."
+            echo "Check the execution logs above for errors."
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ Artifact verification passed ($TOTAL files found)"
+
       - name: Upload artifacts
         if: inputs.dry_run != 'true'
         uses: actions/upload-artifact@v4
@@ -162,6 +199,8 @@ jobs:
             reports/path1/evidence/runs/
             reports/path1/evidence/INDEX.md
           retention-days: 90
+          # Task B remediation: Fail if no files match (explicit over default 'warn')
+          if-no-files-found: error
 
       - name: Configure Git
         if: inputs.commit_results == 'true' && inputs.dry_run != 'true'
