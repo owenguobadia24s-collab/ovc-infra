@@ -1,0 +1,75 @@
+{
+  "$schema": "../../../schemas/study_manifest_v1.json",
+  "_comment": "NON-CANONICAL — This manifest describes a downstream research study only. NO FEEDBACK INTO CANONICAL.",
+  
+  "study_id": "study_20260120_block_range_intensity_vs_outcomes",
+  "version": "0.1.0",
+  "status": "draft",
+  
+  "metadata": {
+    "title": "Block Range Intensity Score vs Outcomes (Descriptive)",
+    "description": "Descriptive analysis of associations between the block_range_intensity score and canonical Option C outcomes. No predictive claims, no strategy implications.",
+    "author": "@ovc-research",
+    "created_at": "2026-01-20T00:00:00Z",
+    "updated_at": "2026-01-20T00:00:00Z"
+  },
+  
+  "canonical": {
+    "release": "ovc-v0.1-spine",
+    "feature_view": "derived.ovc_block_features_v0_1",
+    "outcome_view": "derived.ovc_outcomes_v0_1"
+  },
+  
+  "window": {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2026-01-01T00:00:00Z",
+    "timezone": "UTC"
+  },
+  
+  "inputs": {
+    "instruments": ["GBPUSD"],
+    "columns": {
+      "features": ["block_id", "ts", "instrument", "rng"],
+      "outcomes": ["fwd_ret_3", "mfe_3", "mae_3"]
+    },
+    "scores": [
+      {
+        "name": "block_range_intensity",
+        "version": "v1.0",
+        "path": "research/scores/score_block_range_intensity_v1_0.sql"
+      }
+    ],
+    "filters": {
+      "description": "All GBPUSD blocks within 2025 calendar year with non-null score",
+      "sql_fragment": "WHERE instrument = 'GBPUSD' AND ts >= '2025-01-01' AND ts < '2026-01-01' AND score_value IS NOT NULL"
+    }
+  },
+  
+  "parameters": {
+    "bucket_edges_percentile": [0, 10, 25, 50, 75, 90, 100],
+    "bucket_labels": ["0-10", "10-25", "25-50", "50-75", "75-90", "90-100"]
+  },
+  
+  "outputs": {
+    "score_name": "block_range_intensity",
+    "output_schema": {
+      "columns": ["bucket", "n", "mean", "std", "p25", "p50", "p75"]
+    },
+    "output_path": "research/outputs/study_20260120_block_range_intensity_vs_outcomes/"
+  },
+  
+  "reproducibility": {
+    "query_hash": null,
+    "random_seed": null,
+    "python_version": "3.11",
+    "dependencies": []
+  },
+  
+  "validation": {
+    "category_error_checklist_passed": true,
+    "no_strategy_claims": true,
+    "buckets_are_reporting_only": true,
+    "reviewed_by": null,
+    "reviewed_at": null
+  }
+}
