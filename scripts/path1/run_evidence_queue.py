@@ -766,12 +766,14 @@ def main():
     existing_ranges = parse_existing_runs(index_path)
     print(f"Existing runs: {len(existing_ranges)}")
     
-    # Read queue
+    # Read queue (skip comment lines before passing to DictReader)
     runs_to_execute = []
     with open(queue_path, 'r') as f:
-        reader = csv.DictReader(f)
+        # Filter out comment lines (lines starting with #) before parsing
+        lines = [line for line in f if not line.strip().startswith('#')]
+        reader = csv.DictReader(lines)
         for row in reader:
-            if row.get('run_id') and not row['run_id'].startswith('#'):
+            if row.get('run_id'):
                 if args.run_id and row['run_id'] != args.run_id:
                     continue
                 runs_to_execute.append(row)
