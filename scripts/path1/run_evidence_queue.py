@@ -94,13 +94,27 @@ def run_sql_query(db_url: str, sql: str) -> str:
 
 
 def run_sql_file(db_url: str, sql_file: Path, output_file: Path) -> str:
-    """Execute SQL file via psql and capture output."""
+    """Execute SQL file via psql and capture output.
+    
+    Raises:
+        subprocess.CalledProcessError: If psql returns non-zero exit code.
+    """
     result = subprocess.run(
         ["psql", db_url, "-f", str(sql_file)],
         capture_output=True, text=True
     )
     output = result.stdout + result.stderr
     output_file.write_text(output)
+    
+    # Fail-fast: propagate psql failures (Task A remediation)
+    if result.returncode != 0:
+        print(f"ERROR: psql failed with exit code {result.returncode}")
+        print(f"SQL file: {sql_file}")
+        print(f"Output: {output[:2000]}" if len(output) > 2000 else f"Output: {output}")
+        raise subprocess.CalledProcessError(
+            result.returncode, result.args, result.stdout, result.stderr
+        )
+    
     return output
 
 
@@ -779,7 +793,24 @@ def main():
                 runs_to_execute.append(row)
     
     if not runs_to_execute:
-        print("No runs in queue (or none matching --run-id filter)")
+        print("="*60)
+        print("NOOP: Queue empty or no matching run_id")
+        print("="*60)
+        print("No runs to execute. This is not an error if the queue is intentionally empty.")
+        print(f"Queue file: {args.queue_path}")
+        print(f"Run ID filter: {args.run_id or '(none)'}")
+        
+        # Create NOOP marker for artifact visibility (Task D remediation)
+        noop_dir = repo_root / "reports" / "path1" / "evidence" / "runs"
+        noop_dir.mkdir(parents=True, exist_ok=True)
+        noop_marker = noop_dir / f"NOOP_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        noop_marker.write_text(
+            f"NOOP marker - queue was empty at {datetime.now().isoformat()}\n"
+            f"Queue file: {args.queue_path}\n"
+            f"Run ID filter: {args.run_id or '(none)'}\n"
+        )
+        print(f"Created NOOP marker: {noop_marker}")
+        
         sys.exit(0)
     
     print(f"Runs to execute: {len(runs_to_execute)}")
