@@ -1,0 +1,17 @@
+# Path 1 Evidence Runs Storage
+#
+# This directory stores completed evidence run artifacts.
+#
+# Structure per run:
+#   runs/<run_id>/
+#   ├── RUN.md                    # Filled EVIDENCE_RUN_TEMPLATE
+#   ├── DIS_v1_1_evidence.md      # Populated DIS report
+#   ├── RES_v1_0_evidence.md      # Populated RES report
+#   ├── LID_v1_0_evidence.md      # Populated LID report
+#   └── outputs/                  # Raw query outputs
+#       ├── dis_distribution.txt
+#       ├── res_distribution.txt
+#       └── lid_distribution.txt
+#
+# Run ID format: p1_{YYYYMMDD}_{SEQ}
+# Example: p1_20260120_001
