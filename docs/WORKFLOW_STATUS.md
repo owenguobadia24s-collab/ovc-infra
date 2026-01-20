@@ -26,6 +26,7 @@
 | Layer | Status | Evidence | Date Promoted |
 |-------|--------|----------|---------------|
 | Option B – C1 | CANONICAL | [C1_v0_1_validation.md](../reports/validation/C1_v0_1_validation.md) | 2026-01-20 |
+| Option B – C2 | CANONICAL | [C2_v0_1_validation.md](../reports/validation/C2_v0_1_validation.md) | 2026-01-20 |
 
 ## [CHANGE][ADDED] GitHub Actions Schedules (UTC)
 | Workflow | Schedule | Purpose |
