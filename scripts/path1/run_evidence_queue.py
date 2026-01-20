@@ -84,6 +84,84 @@ def validate_environment() -> str:
     return db_url
 
 
+def update_queue_status(queue_path: Path, completed_runs: dict):
+    """Update queue CSV to mark completed runs and update actual dates.
+    
+    Args:
+        queue_path: Path to queue CSV file
+        completed_runs: Dict of run_id -> (actual_start, actual_end) for completed runs
+    
+    Preserves comment lines, adds/updates 'status' column, and updates
+    date_start/date_end columns to reflect actual dates used (in case of substitution).
+    """
+    # Read all lines preserving comments
+    with open(queue_path, 'r') as f:
+        all_lines = f.readlines()
+    
+    # Separate comments from data
+    comment_lines = [line for line in all_lines if line.strip().startswith('#')]
+    data_lines = [line for line in all_lines if not line.strip().startswith('#') and line.strip()]
+    
+    if not data_lines:
+        return
+    
+    # Parse header
+    header_line = data_lines[0].strip()
+    headers = [h.strip() for h in header_line.split(',')]
+    
+    # Add status column if not present
+    if 'status' not in headers:
+        headers.append('status')
+        header_line = ','.join(headers)
+    
+    status_idx = headers.index('status')
+    date_start_idx = headers.index('date_start') if 'date_start' in headers else None
+    date_end_idx = headers.index('date_end') if 'date_end' in headers else None
+    
+    # Process data rows
+    updated_rows = [header_line]
+    for line in data_lines[1:]:
+        if not line.strip():
+            continue
+        
+        values = line.strip().split(',')
+        
+        # Pad with empty values if needed
+        while len(values) < len(headers):
+            values.append('')
+        
+        run_id = values[0].strip() if values else ''
+        
+        # Update status and dates for completed runs
+        if run_id in completed_runs:
+            actual_start, actual_end = completed_runs[run_id]
+            old_start = values[date_start_idx] if date_start_idx is not None else ''
+            old_end = values[date_end_idx] if date_end_idx is not None else ''
+            
+            values[status_idx] = 'complete'
+            
+            # Update dates if they were substituted
+            if date_start_idx is not None and actual_start != old_start:
+                values[date_start_idx] = actual_start
+                print(f"Queue updated: {run_id} date_start {old_start} -> {actual_start}")
+            if date_end_idx is not None and actual_end != old_end:
+                values[date_end_idx] = actual_end
+                print(f"Queue updated: {run_id} date_end {old_end} -> {actual_end}")
+            
+            print(f"Queue updated: {run_id} -> complete")
+        
+        updated_rows.append(','.join(values))
+    
+    # Write back with comments preserved
+    with open(queue_path, 'w') as f:
+        for comment in comment_lines:
+            f.write(comment)
+        for row in updated_rows:
+            f.write(row + '\n')
+    
+    print(f"Queue file updated: {queue_path}")
+
+
 def run_sql_query(db_url: str, sql: str) -> str:
     """Execute SQL via psql and return output."""
     result = subprocess.run(
@@ -598,10 +676,10 @@ def execute_single_run(
     db_url: str, repo_root: Path, run_id: str, symbol: str,
     date_start: str, date_end: str, existing_ranges: list,
     dry_run: bool = False
-) -> Tuple[bool, str]:
+) -> Tuple[bool, str, str, str]:
     """
     Execute a single evidence run.
-    Returns (success, message).
+    Returns (success, message, date_start_actual, date_end_actual).
     """
     print(f"\n{'='*60}")
     print(f"EXECUTING RUN: {run_id}")
@@ -624,7 +702,7 @@ def execute_single_run(
             db_url, symbol, date_start, date_end, existing_ranges
         )
         if sub_start is None:
-            return False, f"No substitute range found with data"
+            return False, f"No substitute range found with data", date_start, date_end
         
         date_start_actual = sub_start
         date_end_actual = sub_end
@@ -634,7 +712,7 @@ def execute_single_run(
     
     if dry_run:
         print("[DRY RUN] Would execute studies and generate artifacts")
-        return True, f"DRY RUN: {row_count} rows"
+        return True, f"DRY RUN: {row_count} rows", date_start_actual, date_end_actual
     
     # Create directories
     sql_dir = repo_root / "sql" / "path1" / "evidence" / "runs" / run_id
@@ -702,7 +780,7 @@ def execute_single_run(
     # Add to existing ranges to avoid future overlap
     existing_ranges.append((date_start_actual, date_end_actual))
     
-    return True, f"Completed: {row_count} rows ({date_start_actual} to {date_end_actual})"
+    return True, f"Completed: {row_count} rows ({date_start_actual} to {date_end_actual})", date_start_actual, date_end_actual
 
 
 def parse_existing_runs(index_path: Path) -> list:
@@ -711,7 +789,7 @@ def parse_existing_runs(index_path: Path) -> list:
     if not index_path.exists():
         return ranges
     
-    content = index_path.read_text()
+    content = index_path.read_text(encoding='utf-8')
     # Extract date ranges from table rows
     for line in content.split('\n'):
         if line.startswith('| p1_'):
@@ -790,6 +868,11 @@ def main():
             if row.get('run_id'):
                 if args.run_id and row['run_id'] != args.run_id:
                     continue
+                # Only process rows with status='pending' or empty/missing status
+                status = row.get('status', '').strip().lower()
+                if status and status != 'pending':
+                    print(f"Skipping {row['run_id']}: status={row.get('status')}")
+                    continue
                 runs_to_execute.append(row)
     
     if not runs_to_execute:
@@ -828,25 +911,35 @@ def main():
         date_start = run_spec['date_start']
         date_end = run_spec['date_end']
         
-        success, message = execute_single_run(
+        success, message, actual_start, actual_end = execute_single_run(
             db_url, repo_root, run_id, symbol,
             date_start, date_end, existing_ranges,
             dry_run=args.dry_run
         )
-        results.append((run_id, success, message))
+        results.append((run_id, success, message, date_start, date_end, actual_start, actual_end))
     
     # Summary
     print("\n" + "=" * 60)
     print("EXECUTION SUMMARY")
     print("=" * 60)
     
-    for run_id, success, message in results:
+    for run_id, success, message, _, _, _, _ in results:
         status = "✅ PASS" if success else "❌ FAIL"
         print(f"{status} | {run_id} | {message}")
     
-    passed = sum(1 for _, s, _ in results if s)
+    passed = sum(1 for _, s, _, _, _, _, _ in results if s)
     failed = len(results) - passed
     print(f"\nTotal: {len(results)} | Passed: {passed} | Failed: {failed}")
+    
+    # Update queue status for completed runs (unless dry run)
+    # Include actual dates so CSV reflects what was actually executed
+    if not args.dry_run and passed > 0:
+        completed_runs = {
+            run_id: (actual_start, actual_end)
+            for run_id, success, _, req_start, req_end, actual_start, actual_end in results
+            if success
+        }
+        update_queue_status(queue_path, completed_runs)
     
     if failed > 0:
         sys.exit(1)
