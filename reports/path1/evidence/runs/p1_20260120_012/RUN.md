@@ -8,7 +8,7 @@
 | `date_range_requested` | `2023-10-09` to `2023-10-13` |
 | `date_range_actual` | `2023-10-09` to `2023-10-13` |
 | `symbol(s)` | `GBPUSD` |
-| `generated_at` | `2026-01-20T12:33:04Z` |
+| `generated_at` | `2026-01-20T13:11:23Z` |
 | `n_observations` | `59` |
 
 ---
