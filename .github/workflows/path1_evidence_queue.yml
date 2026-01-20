@@ -142,7 +142,80 @@ jobs:
           fi
           
           echo "Executing: $CMD"
-          eval $CMD
+          eval $CMD | tee /tmp/runner_output.txt
+          
+          # Extract executed run_ids from output for validation step
+          # Format: "✅ PASS | run_id | message" or "❌ FAIL | run_id | message"
+          EXECUTED_RUNS=$(grep -E '^\s*(✅|❌)' /tmp/runner_output.txt | awk -F'|' '{print $2}' | tr -d ' ' | tr '\n' ',' | sed 's/,$//')
+          echo "executed_runs=$EXECUTED_RUNS" >> $GITHUB_OUTPUT
+          echo "Executed run IDs: $EXECUTED_RUNS"
+
+      # NOTE:
+      # Evidence artifacts are written directly to:
+      #   reports/path1/evidence/runs/<run_id>/
+      # following the canonical pattern established in Runs 001–003.
+      # No post-processing, relocation, or archiving occurs here.
+
+      - name: Validate Evidence Run (Post-Run Gate)
+        if: inputs.dry_run != 'true'
+        run: |
+          echo "=== Post-Run Validation ==="
+          
+          # FUTURE (NOT IMPLEMENTED):
+          # A queue archival / status protocol may be added later.
+          # This workflow intentionally does NOT:
+          # - mark queue rows as complete
+          # - move completed runs
+          # - archive run folders
+          # The queue remains intent-only; INDEX.md is the execution ledger.
+          
+          # Determine which run_ids to validate
+          if [ -n "${{ inputs.run_id }}" ]; then
+            # Canonical pattern: specific run_id was requested
+            RUNS_TO_VALIDATE="${{ inputs.run_id }}"
+          else
+            # Extract from runner output
+            RUNS_TO_VALIDATE="${{ steps.runner.outputs.executed_runs }}"
+          fi
+          
+          if [ -z "$RUNS_TO_VALIDATE" ]; then
+            echo "No runs executed (NOOP case). Skipping validation."
+            exit 0
+          fi
+          
+          echo "Run IDs to validate: $RUNS_TO_VALIDATE"
+          
+          # Validate each executed run
+          VALIDATION_FAILED=0
+          IFS=',' read -ra RUN_ARRAY <<< "$RUNS_TO_VALIDATE"
+          for RUN_ID in "${RUN_ARRAY[@]}"; do
+            if [ -z "$RUN_ID" ]; then
+              continue
+            fi
+            
+            echo ""
+            echo "--- Validating: $RUN_ID ---"
+            
+            if ! python scripts/path1/validate_post_run.py --run-id "$RUN_ID" --repo-root .; then
+              echo "❌ VALIDATION FAILED: $RUN_ID"
+              VALIDATION_FAILED=1
+            else
+              echo "✅ VALIDATION PASSED: $RUN_ID"
+            fi
+          done
+          
+          if [ "$VALIDATION_FAILED" -eq 1 ]; then
+            echo ""
+            echo "=========================================="
+            echo "POST-RUN VALIDATION FAILED"
+            echo "One or more runs did not pass integrity checks."
+            echo "Review violations above. Workflow will not proceed."
+            echo "=========================================="
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ All evidence runs passed validation"
 
       - name: List generated artifacts
         if: inputs.dry_run != 'true'
