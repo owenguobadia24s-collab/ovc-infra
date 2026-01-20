@@ -78,13 +78,26 @@ Modifications to existing frozen scores (DIS-v1.1, RES-v1.0, LID-v1.0) are **not
 
 ---
 
-## 5. References
+## 5. Completed Runs Location
+
+Evidence run artifacts are stored in:
+
+```
+reports/path1/evidence/runs/<run_id>/
+```
+
+See [EVIDENCE_RUNS_HOWTO.md](EVIDENCE_RUNS_HOWTO.md) for operational instructions.
+
+---
+
+## 6. References
 
 | Document | Purpose |
 |----------|---------|
 | [SCORE_LIBRARY_v1.md](scores/SCORE_LIBRARY_v1.md) | Full score definitions and formulas |
 | [SCORE_INVENTORY_v1.md](SCORE_INVENTORY_v1.md) | Compact score manifest |
 | [RUN_CONVENTIONS.md](RUN_CONVENTIONS.md) | Run naming and output conventions |
+| [EVIDENCE_RUNS_HOWTO.md](EVIDENCE_RUNS_HOWTO.md) | Evidence run execution guide |
 
 ---
 
