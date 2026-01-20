@@ -4,6 +4,28 @@
 > **Purpose:** Quick-reference status snapshot for operators  
 > **Canonical source:** `docs/ops/OVC_DATA_FLOW_CANON_v0.1.md`
 
+---
+
+## 🔒 FOUNDATION FREEZE: ovc-v0.1-spine
+
+| Attribute | Value |
+|-----------|-------|
+| **Release** | `ovc-v0.1-spine` |
+| **Date** | 2026-01-20 |
+| **Status** | **FROZEN** |
+| **Release Notes** | [releases/ovc-v0.1-spine.md](../releases/ovc-v0.1-spine.md) |
+| **Immutability Notice** | [docs/IMMUTABILITY_NOTICE.md](IMMUTABILITY_NOTICE.md) |
+
+**Frozen Scope:**
+- Option B (C1/C2/C3): CANONICAL
+- Option C (Outcomes): CANONICAL
+
+**All future work must be downstream-only.**
+
+Breaking changes to frozen layers require new versions + governance approval per `docs/ops/GOVERNANCE_RULES_v0.1.md`.
+
+---
+
 ## Current state (main + branches)
 - main enforces MIN v0.1.1 in `infra/ovc-webhook/src/index.ts` (strict key order/type checks, /tv accepts raw exports, /tv_secure requires JSON). The ret semantic check is disabled for ingest stability.
 - MIN contract validation is wired through `tools/validate_contract.py`, `tools/validate_contract.ps1`, and `tests/test_min_contract_validation.py`.
