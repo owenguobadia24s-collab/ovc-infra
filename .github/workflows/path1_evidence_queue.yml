@@ -290,6 +290,9 @@ jobs:
           git checkout -b "$BRANCH"
           
           # Stage generated files
+          # IMPORTANT: RUN_QUEUE.csv is intentionally NOT committed.
+          # Queue status updates are LOCAL ONLY and will be lost after workflow.
+          # INDEX.md is the canonical execution ledger, not the queue.
           git add sql/path1/evidence/runs/
           git add reports/path1/evidence/runs/
           git add reports/path1/evidence/INDEX.md
