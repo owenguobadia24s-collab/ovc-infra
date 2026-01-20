@@ -1,8 +1,36 @@
 # OVC Data Flow Canon v0.1
 
+> **[CHANGE][ADDED] [STATUS: CANONICAL]**  
 > **Created:** 2026-01-19  
+> **Last Updated:** 2026-01-20 (workflow audit — added GH Actions schedules, Notion env vars)  
 > **Purpose:** Authoritative reference for data ownership, purpose, and downstream flows  
-> **Status:** Canonical (DO NOT MODIFY without review)
+> **Governance:** DO NOT MODIFY without review — see `docs/ops/GOVERNANCE_RULES_v0.1.md`
+
+---
+
+## [CHANGE][ADDED] Canonical Boundary Declaration
+
+This document is **CANONICAL**. The following rules apply:
+
+### Allowed Inputs (What May Influence This Document)
+- Audit findings from `docs/ops/WORKFLOW_AUDIT_*.md`
+- Schema changes that have completed the version-bump process
+- Governance-approved corrections with `[CHANGE]` markers
+
+### Downstream Dependents (What Relies on This Document)
+- Option B derived layer design decisions
+- Option C evaluation layer boundaries
+- Notion sync field mappings
+- All pipeline implementations (P1, P2, B1, B2, C, D)
+
+### Explicitly Prohibited
+- ❌ Modifying schema definitions without version bump
+- ❌ Reinterpreting data flow boundaries
+- ❌ Renaming schemas, tables, or canonical paths
+- ❌ Removing sections without DEPRECATED transition
+- ❌ Adding new data flows without audit
+
+**Governance Reference:** [GOVERNANCE_RULES_v0.1.md](GOVERNANCE_RULES_v0.1.md)
 
 ---
 
@@ -181,6 +209,39 @@ Based on [scripts/notion_sync.py](../../scripts/notion_sync.py), the following m
 
 The current Notion sync is **mostly correct**. The only questionable field is `export_str`, which contains the raw pipe-delimited export string. This is useful for debugging but not for human decision-making. Consider removing it in a future iteration.
 
+### [CHANGE][ADDED] Notion Sync Environment Variables
+
+The Notion sync requires the following environment variables (defined in `scripts/notion_sync.py` lines 19-24):
+
+| Variable | Purpose | Notes |
+|----------|---------|-------|
+| `DATABASE_URL` | Neon connection string | Required |
+| `NOTIOM_TOKEN` | Notion API token | **Intentional spelling** — canonical, not a typo |
+| `NOTION_BLOCKS_DB_ID` | Blocks database ID | Required |
+| `NOTION_OUTCOMES_DB_ID` | Outcomes database ID | Required |
+| `NOTION_RUNS_DB_ID` | Runs database ID | Optional |
+
+> **Note:** `NOTIOM_TOKEN` (not `NOTION_TOKEN`) is the canonical spelling used throughout the codebase. This is intentional and must not be "fixed" to standard spelling.
+
+---
+
+## [CHANGE][ADDED] 4b. GitHub Actions Schedule Summary
+
+The following GitHub Actions workflows are scheduled for automated execution:
+
+| Workflow | File | Schedule (UTC) | Purpose |
+|----------|------|----------------|---------|
+| OVC Backfill | `.github/workflows/backfill.yml` | `17 */6 * * *` (every 6h at :17) | P2 canonical backfill |
+| Notion Sync | `.github/workflows/notion_sync.yml` | `17 */2 * * *` (every 2h at :17) | D-NotionSync to Notion |
+| Option C | `.github/workflows/ovc_option_c_schedule.yml` | `15 6 * * *` (daily 06:15) | C-Eval outcomes |
+
+### Manual-Only Workflows (DORMANT)
+
+| Workflow | File | Purpose |
+|----------|------|---------|
+| Backfill + Validate | `.github/workflows/backfill_then_validate.yml` | Range backfill with full validation |
+| FULL Ingest | `.github/workflows/ovc_full_ingest.yml` | FULL payload stub (not production) |
+
 ---
 
 ## 5. Orphan & Pruning Candidates
@@ -227,6 +288,44 @@ These rules govern all data flow decisions in OVC:
 
 7. **When in doubt, do not sync.**  
    It is always safer to withhold data from Notion than to pollute the decision surface.
+
+---
+
+## [CHANGE][ADDED] 7. Run Artifact System
+
+All instrumented pipelines emit standardized run artifacts to `reports/runs/<pipeline_id>/<run_id>/run.json`.
+
+### Components
+
+| Component | Path | Purpose |
+|-----------|------|---------|
+| Spec | `contracts/run_artifact_spec_v0.1.json` | JSON Schema for run artifacts |
+| Helper | `src/ovc_ops/run_artifact.py` | `RunWriter` class |
+| CLI | `src/ovc_ops/run_artifact_cli.py` | CLI wrapper for ad-hoc runs |
+| Docs | `docs/ops/RUN_ARTIFACT_SPEC_v0.1.md` | Specification document |
+
+### Instrumented Pipelines
+
+| Pipeline | Script | RunWriter Location |
+|----------|--------|-------------------|
+| P2-Backfill | `src/backfill_oanda_2h_checkpointed.py` | Lines 18, 49, 529 |
+| B1-DerivedC1 | `src/derived/compute_c1_v0_1.py` | Lines 42, 355 |
+| B1-DerivedC2 | `src/derived/compute_c2_v0_1.py` | Lines 46, 569 |
+| B1-DerivedC3 | `src/derived/compute_c3_regime_trend_v0_1.py` | Lines 86, 419 |
+| B2-DerivedValidation | `src/validate/validate_derived_range_v0_1.py` | Lines 55, 1072 |
+| D-NotionSync | `scripts/notion_sync.py` | Lines 15-16 |
+| D-ValidationHarness | `src/validate_day.py`, `src/validate_range.py` | Various |
+
+### GitHub Actions Artifact Upload
+
+All scheduled workflows upload run artifacts via `actions/upload-artifact@v4`:
+
+| Workflow | Upload Location (line) |
+|----------|----------------------|
+| `backfill.yml` | Line 58 |
+| `notion_sync.yml` | Line 34 |
+| `ovc_option_c_schedule.yml` | Lines 99, 107 |
+| `backfill_then_validate.yml` | Lines 175, 183 |
 
 ---
 

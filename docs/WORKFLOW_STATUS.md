@@ -1,5 +1,9 @@
 # Workflow Status (OVC v0.1.1 ingest)
 
+> **[CHANGE][ADDED] [STATUS: ACTIVE]**  
+> **Purpose:** Quick-reference status snapshot for operators  
+> **Canonical source:** `docs/ops/OVC_DATA_FLOW_CANON_v0.1.md`
+
 ## Current state (main + branches)
 - main enforces MIN v0.1.1 in `infra/ovc-webhook/src/index.ts` (strict key order/type checks, /tv accepts raw exports, /tv_secure requires JSON). The ret semantic check is disabled for ingest stability.
 - MIN contract validation is wired through `tools/validate_contract.py`, `tools/validate_contract.ps1`, and `tests/test_min_contract_validation.py`.
@@ -17,6 +21,13 @@
 - P2: PASS (canonical backfill writes to `ovc.ovc_blocks_v01_1_min`).
 - P3: OPTIONAL / PARTIAL (derived, non-blocking).
 - P4: PASS (core validation always runs; derived conditional).
+
+## [CHANGE][ADDED] GitHub Actions Schedules (UTC)
+| Workflow | Schedule | Purpose |
+|----------|----------|---------|
+| `backfill.yml` | `17 */6 * * *` (every 6h) | P2 canonical backfill |
+| `notion_sync.yml` | `17 */2 * * *` (every 2h) | D-NotionSync |
+| `ovc_option_c_schedule.yml` | `15 6 * * *` (daily 06:15) | C-Eval |
 
 ## Validation pack behavior
 - Core validation is unconditional.

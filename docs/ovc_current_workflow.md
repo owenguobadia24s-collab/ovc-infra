@@ -1,26 +1,33 @@
 # OVC Current Workflow (as implemented in this repo)
 
+> **[CHANGE][ADDED] [STATUS: DEPRECATED]**  
+> **Superseded by:** `docs/ops/OVC_DATA_FLOW_CANON_v0.1.md` (CANONICAL), `docs/ops/PIPELINE_REALITY_MAP_v0.1.md` (ACTIVE)  
+> **Last audit:** 2026-01-20 — Kept for historical reference only.
+
 ## 1) What OVC is (2–5 sentences)
 OVC is a TradingView-driven signal export + storage pipeline that captures 2-hour market-state snapshots and persists them to Neon Postgres for analysis and replay. It solves the problem of reliably ingesting TradingView alert payloads (MIN) and, optionally, richer debug payloads (FULL) into structured storage with idempotent keys. In this repo, **MIN** is the webhook-safe subset of fields emitted by the Pine script and intended for live ingestion, while **FULL** is the complete “copy/debug” export string that contains every computed field and is intended for cold-path storage only. The Pine script explicitly labels these two profiles and builds different export strings for each. 【F:pine/OVC_v0_1.pine†L50-L178】
 
 ## 2) System Diagram (ASCII)
+
+> **[CHANGE][CHANGED] Note:** This diagram references legacy table names. The canonical table is now `ovc.ovc_blocks_v01_1_min` (not `public.ovc_blocks_v01`).
+
 ```
 +-----------------------+          +---------------------------+          +----------------------+
 | TradingView Alert     |  POST    | Cloudflare Worker         |  INSERT  | Neon Postgres        |
-| (Pine export string)  +--------->| infra/ovc-webhook/src/... |--------->| ovc_blocks_v01 (MIN) |
+| (Pine export string)  +--------->| infra/ovc-webhook/src/... |--------->| [CHANGE][CHANGED] ovc.ovc_blocks_v01_1_min |
 +-----------------------+          +-------------+-------------+          +----------+-----------+
                                                 |                                   |
-                                                | RAW body write                    | FULL JSONB
+                                                | RAW body write                    | [CHANGE][REMOVED] FULL JSONB (not active)
                                                 v                                   v
                                        +---------------------+           +-------------------------+
-                                       | Cloudflare R2        |           | ovc_blocks_detail_v01  |
-                                       | bucket: ovc-raw-...  |           | (FULL, JSONB)           |
+                                       | Cloudflare R2        |           | [CHANGE][REMOVED] ovc_blocks_detail_v01  |
+                                       | bucket: ovc-raw-...  |           | (ORPHANED - not in use)  |
                                        +---------------------+           +-------------------------+
 
    +----------------------+                                     +-----------------------------+
    | GitHub Actions       |                                     | Local scripts               |
-   | backfill.yml         |---- backfill_oanda_2h_checkpointed ->| src/backfill_oanda_2h*.py   |
-   | ovc_full_ingest.yml  |---- full_ingest_stub.py ------------>| src/full_ingest_stub.py     |
+   | backfill.yml         |---- [CHANGE][CHANGED] backfill_oanda_2h_checkpointed ->| src/backfill_oanda_2h_checkpointed.py |
+   | ovc_full_ingest.yml  |---- full_ingest_stub.py (DORMANT) -->| src/full_ingest_stub.py     |
    +----------------------+                                     +-----------------------------+
 ```
 Citations: Worker ingress and raw-event writes are in `infra/ovc-webhook/src/index.ts`, R2 bucket binding is in `infra/ovc-webhook/wrangler.jsonc`, and the GitHub Actions workflows call the backfill and full-ingest scripts. 【F:infra/ovc-webhook/src/index.ts†L57-L240】【F:infra/ovc-webhook/wrangler.jsonc†L1-L20】【F:.github/workflows/backfill.yml†L1-L56】【F:.github/workflows/ovc_full_ingest.yml†L1-L60】
@@ -39,7 +46,7 @@ Citations: Worker ingress and raw-event writes are in `infra/ovc-webhook/src/ind
   - Requires `sym`, `bar_close_ms`, and `bid` in the export or envelope. 【F:infra/ovc-webhook/src/index.ts†L185-L196】
 - **Storage behavior:**
   - Always writes the raw body to R2 (keyed under `tv/YYYY-MM-DD/...`) if the binding is present. 【F:infra/ovc-webhook/src/index.ts†L52-L85】
-  - Upserts MIN data into `ovc_blocks_v01`, storing `export_min` and `payload_min` JSONB along with the idempotency key. 【F:infra/ovc-webhook/src/index.ts†L210-L240】
+  - [CHANGE][CHANGED] Upserts MIN data into `ovc.ovc_blocks_v01_1_min` with full MIN v0.1.1 contract fields. 【F:infra/ovc-webhook/src/index.ts†L210-L240】
 
 ### Neon schema/tables (MIN vs FULL)
 - **Core (MIN):** `public.ovc_blocks_v01` is defined in `sql/schema_v01.sql` with a primary key on `(symbol, block_start, block_type, schema_ver)` and OHLC columns. 【F:sql/schema_v01.sql†L1-L21】
@@ -76,8 +83,8 @@ ORDER BY column_name;
 | FULL storage layer exists (table + JSONB + PK) | **Implemented** | `ovc_blocks_detail_v01.full_payload` is JSONB with a PK on `(symbol, block_start, block_type, schema_ver)`. 【F:infra/ovc-webhook/sql/20250215_create_ovc_blocks_detail_v01.sql†L1-L12】 |
 | FULL ingestion is production-grade (non-stub, automated, run reports) | **Not Implemented Yet** | FULL ingest is currently a stub script invoked manually or via workflow without run-report artifacts. 【F:src/full_ingest_stub.py†L1-L103】【F:.github/workflows/ovc_full_ingest.yml†L1-L60】 |
 | Core/detail tables with PKs enforced | **Implemented** | PKs in `ovc_blocks_v01` and `ovc_blocks_detail_v01`. 【F:sql/schema_v01.sql†L1-L21】【F:infra/ovc-webhook/sql/20250215_create_ovc_blocks_detail_v01.sql†L1-L12】 |
-| Backfill reruns produce zero duplicates | **Implemented** | Backfill uses `ON CONFLICT ... DO UPDATE` on the PK. 【F:src/backfill_oanda_2h.py†L95-L113】【F:src/backfill_oanda_2h_checkpointed.py†L89-L117】 |
-| Run report artifact generated per run | **Not Implemented** | No artifact-generation step exists in the workflows. 【F:.github/workflows/backfill.yml†L1-L56】【F:.github/workflows/ovc_full_ingest.yml†L1-L60】 |
+| Backfill reruns produce zero duplicates | **Implemented** | [CHANGE][CHANGED] Backfill uses `ON CONFLICT ... DO UPDATE` on the PK. Use `src/backfill_oanda_2h_checkpointed.py` (canonical); `src/backfill_oanda_2h.py` is DEPRECATED. |
+| Run report artifact generated per run | [CHANGE][CHANGED] **Implemented** | RunWriter system now active in all scheduled pipelines. See `src/ovc_ops/run_artifact.py` and `contracts/run_artifact_spec_v0.1.json`. |
 | Tests present (what exists, where) | **Implemented** | Contract validation tests in `tests/`, Worker unit tests in `infra/ovc-webhook/test/`. 【F:tests/test_contract_equivalence.py†L1-L75】【F:infra/ovc-webhook/test/index.spec.ts†L1-L20】 |
 
 ## 5) How to Use It (Operator Steps)
