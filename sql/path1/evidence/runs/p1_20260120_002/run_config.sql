@@ -1,0 +1,14 @@
+-- =============================================================================
+-- Run Configuration: p1_20260120_002
+-- =============================================================================
+-- Run ID:      p1_20260120_002
+-- Symbol:      GBPUSD
+-- Date Range:  2023-12-18 to 2023-12-22 (weekday range with data)
+-- Note:        Original request was 2024-01-15 to 2024-01-19, but that range
+--              had 0 rows. Substituted with non-overlapping 5-day range.
+--              Run 001 used 2024-01-08 to 2024-01-12; this range is distinct.
+-- =============================================================================
+
+-- Filter predicates (copy to WHERE clause of each study):
+--   sym = 'GBPUSD'
+--   AND to_timestamp(bar_close_ms/1000)::date BETWEEN '2023-12-18' AND '2023-12-22'
