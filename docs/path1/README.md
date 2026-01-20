@@ -79,6 +79,25 @@ reports/path1/
 
 ---
 
+## Post-Run Validation
+
+After generating an evidence run, validate its structural integrity using the post-run validator. This script checks for required directories, files, content sanity (no psql errors, non-empty outputs), and cross-file consistency without interpreting results or querying the database.
+
+```powershell
+# Basic validation
+python scripts/path1/validate_post_run.py --run-id p1_20260120_001
+
+# Strict mode (additional SQL header and INDEX.md checks)
+python scripts/path1/validate_post_run.py --run-id p1_20260120_001 --strict
+
+# JSON output for CI/automation
+python scripts/path1/validate_post_run.py --run-id p1_20260120_001 --json
+```
+
+Exit code 0 = PASS, exit code 1 = FAIL with detailed violation report.
+
+---
+
 ## Next Steps
 
 Work within Path 1 should focus on:
