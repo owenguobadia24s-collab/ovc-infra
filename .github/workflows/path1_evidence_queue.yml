@@ -337,7 +337,9 @@ jobs:
         env:
           # Use PAT for PR creation to enable auto-merge and trigger downstream workflows
           # GITHUB_TOKEN cannot trigger workflows or enable auto-merge on PRs it creates
+          # Set both to remove any ambiguity in gh CLI auth resolution
           GH_TOKEN: ${{ secrets.OVC_PR_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.OVC_PR_BOT_TOKEN }}
         run: |
           # Validate PAT secret is configured
           if [ -z "${GH_TOKEN:-}" ]; then
@@ -353,6 +355,46 @@ jobs:
             echo ""
             exit 1
           fi
+          
+          # Auth probe: verify token can authenticate and access this repo
+          echo "Verifying GH CLI authentication..."
+          AUTH_OK=true
+          
+          if ! gh auth status 2>&1 | head -5; then
+            echo "gh auth status failed"
+            AUTH_OK=false
+          fi
+          
+          AUTH_USER=$(gh api user -q .login 2>/dev/null || echo "")
+          if [ -z "$AUTH_USER" ]; then
+            echo "gh api user failed - cannot determine authenticated user"
+            AUTH_OK=false
+          else
+            echo "Authenticated as: $AUTH_USER"
+          fi
+          
+          REPO_CHECK=$(gh api "repos/${GITHUB_REPOSITORY}" -q .full_name 2>/dev/null || echo "")
+          if [ -z "$REPO_CHECK" ]; then
+            echo "gh api repos/${GITHUB_REPOSITORY} failed - cannot access repo"
+            AUTH_OK=false
+          else
+            echo "Repo access confirmed: $REPO_CHECK"
+          fi
+          
+          if [ "$AUTH_OK" = "false" ]; then
+            echo ""
+            echo "=========================================="
+            echo "ERROR: OVC_PR_BOT_TOKEN cannot authenticate or cannot access this repo."
+            echo "=========================================="
+            echo "Regenerate token with repo access to ovc-infra and permissions:"
+            echo "  - Pull requests: Read and Write"
+            echo "  - Contents: Read and Write"
+            echo "=========================================="
+            exit 1
+          fi
+          
+          echo "Auth probe passed."
+          echo ""
           
           BRANCH="${{ steps.branch.outputs.branch }}"
           
