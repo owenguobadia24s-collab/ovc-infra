@@ -1,0 +1,63 @@
+{
+  "$schema": "../../../schemas/study_manifest_v1.json",
+  "_comment": "NON-CANONICAL — This manifest describes a downstream research study only. NO FEEDBACK INTO CANONICAL.",
+  
+  "study_id": "study_20260120_basic_feature_outcome_baseline",
+  "version": "0.1.0",
+  "status": "draft",
+  
+  "metadata": {
+    "title": "Basic Feature-Outcome Baseline (Descriptive)",
+    "description": "Descriptive characterization of the relationship between a small subset of Option B features and Option C outcomes for GBPUSD. No predictive claims, no strategy implications.",
+    "author": "@ovc-research",
+    "created_at": "2026-01-20T00:00:00Z",
+    "updated_at": "2026-01-20T00:00:00Z"
+  },
+  
+  "canonical": {
+    "release": "ovc-v0.1-spine",
+    "feature_view": "derived.ovc_block_features_v0_1",
+    "outcome_view": "derived.ovc_outcomes_v0_1"
+  },
+  
+  "window": {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2026-01-01T00:00:00Z",
+    "timezone": "UTC"
+  },
+  
+  "inputs": {
+    "instruments": ["GBPUSD"],
+    "columns": {
+      "features": ["block_id", "ts", "instrument", "rng", "body", "dir"],
+      "outcomes": ["fwd_ret_3", "mfe_3", "mae_3"]
+    },
+    "filters": {
+      "description": "All GBPUSD blocks within the 2025 calendar year",
+      "sql_fragment": "WHERE instrument = 'GBPUSD' AND ts >= '2025-01-01' AND ts < '2026-01-01'"
+    }
+  },
+  
+  "parameters": {},
+  
+  "outputs": {
+    "score_name": null,
+    "output_schema": {
+      "columns": []
+    },
+    "output_path": "research/outputs/study_20260120_basic_feature_outcome_baseline/"
+  },
+  
+  "reproducibility": {
+    "query_hash": null,
+    "random_seed": null,
+    "python_version": "3.11",
+    "dependencies": []
+  },
+  
+  "validation": {
+    "category_error_checklist_passed": true,
+    "reviewed_by": null,
+    "reviewed_at": null
+  }
+}
