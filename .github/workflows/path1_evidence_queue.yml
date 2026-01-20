@@ -340,17 +340,15 @@ jobs:
           GH_TOKEN: ${{ secrets.OVC_PR_BOT_TOKEN }}
         run: |
           # Validate PAT secret is configured
-          if [ -z "$GH_TOKEN" ]; then
+          if [ -z "${GH_TOKEN:-}" ]; then
             echo "=========================================="
             echo "ERROR: OVC_PR_BOT_TOKEN secret is not configured"
             echo "=========================================="
             echo ""
             echo "This workflow requires a Personal Access Token (PAT) to create PRs"
-            echo "and enable auto-merge. The default GITHUB_TOKEN cannot do this."
+            echo "and enable auto-merge."
             echo ""
-            echo "To fix:"
-            echo "1. Create a PAT with 'repo' and 'workflow' scopes"
-            echo "2. Add it as a repository secret named: OVC_PR_BOT_TOKEN"
+            echo "To fix: Create repo secret OVC_PR_BOT_TOKEN"
             echo "   Settings → Secrets and variables → Actions → New repository secret"
             echo ""
             exit 1
@@ -359,11 +357,12 @@ jobs:
           BRANCH="${{ steps.branch.outputs.branch }}"
           
           # Check if PR already exists for this branch
-          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number,url --jq '.[0]' 2>/dev/null || echo "")
           
-          if [ -n "$EXISTING_PR" ]; then
-            echo "PR #$EXISTING_PR already exists for branch $BRANCH"
-            PR_NUMBER=$EXISTING_PR
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            PR_NUMBER=$(echo "$EXISTING_PR" | jq -r '.number')
+            PR_URL=$(echo "$EXISTING_PR" | jq -r '.url')
+            echo "PR #$PR_NUMBER already exists for branch $BRANCH"
           else
             # Create PR
             echo "Creating Pull Request..."
@@ -393,11 +392,12 @@ jobs:
           
           # Enable auto-merge with merge commit strategy
           echo "Enabling auto-merge (merge commit strategy)..."
-          gh pr merge "$PR_NUMBER" --auto --merge
+          gh pr merge "$PR_URL" --auto --merge
           
           echo ""
           echo "=========================================="
           echo "PR #$PR_NUMBER created and auto-merge enabled"
+          echo "URL: $PR_URL"
           echo "PR will merge automatically when checks pass."
           echo "Merge strategy: merge commit (preserves history)"
           echo "=========================================="
