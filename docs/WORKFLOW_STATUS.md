@@ -29,6 +29,18 @@
 | Option B – C2 | CANONICAL | [C2_v0_1_validation.md](../reports/validation/C2_v0_1_validation.md) | 2026-01-20 |
 | Option B – C3 | CANONICAL | [C3_v0_1_validation.md](../reports/validation/C3_v0_1_validation.md) | 2026-01-20 |
 
+## [CHANGE][ADDED] Option C Layer Status
+| Layer | Status | Evidence | Notes |
+|-------|--------|----------|-------|
+| Option C – Outcomes | CANONICAL | [C_v0_1_validation.md](validation/C_v0_1_validation.md), [C_v0_1_promotion.md](../reports/validation/C_v0_1_promotion.md) | Promoted 2026-01-20 |
+
+**Option C Notes:** [CHANGE][CHANGED]
+- View: `derived.v_ovc_c_outcomes_v0_1` [CANONICAL]
+- CANONICAL outcomes: fwd_ret_{1,3,6}, mfe_{3,6}, mae_{3,6}, rvol_6
+- DRAFT outcomes: ttt_* (deferred, pending parameterization, NOT promoted)
+- Outcome meanings and implementation behavior are FROZEN
+- Breaking changes require MAJOR version bump + governance approval
+
 ## [CHANGE][ADDED] GitHub Actions Schedules (UTC)
 | Workflow | Schedule | Purpose |
 |----------|----------|---------|
