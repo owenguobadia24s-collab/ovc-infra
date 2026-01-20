@@ -224,7 +224,32 @@ Before Option B work begins on a new feature category, the following must exist:
 
 ---
 
-## 8. Summary
+## [CHANGE][ADDED] 8. C1 Status
+
+**C1 is now CANONICAL** (promoted 2026-01-20).
+
+| Property | Value |
+|----------|-------|
+| Feature Spec | `OPTION_B_C1_FEATURES_v0.1.md` [CANONICAL] |
+| Implementation Contract | `OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md` [CANONICAL] |
+| SQL View | `derived.v_ovc_c1_features_v0_1` |
+| Validation Evidence | `reports/validation/C1_v0_1_validation.md` |
+
+### Downstream Authorization
+
+- ✅ **C2** (multi-bar features) may depend on C1 outputs
+- ✅ **C3** (signals/classifications) may depend on C1 outputs
+- ✅ **Option C** (outcomes/evaluation) may depend on C1 outputs
+
+### Modification Restrictions
+
+- ❌ C1 feature meanings may NOT be changed without governance approval
+- ❌ C1 implementation may NOT deviate from spec
+- ❌ Breaking changes require MAJOR version bump (v0.1 → v1.0)
+
+---
+
+## 9. Summary
 
 | Aspect | Option B Position |
 |--------|-------------------|
