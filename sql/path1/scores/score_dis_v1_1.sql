@@ -1,14 +1,15 @@
 -- =============================================================================
--- SCORE: DIS-v1.0 — Directional Imbalance Score
+-- SCORE: DIS-v1.1 — Directional Imbalance Score
 -- =============================================================================
 -- Status: NON-CANONICAL (Path 1 Research)
 -- Created: 2026-01-20
+-- Updated: 2026-01-20 (v1.1 removes non-canonical dependency on directional_efficiency)
 --
--- Purpose: Descriptive measure of directional commitment within a bar
--- Formula: DIS_raw = body_ratio × |directional_efficiency|
+-- Purpose: Descriptive measure of body utilization within a bar
+-- Formula: DIS_raw = body_ratio
 --
 -- Source Views (CANONICAL - READ ONLY):
---   - derived.v_ovc_c1_features_v0_1 (body_ratio, directional_efficiency)
+--   - derived.v_ovc_c1_features_v0_1 (body_ratio)
 --   - derived.v_ovc_c2_features_v0_1 (bar_close_ms for ordering)
 --
 -- DISCLAIMER: This score is NOT predictive. Association with outcomes
@@ -25,8 +26,7 @@ base_data AS (
         c1.block_id,
         c1.sym,
         c2.bar_close_ms,
-        c1.body_ratio,
-        c1.directional_efficiency
+        c1.body_ratio
     FROM derived.v_ovc_c1_features_v0_1 c1
     INNER JOIN derived.v_ovc_c2_features_v0_1 c2
         ON c1.block_id = c2.block_id
@@ -36,7 +36,7 @@ base_data AS (
 -- -----------------------------------------------------------------------------
 -- CTE: with_raw_score
 -- Compute DIS raw score with explicit NULL handling
--- Formula: body_ratio × |directional_efficiency|
+-- Formula: DIS_raw = body_ratio
 -- Domain: [0, 1]
 -- -----------------------------------------------------------------------------
 with_raw_score AS (
@@ -47,17 +47,14 @@ with_raw_score AS (
         
         -- Raw score computation
         CASE
-            -- NULL if any input is NULL
+            -- NULL if input is NULL
             WHEN body_ratio IS NULL THEN NULL
-            WHEN directional_efficiency IS NULL THEN NULL
-            -- Normal computation
-            ELSE CAST(body_ratio AS DOUBLE PRECISION) 
-               * ABS(CAST(directional_efficiency AS DOUBLE PRECISION))
+            -- Normal computation: raw_score = body_ratio
+            ELSE CAST(body_ratio AS DOUBLE PRECISION)
         END AS raw_score,
         
         -- Debug columns (prefixed with dbg_)
-        body_ratio AS dbg_body_ratio,
-        directional_efficiency AS dbg_dir_eff
+        body_ratio AS dbg_body_ratio
         
     FROM base_data
 ),
@@ -94,8 +91,7 @@ SELECT
     END AS z_score,
     
     -- Debug columns (optional, for validation)
-    wrs.dbg_body_ratio,
-    wrs.dbg_dir_eff
+    wrs.dbg_body_ratio
 
 FROM with_raw_score wrs
 LEFT JOIN with_stats ws ON wrs.sym = ws.sym
@@ -106,9 +102,9 @@ ORDER BY wrs.sym, wrs.bar_close_ms;
 -- =============================================================================
 -- Expected behaviors:
 --   1. raw_score ∈ [0, 1] for all non-NULL values
---   2. raw_score = NULL when body_ratio or directional_efficiency is NULL
+--   2. raw_score = NULL when body_ratio is NULL
 --   3. z_score is per-symbol normalized (mean ≈ 0, stddev ≈ 1 per sym)
---   4. Pure body bars (no wicks): raw_score = body_ratio² = 1
+--   4. Pure body bars (no wicks): raw_score = 1
 --   5. Doji bars (tiny body): raw_score ≈ 0
 --
 -- Sample validation query:

@@ -1,9 +1,10 @@
 -- =============================================================================
 -- STUDY: DIS Temporal Stability (Quarterly)
 -- =============================================================================
--- Score: DIS-v1.0 — Directional Imbalance Score
+-- Score: DIS-v1.1 — Directional Imbalance Score
 -- Status: NON-CANONICAL (Path 1 Research)
 -- Created: 2026-01-20
+-- Updated: 2026-01-20 (v1.1 removes non-canonical dependency on directional_efficiency)
 --
 -- Purpose: Assess score distribution stability across fixed quarterly periods
 --
@@ -32,9 +33,7 @@ score_data AS (
             END AS quarter,
         CASE
             WHEN c1.body_ratio IS NULL THEN NULL
-            WHEN c1.directional_efficiency IS NULL THEN NULL
-            ELSE CAST(c1.body_ratio AS DOUBLE PRECISION) 
-               * ABS(CAST(c1.directional_efficiency AS DOUBLE PRECISION))
+            ELSE CAST(c1.body_ratio AS DOUBLE PRECISION)
         END AS raw_score
     FROM derived.v_ovc_c1_features_v0_1 c1
     INNER JOIN derived.v_ovc_c2_features_v0_1 c2

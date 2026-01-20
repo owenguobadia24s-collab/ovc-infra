@@ -1,0 +1,93 @@
+# Path 1 — Descriptive Score Research
+
+---
+
+## What Path 1 Is
+
+Path 1 is a collection of **descriptive, non-predictive scores** derived from canonical OVC features. These scores:
+
+- Describe past bar characteristics
+- Use canonical input views only
+- Are SELECT-only (no data mutation)
+- Support repeatable, deterministic studies
+
+Path 1 exists to build **observational evidence** about score-outcome associations without making predictions or strategy claims.
+
+---
+
+## What Path 1 Is NOT
+
+- **NOT** a trading system or strategy framework
+- **NOT** a signal generation pipeline
+- **NOT** a prediction or forecasting tool
+- **NOT** an optimization or tuning environment
+- **NOT** a place for thresholds, triggers, or decision logic
+
+Any correlation between scores and outcomes observed in Path 1 studies describes **historical co-occurrence only** and does not imply predictability, causation, or actionable information.
+
+---
+
+## Current Status
+
+**FROZEN** as of 2026-01-20
+
+Frozen scores:
+- DIS-v1.1
+- RES-v1.0
+- LID-v1.0
+
+---
+
+## Key Documents
+
+| Document | Purpose |
+|----------|---------|
+| [OPTION_B_PATH1_STATUS.md](OPTION_B_PATH1_STATUS.md) | Freeze declaration and invariants |
+| [SCORE_INVENTORY_v1.md](SCORE_INVENTORY_v1.md) | Compact score manifest |
+| [SCORE_LIBRARY_v1.md](scores/SCORE_LIBRARY_v1.md) | Full score definitions |
+| [RUN_CONVENTIONS.md](RUN_CONVENTIONS.md) | Run naming and output conventions |
+
+---
+
+## Directory Structure
+
+```
+docs/path1/
+├── README.md                    # This file
+├── OPTION_B_PATH1_STATUS.md     # Freeze status
+├── SCORE_INVENTORY_v1.md        # Score manifest
+├── RUN_CONVENTIONS.md           # Run conventions
+└── scores/
+    └── SCORE_LIBRARY_v1.md      # Full definitions
+
+sql/path1/
+├── scores/                      # Score computation SQL
+│   ├── score_dis_v1_1.sql
+│   ├── score_res_v1_0.sql
+│   └── score_lid_v1_0.sql
+└── studies/                     # Study SQL files
+    ├── dis_*.sql
+    ├── res_*.sql
+    └── lid_*.sql
+
+reports/path1/
+└── scores/                      # Score reports
+    ├── DIS_v1_1.md
+    ├── RES_v1_0.md
+    └── LID_v1_0.md
+```
+
+---
+
+## Next Steps
+
+Work within Path 1 should focus on:
+
+1. **Evidence-building:** Running studies to observe score-outcome associations
+2. **Documentation:** Recording study results in reports
+
+Work **outside** Path 1 scope:
+
+- New scores → require `SCORE_LIBRARY_v2`
+- Strategy development → prohibited in Path 1
+- Score modifications → prohibited (library is frozen)

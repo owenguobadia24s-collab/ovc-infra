@@ -30,15 +30,18 @@ This document defines three orthogonal, purely descriptive scores for Path 1 res
 
 ---
 
-### 2.1 DIS-v1.0 — Directional Imbalance Score
+### 2.1 DIS-v1.1 — Directional Imbalance Score
+
+> **v1.1 Change Note:** This version removes the non-canonical dependency on `directional_efficiency`.
+> DIS-v1.0 is withdrawn.
 
 #### 2.1.1 Purpose (Descriptive Only)
 
-DIS measures the degree of directional commitment within a bar relative to its total range. It quantifies how much of the bar's movement was "used" to achieve directional progress versus wasted in reversals (wicks).
+DIS measures the degree of body utilization within a bar relative to its total range.
 
 **What DIS describes:**
-- How efficiently price moved in one direction during the bar
-- The balance between body (committed movement) and wicks (reversed movement)
+- The proportion of the bar's range that was committed to directional movement (body)
+- Higher values indicate more body relative to wicks
 
 **What DIS does NOT mean:**
 - DIS is NOT a signal to trade
@@ -53,37 +56,28 @@ DIS measures the degree of directional commitment within a bar relative to its t
 | `block_id` | `v_ovc_c1_features_v0_1` | TEXT |
 | `sym` | `v_ovc_c1_features_v0_1` | TEXT |
 | `body_ratio` | `v_ovc_c1_features_v0_1` | DOUBLE PRECISION |
-| `directional_efficiency` | `v_ovc_c1_features_v0_1` | DOUBLE PRECISION |
 | `bar_close_ms` | `v_ovc_c2_features_v0_1` | BIGINT |
 
 #### 2.1.3 Formula
 
 ```
-DIS_raw = body_ratio × |directional_efficiency|
+DIS_raw = body_ratio
 
 Where:
   body_ratio = |close - open| / (high - low)          ∈ [0, 1]
-  directional_efficiency = (close - open) / (high - low)  ∈ [-1, 1]
-  |directional_efficiency| = absolute value            ∈ [0, 1]
 ```
 
 **Domain:** [0, 1]
 
 **Interpretation (descriptive only):**
-- DIS = 0: Bar has zero body (pure doji) or zero directional efficiency
-- DIS = 1: Bar is pure body with no wicks, fully committed direction
-
-The multiplication captures that:
-1. Large body relative to range (high body_ratio) matters
-2. Strong directional commitment (high |directional_efficiency|) matters
-3. Both must be present for high DIS
+- DIS = 0: Bar has zero body (pure doji)
+- DIS = 1: Bar is pure body with no wicks
 
 #### 2.1.4 Null Handling
 
 | Condition | Result |
 |-----------|--------|
 | `body_ratio IS NULL` | `raw_score = NULL` |
-| `directional_efficiency IS NULL` | `raw_score = NULL` |
 | Zero-range bar (rng = 0) | `raw_score = NULL` (inherited from C1) |
 
 #### 2.1.5 Z-Score Normalization
@@ -303,7 +297,7 @@ The following score concepts were considered but **CANNOT be implemented** due t
 ## 5. File Manifest
 
 ### Score SQL Files
-- `sql/path1/scores/score_dis_v1_0.sql`
+- `sql/path1/scores/score_dis_v1_1.sql`
 - `sql/path1/scores/score_res_v1_0.sql`
 - `sql/path1/scores/score_lid_v1_0.sql`
 
@@ -319,7 +313,7 @@ The following score concepts were considered but **CANNOT be implemented** due t
 - `sql/path1/studies/lid_stability_quarterly.sql`
 
 ### Report Files
-- `reports/path1/scores/DIS_v1_0.md`
+- `reports/path1/scores/DIS_v1_1.md`
 - `reports/path1/scores/RES_v1_0.md`
 - `reports/path1/scores/LID_v1_0.md`
 
@@ -330,3 +324,4 @@ The following score concepts were considered but **CANNOT be implemented** due t
 | Version | Date | Changes |
 |---------|------|---------|
 | v1.0 | 2026-01-20 | Initial creation of DIS, RES, LID scores |
+| v1.1 | 2026-01-20 | DIS-v1.0 withdrawn; DIS-v1.1 removes directional_efficiency dependency |
