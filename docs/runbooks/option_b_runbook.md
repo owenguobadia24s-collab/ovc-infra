@@ -52,3 +52,11 @@ select a.block_id, a.range_z_12 as range_z_v0_1, b.range_z_12 as range_z_v0_2
 from derived.ovc_block_features_v0_1 a
 join derived.ovc_block_features_v0_2 b using (block_id);
 ```
+
+## State Plane Evidence (Path 1)
+
+Generate a state-plane run for a single day:
+
+```bash
+python scripts/path1/run_state_plane.py --symbol GBPUSD --date 2026-01-17
+```

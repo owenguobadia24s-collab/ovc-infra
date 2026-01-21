@@ -356,10 +356,22 @@ jobs:
             exit 1
           fi
 
-          # Auth probe: verify token can authenticate and access this repo (REST only)
-          echo "Verifying GH CLI authentication via REST API..."
+          # ---------------------------------------------------------------------------
+          # Diagnostics: verify token can authenticate and access this repo
+          # (Does NOT print secrets; only safe excerpts)
+          # ---------------------------------------------------------------------------
+          echo "=== GH CLI Auth Diagnostics ==="
+          echo ""
+
+          # gh auth status (safe excerpt - never prints token)
+          echo "--- gh auth status ---"
+          gh auth status 2>&1 | grep -E '^(  ✓|  -)' || echo "(no status lines)"
+          echo ""
+
           AUTH_OK=true
 
+          # Authenticated username via REST API
+          echo "--- Authenticated user ---"
           AUTH_USER=$(gh api user --jq '.login' 2>/dev/null || echo "")
           if [ -z "$AUTH_USER" ]; then
             echo "ERROR: gh api user failed - cannot determine authenticated user"
@@ -367,7 +379,10 @@ jobs:
           else
             echo "Authenticated as: $AUTH_USER"
           fi
+          echo ""
 
+          # Repo access check via REST API
+          echo "--- Repo access ---"
           REPO_CHECK=$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.full_name' 2>/dev/null || echo "")
           if [ -z "$REPO_CHECK" ]; then
             echo "ERROR: gh api repos/${GITHUB_REPOSITORY} failed - cannot access repo"
@@ -375,9 +390,9 @@ jobs:
           else
             echo "Repo access confirmed: $REPO_CHECK"
           fi
+          echo ""
 
           if [ "$AUTH_OK" = "false" ]; then
-            echo ""
             echo "=========================================="
             echo "ERROR: OVC_PR_BOT_TOKEN cannot authenticate or cannot access this repo."
             echo "=========================================="
@@ -388,7 +403,7 @@ jobs:
             exit 1
           fi
 
-          echo "Auth probe passed."
+          echo "=== Auth diagnostics passed ==="
           echo ""
 
           BRANCH="${{ steps.branch.outputs.branch }}"
@@ -460,49 +475,24 @@ jobs:
           fi
 
           # ---------------------------------------------------------------------------
-          # Enable auto-merge with merge commit strategy
-          # Strategy:
-          #   1. Try `gh pr merge --auto --merge` (uses GraphQL enablePullRequestAutoMerge)
-          #   2. If GraphQL fails, fall back to REST immediate merge:
-          #      PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge
-          #   3. If REST merge fails due to branch protection, exit 0 (PR still created)
+          # Enable auto-merge with merge commit strategy (NON-FATAL)
+          # PR creation is a ledger write and MUST succeed even if repo governance
+          # (branch protection / required checks) isn't configured yet.
           # ---------------------------------------------------------------------------
           echo ""
-          echo "Enabling auto-merge (merge commit strategy)..."
+          echo "Attempting to enable auto-merge (merge commit strategy)..."
           MERGE_STATUS=""
 
-          if gh pr merge "$PR_URL" --auto --merge 2>/dev/null; then
-            echo "Auto-merge enabled via gh pr merge (GraphQL)"
+          # Use if/else pattern to ensure auto-merge failure does not fail the workflow
+          if gh pr merge "$PR_URL" --auto --merge 2>&1; then
+            echo "Auto-merge enabled."
             MERGE_STATUS="auto-merge enabled"
           else
-            echo "gh pr merge failed (likely GraphQL restriction), attempting REST merge fallback..."
-
-            # REST fallback: attempt immediate merge
-            # This will succeed only if no required status checks / branch protection
-            MERGE_RESULT=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/merge" \
-              --method PUT \
-              --field merge_method="merge" 2>&1) && MERGE_EXIT=0 || MERGE_EXIT=$?
-
-            if [ "$MERGE_EXIT" -eq 0 ]; then
-              echo "PR merged successfully via REST API"
-              MERGE_STATUS="merged immediately"
-            else
-              # Check if failure is due to branch protection (status checks required)
-              if echo "$MERGE_RESULT" | grep -qiE "required status|check|protection|not mergeable|pull request is not mergeable|405"; then
-                echo ""
-                echo "=========================================="
-                echo "NOTE: PR created but cannot auto-merge or merge immediately."
-                echo "Branch protection requires status checks to pass first."
-                echo "PR will need to be merged manually or when checks pass."
-                echo "=========================================="
-                MERGE_STATUS="pending (branch protection)"
-                # Exit 0: PR was created successfully, merge is just deferred
-              else
-                echo "REST merge failed with unexpected error: $MERGE_RESULT"
-                MERGE_STATUS="merge failed (see logs)"
-                # Still exit 0: PR was created successfully
-              fi
-            fi
+            echo ""
+            echo "WARN: Auto-merge could not be enabled (likely missing branch protection / required checks)."
+            echo "PR remains open: $PR_URL"
+            MERGE_STATUS="auto-merge not enabled (see logs)"
+            # Continue with exit 0 - PR creation succeeded, that's what matters
           fi
 
           echo ""
