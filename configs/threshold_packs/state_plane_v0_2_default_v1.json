@@ -1,0 +1,49 @@
+{
+  "version": "v0.2",
+  "scope": "state_plane_v0_2",
+  "thresholds": {
+    "E_hi": 0.6,
+    "S_hi": 0.35
+  },
+  "weights": {
+    "x_energy": {
+      "rng_rank_6": 0.45,
+      "body_ratio": 0.35,
+      "directional_efficiency": 0.2
+    },
+    "y_shift": {
+      "trend_bias": 0.5,
+      "momentum_state": 0.5
+    }
+  },
+  "y_map": {
+    "trend_bias": {
+      "sustained": -1.0,
+      "nascent": -0.5,
+      "neutral": 0.0,
+      "fading": 0.5
+    },
+    "momentum_state": {
+      "accelerating": -1.0,
+      "steady": 0.0,
+      "decelerating": 0.5,
+      "reversing": 1.0
+    }
+  },
+  "columns": {
+    "x_energy": {
+      "rng_intensity": "rng_rank_6",
+      "body_ratio": "body_ratio",
+      "directional_efficiency": "directional_efficiency"
+    },
+    "y_shift": {
+      "trend_bias": "c3_trend_bias",
+      "momentum_state": "c3_momentum_state"
+    }
+  },
+  "source_views": [
+    "derived.v_ovc_c1_features_v0_1",
+    "derived.v_ovc_c2_features_v0_1",
+    "derived.v_ovc_c3_features_v0_1"
+  ]
+}
