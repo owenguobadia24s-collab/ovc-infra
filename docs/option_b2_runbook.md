@@ -251,7 +251,7 @@ artifacts/
 
 ```powershell
 # Get latest run ID
-$latestRunId = Get-Content artifacts/derived_validation/LATEST
+$latestRunId = Get-Content artifacts/derived_validation/LATEST.txt
 
 # Read report
 Get-Content "artifacts/derived_validation/$latestRunId/derived_validation_report.md"

@@ -10,6 +10,7 @@ venv/
 # Data / logs (future-proofing)
 data/
 logs/
+TradingView_Alerts_Log_*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -214,6 +215,9 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Claude Code
+.claude/
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
@@ -226,5 +230,14 @@ __marimo__/
 
 # Option D run artifacts (general reports ignored)
 reports/*
+# Exception: documentation about reports/ layout (tracked)
+!reports/README.md
 # Exception: Path 1 evidence runs are observational outputs (append-only, tracked)
 !reports/path1/
+# Exception: canonical validation evidence (tracked; machine outputs remain ignored)
+!reports/validation/
+reports/validation/*
+!reports/validation/*.md
+# Exception: canonical verification evidence (tracked)
+!reports/verification/
+!reports/verification/**/*

@@ -355,32 +355,27 @@ jobs:
             echo ""
             exit 1
           fi
-          
-          # Auth probe: verify token can authenticate and access this repo
-          echo "Verifying GH CLI authentication..."
+
+          # Auth probe: verify token can authenticate and access this repo (REST only)
+          echo "Verifying GH CLI authentication via REST API..."
           AUTH_OK=true
-          
-          if ! gh auth status 2>&1 | head -5; then
-            echo "gh auth status failed"
-            AUTH_OK=false
-          fi
-          
-          AUTH_USER=$(gh api user -q .login 2>/dev/null || echo "")
+
+          AUTH_USER=$(gh api user --jq '.login' 2>/dev/null || echo "")
           if [ -z "$AUTH_USER" ]; then
-            echo "gh api user failed - cannot determine authenticated user"
+            echo "ERROR: gh api user failed - cannot determine authenticated user"
             AUTH_OK=false
           else
             echo "Authenticated as: $AUTH_USER"
           fi
-          
-          REPO_CHECK=$(gh api "repos/${GITHUB_REPOSITORY}" -q .full_name 2>/dev/null || echo "")
+
+          REPO_CHECK=$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.full_name' 2>/dev/null || echo "")
           if [ -z "$REPO_CHECK" ]; then
-            echo "gh api repos/${GITHUB_REPOSITORY} failed - cannot access repo"
+            echo "ERROR: gh api repos/${GITHUB_REPOSITORY} failed - cannot access repo"
             AUTH_OK=false
           else
             echo "Repo access confirmed: $REPO_CHECK"
           fi
-          
+
           if [ "$AUTH_OK" = "false" ]; then
             echo ""
             echo "=========================================="
@@ -392,55 +387,129 @@ jobs:
             echo "=========================================="
             exit 1
           fi
-          
+
           echo "Auth probe passed."
           echo ""
-          
+
           BRANCH="${{ steps.branch.outputs.branch }}"
-          
-          # Check if PR already exists for this branch
-          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number,url --jq '.[0]' 2>/dev/null || echo "")
-          
-          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
-            PR_NUMBER=$(echo "$EXISTING_PR" | jq -r '.number')
-            PR_URL=$(echo "$EXISTING_PR" | jq -r '.url')
+          # Derive OWNER from GITHUB_REPOSITORY (format: owner/repo)
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+
+          # ---------------------------------------------------------------------------
+          # Check if PR already exists for this branch using REST API
+          # Uses: GET /repos/{owner}/{repo}/pulls?head={owner}:{branch}&state=open
+          # This avoids GraphQL which fails with "Resource not accessible by personal access token"
+          # ---------------------------------------------------------------------------
+          echo "Checking for existing PR via REST API..."
+          EXISTING_PR_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?head=${OWNER}:${BRANCH}&state=open" 2>/dev/null || echo "[]")
+
+          # Parse first PR from response (empty array = no PR exists)
+          PR_NUMBER=$(echo "$EXISTING_PR_JSON" | jq -r '.[0].number // empty')
+          PR_URL=$(echo "$EXISTING_PR_JSON" | jq -r '.[0].html_url // empty')
+
+          if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ]; then
             echo "PR #$PR_NUMBER already exists for branch $BRANCH"
+            echo "URL: $PR_URL"
           else
-            # Create PR
-            echo "Creating Pull Request..."
-            PR_URL=$(gh pr create \
-              --base main \
-              --head "$BRANCH" \
-              --title "Path 1 Evidence Run(s) - $(date -u +%Y-%m-%d)" \
-              --body "## Automated Evidence Run
-          
-          **Branch:** \`$BRANCH\`
+            # ---------------------------------------------------------------------------
+            # Create PR using REST API
+            # Uses: POST /repos/{owner}/{repo}/pulls
+            # ---------------------------------------------------------------------------
+            echo "Creating Pull Request via REST API..."
+
+            PR_TITLE="Path 1 Evidence Run(s) - $(date -u +%Y-%m-%d)"
+            PR_BODY=$(cat <<'PRBODY'
+          ## Automated Evidence Run
+
           **Workflow Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          
+
           ### Contents
-          - Evidence run artifacts in \`reports/path1/evidence/runs/\`
-          - Updated \`INDEX.md\` (canonical execution ledger)
-          - Generated \`RUN_QUEUE_RESOLVED.csv\` (queue reconciliation view)
-          
+          - Evidence run artifacts in `reports/path1/evidence/runs/`
+          - Updated `INDEX.md` (canonical execution ledger)
+          - Generated `RUN_QUEUE_RESOLVED.csv` (queue reconciliation view)
+
           ### Merge Strategy
           This PR uses **merge commit** (not squash/rebase) to preserve evidence run history.
-          
+
           ---
-          *Auto-generated by Path 1 Evidence Queue Runner*")
-            
-            PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+          *Auto-generated by Path 1 Evidence Queue Runner*
+          PRBODY
+          )
+
+            PR_RESPONSE=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" \
+              --method POST \
+              --field title="$PR_TITLE" \
+              --field head="${BRANCH}" \
+              --field base="main" \
+              --field body="$PR_BODY" 2>&1) || {
+              echo "ERROR: Failed to create PR via REST API"
+              echo "$PR_RESPONSE"
+              exit 1
+            }
+
+            PR_NUMBER=$(echo "$PR_RESPONSE" | jq -r '.number')
+            PR_URL=$(echo "$PR_RESPONSE" | jq -r '.html_url')
+
+            if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" = "null" ]; then
+              echo "ERROR: PR creation response missing PR number"
+              echo "Response: $PR_RESPONSE"
+              exit 1
+            fi
+
             echo "Created PR #$PR_NUMBER: $PR_URL"
           fi
-          
+
+          # ---------------------------------------------------------------------------
           # Enable auto-merge with merge commit strategy
+          # Strategy:
+          #   1. Try `gh pr merge --auto --merge` (uses GraphQL enablePullRequestAutoMerge)
+          #   2. If GraphQL fails, fall back to REST immediate merge:
+          #      PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge
+          #   3. If REST merge fails due to branch protection, exit 0 (PR still created)
+          # ---------------------------------------------------------------------------
+          echo ""
           echo "Enabling auto-merge (merge commit strategy)..."
-          gh pr merge "$PR_URL" --auto --merge
-          
+          MERGE_STATUS=""
+
+          if gh pr merge "$PR_URL" --auto --merge 2>/dev/null; then
+            echo "Auto-merge enabled via gh pr merge (GraphQL)"
+            MERGE_STATUS="auto-merge enabled"
+          else
+            echo "gh pr merge failed (likely GraphQL restriction), attempting REST merge fallback..."
+
+            # REST fallback: attempt immediate merge
+            # This will succeed only if no required status checks / branch protection
+            MERGE_RESULT=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/merge" \
+              --method PUT \
+              --field merge_method="merge" 2>&1) && MERGE_EXIT=0 || MERGE_EXIT=$?
+
+            if [ "$MERGE_EXIT" -eq 0 ]; then
+              echo "PR merged successfully via REST API"
+              MERGE_STATUS="merged immediately"
+            else
+              # Check if failure is due to branch protection (status checks required)
+              if echo "$MERGE_RESULT" | grep -qiE "required status|check|protection|not mergeable|pull request is not mergeable|405"; then
+                echo ""
+                echo "=========================================="
+                echo "NOTE: PR created but cannot auto-merge or merge immediately."
+                echo "Branch protection requires status checks to pass first."
+                echo "PR will need to be merged manually or when checks pass."
+                echo "=========================================="
+                MERGE_STATUS="pending (branch protection)"
+                # Exit 0: PR was created successfully, merge is just deferred
+              else
+                echo "REST merge failed with unexpected error: $MERGE_RESULT"
+                MERGE_STATUS="merge failed (see logs)"
+                # Still exit 0: PR was created successfully
+              fi
+            fi
+          fi
+
           echo ""
           echo "=========================================="
-          echo "PR #$PR_NUMBER created and auto-merge enabled"
+          echo "PR #$PR_NUMBER created"
           echo "URL: $PR_URL"
-          echo "PR will merge automatically when checks pass."
+          echo "Merge status: $MERGE_STATUS"
           echo "Merge strategy: merge commit (preserves history)"
           echo "=========================================="
 

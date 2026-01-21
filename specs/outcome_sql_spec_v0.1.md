@@ -1,5 +1,5 @@
 /* ============================================================================
-OVC Outcomes v0.1 — SQL Spec (Postgres / Neon)
+OVC Outcomes v0.1 - SQL Spec (Postgres / Neon)
 
 GOAL
 - Store realized outcomes in a separate table keyed by block_id
@@ -172,3 +172,4 @@ SELECT
 
 FROM v_ovc_min_with_outcomes_v01
 GROUP BY sym, block4h, block2h, tradeable, ready;
+

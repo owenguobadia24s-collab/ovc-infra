@@ -1,0 +1,5 @@
+OVC Backfill (GBPUSD 2H)	active	223355650
+OVC Backfill then Validate (Range)	active	224649761
+notion-sync	active	224563573
+OVC FULL Ingest (manual)	active	223602733
+OVC Option C Schedule	active	224534934
