@@ -1,0 +1,70 @@
+# VERIFICATION COMMANDS RUN - 2026-01-19
+# Operator: <redacted-host>
+# Git SHA: 800fbb9a6063f067a63b2f51b5e6bd801d7769e8
+
+## Section A: Cloudflare Worker Verification
+-------------------------------------------
+1. cd c:\Users\Owner\projects\ovc-infra\infra\ovc-webhook
+2. Get-Content wrangler.jsonc
+   -> Output: a0_wrangler_config.txt
+3. npx wrangler whoami
+   -> Output: a1_wrangler_whoami.txt
+4. npx wrangler deployments list
+   -> Output: a2_wrangler_deployments.txt
+5. npx wrangler secret list
+   -> Output: a3_wrangler_secrets.txt
+
+## Section B: GitHub Actions Verification
+-------------------------------------------
+1. gh auth status
+   -> Output: b1_gh_auth_status.txt (BLOCKED - gh CLI not installed)
+2. Get-ChildItem .github/workflows
+   -> Output: b2_workflow_files.txt
+3. Workflow file analysis (manual read)
+   -> Output: b3_workflow_analysis.txt
+
+## Section C: Neon Schema Verification
+-------------------------------------------
+1. mcp_neon_list_projects
+   -> Project ID: icy-forest-24883364
+2. mcp_neon_run_sql: SELECT current_database(), now()
+3. mcp_neon_run_sql: SELECT table_schema, table_name FROM information_schema.tables
+4. mcp_neon_run_sql: SELECT schemaname, viewname FROM pg_views
+5. mcp_neon_run_sql: Existence checks for required tables/views
+6. mcp_neon_run_sql: Row counts for ovc_blocks, c1_features, c2_features
+   -> Output: c1_neon_schema_verification.txt
+
+=== SECTION B: GitHub Actions Verification (2026-01-19) ===
+Command sequence executed:
+
+# 1. Auth setup
+winget install --id GitHub.cli -e --accept-source-agreements --accept-package-agreements
+$env:Path = "$env:Path;C:\Program Files\GitHub CLI"
+gh auth login --web -h github.com
+gh auth status
+
+# 2. Repo info
+gh repo view --json name,owner,defaultBranchRef
+
+# 3. Workflow list
+gh workflow list
+
+# 4. Backfill.yml verification
+gh run list --workflow backfill.yml -L 20
+gh run view 21148654913 --json status,conclusion,event,createdAt,updatedAt,headSha,workflowName
+gh api repos/owenguobadia24s-collab/ovc-infra/actions/runs/21148654913/artifacts
+
+# 5. notion_sync.yml verification
+gh run list --workflow notion_sync.yml -L 20
+gh run view 21153538116 --json status,conclusion,event,createdAt,updatedAt,headSha,workflowName
+gh api repos/owenguobadia24s-collab/ovc-infra/actions/runs/21153538116/artifacts
+
+# 6. ovc_option_c_schedule.yml verification
+gh run list --workflow ovc_option_c_schedule.yml -L 20
+gh run view 21099499953 --json status,conclusion,event,createdAt,updatedAt,headSha,workflowName
+gh api repos/owenguobadia24s-collab/ovc-infra/actions/runs/21099499953/artifacts
+
+# 7. backfill_then_validate.yml verification
+gh run list --workflow backfill_then_validate.yml -L 20
+gh run view 21109864521 --json status,conclusion,event,createdAt,updatedAt,headSha,workflowName
+gh api repos/owenguobadia24s-collab/ovc-infra/actions/runs/21109864521/artifacts

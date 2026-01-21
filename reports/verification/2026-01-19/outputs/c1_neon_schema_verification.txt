@@ -1,0 +1,47 @@
+=== NEON DATABASE VERIFICATION ===
+Query Time: 2026-01-19T23:32:51.826Z
+Database: neondb
+Project ID: icy-forest-24883364
+Region: aws-eu-west-2
+PG Version: 17
+
+=== SCHEMA OBJECTS ===
+
+TABLES AND VIEWS BY SCHEMA:
+---
+derived.derived_runs_v0_1 (BASE TABLE)
+derived.eval_runs (BASE TABLE)
+derived.ovc_c1_features_v0_1 (BASE TABLE)
+derived.ovc_c2_features_v0_1 (BASE TABLE)
+derived.ovc_outcomes_v0_1 (VIEW)
+derived.ovc_scores_v0_1 (VIEW)
+derived.v_pattern_outcomes_v01 (VIEW)
+derived.v_session_heatmap_v01 (VIEW)
+derived.v_transition_stats_v01 (VIEW)
+ovc.ovc_blocks_v01_1_min (BASE TABLE)
+ovc.ovc_run_reports_v01 (BASE TABLE)
+ovc.v_data_quality_ohlc_basic (VIEW)
+ovc.v_ovc_min_events_norm (VIEW)
+ovc.v_ovc_min_events_seq (VIEW)
+ovc.v_pattern_outcomes_v01 (VIEW)
+ovc.v_session_heatmap_v01 (VIEW)
+ovc.v_transition_stats_v01 (VIEW)
+ovc_cfg.threshold_pack (BASE TABLE)
+ovc_cfg.threshold_pack_active (BASE TABLE)
+ovc_qa.derived_validation_run (BASE TABLE)
+ovc_qa.expected_blocks (BASE TABLE)
+ovc_qa.ohlc_mismatch (BASE TABLE)
+ovc_qa.tv_ohlc_2h (BASE TABLE)
+ovc_qa.validation_run (BASE TABLE)
+
+=== EXISTENCE CHECKS ===
+ovc.ovc_blocks_v01_1_min: EXISTS (1764 rows)
+derived.ovc_c1_features_v0_1: EXISTS (804 rows)
+derived.ovc_c2_features_v0_1: EXISTS (804 rows)
+derived.ovc_outcomes_v0_1 (VIEW): EXISTS
+ovc_qa.validation_run: EXISTS
+ovc_cfg.threshold_pack: EXISTS
+
+=== NOTES ===
+- derived.ovc_block_features_v0_1 view NOT FOUND (may be deprecated or renamed)
+- Schema names match expected OVC architecture: ovc, derived, ovc_qa, ovc_cfg

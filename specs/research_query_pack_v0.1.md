@@ -9,7 +9,7 @@ sym
 
 bar_close_ms
 
-B) ovc_min_events_seq (adds “previous block” context)
+B) ovc_min_events_seq (adds "previous block" context)
 
 Adds:
 
@@ -29,7 +29,7 @@ lag(...) to get previous values
 
 C) pattern_outcomes_v01
 
-Group stats for “what happens when the system says X”.
+Group stats for "what happens when the system says X".
 
 Group by (v0.1):
 
@@ -59,7 +59,7 @@ signal_alignment_rate (pred_dir == dir)
 
 D) transition_stats_v01
 
-“How often do states transition to other states?”
+"How often do states transition to other states?"
 
 State definition for v0.1 (choose one, but freeze it):
 
@@ -100,20 +100,20 @@ ready=0 rate
 
 null/empty field rates for fields you expect populated
 
-2) Important note (your current MIN doesn’t include fx/fxv/tag)
+2) Important note (your current MIN doesn't include fx/fxv/tag)
 
-Your revised MIN schema includes state/value/trend/struct/space, and L3 prediction fields, but not the full “TagString/fx/fxv” set as first-class fields in the sample object you approved.
+Your revised MIN schema includes state/value/trend/struct/space, and L3 prediction fields, but not the full "TagString/fx/fxv" set as first-class fields in the sample object you approved.
 
-That’s fine. Lane C can start using:
+That's fine. Lane C can start using:
 
-play, bias_mode, bias_dir, trend_tag, struct_state, space_tag as the “pattern surface”
-…and you can add tag/fx/fxv later as v0.1.1/v0.2 without breaking the research framework.
+play, bias_mode, bias_dir, trend_tag, struct_state, space_tag as the "pattern surface"
+.and you can add tag/fx/fxv later as v0.1.1/v0.2 without breaking the research framework.
 
-DoD — Research Query Pack v0.1 is complete when:
+DoD - Research Query Pack v0.1 is complete when:
 
  We define the state_key formula (exact fields + delimiter)
 
- We define “win” precisely (ret > 0 vs dir aligned etc.)
+ We define "win" precisely (ret > 0 vs dir aligned etc.)
 
  We list each view/table with exact group-by dimensions + metrics
 
@@ -123,10 +123,11 @@ DoD — Research Query Pack v0.1 is complete when:
 
 Checklist (spec-only)
 
-Freeze state_key formula (what fields define a “pattern bucket”).
+Freeze state_key formula (what fields define a "pattern bucket").
 
 Freeze win condition (ret-based, not subjective).
 
 Decide whether to split stats by tradeable and/or perm_state (recommended yes).
 
-Approve the v0.1 derived tables list (A–F).
+Approve the v0.1 derived tables list (A-F).
+

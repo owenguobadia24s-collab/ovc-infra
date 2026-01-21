@@ -1,0 +1,92 @@
+
+ Ôøà´©Å wrangler 4.58.0 (update available 4.59.2)
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Created:     2026-01-14T14:21:15.970Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     -
+Version(s):  (100%) 699fea87-d3ef-4e69-a169-506d5ada6dc7
+                 Created:  2026-01-14T14:21:13.102Z
+                     Tag:  -
+                 Message:  -
+
+Created:     2026-01-14T15:59:16.036Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     -
+Version(s):  (100%) 06a47064-1105-4bec-bce6-28d829a3fd89
+                 Created:  2026-01-14T15:59:13.194Z
+                     Tag:  -
+                 Message:  -
+
+Created:     2026-01-14T18:46:36.278Z
+Author:      <redacted-email>
+Source:      Secret Change
+Message:     -
+Version(s):  (100%) 5a0b4151-6538-4ec3-987a-35baa4c53ab4
+                 Created:  2026-01-14T18:46:36.278Z
+                     Tag:  -
+                 Message:  -
+
+Created:     2026-01-14T18:46:48.647Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     -
+Version(s):  (100%) 4f73750e-a3fa-411b-ad3c-4fe4ff570ad6
+                 Created:  2026-01-14T18:46:45.623Z
+                     Tag:  -
+                 Message:  -
+
+Created:     2026-01-16T23:42:22.217Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     Deployed version 966ecbf8
+Version(s):  (100%) 966ecbf8-65a9-4104-8ec3-f162be100189
+                 Created:  2026-01-16T23:42:20.026Z
+                     Tag:  -
+                 Message:  Updated secret: DATABASE_URL
+
+Created:     2026-01-16T23:42:51.407Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     Deployed version 97777592
+Version(s):  (100%) 97777592-7a06-4923-ab12-1a95e59d95c0
+                 Created:  2026-01-16T23:42:49.174Z
+                     Tag:  -
+                 Message:  Updated secret: OVC_TOKEN
+
+Created:     2026-01-16T23:43:18.952Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     Deployed version 0d184662
+Version(s):  (100%) 0d184662-c20a-4890-9938-bbdf80fc8e21
+                 Created:  2026-01-16T23:43:16.323Z
+                     Tag:  -
+                 Message:  Add secret: NEON_DATABASE_URL
+
+Created:     2026-01-17T01:33:03.934Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     -
+Version(s):  (100%) be517a68-58a9-449a-af17-86259db26612
+                 Created:  2026-01-17T01:33:00.889Z
+                     Tag:  -
+                 Message:  -
+
+Created:     2026-01-17T06:23:09.514Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     -
+Version(s):  (100%) 2cfa0760-1596-4ade-abe4-7769259e4798
+                 Created:  2026-01-17T06:23:06.484Z
+                     Tag:  -
+                 Message:  -
+
+Created:     2026-01-17T06:36:20.940Z
+Author:      <redacted-email>
+Source:      Unknown (deployment)
+Message:     -
+Version(s):  (100%) 6b9084ce-afef-47fe-8670-b6df83799a11
+                 Created:  2026-01-17T06:36:18.182Z
+                     Tag:  -
+                 Message:  -

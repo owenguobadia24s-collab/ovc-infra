@@ -389,15 +389,17 @@ def main(writer: RunWriter) -> int:
     
     # Record checks in run artifact
     writer.check(
-        name="validation_status",
+        id="validation_status",
+        name="Validation status",
         status="pass" if status == "PASS" else ("skip" if status == "SKIP" else "fail"),
-        evidence=f"status={status}",
+        evidence=[f"status={status}"],
     )
     if merged:
         writer.check(
-            name="validation_reasons",
+            id="validation_reasons",
+            name="Validation reasons",
             status="pass" if not reasons else "fail",
-            evidence=f"reasons={';'.join(merged)}",
+            evidence=[f"reasons={';'.join(merged)}"],
         )
 
     return 0

@@ -1,0 +1,14 @@
+WORKFLOW FILES FOUND IN .github/workflows/:
+- backfill.yml (schedule: cron "17 */6 * * *")
+- backfill_then_validate.yml (workflow_dispatch only - no schedule)
+- notion_sync.yml (schedule: cron "17 */2 * * *")
+- ovc_option_c_schedule.yml (schedule: cron "15 6 * * *")
+- ovc_full_ingest.yml
+
+WORKFLOW CONFIG VERIFICATION (from file analysis):
+1. backfill.yml: VERIFIED - schedule exists, artifacts configured
+2. notion_sync.yml: VERIFIED - schedule exists, artifacts configured
+3. ovc_option_c_schedule.yml: VERIFIED - schedule exists
+4. backfill_then_validate.yml: VERIFIED - workflow_dispatch only (DORMANT as expected)
+
+RUN HISTORY: BLOCKED - gh CLI not available

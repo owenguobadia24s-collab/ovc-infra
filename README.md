@@ -41,3 +41,8 @@ git push origin ovc-v0.1-ingest-stable
   git push origin --delete codex/fix-export_contract_v0.1_full.json
   git push origin --delete codex/fix-min-contract-schema-in-exportmin
   ```
+
+## Operating Base
+- Start here: `docs/OPERATING_BASE.md`
+- Index: `docs/OPERATING_BASE.index.md`
+- Validation report: `docs/OPERATING_BASE.validation.md`
