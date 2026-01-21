@@ -1,0 +1,34 @@
+Pager usage is off.
+Option C spotchecks v0.1
+1) Row count parity
+    check_name    | n_ingest | n_outcomes | status 
+------------------+----------+------------+--------
+ row_count_parity |        1 |          1 | PASS
+
+2) Null-rate monotonicity (fwd_ret)
+       check_name       |   sym   |        p_null_1        |        p_null_2        |        p_null_6        |       p_null_12        | status 
+------------------------+---------+------------------------+------------------------+------------------------+------------------------+--------
+ null_rate_monotonicity | __all__ | 1.00000000000000000000 | 1.00000000000000000000 | 1.00000000000000000000 | 1.00000000000000000000 | PASS
+ null_rate_monotonicity | GBPUSD  | 1.00000000000000000000 | 1.00000000000000000000 | 1.00000000000000000000 | 1.00000000000000000000 | PASS
+
+3) Hit rate bounds
+   check_name    | metric | min_hit | max_hit | n_out_of_bounds | status 
+-----------------+--------+---------+---------+-----------------+--------
+ hit_rate_bounds | hit_1  |         |         |               0 | PASS
+ hit_rate_bounds | hit_2  |         |         |               0 | PASS
+ hit_rate_bounds | hit_6  |         |         |               0 | PASS
+ hit_rate_bounds | hit_12 |         |         |               0 | PASS
+
+4) MFE/MAE sign sanity
+     check_name      | horizon | n_order_violation | n_mfe_negative | n_mae_positive | status 
+---------------------+---------+-------------------+----------------+----------------+--------
+ mfe_mae_sign_sanity | k=1     |                 0 |              0 |              0 | PASS
+ mfe_mae_sign_sanity | k=2     |                 0 |              0 |              0 | PASS
+ mfe_mae_sign_sanity | k=6     |                 0 |              0 |              0 | PASS
+ mfe_mae_sign_sanity | k=12    |                 0 |              0 |              0 | PASS
+
+5) Recent sample (last 20 blocks)
+     block_id      |  sym   | bar_close_ms  |   c    | pred_dir | fwd_ret_1 | fwd_dir_1 | mfe_1 | mae_1 | hit_1 
+-------------------+--------+---------------+--------+----------+-----------+-----------+-------+-------+-------
+ 20260116-I-GBPUSD | GBPUSD | 1768602000000 | 1.2738 | UP       |           |           |       |       |      
+
