@@ -1104,6 +1104,11 @@ def main():
         default='.',
         help='Repository root path (default: current directory)'
     )
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug logging'
+    )
     
     args = parser.parse_args()
     if args.once:
@@ -1195,6 +1200,8 @@ def main():
             build_pack_v0_2=enable_pack_v0_2,
             force_overwrite=args.force_overwrite,
         )
+        # results tuple contract: indices 0..8 = (run_id, success, did_execute, message, req_start, req_end, actual_start, actual_end, rows_processed);
+        # append-only: new fields may be added to the end; existing indices must not change.
         results.append((run_id, success, did_execute, message, date_start, date_end, actual_start, actual_end, rows_processed))
     
     # Summary
@@ -1255,11 +1262,12 @@ def main():
         if len(r) > 2 and r[1] and r[2]
     ]
     try:
-        print(
-            "DEBUG: executed_successes="
-            f"{len(executed_successes)} "
-            f"first_len={len(executed_successes[0]) if executed_successes else None}"
-        )
+        if args.debug:
+            print(
+                "DEBUG: executed_successes="
+                f"{len(executed_successes)} "
+                f"first_len={len(executed_successes[0]) if executed_successes else None}"
+            )
         if not args.dry_run and executed_successes:
             # executed_successes rows are expected to have indices 0..6:
             # run_id, success, did_execute, req_start, req_end, actual_start, actual_end
