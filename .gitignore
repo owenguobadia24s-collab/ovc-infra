@@ -251,5 +251,7 @@ reports/validation/*
 
 # VS Code workspace settings (track only this)
 .vscode/
+!.vscode/
+.vscode/*
 !.vscode/settings.json
 
