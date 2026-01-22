@@ -23,5 +23,8 @@
   "python.analysis.diagnosticMode": "workspace",
 
   // --- Terminal consistency ---
-  "terminal.integrated.defaultProfile.windows": "PowerShell"
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "python.testing.pytestArgs": [
+    "."
+  ]
 }
