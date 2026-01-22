@@ -255,3 +255,7 @@ reports/validation/*
 .vscode/*
 !.vscode/settings.json
 
+
+# Ignore VS Code folders anywhere (except root settings.json already unignored)
+**/.vscode/
+
