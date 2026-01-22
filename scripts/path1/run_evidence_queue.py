@@ -1224,14 +1224,17 @@ def main():
         rows_processed = sum(r[8] for r in results)
         outcome = "SKIPPED"
 
-    write_path1_summary(
-        repo_root=repo_root,
-        run_id=summary_run_id,
-        date_from=date_from,
-        date_to=date_to,
-        rows_processed=rows_processed,
-        outcome=outcome,
-    )
+    try:
+        write_path1_summary(
+            repo_root=repo_root,
+            run_id=summary_run_id,
+            date_from=date_from,
+            date_to=date_to,
+            rows_processed=rows_processed,
+            outcome=outcome,
+        )
+    except Exception as exc:
+        print(f"WARNING: Failed to write Path1 summary: {exc}")
     
     # Update queue status for completed runs (unless dry run)
     # Include actual dates so CSV reflects what was actually executed
@@ -1239,6 +1242,11 @@ def main():
         r for r in results
         if r[1] and r[2]
     ]
+    print(
+        "DEBUG: executed_successes="
+        f"{len(executed_successes)} "
+        f"first_len={len(executed_successes[0]) if executed_successes else None}"
+    )
     if not args.dry_run and executed_successes:
         # executed_successes rows are expected to have indices 0..6:
         # run_id, success, did_execute, req_start, req_end, actual_start, actual_end
