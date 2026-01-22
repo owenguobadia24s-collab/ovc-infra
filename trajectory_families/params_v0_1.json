@@ -1,0 +1,13 @@
+{
+  "version": "trajectory_families_v0.1",
+  "fingerprint": {
+    "state_plane_version": "v0.2",
+    "threshold_pack": "state_plane_v0_2_default_v1",
+    "E_hi": 0.6,
+    "S_hi": 0.35,
+    "y_jump_threshold": 0.25,
+    "numeric_precision": 6
+  },
+  "block_count": 12,
+  "block_labels": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
+}
