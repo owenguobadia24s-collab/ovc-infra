@@ -7,6 +7,29 @@
 
 ---
 
+## Path1 Run Observability (Non-Canonical)
+
+Each Path1 execution emits a **non-canonical run summary** for human inspection.
+
+- Summary file: `artifacts/path1_summary.json`
+- CI rendering: GitHub Actions → `$GITHUB_STEP_SUMMARY`
+
+The summary includes:
+- Run ID
+- Date range
+- Rows processed
+- Outcome (`EXECUTED` or `SKIPPED`)
+- Commit SHA (`N/A` if no commit occurred)
+
+Important invariants:
+- **No-op is success**: a run that produces no new evidence exits `0`, commits nothing, and still emits a summary.
+- The **canonical ledger** remains:
+  - `reports/path1/evidence/INDEX.md`
+  - `reports/path1/evidence/runs/<run_id>/`
+- `$GITHUB_STEP_SUMMARY` and `path1_summary.json` are **observational only** and must not be treated as sources of truth.
+
+For authoritative state, always inspect the ledger, not the summary.
+
 ## 0. Deployment Order & Prerequisites
 
 ### 0.1 Full Deployment Chain (One-Time or After Schema Reset)
