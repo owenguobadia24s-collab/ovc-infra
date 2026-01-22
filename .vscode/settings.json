@@ -1,0 +1,27 @@
+{
+  // --- Encoding & line endings (critical for UTF-8 evidence pipeline) ---
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.autoGuessEncoding": false,
+
+  // --- Git safety on Windows ---
+  // Prevent background Git operations from holding index locks
+  "git.autorefresh": false,
+  "git.enabled": true,
+  "git.confirmSync": false,
+
+  // Do not let VS Code aggressively scan huge repos
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/reports/**": true,
+    "**/artifacts/**": true
+  },
+
+  // --- Python: avoid background runners touching files mid-run ---
+  "python.testing.autoTestDiscoverOnSaveEnabled": false,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticMode": "workspace",
+
+  // --- Terminal consistency ---
+  "terminal.integrated.defaultProfile.windows": "PowerShell"
+}
