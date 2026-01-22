@@ -1,6 +1,6 @@
 # Path 1 Evidence Runs Index
 
-**Last Updated:** 2026-01-20
+**Last Updated:** 2026-01-22
 
 ---
 
@@ -23,6 +23,7 @@
 | p1_20260120_013 | 2023-10-02 to 2023-10-06 | GBPUSD | 59 | COMPLETE | [RUN.md](runs/p1_20260120_013/RUN.md) |
 | p1_20260120_014 | 2023-09-25 to 2023-09-29 | GBPUSD | 59 | COMPLETE | [RUN.md](runs/p1_20260120_014/RUN.md) |
 | p1_20260120_015 | 2023-09-18 to 2023-09-22 | GBPUSD | 59 | COMPLETE | [RUN.md](runs/p1_20260120_015/RUN.md) |
+| p1_20260120_031 | 2022-12-12 to 2022-12-14 | GBPUSD | 36 | COMPLETE | [RUN.md](runs/p1_20260120_031/RUN.md) |
 
 ---
 

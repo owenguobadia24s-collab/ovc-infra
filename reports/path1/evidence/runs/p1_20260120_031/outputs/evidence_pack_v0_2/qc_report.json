@@ -1,0 +1,156 @@
+{
+  "aggregation_match": [],
+  "candle_count": [],
+  "context": [
+    {
+      "block4h": "AB",
+      "count": 8,
+      "date_ny": "2022-12-11",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "CD",
+      "count": 8,
+      "date_ny": "2022-12-11",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "EF",
+      "count": 8,
+      "date_ny": "2022-12-11",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "GH",
+      "count": 8,
+      "date_ny": "2022-12-11",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "IJ",
+      "count": 8,
+      "date_ny": "2022-12-11",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "KL",
+      "count": 8,
+      "date_ny": "2022-12-11",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "AB",
+      "count": 8,
+      "date_ny": "2022-12-12",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "CD",
+      "count": 8,
+      "date_ny": "2022-12-12",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "EF",
+      "count": 8,
+      "date_ny": "2022-12-12",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "GH",
+      "count": 8,
+      "date_ny": "2022-12-12",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "IJ",
+      "count": 8,
+      "date_ny": "2022-12-12",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "KL",
+      "count": 8,
+      "date_ny": "2022-12-12",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "AB",
+      "count": 8,
+      "date_ny": "2022-12-13",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "CD",
+      "count": 8,
+      "date_ny": "2022-12-13",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "EF",
+      "count": 8,
+      "date_ny": "2022-12-13",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "GH",
+      "count": 8,
+      "date_ny": "2022-12-13",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "IJ",
+      "count": 8,
+      "date_ny": "2022-12-13",
+      "granularity": "M30",
+      "issue": "ok"
+    },
+    {
+      "block4h": "KL",
+      "count": 8,
+      "date_ny": "2022-12-13",
+      "granularity": "M30",
+      "issue": "ok"
+    }
+  ],
+  "continuity": [],
+  "date_from": "2022-12-12",
+  "date_to": "2022-12-14",
+  "generated_at": "2026-01-22T03:15:21Z",
+  "m15_scope": {
+    "max_needed_ms": 1671055200000,
+    "min_needed_ms": 1670796000000,
+    "rows_loaded": 288
+  },
+  "ohlc_sanity": [],
+  "run_id": "p1_20260120_031",
+  "summary": {
+    "blocks_missing_m15": 0,
+    "blocks_total": 36,
+    "blocks_with_agg_mismatch": 0,
+    "blocks_with_continuity_issues": 0,
+    "blocks_with_ohlc_issues": 0,
+    "context_h1": 0,
+    "context_m30": 18,
+    "context_windows_total": 18,
+    "context_written": 18,
+    "strips_written": 36
+  },
+  "symbol": "GBPUSD"
+}

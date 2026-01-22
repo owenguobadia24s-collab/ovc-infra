@@ -1,0 +1,46 @@
+{
+  "context_columns": [
+    "idx",
+    "time_utc",
+    "bar_start_ms",
+    "bar_close_ms",
+    "o",
+    "h",
+    "l",
+    "c",
+    "volume"
+  ],
+  "counts": {
+    "blocks": 36,
+    "context_written": 18,
+    "strips_written": 36
+  },
+  "date_from": "2022-12-12",
+  "date_to": "2022-12-14",
+  "generated_at": "2026-01-22T03:15:21Z",
+  "m15_scope": {
+    "max_needed_ms": 1671055200000,
+    "min_needed_ms": 1670796000000,
+    "rows_loaded": 288
+  },
+  "run_id": "p1_20260120_031",
+  "sources": {
+    "blocks_view": "derived.v_path1_evidence_dis_v1_1",
+    "m15_table": "ovc.ovc_candles_m15_raw",
+    "spine_table": "ovc.ovc_blocks_v01_1_min"
+  },
+  "strip_columns": [
+    "idx",
+    "time_utc",
+    "bar_start_ms",
+    "bar_close_ms",
+    "o",
+    "h",
+    "l",
+    "c",
+    "volume"
+  ],
+  "symbol": "GBPUSD",
+  "tolerance": 1e-06,
+  "version": "evidence_pack_v0_2"
+}

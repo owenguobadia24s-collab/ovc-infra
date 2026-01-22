@@ -217,6 +217,53 @@ def run_sql_file(db_url: str, sql_file: Path, output_file: Path) -> str:
     return output
 
 
+def truthy_env(value: Optional[str]) -> bool:
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes", "y"}
+
+
+def build_evidence_pack_v0_2(
+    repo_root: Path,
+    db_url: str,
+    run_id: str,
+    symbol: str,
+    date_start: str,
+    date_end: str,
+) -> None:
+    """Run the evidence pack v0.2 builder (best-effort, non-fatal)."""
+    script_path = repo_root / "scripts" / "path1" / "build_evidence_pack_v0_2.py"
+    if not script_path.exists():
+        print(f"WARNING: Evidence pack builder missing: {script_path}")
+        return
+
+    cmd = [
+        sys.executable,
+        str(script_path),
+        "--run-id",
+        run_id,
+        "--sym",
+        symbol,
+        "--date-from",
+        date_start,
+        "--date-to",
+        date_end,
+        "--repo-root",
+        str(repo_root),
+    ]
+    env = os.environ.copy()
+    env["DATABASE_URL"] = db_url
+    result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    if result.returncode != 0:
+        print("WARNING: Evidence pack v0.2 build failed (non-fatal).")
+        if result.stdout:
+            print(result.stdout.strip()[:2000])
+        if result.stderr:
+            print(result.stderr.strip()[:2000])
+    else:
+        print("Evidence pack v0.2 build complete.")
+
+
 def check_data_availability(db_url: str, symbol: str, date_start: str, date_end: str) -> int:
     """Check row count for given date range."""
     sql = f"""
@@ -701,7 +748,8 @@ def update_index_md(index_path: Path, run_id: str, date_range: str, symbol: str,
 def execute_single_run(
     db_url: str, repo_root: Path, run_id: str, symbol: str,
     date_start: str, date_end: str, existing_ranges: list,
-    dry_run: bool = False
+    dry_run: bool = False,
+    build_pack_v0_2: bool = False,
 ) -> Tuple[bool, str, str, str]:
     """
     Execute a single evidence run.
@@ -814,6 +862,16 @@ def execute_single_run(
     run_md_path = report_dir / "RUN.md"
     run_md_path.write_text(run_md_content)
     print(f"Generated: {run_md_path}")
+
+    if build_pack_v0_2:
+        build_evidence_pack_v0_2(
+            repo_root=repo_root,
+            db_url=db_url,
+            run_id=run_id,
+            symbol=symbol,
+            date_start=date_start_actual,
+            date_end=date_end_actual,
+        )
     
     # Update INDEX.md
     index_path = repo_root / "reports" / "path1" / "evidence" / "INDEX.md"
@@ -870,6 +928,11 @@ def main():
         '--dry-run', '-n',
         action='store_true',
         help='Validate inputs and check data availability without executing'
+    )
+    parser.add_argument(
+        '--evidence-pack-v0-2',
+        action='store_true',
+        help='Build Evidence Pack v0.2 (M15 overlay) for each completed run'
     )
     parser.add_argument(
         '--repo-root',
@@ -951,6 +1014,8 @@ def main():
         print(f"Limiting to --max-runs={args.max_runs}")
         runs_to_execute = runs_to_execute[:args.max_runs]
     
+    enable_pack_v0_2 = args.evidence_pack_v0_2 or truthy_env(os.environ.get("EVIDENCE_PACK_V0_2"))
+
     # Execute runs
     results = []
     for run_spec in runs_to_execute:
@@ -962,7 +1027,8 @@ def main():
         success, message, actual_start, actual_end = execute_single_run(
             db_url, repo_root, run_id, symbol,
             date_start, date_end, existing_ranges,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
+            build_pack_v0_2=enable_pack_v0_2,
         )
         results.append((run_id, success, message, date_start, date_end, actual_start, actual_end))
     

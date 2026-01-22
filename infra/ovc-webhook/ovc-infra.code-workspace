@@ -1,17 +1,31 @@
 {
-	"folders": [
-		{
-			"path": "../.."
-		},
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"powershell.cwd": "ovc-infra",
-		"chat.tools.terminal.autoApprove": {
-			"ForEach-Object": true,
-			"npm test": true
-		}
-	}
+  "folders": [
+    { "path": "../.." },
+    { "path": "." }
+  ],
+  "settings": {
+    // --- Chat/Codex safety rails ---
+    "chat.editing.alwaysSaveWithGeneratedChanges": false,
+    "chat.experimental.autoApproveEdits": false,
+
+    // --- Terminal as evidence ledger ---
+    "terminal.integrated.scrollback": 200000,
+    "terminal.integrated.persistentSessionScrollback": 200000,
+    "terminal.integrated.wordWrap": true,
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.shellIntegration.enabled": true,
+    "terminal.integrated.focusAfterRun": "none",
+
+    // --- Default terminal working directory (relative to this .code-workspace file) ---
+    "terminal.integrated.cwd": "ovc-infra",
+
+    // --- Terminal tool approvals (keep OFF unless you *really* mean it) ---
+   "chat.tools.terminal.autoApprove": {
+  "pwd": true,
+  "ls": true,
+  "dir": true,
+  "git status": true
+   }
+
+  }
 }
