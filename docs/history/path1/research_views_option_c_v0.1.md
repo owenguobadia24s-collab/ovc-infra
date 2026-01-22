@@ -1,5 +1,10 @@
 # Option C Research Views v0.1
 
+**STATUS: HISTORICAL (REFERENCE ONLY)**  
+This document reflects research-view concepts at the time it was written.  
+Execution ergonomics are defined in `PATH1_EXECUTION_MODEL.md`.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
+
 These views live in schema `derived` and join MIN tags with Option C outcomes.
 
 ## derived.v_pattern_outcomes_v01

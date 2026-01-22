@@ -1,5 +1,10 @@
 # Path 1 Evidence Runs — Operational How-To
 
+**STATUS: HISTORICAL (REFERENCE ONLY)**  
+This document reflects the operational guide at the time it was written.  
+Current execution ergonomics are defined in `PATH1_EXECUTION_MODEL.md`.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
+
 **Version:** 1.1  
 **Created:** 2026-01-20  
 **Updated:** 2026-01-20  

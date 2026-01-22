@@ -1,5 +1,10 @@
 # Path 1 Score Library v1.0
 
+**STATUS: HISTORICAL (REFERENCE ONLY)**  
+This score library is frozen and retained for audit.  
+Execution ergonomics are defined in `PATH1_EXECUTION_MODEL.md`.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
+
 **Status:** NON-CANONICAL (Research/Descriptive Only)  
 **Created:** 2026-01-20  
 **Governance:** docs/ops/GOVERNANCE_RULES_v0.1.md

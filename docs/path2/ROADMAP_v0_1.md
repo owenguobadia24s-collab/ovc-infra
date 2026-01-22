@@ -1,5 +1,10 @@
 # Post-Path1 Roadmap (v0.1)
 
+**STATUS: DRAFT / PLANNING (NON-CANONICAL)**  
+This roadmap is not authoritative for Path 1 execution.  
+See `PATH1_EXECUTION_MODEL.md` for current Path 1 behavior.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
+
 Status: draft scaffold (non-canonical)
 Scope: Plan and scaffolding for components that read Path1 without modifying it.
 
