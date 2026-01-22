@@ -1,5 +1,29 @@
 # OVC Infrastructure – Copilot Instructions
 
+> **Purpose:** This file helps GitHub Copilot understand the project structure, conventions, and critical constraints.
+> 
+> **For new contributors:** Start with [docs/operations/OPERATING_BASE.md](../docs/operations/OPERATING_BASE.md) for onboarding.
+
+## Quick Start
+
+### Essential Reading (in order)
+1. **Architecture & Data Flow** (below) – understand the 4 data layers
+2. **[Governance Rules](../docs/governance/GOVERNANCE_RULES_v0.1.md)** – CANONICAL artifacts and modification rules
+3. **[Branch Policy](../docs/governance/BRANCH_POLICY.md)** – PR naming and workflow conventions
+
+### Development Workflow
+1. Create branch: `git checkout -b pr/<area>-<topic>-vX.Y`
+2. Make minimal changes following governance rules
+3. Test locally: `.\scripts\verify_local.ps1`
+4. Create PR (never merge to main directly)
+5. Deploy after merge: `.\scripts\deploy_worker.ps1`
+
+### Critical Constraints
+- ⛔ **Option A is LOCKED** – Never modify canonical facts, MIN contract, or ingest worker
+- ⛔ **Never mix Pine + infra changes** in the same PR
+- ⛔ **Never edit contracts in-place** – create new versioned files instead
+- ⛔ **Never modify CANONICAL artifacts** without explicit approval (see Governance Rules)
+
 ## Architecture Overview
 OVC is a trading signal capture and evaluation system with four data layers (Options):
 - **Option A (LOCKED)**: Ingest pipeline – raw TradingView exports → R2 + Neon `ovc.ovc_blocks_v01_1_min`
@@ -147,3 +171,43 @@ $env:OANDA_API_TOKEN = '...'             # For OANDA backfill
 | Worker deploy fails | Check `wrangler.jsonc` and secrets via `wrangler secret list` |
 | Backfill returns 0 candles | Use weekday dates; weekends/holidays return empty |
 | `curl: (26) Failed to open` | Use `curl.exe` with forward slashes in paths |
+
+## Security & Governance
+
+### Critical Path Protection
+Changes to these files require **mandatory human review** and governance approval:
+- `sql/01_tables_min.sql` – CANONICAL schema (LOCKED)
+- `contracts/export_contract_v0.1.1_min.json` – CANONICAL contract (LOCKED)
+- `infra/ovc-webhook/src/index.ts` – P1 ingest worker (LOCKED)
+- `docs/governance/GOVERNANCE_RULES_v0.1.md` – Governance rules
+
+See [GOVERNANCE_RULES_v0.1.md](../docs/governance/GOVERNANCE_RULES_v0.1.md) for complete modification authority matrix.
+
+### Lifecycle States
+- **CANONICAL**: Frozen contracts, never modify in-place (version bump required)
+- **ACTIVE**: Operational code, modifiable with standard review
+- **DEPRECATED**: Legacy artifacts, do not extend or rely upon
+- **ORPHANED**: No consumers, candidate for removal
+
+### Security Practices
+- Never commit secrets (use `wrangler secret` for worker env vars)
+- Validate all TradingView exports before database insert
+- Use parameterized SQL queries to prevent injection
+- Environment variables: Store in `.env` (gitignored) or wrangler secrets
+
+## Getting Help
+
+### Documentation Index
+- **Operations**: [docs/operations/OPERATING_BASE.md](../docs/operations/OPERATING_BASE.md)
+- **Architecture**: [docs/architecture/](../docs/architecture/)
+- **Runbooks**: [docs/runbooks/](../docs/runbooks/)
+- **Validation**: [docs/validation/](../docs/validation/)
+
+### Issue Reporting
+- Pipeline failures: Check `.\scripts\pipeline_status.py --mode detect`
+- Test failures: Review `pytest` output and check `tests/sample_exports/`
+- Worker issues: Check Cloudflare dashboard logs
+
+---
+
+*Last updated: 2026-01-22 | For questions, see [governance/decisions.md](../docs/governance/decisions.md)*
