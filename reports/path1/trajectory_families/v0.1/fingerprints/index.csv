@@ -1,2 +1,3 @@
 fingerprint_id,date_ny,symbol,trajectory_csv_path,fingerprint_json_path,path_length,efficiency,dominant_quadrant,family_id,content_hash
+fp_GBPUSD_20220926_893a3890,2022-09-26,GBPUSD,reports/path1/evidence/runs/p1_20260122_004/outputs/state_plane_v0_2/trajectory.csv,fingerprints/GBPUSD/2022/fp_GBPUSD_20220926_893a3890.json,11.371508,0.067242,Q4,,9df9ce81a28255d4bd42fb6f061f297656de24618ced2f87f79397342dfb8d1a
 fp_GBPUSD_20260117_03c0d079,2026-01-17,GBPUSD,reports/path1/evidence/runs/p1_20260121_001/outputs/state_plane_v0_2/trajectory.csv,fingerprints/GBPUSD/2026/fp_GBPUSD_20260117_03c0d079.json,2.988130,0.083932,Q2,,cf4d02e0c30fb441ca39988c691cfc1d91d27ffa0f6d8d10b1debc8aa169b9af
