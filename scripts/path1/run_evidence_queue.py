@@ -1198,33 +1198,44 @@ def main():
         results.append((run_id, success, did_execute, message, date_start, date_end, actual_start, actual_end, rows_processed))
     
     # Summary
-    print("\n" + "=" * 60)
-    print("EXECUTION SUMMARY")
-    print("=" * 60)
-    
-    for run_id, success, _, message, _, _, _, _, _ in results:
-        status = "PASS" if success else "FAIL"
-        print(f"{status} | {run_id} | {message}")
-    
-    passed = sum(1 for _, s, _, _, _, _, _, _, _ in results if s)
+    passed = 0
+    for row in results:
+        if len(row) > 1 and row[1]:
+            passed += 1
     failed = len(results) - passed
-    print(f"\nTotal: {len(results)} | Passed: {passed} | Failed: {failed}")
-
-    executed = [r for r in results if r[2]]
-    if executed:
-        date_from = min(r[6] for r in executed)
-        date_to = max(r[7] for r in executed)
-        summary_run_id = executed[0][0] if len(executed) == 1 else "MULTIPLE"
-        rows_processed = sum(r[8] for r in executed)
-        outcome = "EXECUTED"
-    else:
-        summary_run_id = results[0][0] if len(results) == 1 else "MULTIPLE"
-        date_from = min(r[6] for r in results)
-        date_to = max(r[7] for r in results)
-        rows_processed = sum(r[8] for r in results)
-        outcome = "SKIPPED"
+    try:
+        print("\n" + "=" * 60)
+        print("EXECUTION SUMMARY")
+        print("=" * 60)
+        for row in results:
+            run_id = row[0] if len(row) > 0 else None
+            success = row[1] if len(row) > 1 else False
+            message = row[3] if len(row) > 3 else ""
+            status = "PASS" if success else "FAIL"
+            print(f"{status} | {run_id} | {message}")
+        print(f"\nTotal: {len(results)} | Passed: {passed} | Failed: {failed}")
+    except Exception as exc:
+        print(f"WARNING: Failed to render execution summary: {type(exc).__name__}: {exc}")
 
     try:
+        executed = [r for r in results if len(r) > 2 and r[2]]
+        if executed:
+            dates_from = [r[6] for r in executed if len(r) > 6 and r[6] is not None]
+            date_from = min(dates_from) if dates_from else None
+            dates_to = [r[7] for r in executed if len(r) > 7 and r[7] is not None]
+            date_to = max(dates_to) if dates_to else None
+            summary_run_id = executed[0][0] if len(executed) == 1 and len(executed[0]) > 0 else "MULTIPLE"
+            rows_processed = sum(r[8] for r in executed if len(r) > 8 and r[8] is not None)
+            outcome = "EXECUTED"
+        else:
+            summary_run_id = results[0][0] if len(results) == 1 and len(results[0]) > 0 else "MULTIPLE"
+            dates_from = [r[6] for r in results if len(r) > 6 and r[6] is not None]
+            date_from = min(dates_from) if dates_from else None
+            dates_to = [r[7] for r in results if len(r) > 7 and r[7] is not None]
+            date_to = max(dates_to) if dates_to else None
+            rows_processed = sum(r[8] for r in results if len(r) > 8 and r[8] is not None)
+            outcome = "SKIPPED"
+
         write_path1_summary(
             repo_root=repo_root,
             run_id=summary_run_id,
@@ -1234,23 +1245,24 @@ def main():
             outcome=outcome,
         )
     except Exception as exc:
-        print(f"WARNING: Failed to write Path1 summary: {exc}")
+        print(f"WARNING: Failed to write Path1 summary: {type(exc).__name__}: {exc}")
     
     # Update queue status for completed runs (unless dry run)
     # Include actual dates so CSV reflects what was actually executed
+    # executed_successes tuples are append-only; extra fields may be present.
     executed_successes = [
         r for r in results
-        if r[1] and r[2]
+        if len(r) > 2 and r[1] and r[2]
     ]
-    print(
-        "DEBUG: executed_successes="
-        f"{len(executed_successes)} "
-        f"first_len={len(executed_successes[0]) if executed_successes else None}"
-    )
-    if not args.dry_run and executed_successes:
-        # executed_successes rows are expected to have indices 0..6:
-        # run_id, success, did_execute, req_start, req_end, actual_start, actual_end
-        try:
+    try:
+        print(
+            "DEBUG: executed_successes="
+            f"{len(executed_successes)} "
+            f"first_len={len(executed_successes[0]) if executed_successes else None}"
+        )
+        if not args.dry_run and executed_successes:
+            # executed_successes rows are expected to have indices 0..6:
+            # run_id, success, did_execute, req_start, req_end, actual_start, actual_end
             completed_runs = {}
             for row in executed_successes:
                 if len(row) < 7:
@@ -1261,17 +1273,15 @@ def main():
                         "Skipping queue update for this row only."
                     )
                     continue
-                run_id = row[0]
-                actual_start = row[5]
-                actual_end = row[6]
+                run_id, success, did_execute, req_start, req_end, actual_start, actual_end, *_ = row
                 completed_runs[run_id] = (actual_start, actual_end)
             if completed_runs:
                 update_queue_status(queue_path, completed_runs)
                 print("")
                 print("WARNING: Queue status updated LOCALLY ONLY. Changes are not auto-committed.")
                 print("         INDEX.md is the canonical execution ledger, not the queue.")
-        except Exception as exc:
-            print(f"WARNING: Failed to update queue status update: {exc}")
+    except Exception as exc:
+        print(f"WARNING: Failed to process executed_successes reporting: {type(exc).__name__}: {exc}")
     
     if failed > 0:
         sys.exit(1)
