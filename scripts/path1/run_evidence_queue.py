@@ -1240,14 +1240,30 @@ def main():
         if r[1] and r[2]
     ]
     if not args.dry_run and executed_successes:
-        completed_runs = {
-            run_id: (actual_start, actual_end)
-            for run_id, success, did_execute, req_start, req_end, actual_start, actual_end, _ in executed_successes
-        }
-        update_queue_status(queue_path, completed_runs)
-        print("")
-        print("WARNING: Queue status updated LOCALLY ONLY. Changes are not auto-committed.")
-        print("         INDEX.md is the canonical execution ledger, not the queue.")
+        # executed_successes rows are expected to have indices 0..6:
+        # run_id, success, did_execute, req_start, req_end, actual_start, actual_end
+        try:
+            completed_runs = {}
+            for row in executed_successes:
+                if len(row) < 7:
+                    run_id_hint = row[0] if len(row) > 0 else None
+                    print(
+                        "WARNING: executed_successes row missing expected fields; "
+                        f"len={len(row)} run_id={run_id_hint!r}. "
+                        "Skipping queue update for this row only."
+                    )
+                    continue
+                run_id = row[0]
+                actual_start = row[5]
+                actual_end = row[6]
+                completed_runs[run_id] = (actual_start, actual_end)
+            if completed_runs:
+                update_queue_status(queue_path, completed_runs)
+                print("")
+                print("WARNING: Queue status updated LOCALLY ONLY. Changes are not auto-committed.")
+                print("         INDEX.md is the canonical execution ledger, not the queue.")
+        except Exception as exc:
+            print(f"WARNING: Failed to update queue status update: {exc}")
     
     if failed > 0:
         sys.exit(1)
