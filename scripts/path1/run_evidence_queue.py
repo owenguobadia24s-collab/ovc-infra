@@ -1200,8 +1200,17 @@ def main():
             build_pack_v0_2=enable_pack_v0_2,
             force_overwrite=args.force_overwrite,
         )
-        # results tuple contract: indices 0..8 = (run_id, success, did_execute, message, req_start, req_end, actual_start, actual_end, rows_processed);
-        # append-only: new fields may be added to the end; existing indices must not change.
+        # Results tuple contract (append-only):
+        #   [0] run_id
+        #   [1] success
+        #   [2] did_execute
+        #   [3] message
+        #   [4] req_start
+        #   [5] req_end
+        #   [6] actual_start
+        #   [7] actual_end
+        #   [8] rows_processed
+        # Append-only rule: new fields may be appended; existing indices must not change.
         results.append((run_id, success, did_execute, message, date_start, date_end, actual_start, actual_end, rows_processed))
     
     # Summary
