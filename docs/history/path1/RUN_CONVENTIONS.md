@@ -2,6 +2,8 @@
 
 **Status:** HISTORICAL (superseded)  
 **Retained only for historical context; do not use for current runs.**
+Execution ergonomics are defined in `PATH1_EXECUTION_MODEL.md`.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
 
 ---
 

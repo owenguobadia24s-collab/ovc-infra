@@ -60,6 +60,10 @@ git push origin ovc-v0.1-ingest-stable
 - Runner: `scripts/path1/run_evidence_queue.py`
 - Queue: `reports/path1/evidence/RUN_QUEUE.csv`
 
+### How Path 1 runs
+- `RUN_QUEUE.csv` = intent, Workflow = execution, `INDEX.md` = fact
+- Canonical execution model: `PATH1_EXECUTION_MODEL.md`
+
 ### Where outputs go
 - Canonical ledger: `reports/path1/evidence/INDEX.md`
 - Run folders: `reports/path1/evidence/runs/<run_id>/`

@@ -1,5 +1,7 @@
 # Trajectory Families v0.1 — Technical Specification
 
+**Status Banner:** DRAFT — Describes intended design; current CLI implements fingerprint generation only (`emit-fingerprint`, `batch-fingerprints`). Clustering, naming, and gallery flows are **NOT IMPLEMENTED** in the CLI.
+
 **Status:** DRAFT
 **Version:** 0.1.0
 **Author:** Principal Engineer + Research Taxonomist
@@ -15,6 +17,8 @@ This specification defines a deterministic taxonomy pipeline for cataloging recu
 **Scope:** Descriptive cataloging only. No prediction, no signal generation, no edge claims.
 
 **Metaphor:** A museum catalog of day-shapes, not a model.
+
+**Note:** This spec is subordinate to the canonical Path 1 evidence flow; it does not define Path 1 execution.
 
 ---
 
@@ -356,6 +360,8 @@ json.dumps(obj, sort_keys=True, indent=2, separators=(",", ": "))
 
 ## (2) Two Similarity Modes
 
+**NOT IMPLEMENTED in current CLI.** Design-only specification for future clustering work.
+
 ### Mode A: Sequence Similarity (Quadrant Strings)
 
 #### A.1: Levenshtein / Edit Distance
@@ -492,6 +498,8 @@ d_rmsd(P, Q) = sqrt(d_msd(P, Q))
 ---
 
 ## (3) Feature Vector for Clustering
+
+**NOT IMPLEMENTED in current CLI.** Design-only specification for future clustering work.
 
 ### 3.1 Explicit Feature Vector Definition
 
@@ -634,6 +642,8 @@ def compute_trend_slope(values: list) -> float:
 
 ## (4) Clustering Strategy
 
+**NOT IMPLEMENTED in current CLI.** Design-only specification for future clustering work.
+
 ### 4.1 Primary Algorithm: k-Medoids (PAM)
 
 **Choice:** k-Medoids via PAM (Partitioning Around Medoids)
@@ -739,6 +749,8 @@ def identify_outliers(X: np.ndarray, labels: np.ndarray) -> list:
 ---
 
 ## (5) Family Naming Scheme
+
+**NOT IMPLEMENTED in current CLI.** Design-only specification for future clustering work.
 
 ### 5.1 Canonical Naming Format
 
@@ -863,6 +875,8 @@ def assign_stable_family_ids(clusters: dict) -> dict:
 
 ## (6) File Layout + Artifacts
 
+**PARTIALLY IMPLEMENTED.** Fingerprint outputs and index.csv exist; clustering/gallery artifacts are **NOT IMPLEMENTED** in the CLI.
+
 ### 6.1 Directory Structure
 
 ```
@@ -927,7 +941,7 @@ reports/path1/trajectory_families/
 
 ```csv
 fingerprint_id,date_ny,symbol,trajectory_csv_path,fingerprint_json_path,path_length,efficiency,dominant_quadrant,family_id,content_hash
-fp_GBPUSD_20221212_a3f8b2c1,2022-12-12,GBPUSD,runs/p1_20260120_031/outputs/evidence_pack_v0_2/state_plane_v0_2/trajectory.csv,fingerprints/GBPUSD/2022/fp_GBPUSD_20221212_a3f8b2c1.json,2.341567,0.456789,Q2,TF-03,a3f8b2c1d5e9f7a2...
+fp_GBPUSD_20221212_a3f8b2c1,2022-12-12,GBPUSD,runs/p1_20260120_031/outputs/state_plane_v0_2/trajectory.csv,fingerprints/GBPUSD/2022/fp_GBPUSD_20221212_a3f8b2c1.json,2.341567,0.456789,Q2,TF-03,a3f8b2c1d5e9f7a2...
 ```
 
 **Columns:**
@@ -1015,28 +1029,33 @@ TF-02,Expansion-Dominant / High-Activity,fp_GBPUSD_20230115_d8e7f6a5,2023-01-15,
 ### 7.1 Modules / Files
 
 ```
-scripts/path1/
+trajectory_families/
 ├── fingerprint.py              # DayFingerprint computation
-├── fingerprint_batch.py        # Batch fingerprint generation
-├── trajectory_similarity.py    # Similarity computation (DTW, Levenshtein, Markov)
-├── trajectory_clustering.py    # k-medoids clustering + family assignment
-├── trajectory_naming.py        # Algorithmic family naming
-├── trajectory_gallery.py       # Gallery/visualization generation
-└── run_trajectory_families.py  # Main CLI entry point
+├── distance.py                 # Similarity utilities (library-only)
+├── features.py                 # Feature vector utilities (library-only)
+├── clustering.py               # Clustering utilities (library-only)
+├── naming.py                   # Naming utilities (library-only)
+├── gallery.py                  # Gallery utilities (library-only)
+├── schema.py                   # Fingerprint schema + validation
+└── params_v0_1.json             # Default parameters
+
+scripts/path1/
+└── run_trajectory_families.py  # CLI entry point (emit-fingerprint, batch-fingerprints only)
 
 tests/
 ├── test_fingerprint.py
 ├── test_fingerprint_determinism.py
-├── test_trajectory_similarity.py
-├── test_trajectory_clustering.py
-├── test_trajectory_naming.py
 └── fixtures/
     ├── golden_fingerprint_v0_1.json
     ├── golden_feature_vector.npy
     └── golden_cluster_assignments.csv
+
+# NOT IMPLEMENTED: test_trajectory_similarity.py, test_trajectory_clustering.py, test_trajectory_naming.py
 ```
 
 ### 7.2 CLI Commands
+
+**Current CLI scope:** `emit-fingerprint` and `batch-fingerprints` only. Other commands below are **NOT IMPLEMENTED** in the CLI.
 
 #### emit-fingerprint (single day)
 
@@ -1044,9 +1063,9 @@ tests/
 python scripts/path1/run_trajectory_families.py emit-fingerprint \
     --symbol GBPUSD \
     --date 2022-12-12 \
-    --trajectory-csv reports/path1/evidence/runs/p1_20260120_031/outputs/evidence_pack_v0_2/state_plane_v0_2/trajectory.csv \
+    --trajectory-csv reports/path1/evidence/runs/p1_20260120_031/outputs/state_plane_v0_2/trajectory.csv \
     --output-dir reports/path1/trajectory_families/v0.1/fingerprints/GBPUSD/2022/ \
-    --params-file configs/trajectory_families_v0_1_params.json
+    --params-file trajectory_families/params_v0_1.json
 ```
 
 **Output:** Single fingerprint JSON + updates index.csv
@@ -1060,41 +1079,24 @@ python scripts/path1/run_trajectory_families.py batch-fingerprints \
     --date-to 2023-12-31 \
     --evidence-dir reports/path1/evidence/runs/ \
     --output-dir reports/path1/trajectory_families/v0.1/ \
-    --params-file configs/trajectory_families_v0_1_params.json \
+    --params-file trajectory_families/params_v0_1.json \
     --parallel 4
 ```
 
 **Output:** Multiple fingerprint JSONs + updates index.csv
 
-#### cluster (build families)
+#### cluster (build families) — NOT IMPLEMENTED
 
-```bash
-python scripts/path1/run_trajectory_families.py cluster \
-    --symbol GBPUSD \
-    --fingerprint-dir reports/path1/trajectory_families/v0.1/fingerprints/GBPUSD/ \
-    --output-dir reports/path1/trajectory_families/v0.1/clusters/GBPUSD/ \
-    --n-clusters auto \
-    --seed 42
-```
+This command is not wired in `scripts/path1/run_trajectory_families.py`.
 
-**Output:** families_summary.json, families_table.csv, assignments.csv, cluster_run_*.json
+#### generate-gallery — NOT IMPLEMENTED
 
-#### generate-gallery
-
-```bash
-python scripts/path1/run_trajectory_families.py generate-gallery \
-    --symbol GBPUSD \
-    --families-summary reports/path1/trajectory_families/v0.1/clusters/GBPUSD/families_summary.json \
-    --source-plots-dir reports/path1/evidence/runs/ \
-    --output-dir reports/path1/trajectory_families/v0.1/gallery/GBPUSD/
-```
-
-**Output:** Organized gallery directories with plots
+This command is not wired in `scripts/path1/run_trajectory_families.py`.
 
 ### 7.3 Determinism Controls
 
 ```python
-# configs/trajectory_families_v0_1_params.json
+# trajectory_families/params_v0_1.json
 {
   "version": "trajectory_families_v0.1",
   "fingerprint": {
@@ -1163,6 +1165,8 @@ def test_feature_vector_determinism():
 
 ### 7.5 Definition of Done
 
+**HISTORICAL planning checklist — not authoritative for current implementation.**
+
 **PR #1: Fingerprint Infrastructure**
 - [ ] `fingerprint.py` with `compute_fingerprint()` function
 - [ ] JSON schema validation against `day_fingerprint_v0_1.json`
@@ -1174,7 +1178,7 @@ def test_feature_vector_determinism():
 - [ ] Determinism test (re-run over same data = identical output)
 - [ ] Documentation in `docs/specs/TRAJECTORY_FAMILIES_v0_1_SPEC.md`
 
-**PR #2: Clustering + Gallery**
+**PR #2: Clustering + Gallery (NOT IMPLEMENTED)**
 - [ ] `trajectory_similarity.py` with DTW, Levenshtein, Markov
 - [ ] `trajectory_clustering.py` with k-medoids, silhouette selection
 - [ ] `trajectory_naming.py` with deterministic naming

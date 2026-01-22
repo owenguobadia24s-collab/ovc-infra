@@ -1,5 +1,10 @@
 # Path 1 — Descriptive Score Research (Historical Overview)
 
+**STATUS: HISTORICAL (REFERENCE ONLY)**  
+This overview reflects Path 1 context at the time it was written.  
+Current execution ergonomics are defined in `PATH1_EXECUTION_MODEL.md`.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
+
 **Canonical Path 1 entrypoint:** see repo root `README.md` → “Path 1 (FROZEN) — Descriptive Score Research”.
 
 ---

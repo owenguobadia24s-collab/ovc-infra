@@ -1,5 +1,9 @@
 # Option B — Path 1 Status
 
+**STATUS: CURRENT (AUTHORITATIVE FOR SCORE FREEZE)**  
+This document defines the frozen score library for Path 1.  
+Execution ergonomics are defined in `PATH1_EXECUTION_MODEL.md`.
+
 **Status:** FROZEN  
 **Freeze Date:** 2026-01-20  
 **Library Version:** SCORE_LIBRARY_v1

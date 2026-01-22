@@ -1,5 +1,10 @@
 # Path1 Sealing Protocol v0.1
 
+**STATUS: DRAFT / PLANNING (NOT IMPLEMENTED)**  
+This protocol is not implemented in the current codebase.  
+Execution ergonomics are defined in `PATH1_EXECUTION_MODEL.md`.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
+
 **Status:** DRAFT (observational tooling)  
 **Scope:** Per-run immutable hash manifests
 

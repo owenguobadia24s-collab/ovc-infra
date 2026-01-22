@@ -1,5 +1,10 @@
 # Path 1 Evidence Runs Index
 
+**Canonical fact ledger:** `INDEX.md` is append-only and authoritative.  
+**INDEX ≠ intent:** the queue (`RUN_QUEUE.csv`) is intent only.  
+**INDEX ≠ execution:** the workflow defines execution.  
+See `PATH1_EXECUTION_MODEL.md` for the execution model.
+
 **Last Updated:** 2026-01-22
 
 ---

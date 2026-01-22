@@ -1,5 +1,10 @@
 # Path 1 Score Inventory v1
 
+**STATUS: HISTORICAL (REFERENCE ONLY)**  
+This inventory reflects the frozen score set at the time it was written.  
+Execution ergonomics are defined in `PATH1_EXECUTION_MODEL.md`.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
+
 **Status:** FROZEN  
 **Freeze Date:** 2026-01-20  
 **Library:** SCORE_LIBRARY_v1

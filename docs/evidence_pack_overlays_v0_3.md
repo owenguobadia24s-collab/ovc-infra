@@ -1,8 +1,12 @@
 # Evidence Pack v0.3 Overlays - Liquidity & Microstructure Analysis
 
+**Status Banner:** LIBRARY-ONLY — Not wired into `scripts/path1/build_evidence_pack_v0_2.py` or the canonical Path 1 execution flow.
+
 ## Overview
 
 Evidence Pack v0.3 Overlays provide an **observational, read-only layer** of liquidity and microstructure analysis derived from M15 strips and the frozen 2H spine. Overlays are **additive artifacts** that do not mutate any canonical tables or existing v0.2 pack outputs.
+
+**Current status:** library-only. The pack builder does not generate overlays, and no CLI flags or env vars enable them in the builder.
 
 ## Design Principles
 
@@ -10,19 +14,21 @@ Evidence Pack v0.3 Overlays provide an **observational, read-only layer** of liq
 2. **Deterministic**: All computations use stable sorting and canonical JSON encoding
 3. **Additive**: Outputs are stored under `overlays_v0_3/` subdirectory
 4. **Order-stable**: Events and sequences are sorted consistently
-5. **Non-invasive**: Can be enabled/disabled without affecting v0.2 pack integrity
+5. **Non-invasive**: Library-only; no pack-builder integration
 6. **Intrablock-only**: All overlay computation operates within block boundaries (no cross-block lookbacks)
 7. **Numeric precision**: All numeric values quantized to fixed precision (1e-5 / 5 decimal places)
 8. **Event identity**: All v0.3-B events include deterministic SHA-1 event_id
 
 ## Output Structure
 
+**DRAFT (integration not wired):** Intended layout if overlays are ever integrated into the evidence pack builder.
+
 ```
 evidence_pack_v0_2/
 ├── backbone_2h.csv
 ├── strips/2h/
 ├── context/4h/
-├── meta.json (includes overlays_v0_3 metadata)
+├── meta.json (DRAFT: would include overlays_v0_3 metadata if wired)
 ├── qc_report.json
 └── overlays_v0_3/
     ├── micro/
@@ -164,63 +170,15 @@ evidence_pack_v0_2/
 }
 ```
 
-## Usage
+## Usage (LIBRARY-ONLY)
 
-### Enable Overlays via CLI Flag
+Overlays are **not wired** into `scripts/path1/build_evidence_pack_v0_2.py`. There are no supported CLI flags or env vars for pack builds.
 
-```bash
-python scripts/path1/build_evidence_pack_v0_2.py \
-  --run-id p1_20260122_001 \
-  --sym GBPUSD \
-  --date-from 2022-12-12 \
-  --date-to 2022-12-14 \
-  --overlays-v0-3
-```
-
-### Enable Overlays via Environment Variable
-
-```bash
-export EVIDENCE_OVERLAYS_V0_3=1
-python scripts/path1/build_evidence_pack_v0_2.py \
-  --run-id p1_20260122_001 \
-  --sym GBPUSD \
-  --date-from 2022-12-12 \
-  --date-to 2022-12-14
-```
-
-### Check Overlay Status in meta.json
-
-```bash
-cat reports/path1/evidence/runs/p1_20260122_001/outputs/evidence_pack_v0_2/meta.json | \
-  jq '.overlays_v0_3'
-```
-
-Output when enabled:
-```json
-{
-  "enabled": true,
-  "version": "0.3",
-  "modules": ["v0.3-A", "v0.3-B", "v0.3-C"],
-  "counts": {
-    "v0.3-A": 36,
-    "v0.3-B": 142,
-    "v0.3-C": 36
-  }
-}
-```
-
-Output when disabled:
-```json
-{
-  "enabled": false,
-  "version": "0.3",
-  "modules": []
-}
-```
+To exercise overlays, use the library directly (see `tests/test_overlays_v0_3_determinism.py`).
 
 ## Configuration Parameters
 
-All parameters are defined in `scripts/path1/overlays_v0_3.py` and captured in `meta.json` under `overlays_v0_3.params`:
+All parameters are defined in `scripts/path1/overlays_v0_3.py`. Meta.json capture would require pack-builder integration, which is **not wired**.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -235,33 +193,9 @@ All parameters are defined in `scripts/path1/overlays_v0_3.py` and captured in `
 | `TOUCH_THRESHOLD` | 0.00005 | Tolerance for same-level touches |
 | `INTRABLOCK_ONLY` | true | Computation scope restricted to block boundaries |
 
-### Parameter Provenance
+### Parameter Provenance (HISTORICAL / NOT WIRED)
 
-All overlay parameters are captured in `meta.json` when overlays are enabled:
-
-```json
-{
-  "overlays_v0_3": {
-    "enabled": true,
-    "version": "0.3",
-    "modules": ["v0.3-A", "v0.3-B", "v0.3-C"],
-    "params": {
-      "price_precision": 5,
-      "wick_sweep_lookback": 3,
-      "raid_reclaim_threshold": 0.5,
-      "fvg_rule": "3_candle",
-      "fvg_min_size": 0.00001,
-      "displacement_median_window": 20,
-      "displacement_multiplier": 2.0,
-      "liquidity_bucket_size": 0.0001,
-      "liquidity_touch_threshold": 0.00005,
-      "intrablock_only": true
-    }
-  }
-}
-```
-
-Changing any parameter MUST change `data_sha256` (if overlays are included in data manifest).
+The example below reflects the **intended** meta.json capture if overlays were wired into the pack builder. This is **not currently generated**.
 
 ## Determinism Guarantees
 
@@ -274,18 +208,13 @@ Changing any parameter MUST change `data_sha256` (if overlays are included in da
 7. **Event identity**: v0.3-B events include deterministic SHA-1 `event_id` derived from canonical fields
 8. **Intrablock scope**: No cross-block lookbacks (all computation isolated within block boundaries)
 
-## Pack Rebuild Equivalence
+## Pack Rebuild Equivalence (LIBRARY-ONLY NOTE)
 
-Identical inputs MUST produce identical `data_sha256` values across rebuilds, whether overlays are enabled or disabled. The `pack_sha256` hash MAY vary when metadata timestamps change, but rebuild equivalence is judged by the data hash. An integration test (`tests/test_pack_rebuild_equivalence.py`) enforces this invariant. Rebuild equivalence is required for citation validity, because `data_sha256` is the canonical citation identifier.
+The rebuild-equivalence tests in `tests/test_pack_rebuild_equivalence.py` exercise the overlay library. They do **not** indicate pack-builder integration.
 
-## Manifest Integration
+## Manifest Integration (NOT WIRED)
 
-When overlays are enabled, overlay files are automatically included in:
-- `manifest.json` (build manifest)
-- `data_manifest.json` (if overlays are considered data - currently excluded)
-- `pack_sha256` computation
-
-This ensures overlay integrity is verified alongside core pack files.
+There is no pack-builder integration, so overlay files are **not** included in evidence pack manifests.
 
 ## Performance Impact
 
@@ -308,7 +237,7 @@ Potential enhancements (non-normative):
 
 **IMPORTANT**: v0.3 overlays are an observational analysis layer only. They are:
 - **Non-canonical**: Not part of the canonical v0.2 evidence pack specification
-- **Optional**: Can be enabled/disabled without affecting pack validity
+- **Optional**: Library-only (no pack-builder integration)
 - **Additive**: Stored separately under `overlays_v0_3/` subdirectory
 - **Read-only**: Never mutate canonical spine tables or M15 data
 - **Intrablock-only**: All computations isolated within block boundaries
@@ -318,7 +247,8 @@ Overlays provide supplemental liquidity and microstructure insights but do NOT m
 ---
 
 **Version**: v0.3 Overlays (2026-01)
-**Status**: Observational layer - does not affect canonical v0.2 pack
-**Compatibility**: Requires Evidence Pack v0.2 builder
+**Status**: Observational library - not wired into canonical v0.2 pack builds
+**Compatibility**: Library-only; no builder integration
 **Determinism**: All outputs bit-identical across runs with identical inputs
 **Test Suite**: `tests/test_overlays_v0_3_determinism.py` validates numeric stability and event ordering
+

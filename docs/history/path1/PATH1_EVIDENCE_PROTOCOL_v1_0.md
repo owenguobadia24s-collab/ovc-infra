@@ -1,5 +1,10 @@
 # Path 1 Evidence Protocol v1.0
 
+**STATUS: SUPERSEDED**  
+This protocol has been replaced by `PATH1_EXECUTION_MODEL.md`.  
+It is retained for historical and audit purposes only.  
+Canonical facts remain in `reports/path1/evidence/INDEX.md`.
+
 **Status:** FROZEN (mechanics)  
 **Scope:** End-to-end execution of Path 1 Evidence Runs (observational only)
 

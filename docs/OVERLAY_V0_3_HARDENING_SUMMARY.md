@@ -1,5 +1,7 @@
 # Evidence Pack v0.3 Overlays - Hardening Summary
 
+**Status Banner:** LIBRARY-ONLY — not wired into `scripts/path1/build_evidence_pack_v0_2.py`.
+
 ## Mission
 
 HARDEN the existing Evidence Pack v0.3 overlay system so that overlay outputs are fully deterministic, testable, and provenance-complete.
@@ -9,7 +11,7 @@ HARDEN the existing Evidence Pack v0.3 overlay system so that overlay outputs ar
 All 5 parts implemented and tested:
 
 1. ✅ Numeric determinism locked
-2. ✅ Parameter provenance captured in meta.json
+2. ✅ Parameter provenance captured in library metadata (pack-builder integration not wired)
 3. ✅ Stable event identity and ordering
 4. ✅ Semantic determinism test suite (all tests passing)
 5. ✅ Documentation synchronized
@@ -26,7 +28,7 @@ All 5 parts implemented and tested:
 - Updated all numeric operations to use `quantize()` and `safe_float()`
 - Changed JSON serialization to use `separators=(",", ":")`
 
-**Result**:
+**Result (intended meta.json shape if integrated; not produced by builder)**:
 - All price levels, ranges, and derived values emitted in deterministic form
 - No NaN/Infinity values can be emitted (raises ValueError)
 - Canonical JSON formatting with compact representation
@@ -36,12 +38,12 @@ All 5 parts implemented and tested:
 
 ### Part 2 — Explicit Overlay Parameter Capture
 
-**Objective**: Extend meta.json overlay metadata with parameter provenance.
+**Objective**: Extend overlay metadata with parameter provenance (library-only).
 
 **Implementation**:
 - Added `PRICE_PRECISION`, `FVG_RULE`, `INTRABLOCK_ONLY` constants
 - Extended `build_overlay_metadata()` to include `params` section
-- All overlay constants now documented in meta.json
+- All overlay constants now documented in overlay metadata (library-only)
 
 **Result**:
 ```json
@@ -136,7 +138,7 @@ All tests passed!
 - Added numeric precision to design principles
 - Added event identity and intrablock-only clarifications
 - Expanded determinism guarantees section
-- Added parameter provenance table and meta.json example
+- Added parameter provenance table and intended meta.json example (not wired)
 - Updated v0.3-B schema to include event_id
 - Added "Observational & Non-Canonical Status" section
 
@@ -149,10 +151,9 @@ All tests passed!
 
 ```bash
 python -m py_compile scripts/path1/overlays_v0_3.py
-python -m py_compile scripts/path1/build_evidence_pack_v0_2.py
 ```
 
-✅ Both files compile without errors
+✅ File compiles without errors
 
 ### Determinism Test Suite
 
@@ -162,22 +163,9 @@ python tests/test_overlays_v0_3_determinism.py
 
 ✅ All 5 tests pass
 
-### Manual Pack Build (requires DATABASE_URL)
+### Manual Pack Build (HISTORICAL / NOT WIRED)
 
-```bash
-python scripts/path1/build_evidence_pack_v0_2.py \
-  --run-id p1_hardened_$(date +%Y%m%d)_001 \
-  --sym GBPUSD \
-  --date-from 2022-12-12 \
-  --date-to 2022-12-14 \
-  --overlays-v0-3
-
-# Verify parameter provenance
-cat reports/path1/evidence/runs/p1_hardened_*/outputs/evidence_pack_v0_2/meta.json | jq '.overlays_v0_3.params'
-
-# Verify event_id in v0.3-B output
-head -3 reports/path1/evidence/runs/p1_hardened_*/outputs/evidence_pack_v0_2/overlays_v0_3/events/displacement_fvg.jsonl | jq '.event_id'
-```
+Builder integration steps are historical and **not supported** in the current codebase.
 
 ## Determinism Checklist
 
@@ -186,7 +174,7 @@ head -3 reports/path1/evidence/runs/p1_hardened_*/outputs/evidence_pack_v0_2/ove
 - [x] JSON serialization uses canonical format
 - [x] Event ordering stable across runs
 - [x] Event identity deterministic (SHA-1)
-- [x] Parameters captured in meta.json
+- [x] Parameter provenance captured in overlay metadata (library-only)
 - [x] Intrablock-only computation (no cross-block lookbacks)
 - [x] Test suite validates all guarantees
 - [x] Documentation synchronized
@@ -195,8 +183,8 @@ head -3 reports/path1/evidence/runs/p1_hardened_*/outputs/evidence_pack_v0_2/ove
 
 **None** when overlays are disabled.
 
-When overlays are enabled:
-- meta.json now includes `params` section (additive)
+When overlays are enabled (library-only context):
+- overlay metadata includes `params` section (no pack-builder output)
 - v0.3-B events now include `event_id` field (additive)
 - Numeric values quantized to 5 decimal places (may differ beyond 5th decimal)
 
