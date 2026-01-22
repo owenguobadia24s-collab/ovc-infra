@@ -1,0 +1,196 @@
+name: Path1 Replay Verification (Structural)
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_runs:
+        description: "Maximum runs to verify"
+        required: false
+        default: "50"
+        type: string
+      strict:
+        description: "Treat warnings as failures"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      report_json:
+        description: "Write JSON report to artifacts/"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  replay-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Path1 replay verification (structural)
+        id: replay
+        run: |
+          set -euo pipefail
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MAX_RUNS="${{ inputs.max_runs || '50' }}"
+            STRICT="${{ inputs.strict || 'false' }}"
+            REPORT_JSON="${{ inputs.report_json || 'true' }}"
+          else
+            MAX_RUNS="50"
+            STRICT="false"
+            REPORT_JSON="true"
+          fi
+          
+          CMD="python scripts/path1_replay/run_replay_verification.py --repo-root . --all --max-runs ${MAX_RUNS}"
+          if [ "${STRICT}" = "true" ]; then
+            CMD="${CMD} --strict"
+          fi
+          if [ "${REPORT_JSON}" = "true" ]; then
+            CMD="${CMD} --report-json artifacts/path1_replay_report.json"
+          fi
+          
+          echo "Executing: ${CMD}"
+          eval "${CMD}"
+
+      - name: Upload replay report
+        if: always() && hashFiles('artifacts/path1_replay_report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: path1-replay-report-${{ github.run_number }}
+          path: artifacts/path1_replay_report.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Path1 Replay Verification (Non-Canonical)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Mode | structural |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "| Max runs | ${{ inputs.max_runs || '50' }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Strict | ${{ inputs.strict || 'false' }} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Max runs | 50 |" >> $GITHUB_STEP_SUMMARY
+            echo "| Strict | false |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "| Exit codes | 0=OK, 2=verification failure, 3=runtime error |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "artifacts/path1_replay_report.json" ]; then
+            python3 - << 'PY' >> $GITHUB_STEP_SUMMARY
+          import json
+          from pathlib import Path
+          
+          report_path = Path("artifacts/path1_replay_report.json")
+          data = json.loads(report_path.read_text(encoding="utf-8"))
+          summary = data.get("summary", {})
+          checked = summary.get("checked", "N/A")
+          passed = summary.get("passed", "N/A")
+          failed = summary.get("failed", "N/A")
+          warnings = summary.get("warnings", "N/A")
+          
+          print(f"| Checked | {checked} |")
+          print(f"| Passed | {passed} |")
+          print(f"| Failed | {failed} |")
+          print(f"| Warnings | {warnings} |")
+          print("| Report artifact | `artifacts/path1_replay_report.json` |")
+          PY
+          else
+            echo "| Checked | N/A |" >> $GITHUB_STEP_SUMMARY
+            echo "| Passed | N/A |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failed | N/A |" >> $GITHUB_STEP_SUMMARY
+            echo "| Warnings | N/A |" >> $GITHUB_STEP_SUMMARY
+            echo "| Report artifact | No JSON report generated. |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "| Outcome | PASS |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Outcome | FAIL |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Failure Digest (Non-Canonical)" >> $GITHUB_STEP_SUMMARY
+          if [ -f "artifacts/path1_replay_report.json" ]; then
+            python3 - << 'PY' >> $GITHUB_STEP_SUMMARY
+          import json
+          from collections import Counter
+          from pathlib import Path
+          
+          report_path = Path("artifacts/path1_replay_report.json")
+          data = json.loads(report_path.read_text(encoding="utf-8"))
+          results = data.get("results", []) or []
+          
+          failed_runs = sorted([r.get("run_id") for r in results if not r.get("ok") and r.get("run_id")])
+          failed_total = len(failed_runs)
+          top_failed = failed_runs[:10]
+          if failed_total > 10:
+              failed_line = ", ".join(top_failed) + f" (+{failed_total - 10} more)"
+          else:
+              failed_line = ", ".join(top_failed)
+          
+          print("**Failed run IDs (up to 10)**")
+          print(f"{failed_line}" if failed_line else "None.")
+          print("")
+          
+          print("**Per-run top reasons (up to 5 runs)**")
+          by_id = {r.get("run_id"): r for r in results if r.get("run_id")}
+          per_run = []
+          for run_id in failed_runs:
+              r = by_id.get(run_id)
+              if r:
+                  failures = r.get("failures") or []
+                  warnings = r.get("warnings") or []
+                  reasons = failures if failures else warnings
+                  per_run.append((run_id, reasons[:3]))
+          if per_run:
+              for run_id, reasons in per_run[:5]:
+                  reason_text = ", ".join(reasons) if reasons else "unknown"
+                  print(f"- {run_id}: {reason_text}")
+          else:
+              print("No failed runs.")
+          print("")
+          
+          warnings_counter = Counter()
+          failures_counter = Counter()
+          for r in results:
+              for w in r.get("warnings") or []:
+                  warnings_counter[w] += 1
+              for f in r.get("failures") or []:
+                  failures_counter[f] += 1
+          
+          print("**Warning histogram (top 10)**")
+          if warnings_counter:
+              for key, count in sorted(warnings_counter.items(), key=lambda kv: (-kv[1], kv[0]))[:10]:
+                  print(f"- {key}: {count}")
+          else:
+              print("No warnings.")
+          print("")
+          
+          print("**Failure histogram (top 10)**")
+          if failures_counter:
+              for key, count in sorted(failures_counter.items(), key=lambda kv: (-kv[1], kv[0]))[:10]:
+                  print(f"- {key}: {count}")
+          else:
+              print("No failures.")
+          PY
+          else
+            echo "No JSON report generated; digest unavailable." >> $GITHUB_STEP_SUMMARY
+          fi
