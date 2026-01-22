@@ -50,56 +50,53 @@ jobs:
 
       - name: Run Path1 evidence queue (once)
         id: runner
-        continue-on-error: true
         run: |
           set -euo pipefail
           python scripts/path1/run_evidence_queue.py --once --max-runs 1
 
-      - name: Detect changes
-        id: diff
+      - name: Stage expected Path1 ledger outputs
+        id: stage
         if: always()
+        shell: bash
         run: |
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "changed=false" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          git config user.name "ovc-ledger-bot"
+          git config user.email "bot@ovc.local"
+
+          echo "=== STATUS BEFORE STAGE ==="
+          git status --porcelain || true
+
+          # Core Path1 evidence outputs
+          git add reports/path1/evidence/INDEX.md || true
+          git add reports/path1/evidence/runs/ || true
+          git add sql/path1/evidence/runs/ || true
+          git add artifacts/path1_summary.json || true
+
+          # Governance / ledgers that commonly change during evidence runs
+          git add ANCHOR_INDEX_v0_1.csv || true
+          git add README_ORG_NOTES.md || true
+          git add CLAIM_BINDING_v0_1.md || true
+
+          echo "=== CACHED DIFF (name-only) ==="
+          git diff --cached --name-only || true
+
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "NOOP: no staged changes (queue empty, or run produced no repo mutations)."
           else
-            echo "changed=true" >> $GITHUB_OUTPUT
-            git status --porcelain
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit ledger update
-        id: commit
-        if: always() && steps.diff.outputs.changed == 'true'
+        if: always() && steps.stage.outputs.changed == 'true'
+        shell: bash
         run: |
-          git config user.name "ovc-ledger-bot"
-          git config user.email "bot@ovc.local"
-          echo "=== STATUS BEFORE STAGE ==="
-          git status --porcelain
-          git add reports/path1/evidence/INDEX.md
-          if [ -d sql/path1/evidence/runs ]; then git add sql/path1/evidence/runs/; fi
-          if [ -d reports/path1/evidence/runs ]; then git add reports/path1/evidence/runs/; fi
-          if [ -f artifacts/path1_summary.json ]; then
-            git add artifacts/path1_summary.json
-          fi
-          echo "=== CACHED DIFF (name-only) ==="
-          git diff --cached --name-only || true
-          if git diff --cached --quiet; then
-            echo "No changes to commit (NOOP)"
-            echo "committed=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          git commit -m "path1: ledger update"
-          echo "committed=true" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          git commit -m "path1: ledger update (${GITHUB_RUN_ID})"
 
       - name: Push ledger
-        if: always() && steps.commit.outputs.committed == 'true'
+        if: always() && steps.stage.outputs.changed == 'true'
+        shell: bash
         run: |
+          set -euo pipefail
           git push
-
-      - name: Runner status (non-blocking)
-        if: always()
-        run: |
-          if [ "${{ steps.runner.outcome }}" != "success" ]; then
-            echo "WARNING: runner step failed but ledger steps were allowed to continue."
-            # exit 1
-          fi
-         
