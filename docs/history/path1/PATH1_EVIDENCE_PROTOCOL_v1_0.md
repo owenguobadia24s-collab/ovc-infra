@@ -29,6 +29,27 @@ This protocol freezes the *procedure*, not the conclusions.
 - Outputs are **observational only**
 - Runs are **append-only** (no retroactive edits)
 
+## Path 1 Contract Freeze (v1.0)
+
+Path 1 is **frozen at v1.0**. The contract is stable and must not change without an explicit
+version bump and compatibility note.
+
+Frozen components (v1.0):
+- `scripts/path1/run_evidence_queue.py` (mechanics + output semantics)
+- Run folder layout: `reports/path1/evidence/runs/<run_id>/`
+- Canonical ledger semantics: `reports/path1/evidence/INDEX.md` is append-only and authoritative
+
+Rule for changes:
+- Any change to the frozen components requires an explicit version bump (v1.0 -> v1.1/v2.0)
+  plus a compatibility note describing what changed and why.
+
+## Observability (Non-Canonical)
+
+- **No-op is success.** If no new evidence is generated, the run exits `0`, commits nothing,
+  and still emits a summary.
+- `$GITHUB_STEP_SUMMARY` is **non-canonical**. It is for human-readable context only.
+- The **canonical ledger** remains `INDEX.md + run folders` only.
+
 ## Deployment Chain (Strict Order)
 
 Follow `docs/path1/EVIDENCE_RUNS_HOWTO.md` exactly.

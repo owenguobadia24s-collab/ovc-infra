@@ -20,6 +20,7 @@ It does NOT "improve" anything.
 
 import argparse
 import csv
+import json
 import os
 import re
 import shutil
@@ -241,6 +242,33 @@ def truthy_env(value: Optional[str]) -> bool:
     if value is None:
         return False
     return value.strip().lower() in {"1", "true", "yes", "y"}
+
+
+def write_path1_summary(
+    repo_root: Path,
+    run_id: str,
+    date_from: str,
+    date_to: str,
+    rows_processed: int,
+    outcome: str,
+) -> Path:
+    summary_dir = repo_root / "artifacts"
+    summary_dir.mkdir(parents=True, exist_ok=True)
+    summary_path = summary_dir / "path1_summary.json"
+    payload = {
+        "run_id": run_id,
+        "date_from": date_from,
+        "date_to": date_to,
+        "rows_processed": rows_processed,
+        "outcome": outcome,
+    }
+    summary_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    print(f"PATH1_SUMMARY_JSON: {summary_path}")
+    return summary_path
 
 
 def parse_run_md_metadata(run_md_path: Path) -> Dict[str, Optional[str]]:
@@ -836,10 +864,10 @@ def execute_single_run(
     dry_run: bool = False,
     build_pack_v0_2: bool = False,
     force_overwrite: bool = False,
-) -> Tuple[bool, str, str, str]:
+) -> Tuple[bool, bool, str, str, str, int]:
     """
     Execute a single evidence run.
-    Returns (success, message, date_start_actual, date_end_actual).
+    Returns (success, did_execute, message, date_start_actual, date_end_actual, rows_processed).
     """
     print(f"\n{'='*60}")
     print(f"EXECUTING RUN: {run_id}")
@@ -870,13 +898,14 @@ def execute_single_run(
             else:
                 print("DRY RUN: Would quarantine non-directory run folder.")
             if dry_run:
-                return True, "DRY RUN: non-directory run folder handled", date_start, date_end
+                return True, False, "DRY RUN: non-directory run folder handled", date_start, date_end, 0
         else:
             is_complete, missing = check_run_completeness(report_dir, build_pack_v0_2)
             if is_complete:
                 metadata = parse_run_md_metadata(report_dir / "RUN.md")
                 date_start_actual = metadata["date_start_actual"] or date_start
                 date_end_actual = metadata["date_end_actual"] or date_end
+                n_obs = int(metadata["n_obs"]) if metadata["n_obs"] else 0
                 if not dry_run:
                     if metadata["symbol"] and metadata["n_obs"] and date_start_actual and date_end_actual:
                         date_range_str = f"{date_start_actual} to {date_end_actual}"
@@ -895,7 +924,7 @@ def execute_single_run(
                         print("WARNING: Unable to parse RUN.md metadata for INDEX update.")
                 existing_ranges.append((date_start_actual, date_end_actual))
                 print(f"SKIP: folder already complete for {run_id}")
-                return True, "SKIP: folder already complete", date_start_actual, date_end_actual
+                return True, False, "SKIP: folder already complete", date_start_actual, date_end_actual, n_obs
             if not force_overwrite and not dry_run:
                 quarantine_dir = quarantine_run_folder(report_dir, missing)
                 print(f"QUARANTINE: Existing run moved to {quarantine_dir}")
@@ -904,7 +933,7 @@ def execute_single_run(
             else:
                 print("DRY RUN: Would quarantine incomplete run folder.")
             if dry_run:
-                return True, "DRY RUN: incomplete run folder handled", date_start, date_end
+                return True, False, "DRY RUN: incomplete run folder handled", date_start, date_end, 0
 
     # Check data availability
     row_count = check_data_availability(db_url, symbol, date_start, date_end)
@@ -921,7 +950,7 @@ def execute_single_run(
             db_url, symbol, date_start, date_end, existing_ranges
         )
         if sub_start is None:
-            return False, "No substitute range found with data", date_start, date_end
+            return False, False, "No substitute range found with data", date_start, date_end, 0
         
         date_start_actual = sub_start
         date_end_actual = sub_end
@@ -936,7 +965,7 @@ def execute_single_run(
     
     if dry_run:
         print("[DRY RUN] Would execute studies and generate artifacts")
-        return True, f"DRY RUN: {row_count} rows", date_start_actual, date_end_actual
+        return True, False, f"DRY RUN: {row_count} rows", date_start_actual, date_end_actual, row_count
     
     sql_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1009,7 +1038,7 @@ def execute_single_run(
     # Add to existing ranges to avoid future overlap
     existing_ranges.append((date_start_actual, date_end_actual))
     
-    return True, f"Completed: {row_count} rows ({date_start_actual} to {date_end_actual})", date_start_actual, date_end_actual
+    return True, True, f"Completed: {row_count} rows ({date_start_actual} to {date_end_actual})", date_start_actual, date_end_actual, row_count
 
 
 def parse_existing_runs(index_path: Path) -> list:
@@ -1131,20 +1160,15 @@ def main():
         print("No runs to execute. This is not an error if the queue is intentionally empty.")
         print(f"Queue file: {queue_path}")
         print(f"Run ID filter: {args.run_id or '(none)'}")
-        
-        # Create NOOP marker for artifact visibility (Task D remediation)
-        noop_dir = repo_root / "reports" / "path1" / "evidence" / "runs"
-        noop_dir.mkdir(parents=True, exist_ok=True)
-        noop_marker = noop_dir / f"NOOP_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.txt"
-        noop_marker.write_text(
-            f"NOOP marker - queue was empty at {datetime.now(UTC).isoformat()}\n"
-            f"Queue file: {queue_path}\n"
-            f"Run ID filter: {args.run_id or '(none)'}\n",
-            encoding="utf-8",
-            newline="\n",
+        summary_run_id = args.run_id if args.run_id else "NONE"
+        write_path1_summary(
+            repo_root=repo_root,
+            run_id=summary_run_id,
+            date_from="N/A",
+            date_to="N/A",
+            rows_processed=0,
+            outcome="SKIPPED",
         )
-        print(f"Created NOOP marker: {noop_marker}")
-        
         sys.exit(0)
     
     print(f"Runs to execute: {len(runs_to_execute)}")
@@ -1164,35 +1188,61 @@ def main():
         date_start = run_spec['date_start']
         date_end = run_spec['date_end']
         
-        success, message, actual_start, actual_end = execute_single_run(
+        success, did_execute, message, actual_start, actual_end, rows_processed = execute_single_run(
             db_url, repo_root, run_id, symbol,
             date_start, date_end, existing_ranges,
             dry_run=args.dry_run,
             build_pack_v0_2=enable_pack_v0_2,
             force_overwrite=args.force_overwrite,
         )
-        results.append((run_id, success, message, date_start, date_end, actual_start, actual_end))
+        results.append((run_id, success, did_execute, message, date_start, date_end, actual_start, actual_end, rows_processed))
     
     # Summary
     print("\n" + "=" * 60)
     print("EXECUTION SUMMARY")
     print("=" * 60)
     
-    for run_id, success, message, _, _, _, _ in results:
+    for run_id, success, _, message, _, _, _, _, _ in results:
         status = "PASS" if success else "FAIL"
         print(f"{status} | {run_id} | {message}")
     
-    passed = sum(1 for _, s, _, _, _, _, _ in results if s)
+    passed = sum(1 for _, s, _, _, _, _, _, _, _ in results if s)
     failed = len(results) - passed
     print(f"\nTotal: {len(results)} | Passed: {passed} | Failed: {failed}")
+
+    executed = [r for r in results if r[2]]
+    if executed:
+        date_from = min(r[6] for r in executed)
+        date_to = max(r[7] for r in executed)
+        summary_run_id = executed[0][0] if len(executed) == 1 else "MULTIPLE"
+        rows_processed = sum(r[8] for r in executed)
+        outcome = "EXECUTED"
+    else:
+        summary_run_id = results[0][0] if len(results) == 1 else "MULTIPLE"
+        date_from = min(r[6] for r in results)
+        date_to = max(r[7] for r in results)
+        rows_processed = sum(r[8] for r in results)
+        outcome = "SKIPPED"
+
+    write_path1_summary(
+        repo_root=repo_root,
+        run_id=summary_run_id,
+        date_from=date_from,
+        date_to=date_to,
+        rows_processed=rows_processed,
+        outcome=outcome,
+    )
     
     # Update queue status for completed runs (unless dry run)
     # Include actual dates so CSV reflects what was actually executed
-    if not args.dry_run and passed > 0:
+    executed_successes = [
+        r for r in results
+        if r[1] and r[2]
+    ]
+    if not args.dry_run and executed_successes:
         completed_runs = {
             run_id: (actual_start, actual_end)
-            for run_id, success, _, req_start, req_end, actual_start, actual_end in results
-            if success
+            for run_id, success, did_execute, req_start, req_end, actual_start, actual_end, _ in executed_successes
         }
         update_queue_status(queue_path, completed_runs)
         print("")

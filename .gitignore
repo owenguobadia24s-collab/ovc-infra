@@ -243,6 +243,9 @@ reports/validation/*
 !reports/verification/
 !reports/verification/**/*
 
+# Path1 non-canonical observability (ephemeral; never committed)
+artifacts/path1_summary.json
+
 # pytest temp / cache
 .pytest_cache/
 .pytest-tmp/
