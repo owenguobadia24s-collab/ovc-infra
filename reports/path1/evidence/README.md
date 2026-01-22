@@ -1,5 +1,7 @@
 # Path 1 Evidence-Building Framework
 
+**Canonical Path 1 entrypoint:** see repo root `README.md` → “Path 1 (FROZEN) — Descriptive Score Research”.
+
 ## Overview
 
 This directory contains the scaffolding for repeatable evidence runs that compare
@@ -114,9 +116,6 @@ When comparing runs:
 reports/path1/evidence/
 ├── README.md                      # This file
 ├── EVIDENCE_RUN_TEMPLATE.md       # Template for new runs
-├── DIS_v1_1_evidence.md           # DIS score evidence report stub
-├── RES_v1_0_evidence.md           # RES score evidence report stub
-├── LID_v1_0_evidence.md           # LID score evidence report stub
 └── runs/                          # Archived completed runs
     └── <run_id>/                  # e.g., p1_20260120_001
         ├── RUN.md
@@ -140,7 +139,7 @@ sql/path1/evidence/
 ## Operational Guide
 
 For step-by-step execution instructions, see:  
-**[docs/path1/EVIDENCE_RUNS_HOWTO.md](../../../docs/path1/EVIDENCE_RUNS_HOWTO.md)**
+**[docs/history/path1/EVIDENCE_RUNS_HOWTO.md](../../../docs/history/path1/EVIDENCE_RUNS_HOWTO.md)**
 
 ---
 

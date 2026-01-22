@@ -43,6 +43,28 @@ git push origin ovc-v0.1-ingest-stable
   ```
 
 ## Operating Base
-- Start here: `docs/OPERATING_BASE.md`
-- Index: `docs/OPERATING_BASE.index.md`
-- Validation report: `docs/OPERATING_BASE.validation.md`
+- Start here: `docs/operations/OPERATING_BASE.md`
+- Index: `docs/operations/OPERATING_BASE.index.md`
+- Validation report: `docs/operations/OPERATING_BASE.validation.md`
+
+## Path 1 (FROZEN) — Descriptive Score Research
+
+**What Path 1 is:** frozen, descriptive-only score research over canonical OVC features and outcomes.  
+**What Path 1 is not:** signals, thresholds, optimization, or trading logic.
+
+- Freeze authority: `docs/history/path1/OPTION_B_PATH1_STATUS.md`
+- Run ID (authoritative): `p1_YYYYMMDD_SEQ` (example: `p1_20260120_031`)
+
+### How to run
+- Workflow: `.github/workflows/path1_evidence_queue.yml`
+- Runner: `scripts/path1/run_evidence_queue.py`
+- Queue: `reports/path1/evidence/RUN_QUEUE.csv`
+
+### Where outputs go
+- Canonical ledger: `reports/path1/evidence/INDEX.md`
+- Run folders: `reports/path1/evidence/runs/<run_id>/`
+
+### Supporting docs (subordinate)
+- Overview: `docs/history/path1/README.md`
+- Operational guide: `docs/history/path1/EVIDENCE_RUNS_HOWTO.md`
+- Evidence structure: `reports/path1/evidence/README.md`
