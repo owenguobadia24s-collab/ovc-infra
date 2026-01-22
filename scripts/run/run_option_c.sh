@@ -3,7 +3,16 @@ set -euo pipefail
 
 trap 'echo "Run failed." >&2; exit 2' ERR
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+# Anchor SQL paths to repo root so psql never depends on the caller's CWD.
+if [[ "$(basename "$script_dir")" == "run" ]]; then
+  repo_root="$(cd "$script_dir/../.." && pwd -P)"
+elif [[ "$(basename "$script_dir")" == "scripts" ]]; then
+  repo_root="$(cd "$script_dir/.." && pwd -P)"
+else
+  repo_root="$script_dir"
+fi
+sql_file="$repo_root/sql/option_c_v0_1.sql"
 cd "$repo_root"
 
 usage() {
@@ -70,6 +79,11 @@ if ! command -v psql >/dev/null 2>&1; then
   exit 127
 fi
 
+if [[ ! -f "$sql_file" ]]; then
+  echo "Missing SQL file: $sql_file" >&2
+  exit 2
+fi
+
 spotcheck_contains() {
   local pattern="$1"
   local file="$2"
@@ -98,12 +112,15 @@ if [[ "$spotchecks_only" != "true" ]]; then
     exit 2
   fi
   echo "Applying Option C SQL..."
+  pwd
+  echo "SQL_FILE=$sql_file"
+  ls -la "$sql_file" || true
   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
     -v run_id="$run_id" \
     -v eval_version="$eval_version" \
     -v formula_hash="$formula_hash" \
     -v horizon_spec="$horizon_spec" \
-    -f sql/option_c_v0_1.sql
+    -f "$sql_file"
 fi
 
 echo "Registering eval run..."
