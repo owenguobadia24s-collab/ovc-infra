@@ -80,3 +80,4 @@ Where generated outputs must go:
 ## Safety rule for organization passes
 
 Organization passes are **moves-only unless explicitly stated otherwise**: no deletions, no renames, and no content edits.
+Anchor C indexed in CLAIMS/ANCHOR_INDEX_v0_1.csv.

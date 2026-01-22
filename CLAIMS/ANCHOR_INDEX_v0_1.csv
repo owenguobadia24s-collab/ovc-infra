@@ -1,4 +1,4 @@
 anchor_id,domain,symbol,date_ny,run_ids,tool,tool_version,report_path
-ANCHOR-A-2026-01-22-LEDGER-LEDGER_TOOL,LEDGER,GBPUSD,2026-01-22,run001,LEDGER_TOOL,1.0.0,reports/path1/evidence/runs/p1_20260122_001/RUN.md
-ANCHOR-B-2026-01-22-LEDGER-LEDGER_TOOL,LEDGER,EURUSD,2026-01-22,run002,LEDGER_TOOL,1.0.0,reports/path1/evidence/runs/p1_20260122_002/RUN.md
-ANCHOR-C-2026-01-22-LEDGER-LEDGER_TOOL,LEDGER,USDJPY,2026-01-22,run003,LEDGER_TOOL,1.0.0,reports/path1/evidence/runs/p1_20260122_003/RUN.md
+ANCHOR-A-2026-01-16-optionc-optionc_v0.1,optionc,GBPUSD,2026-01-16,ANCHOR_GBPUSD_2026-01-16_optionc_v0.1_1|ANCHOR_GBPUSD_2026-01-16_optionc_v0.1_2|ANCHOR_GBPUSD_2026-01-16_optionc_v0.1_3,optionc_v0.1,v0.1,reports/verification/REPRO_REPORT_ANCHOR_GBPUSD_2026-01-16_optionc_v0.1_20260122.md
+ANCHOR-B-2026-01-17-path1-state_plane_v0_2,path1,GBPUSD,2026-01-17,p1_20260121_001,state_plane_v0_2,v0_2,reports/path1/evidence/runs/p1_20260121_001/RUN.md
+ANCHOR-C-2022-09-26-path1-state_plane_v0_2,path1,GBPUSD,2022-09-26,p1_20260122_003|p1_20260122_004,state_plane_v0_2,v0_2,reports/verification/REPRO_REPORT_ANCHOR_GBPUSD_2022-09-26_path1_state_plane_v0_2.md
