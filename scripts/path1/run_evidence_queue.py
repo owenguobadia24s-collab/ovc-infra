@@ -22,11 +22,12 @@ import argparse
 import csv
 import os
 import re
+import shutil
 import subprocess
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 
 # ============================================================================
@@ -77,6 +78,25 @@ INVARIANTS_TEXT = """
 > **Scores are descriptive and frozen.** They describe structural characteristics, not signals.  
 > **Summaries are non-interpretive.** They describe what occurred, not what will occur.
 """
+
+REQUIRED_RUN_FILES = [
+    "RUN.md",
+    "DIS_v1_1_evidence.md",
+    "RES_v1_0_evidence.md",
+    "LID_v1_0_evidence.md",
+]
+
+REQUIRED_OUTPUT_FILES = [
+    "outputs/study_dis_v1_1.txt",
+    "outputs/study_res_v1_0.txt",
+    "outputs/study_lid_v1_0.txt",
+]
+
+REQUIRED_PACK_FILES = [
+    "outputs/evidence_pack_v0_2/manifest.json",
+    "outputs/evidence_pack_v0_2/manifest_sha256.txt",
+    "outputs/evidence_pack_v0_2/pack_sha256.txt",
+]
 
 # ============================================================================
 # UTILITY FUNCTIONS
@@ -221,6 +241,71 @@ def truthy_env(value: Optional[str]) -> bool:
     if value is None:
         return False
     return value.strip().lower() in {"1", "true", "yes", "y"}
+
+
+def parse_run_md_metadata(run_md_path: Path) -> Dict[str, Optional[str]]:
+    metadata: Dict[str, Optional[str]] = {
+        "date_start_actual": None,
+        "date_end_actual": None,
+        "symbol": None,
+        "n_obs": None,
+    }
+    if not run_md_path.exists():
+        return metadata
+    content = run_md_path.read_text(encoding="utf-8")
+    date_match = re.search(
+        r"\| `date_range_actual` \| `(\d{4}-\d{2}-\d{2}) to (\d{4}-\d{2}-\d{2})` \|",
+        content,
+    )
+    if date_match:
+        metadata["date_start_actual"] = date_match.group(1)
+        metadata["date_end_actual"] = date_match.group(2)
+    symbol_match = re.search(r"\| `symbol\(s\)` \| `([^`]+)` \|", content)
+    if symbol_match:
+        metadata["symbol"] = symbol_match.group(1)
+    n_obs_match = re.search(r"\| `n_observations` \| `(\d+)` \|", content)
+    if n_obs_match:
+        metadata["n_obs"] = n_obs_match.group(1)
+    return metadata
+
+
+def check_run_completeness(report_dir: Path, require_pack: bool) -> Tuple[bool, List[str]]:
+    missing: List[str] = []
+    for rel_path in REQUIRED_RUN_FILES + REQUIRED_OUTPUT_FILES:
+        path = report_dir / rel_path
+        if not path.exists() or not path.is_file() or path.stat().st_size == 0:
+            missing.append(rel_path)
+    if require_pack:
+        for rel_path in REQUIRED_PACK_FILES:
+            path = report_dir / rel_path
+            if not path.exists() or not path.is_file() or path.stat().st_size == 0:
+                missing.append(rel_path)
+    return (len(missing) == 0, missing)
+
+
+def quarantine_run_folder(report_dir: Path, missing: List[str]) -> Path:
+    quarantine_root = report_dir.parent / "_quarantine"
+    quarantine_root.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+    quarantine_dir = quarantine_root / f"{report_dir.name}__{timestamp}__INCOMPLETE"
+    if report_dir.is_dir():
+        shutil.move(str(report_dir), str(quarantine_dir))
+    else:
+        quarantine_dir.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(report_dir), str(quarantine_dir / report_dir.name))
+    note_path = quarantine_dir / "QUARANTINE_NOTE.md"
+    missing_lines = "\n".join(f"- {item}" for item in missing) if missing else "- Unknown"
+    note_path.write_text(
+        "# Quarantine Note\n\n"
+        "This run folder was moved because it was incomplete at execution time.\n\n"
+        f"Original path: `{report_dir}`\n"
+        f"Quarantined at: `{datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ')}`\n\n"
+        "Missing or empty artifacts:\n"
+        f"{missing_lines}\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return quarantine_dir
 
 
 def build_evidence_pack_v0_2(
@@ -768,6 +853,59 @@ def execute_single_run(
     if not validate_date_format(date_end, 'date_end'):
         return False, f"Invalid date_end format: {date_end}", date_start, date_end
     
+    # Create directories
+    sql_dir = repo_root / "sql" / "path1" / "evidence" / "runs" / run_id
+    report_dir = repo_root / "reports" / "path1" / "evidence" / "runs" / run_id
+    output_dir = report_dir / "outputs"
+    
+    # Check if run artifacts already exist (possible re-run)
+    if report_dir.exists():
+        if not report_dir.is_dir():
+            missing = ["run_folder_not_a_directory"]
+            if not force_overwrite and not dry_run:
+                quarantine_dir = quarantine_run_folder(report_dir, missing)
+                print(f"QUARANTINE: Existing run moved to {quarantine_dir}")
+            elif force_overwrite:
+                print("FORCE-OVERWRITE: I know what I'm doing. Existing run will be overwritten.")
+            else:
+                print("DRY RUN: Would quarantine non-directory run folder.")
+            if dry_run:
+                return True, "DRY RUN: non-directory run folder handled", date_start, date_end
+        else:
+            is_complete, missing = check_run_completeness(report_dir, build_pack_v0_2)
+            if is_complete:
+                metadata = parse_run_md_metadata(report_dir / "RUN.md")
+                date_start_actual = metadata["date_start_actual"] or date_start
+                date_end_actual = metadata["date_end_actual"] or date_end
+                if not dry_run:
+                    if metadata["symbol"] and metadata["n_obs"] and date_start_actual and date_end_actual:
+                        date_range_str = f"{date_start_actual} to {date_end_actual}"
+                        index_path = repo_root / "reports" / "path1" / "evidence" / "INDEX.md"
+                        if index_path.exists():
+                            update_index_md(
+                                index_path,
+                                run_id,
+                                date_range_str,
+                                metadata["symbol"],
+                                int(metadata["n_obs"]),
+                            )
+                        else:
+                            print(f"WARNING: INDEX.md missing, cannot update: {index_path}")
+                    else:
+                        print("WARNING: Unable to parse RUN.md metadata for INDEX update.")
+                existing_ranges.append((date_start_actual, date_end_actual))
+                print(f"SKIP: folder already complete for {run_id}")
+                return True, "SKIP: folder already complete", date_start_actual, date_end_actual
+            if not force_overwrite and not dry_run:
+                quarantine_dir = quarantine_run_folder(report_dir, missing)
+                print(f"QUARANTINE: Existing run moved to {quarantine_dir}")
+            elif force_overwrite:
+                print("FORCE-OVERWRITE: I know what I'm doing. Existing run will be overwritten.")
+            else:
+                print("DRY RUN: Would quarantine incomplete run folder.")
+            if dry_run:
+                return True, "DRY RUN: incomplete run folder handled", date_start, date_end
+
     # Check data availability
     row_count = check_data_availability(db_url, symbol, date_start, date_end)
     print(f"Rows in requested range: {row_count}")
@@ -783,7 +921,7 @@ def execute_single_run(
             db_url, symbol, date_start, date_end, existing_ranges
         )
         if sub_start is None:
-            return False, f"No substitute range found with data", date_start, date_end
+            return False, "No substitute range found with data", date_start, date_end
         
         date_start_actual = sub_start
         date_end_actual = sub_end
@@ -799,23 +937,6 @@ def execute_single_run(
     if dry_run:
         print("[DRY RUN] Would execute studies and generate artifacts")
         return True, f"DRY RUN: {row_count} rows", date_start_actual, date_end_actual
-    
-    # Create directories
-    sql_dir = repo_root / "sql" / "path1" / "evidence" / "runs" / run_id
-    report_dir = repo_root / "reports" / "path1" / "evidence" / "runs" / run_id
-    output_dir = report_dir / "outputs"
-    
-    # Check if run artifacts already exist (possible re-run)
-    if report_dir.exists() and not force_overwrite:
-        print("ERROR: Run folder already exists.")
-        print("Ledger is append-only.")
-        print("Use --force-overwrite to explicitly override.")
-        raise SystemExit(1)
-    if report_dir.exists() and force_overwrite:
-        print("=" * 60)
-        print(f"WARNING: Run folder already exists: {report_dir}")
-        print("         --force-overwrite supplied; files will be overwritten.")
-        print("=" * 60)
     
     sql_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1058,7 +1179,7 @@ def main():
     print("=" * 60)
     
     for run_id, success, message, _, _, _, _ in results:
-        status = "✅ PASS" if success else "❌ FAIL"
+        status = "PASS" if success else "FAIL"
         print(f"{status} | {run_id} | {message}")
     
     passed = sum(1 for _, s, _, _, _, _, _ in results if s)
