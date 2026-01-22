@@ -59,10 +59,11 @@ jobs:
         id: diff
         if: always()
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain)" ]; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
+            git status --porcelain
           fi
 
       - name: Commit ledger update
@@ -71,12 +72,16 @@ jobs:
         run: |
           git config user.name "ovc-ledger-bot"
           git config user.email "bot@ovc.local"
+          echo "=== STATUS BEFORE STAGE ==="
+          git status --porcelain
           git add reports/path1/evidence/INDEX.md
           if [ -d sql/path1/evidence/runs ]; then git add sql/path1/evidence/runs/; fi
           if [ -d reports/path1/evidence/runs ]; then git add reports/path1/evidence/runs/; fi
           if [ -f artifacts/path1_summary.json ]; then
             git add artifacts/path1_summary.json
           fi
+          echo "=== CACHED DIFF (name-only) ==="
+          git diff --cached --name-only || true
           if git diff --cached --quiet; then
             echo "No changes to commit (NOOP)"
             echo "committed=false" >> $GITHUB_OUTPUT
