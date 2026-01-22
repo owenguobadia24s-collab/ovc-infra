@@ -63,6 +63,7 @@ coverage.xml
 *.py.cover
 .hypothesis/
 .pytest_cache/
+.pytest-tmp/
 cover/
 
 # Translations
@@ -241,3 +242,9 @@ reports/validation/*
 # Exception: canonical verification evidence (tracked)
 !reports/verification/
 !reports/verification/**/*
+
+# pytest temp / cache
+.pytest_cache/
+.pytest-tmp/
+.pytest-tmp2/
+

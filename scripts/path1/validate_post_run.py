@@ -305,6 +305,132 @@ def validate_evidence_reports(repo_root: Path, run_id: str, result: ValidationRe
             )
 
 
+def validate_evidence_pack_v0_2(repo_root: Path, run_id: str, result: ValidationResult):
+    """Optional: validate Evidence Pack v0.2 structure if present."""
+    pack_dir = (
+        repo_root
+        / 'reports'
+        / 'path1'
+        / 'evidence'
+        / 'runs'
+        / run_id
+        / 'outputs'
+        / 'evidence_pack_v0_2'
+    )
+    if not pack_dir.exists():
+        return
+    if not pack_dir.is_dir():
+        result.add_violation('structure', str(pack_dir), 'Expected directory but found file')
+        return
+
+    required_dirs = [
+        pack_dir / 'strips' / '2h',
+        pack_dir / 'context' / '4h',
+    ]
+    for d in required_dirs:
+        if not d.exists():
+            result.add_violation('structure', str(d), f'Required directory missing: {d.name}')
+        elif not d.is_dir():
+            result.add_violation('structure', str(d), f'Expected directory but found file: {d.name}')
+
+    required_files = [
+        pack_dir / 'backbone_2h.csv',
+        pack_dir / 'meta.json',
+        pack_dir / 'qc_report.json',
+    ]
+    for f in required_files:
+        if not f.exists():
+            result.add_violation('structure', str(f), f'Required file missing: {f.name}')
+        elif not f.is_file():
+            result.add_violation('structure', str(f), f'Expected file but found directory: {f.name}')
+        else:
+            if f.stat().st_size == 0:
+                result.add_violation('content', str(f), f'File is empty: {f.name}')
+            result.files_checked += 1
+
+    # Optional: validate dst_audit.json if present (NON-FATAL)
+    validate_dst_audit_json(pack_dir, result)
+
+
+# Required top-level keys for dst_audit.json
+DST_AUDIT_REQUIRED_KEYS = {
+    'dates_tested',
+    'blocks_checked',
+    'strip_count_failures',
+    'continuity_failures',
+    'aggregation_failures',
+    'session_boundary_failures',
+    'worst_aggregation_deviation',
+    'anomalies',
+}
+
+
+def validate_dst_audit_json(pack_dir: Path, result: ValidationResult):
+    """
+    Validate dst_audit.json if present (NON-FATAL by default).
+
+    This validation checks:
+    - File is valid JSON
+    - Contains required top-level keys
+    - Does NOT fail the overall validation if issues are found (just warns)
+
+    The pack is optional and should not break the pipeline by default.
+    """
+    dst_audit_path = pack_dir / 'dst_audit.json'
+
+    if not dst_audit_path.exists():
+        # DST audit is optional - not an error if missing
+        return
+
+    if not dst_audit_path.is_file():
+        print(f"WARN: dst_audit.json exists but is not a file: {dst_audit_path}")
+        return
+
+    result.files_checked += 1
+
+    try:
+        content = dst_audit_path.read_text(encoding='utf-8')
+    except Exception as e:
+        print(f"WARN: Cannot read dst_audit.json: {e}")
+        return
+
+    # Check file is not empty
+    if dst_audit_path.stat().st_size == 0:
+        print(f"WARN: dst_audit.json is empty: {dst_audit_path}")
+        return
+
+    # Validate JSON structure
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError as e:
+        print(f"WARN: dst_audit.json is not valid JSON: {e}")
+        return
+
+    if not isinstance(data, dict):
+        print(f"WARN: dst_audit.json root must be an object, got: {type(data).__name__}")
+        return
+
+    # Check required keys
+    missing_keys = DST_AUDIT_REQUIRED_KEYS - set(data.keys())
+    if missing_keys:
+        print(f"WARN: dst_audit.json missing required keys: {sorted(missing_keys)}")
+        return
+
+    # Validate specific fields have expected types
+    if not isinstance(data.get('dates_tested'), list):
+        print("WARN: dst_audit.json 'dates_tested' should be a list")
+    if not isinstance(data.get('anomalies'), list):
+        print("WARN: dst_audit.json 'anomalies' should be a list")
+    if not isinstance(data.get('blocks_checked'), int):
+        print("WARN: dst_audit.json 'blocks_checked' should be an integer")
+
+    # If we got here, dst_audit.json is structurally valid
+    # Print summary info (non-fatal reporting)
+    anomaly_count = len(data.get('anomalies', []))
+    if anomaly_count > 0:
+        print(f"INFO: dst_audit.json reports {anomaly_count} anomalies (review recommended)")
+
+
 def validate_consistency(repo_root: Path, run_id: str, metadata: dict, result: ValidationResult, strict: bool):
     """Step 4: Cross-file consistency checks."""
     
@@ -512,6 +638,7 @@ def main():
     validate_output_content(repo_root, run_id, result)
     metadata = validate_run_md(repo_root, run_id, result)
     validate_evidence_reports(repo_root, run_id, result)
+    validate_evidence_pack_v0_2(repo_root, run_id, result)
     
     # Step 4: Consistency
     validate_consistency(repo_root, run_id, metadata, result, args.strict)
