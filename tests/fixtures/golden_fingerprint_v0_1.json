@@ -1,0 +1,151 @@
+{
+  "block_labels": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L"
+  ],
+  "content_hash": "5773a3e92bbe600e2234ba774aba91b5b9dc2961c7a9b76ccc7d391a4c038333",
+  "date_ny": "2022-12-12",
+  "fingerprint_id": "fp_GBPUSD_20221212_ff295ee7",
+  "generated_at": "2026-01-22T00:00:00Z",
+  "params": {
+    "E_hi": 0.6,
+    "S_hi": 0.35,
+    "numeric_precision": 6,
+    "state_plane_version": "v0.2",
+    "threshold_pack": "state_plane_v0_2_default_v1",
+    "y_jump_threshold": 0.25
+  },
+  "path_geometry": {
+    "efficiency": 0.083932,
+    "energy_mean": 0.573333,
+    "energy_std": 0.102415,
+    "jump_count": 3,
+    "net_displacement": 0.250799,
+    "path_length": 2.98813,
+    "shift_mean": -0.004167,
+    "shift_std": 0.309878,
+    "turning": 9.54875
+  },
+  "points": [
+    {
+      "block": "A",
+      "x": 0.42,
+      "y": -0.1
+    },
+    {
+      "block": "B",
+      "x": 0.55,
+      "y": -0.2
+    },
+    {
+      "block": "C",
+      "x": 0.62,
+      "y": -0.15
+    },
+    {
+      "block": "D",
+      "x": 0.7,
+      "y": 0.1
+    },
+    {
+      "block": "E",
+      "x": 0.75,
+      "y": 0.45
+    },
+    {
+      "block": "F",
+      "x": 0.52,
+      "y": 0.5
+    },
+    {
+      "block": "G",
+      "x": 0.48,
+      "y": 0.3
+    },
+    {
+      "block": "H",
+      "x": 0.58,
+      "y": -0.4
+    },
+    {
+      "block": "I",
+      "x": 0.66,
+      "y": -0.55
+    },
+    {
+      "block": "J",
+      "x": 0.63,
+      "y": -0.2
+    },
+    {
+      "block": "K",
+      "x": 0.57,
+      "y": 0.05
+    },
+    {
+      "block": "L",
+      "x": 0.4,
+      "y": 0.15
+    }
+  ],
+  "quadrant_dynamics": {
+    "q_counts": {
+      "Q1": 3,
+      "Q2": 5,
+      "Q3": 2,
+      "Q4": 2
+    },
+    "q_entropy": 1.887919,
+    "q_runs_max": 2,
+    "q_transitions": {
+      "Q1_Q1": 1,
+      "Q1_Q2": 1,
+      "Q1_Q3": 1,
+      "Q1_Q4": 0,
+      "Q2_Q1": 1,
+      "Q2_Q2": 2,
+      "Q2_Q3": 0,
+      "Q2_Q4": 1,
+      "Q3_Q1": 1,
+      "Q3_Q2": 0,
+      "Q3_Q3": 0,
+      "Q3_Q4": 1,
+      "Q4_Q1": 0,
+      "Q4_Q2": 1,
+      "Q4_Q3": 1,
+      "Q4_Q4": 0
+    }
+  },
+  "quadrant_string": "Q2 Q2 Q1 Q1 Q3 Q4 Q2 Q4 Q3 Q1 Q2 Q2",
+  "quadrants": [
+    "Q2",
+    "Q2",
+    "Q1",
+    "Q1",
+    "Q3",
+    "Q4",
+    "Q2",
+    "Q4",
+    "Q3",
+    "Q1",
+    "Q2",
+    "Q2"
+  ],
+  "schema_version": "day_fingerprint_v0.1",
+  "source_artifacts": {
+    "trajectory_csv": "tests/fixtures/sample_trajectory.csv",
+    "trajectory_png": "tests/fixtures/sample_trajectory.png"
+  },
+  "symbol": "GBPUSD",
+  "timezone": "America/New_York"
+}

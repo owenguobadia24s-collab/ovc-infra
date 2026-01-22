@@ -24,6 +24,7 @@
 
   // --- Terminal consistency ---
   "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.cwd": "C:\\Users\\Owner\\projects\\ovc-infra",
   "python.testing.pytestArgs": [
     "."
   ]

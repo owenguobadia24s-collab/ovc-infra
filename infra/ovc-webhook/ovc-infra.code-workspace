@@ -17,7 +17,7 @@
     "terminal.integrated.focusAfterRun": "none",
 
     // --- Default terminal working directory (relative to this .code-workspace file) ---
-    "terminal.integrated.cwd": "ovc-infra",
+    "terminal.integrated.cwd": "C:\\Users\\Owner\\projects\\ovc-infra",
 
     // --- Terminal tool approvals (keep OFF unless you *really* mean it) ---
    "chat.tools.terminal.autoApprove": {
