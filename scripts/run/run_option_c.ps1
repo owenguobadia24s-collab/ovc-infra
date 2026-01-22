@@ -6,7 +6,18 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+# Anchor SQL paths to repo root so psql never depends on the caller's CWD.
+$scriptLeaf = Split-Path -Leaf $scriptDir
+# Anchor SQL paths to repo root so psql never depends on the caller's CWD.
+if ($scriptLeaf -eq "run") {
+  $repoRoot = (Resolve-Path (Join-Path $scriptDir "..\\..")).Path
+} elseif ($scriptLeaf -eq "scripts") {
+  $repoRoot = (Resolve-Path (Join-Path $scriptDir "..")).Path
+} else {
+  $repoRoot = $scriptDir
+}
+$sqlFile = Join-Path $repoRoot "sql/option_c_v0_1.sql"
 Push-Location $repoRoot
 try {
   if (-not $env:DATABASE_URL) {
@@ -20,6 +31,9 @@ try {
   if (-not $psql) {
     Write-Error "psql not found in PATH"
     exit 127
+  }
+  if (-not (Test-Path $sqlFile)) {
+    throw "Missing: $sqlFile"
   }
 
   if (-not $RunId) {
@@ -52,13 +66,17 @@ try {
       exit 2
     }
     Write-Host "Applying Option C SQL..."
+    Write-Host "CWD=$(Get-Location)"
+    Write-Host "SqlFile=$sqlFile"
+    Write-Host "SqlFileExists=$(Test-Path $sqlFile)"
+    Get-Item $sqlFile -ErrorAction SilentlyContinue | Format-List
     & $psql.Path -d $env:DATABASE_URL `
       --set=ON_ERROR_STOP=1 `
       --set=run_id=$RunId `
       --set=eval_version=$EvalVersion `
       --set=formula_hash=$FormulaHash `
       --set=horizon_spec=$HorizonSpec `
-      -f sql/option_c_v0_1.sql
+      -f $sqlFile
     if ($LASTEXITCODE -ne 0) {
       exit 2
     }
