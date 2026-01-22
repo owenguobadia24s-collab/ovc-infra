@@ -1,0 +1,152 @@
+{
+  "block_labels": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L"
+  ],
+  "content_hash": "9df9ce81a28255d4bd42fb6f061f297656de24618ced2f87f79397342dfb8d1a",
+  "date_ny": "2022-09-26",
+  "fingerprint_id": "fp_GBPUSD_20220926_893a3890",
+  "generated_at": "2026-01-22T18:43:37Z",
+  "params": {
+    "E_hi": 0.6,
+    "S_hi": 0.35,
+    "numeric_precision": 6,
+    "state_plane_version": "v0.2",
+    "threshold_pack": "state_plane_v0_2_default_v1",
+    "y_jump_threshold": 0.25
+  },
+  "path_geometry": {
+    "efficiency": 0.067242,
+    "energy_mean": 0.409114,
+    "energy_std": 0.25834,
+    "jump_count": 8,
+    "net_displacement": 0.764641,
+    "path_length": 11.371508,
+    "shift_mean": 0.229167,
+    "shift_std": 0.649185,
+    "turning": 21.511799
+  },
+  "points": [
+    {
+      "block": "A",
+      "x": 0.213276,
+      "y": 0.75
+    },
+    {
+      "block": "B",
+      "x": 0.699412,
+      "y": -0.75
+    },
+    {
+      "block": "C",
+      "x": 0.145995,
+      "y": -0.25
+    },
+    {
+      "block": "D",
+      "x": 0.102612,
+      "y": 0.75
+    },
+    {
+      "block": "E",
+      "x": 0.381154,
+      "y": 0.75
+    },
+    {
+      "block": "F",
+      "x": 0.555866,
+      "y": -0.75
+    },
+    {
+      "block": "G",
+      "x": 0.266652,
+      "y": 0.75
+    },
+    {
+      "block": "H",
+      "x": 0.562155,
+      "y": -0.75
+    },
+    {
+      "block": "I",
+      "x": 0.307709,
+      "y": 0.75
+    },
+    {
+      "block": "J",
+      "x": 0.861269,
+      "y": 0.75
+    },
+    {
+      "block": "K",
+      "x": 0.748903,
+      "y": 0.75
+    },
+    {
+      "block": "L",
+      "x": 0.064362,
+      "y": 0.0
+    }
+  ],
+  "quadrant_dynamics": {
+    "q_counts": {
+      "Q1": 0,
+      "Q2": 2,
+      "Q3": 3,
+      "Q4": 7
+    },
+    "q_entropy": 1.384432,
+    "q_runs_max": 6,
+    "q_transitions": {
+      "Q1_Q1": 0,
+      "Q1_Q2": 0,
+      "Q1_Q3": 0,
+      "Q1_Q4": 0,
+      "Q2_Q1": 0,
+      "Q2_Q2": 0,
+      "Q2_Q3": 0,
+      "Q2_Q4": 1,
+      "Q3_Q1": 0,
+      "Q3_Q2": 2,
+      "Q3_Q3": 1,
+      "Q3_Q4": 0,
+      "Q4_Q1": 0,
+      "Q4_Q2": 0,
+      "Q4_Q3": 2,
+      "Q4_Q4": 5
+    }
+  },
+  "quadrant_string": "Q4 Q3 Q2 Q4 Q4 Q4 Q4 Q4 Q4 Q3 Q3 Q2",
+  "quadrants": [
+    "Q4",
+    "Q3",
+    "Q2",
+    "Q4",
+    "Q4",
+    "Q4",
+    "Q4",
+    "Q4",
+    "Q4",
+    "Q3",
+    "Q3",
+    "Q2"
+  ],
+  "schema_version": "day_fingerprint_v0.1",
+  "source_artifacts": {
+    "path_metrics_json": "reports/path1/evidence/runs/p1_20260122_004/outputs/state_plane_v0_2/path_metrics.json",
+    "trajectory_csv": "reports/path1/evidence/runs/p1_20260122_004/outputs/state_plane_v0_2/trajectory.csv",
+    "trajectory_png": "reports/path1/evidence/runs/p1_20260122_004/outputs/state_plane_v0_2/trajectory.png"
+  },
+  "symbol": "GBPUSD",
+  "timezone": "America/New_York"
+}
