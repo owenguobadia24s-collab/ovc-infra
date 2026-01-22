@@ -1,0 +1,129 @@
+name: Path1 — Evidence (one run)
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_runs:
+        description: "How many queue items to process"
+        required: false
+        default: "1"
+  schedule:
+    # 02:10 UTC daily (tune as you like)
+    - cron: "10 2 * * *"
+
+concurrency:
+  group: path1-evidence-runner
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  run-one:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONUTF8: "1"
+      # Required: DB URL used by your scripts (name it to match your code)
+      OVC_DB_URL: ${{ secrets.OVC_DB_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system deps (psql)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "ovc-bot"
+          git config user.email "ovc-bot@users.noreply.github.com"
+
+      - name: Run evidence queue (once)
+        id: run
+        run: |
+          set -euo pipefail
+          python scripts/path1/run_evidence_queue.py --once --max-runs "${{ inputs.max_runs || '1' }}"
+
+          # Extract last run id from INDEX.md (same regex you used in PowerShell)
+          RUN_ID="$(grep -oE 'p1_[0-9]{8}_[0-9]{3}' reports/path1/evidence/INDEX.md | tail -n 1 || true)"
+          if [ -z "${RUN_ID}" ]; then
+            echo "RUN_ID could not be detected from INDEX.md"
+            exit 1
+          fi
+
+          echo "run_id=${RUN_ID}" >> "$GITHUB_OUTPUT"
+          echo "Detected run_id=${RUN_ID}"
+
+      - name: Validate post-run structure
+        run: |
+          set -euo pipefail
+          python scripts/path1/validate_post_run.py --run-id "${{ steps.run.outputs.run_id }}"
+
+      - name: Stage ledger deltas only
+        id: stage
+        run: |
+          set -euo pipefail
+          RUN_ID="${{ steps.run.outputs.run_id }}"
+
+          # Stage canonical ledger files + the specific run folders
+          git add \
+            reports/path1/evidence/RUN_QUEUE.csv \
+            reports/path1/evidence/INDEX.md \
+            "reports/path1/evidence/runs/${RUN_ID}" \
+            "sql/path1/evidence/runs/${RUN_ID}"
+
+          # If nothing changed (e.g., the run was skipped as already-complete), do nothing.
+          if git diff --cached --quiet; then
+            echo "noop=true" >> "$GITHUB_OUTPUT"
+            echo "No staged changes (likely SKIP: already complete)."
+          else
+            echo "noop=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create branch + commit
+        if: steps.stage.outputs.noop != 'true'
+        id: commit
+        run: |
+          set -euo pipefail
+          RUN_ID="${{ steps.run.outputs.run_id }}"
+          BRANCH="path1/evidence/${RUN_ID}"
+
+          git checkout -b "${BRANCH}"
+          git commit -m "Path1: evidence run ${RUN_ID}"
+          git push -u origin "${BRANCH}"
+
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+
+      - name: Open PR (and optionally enable auto-merge)
+        if: steps.stage.outputs.noop != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RUN_ID="${{ steps.run.outputs.run_id }}"
+          BRANCH="${{ steps.commit.outputs.branch }}"
+
+          # Create PR (idempotent-ish: if rerun, gh will error; acceptable)
+          gh pr create \
+            --title "Path1: evidence run ${RUN_ID}" \
+            --body "Automated Path1 evidence ledger write for ${RUN_ID}." \
+            --base main \
+            --head "${BRANCH}"
+
+          # Uncomment if you want auto-merge (requires repo settings allowing it)
+          # gh pr merge "${BRANCH}" --merge --auto
