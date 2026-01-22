@@ -248,3 +248,8 @@ reports/validation/*
 .pytest-tmp/
 .pytest-tmp2/
 
+
+# VS Code workspace settings (track only this)
+.vscode/
+!.vscode/settings.json
+
