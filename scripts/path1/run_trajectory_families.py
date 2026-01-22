@@ -470,12 +470,117 @@ def main() -> int:
         "--parallel", type=int, default=1, help="Number of parallel workers (default: 1)"
     )
 
+    # cluster command
+    cluster_parser = subparsers.add_parser(
+        "cluster",
+        help="Cluster fingerprints into trajectory families (v0.1) and emit canonical outputs",
+    )
+    cluster_parser.add_argument(
+        "--index", required=True, help="Path to fingerprints/index.csv"
+    )
+    cluster_parser.add_argument(
+        "--fingerprints-dir", required=True, help="Directory containing fingerprint JSONs"
+    )
+    cluster_parser.add_argument(
+        "--out-dir", required=True, help="Output directory for family artifacts"
+    )
+
+    # generate-gallery command
+    gallery_parser = subparsers.add_parser(
+        "generate-gallery",
+        help="Generate gallery by copying trajectory plots per canonical mapping",
+    )
+    gallery_parser.add_argument(
+        "--index", required=True, help="Path to fingerprints/index.csv"
+    )
+    gallery_parser.add_argument(
+        "--fingerprints-dir", required=True, help="Directory containing fingerprint JSONs"
+    )
+    gallery_parser.add_argument(
+        "--assignments", required=True, help="Path to assignments.csv from clustering"
+    )
+    gallery_parser.add_argument(
+        "--out-dir", required=True, help="Output directory for gallery"
+    )
+
     args = parser.parse_args()
 
     if args.command == "emit-fingerprint":
         return cmd_emit_fingerprint(args)
     elif args.command == "batch-fingerprints":
         return cmd_batch_fingerprints(args)
+    elif args.command == "cluster":
+        # --- CLUSTERING PIPELINE ---
+        from trajectory_families.features import load_fingerprints, extract_feature_matrix, zscore_standardize, get_feature_keys
+        from trajectory_families.distance import pairwise_dtw
+        from trajectory_families.clustering import select_k, compute_silhouette
+        from trajectory_families.naming import stable_family_ids, assign_family_ids
+        import csv, json, time
+        from pathlib import Path
+        import numpy as np
+
+        index = Path(args.index)
+        fingerprints_dir = Path(args.fingerprints_dir)
+        out_dir = Path(args.out_dir)
+        fingerprints = load_fingerprints(index, fingerprints_dir)
+        feature_keys = get_feature_keys(fingerprints)
+        X = extract_feature_matrix(fingerprints, feature_keys)
+        Xz = zscore_standardize(X)
+        D = pairwise_dtw(Xz)
+        k, labels, medoids = select_k(D, Xz, seed=42)
+        sil_samples = compute_silhouette(D, labels)
+        id_map = stable_family_ids(labels, medoids, fingerprints)
+        assignments = assign_family_ids(labels, id_map, sil_samples)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = int(time.time())
+        # families_summary.json
+        summary = {
+            'k': k,
+            'family_ids': id_map,
+            'medoids': [int(m) for m in medoids],
+            'assignments': assignments,
+            'feature_keys': feature_keys,
+            'timestamp': timestamp
+        }
+        with open(out_dir / 'families_summary.json', 'w') as f:
+            json.dump(summary, f, indent=2)
+        # families_table.csv
+        with open(out_dir / 'families_table.csv', 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['TF_ID', 'symbol', 'date_ny', 'is_medoid'])
+            for i, (fp, fam) in enumerate(zip(fingerprints, assignments)):
+                is_medoid = 'Y' if i in medoids else ''
+                writer.writerow([fam, fp['symbol'], fp['date_ny'], is_medoid])
+        # assignments.csv
+        with open(out_dir / 'assignments.csv', 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['symbol', 'date_ny', 'TF_ID'])
+            for fp, fam in zip(fingerprints, assignments):
+                writer.writerow([fp['symbol'], fp['date_ny'], fam])
+        # cluster_run_{timestamp}.json
+        with open(out_dir / f'cluster_run_{timestamp}.json', 'w') as f:
+            json.dump({'labels': labels.tolist(), 'medoids': medoids.tolist(), 'silhouette': sil_samples.tolist()}, f, indent=2)
+        print(f"Clustering complete. Outputs written to {out_dir}")
+        return 0
+    elif args.command == "generate-gallery":
+        from trajectory_families.features import load_fingerprints
+        from trajectory_families.gallery import copy_gallery, copy_medoids
+        import csv
+        from pathlib import Path
+        index = Path(args.index)
+        fingerprints_dir = Path(args.fingerprints_dir)
+        out_dir = Path(args.out_dir)
+        assignments_path = Path(args.assignments)
+        fingerprints = load_fingerprints(index, fingerprints_dir)
+        # Load assignments
+        assignments = []
+        with open(assignments_path, newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                assignments.append(row['TF_ID'])
+        fam_dirs = copy_gallery(fingerprints, assignments, out_dir)
+        print(f"Gallery generated in {out_dir / 'by_family'}")
+        return 0
     else:
         parser.print_help()
         return 1
