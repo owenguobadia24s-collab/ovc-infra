@@ -1,4 +1,6 @@
-# Path 1 — Descriptive Score Research
+# Path 1 — Descriptive Score Research (Historical Overview)
+
+**Canonical Path 1 entrypoint:** see repo root `README.md` → “Path 1 (FROZEN) — Descriptive Score Research”.
 
 ---
 
@@ -49,10 +51,10 @@ Frozen scores:
 
 ---
 
-## Directory Structure
+## Directory Structure (Historical Reference)
 
 ```
-docs/path1/
+docs/history/path1/
 ├── README.md                    # This file
 ├── OPTION_B_PATH1_STATUS.md     # Freeze status
 ├── SCORE_INVENTORY_v1.md        # Score manifest

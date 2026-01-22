@@ -270,9 +270,9 @@ Examples:
 
 | Document | Location |
 |----------|----------|
-| Run Conventions | [docs/path1/RUN_CONVENTIONS.md](RUN_CONVENTIONS.md) |
+| Run Conventions | [docs/history/path1/RUN_CONVENTIONS.md](RUN_CONVENTIONS.md) |
 | Evidence Framework README | [reports/path1/evidence/README.md](../../reports/path1/evidence/README.md) |
-| Path 1 Status | [docs/path1/OPTION_B_PATH1_STATUS.md](OPTION_B_PATH1_STATUS.md) |
+| Path 1 Status | [docs/history/path1/OPTION_B_PATH1_STATUS.md](OPTION_B_PATH1_STATUS.md) |
 | Run Template | [reports/path1/evidence/EVIDENCE_RUN_TEMPLATE.md](../../reports/path1/evidence/EVIDENCE_RUN_TEMPLATE.md) |
 
 ---
@@ -290,7 +290,7 @@ Examples:
 
 ### 11.1 Overview
 
-The `path1_evidence_queue.yml` workflow enables on-demand execution of Path 1 Evidence runs from a queued CSV file. It replicates the exact behavior of manual Runs 001-003.
+The `.github/workflows/path1_evidence_queue.yml` workflow enables on-demand execution of Path 1 Evidence runs from a queued CSV file. It replicates the exact behavior of manual Runs 001-003.
 
 **Key Features:**
 - On-demand execution via `workflow_dispatch`
