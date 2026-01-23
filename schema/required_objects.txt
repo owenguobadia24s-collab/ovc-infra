@@ -1,0 +1,34 @@
+# Required Database Objects for OVC Pipeline v1
+#
+# This file lists all database objects that MUST exist for the pipeline
+# to function correctly. CI checks verify these objects exist.
+#
+# Format: TYPE SCHEMA.NAME
+# Types: TABLE, VIEW
+
+# === CANONICAL TABLES (Option A) ===
+TABLE ovc.ovc_blocks_v01_1_min
+TABLE ovc.ovc_candles_m15_raw
+
+# === CONFIGURATION TABLES ===
+TABLE ovc_cfg.threshold_pack
+TABLE ovc_cfg.threshold_pack_active
+
+# === DERIVED FEATURE VIEWS (Option B) ===
+VIEW derived.v_ovc_c1_features_v0_1
+VIEW derived.v_ovc_c2_features_v0_1
+VIEW derived.v_ovc_c3_features_v0_1
+
+# === OUTCOMES VIEW (Option C - Authoritative) ===
+VIEW derived.v_ovc_c_outcomes_v0_1
+
+# === EVIDENCE VIEWS (Option D) ===
+VIEW derived.v_path1_evidence_dis_v1_1
+
+# === METADATA TABLES ===
+TABLE derived.eval_runs
+TABLE derived.derived_runs
+
+# === DEPRECATED (exist but not relied upon) ===
+# VIEW derived.ovc_block_features_v0_1  # Legacy, do not use
+# VIEW derived.ovc_outcomes_v0_1        # Deprecated, use v_ovc_c_outcomes_v0_1

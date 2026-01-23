@@ -1,0 +1,105 @@
+{
+  "_comment": "Migration ledger tracking applied SQL patches. Update this file when applying migrations.",
+  "_version": "1.0",
+  "_created": "2026-01-23",
+  "migrations": [
+    {
+      "file": "sql/00_schema.sql",
+      "description": "Create base schemas (ovc, derived, ovc_cfg)",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/01_tables_min.sql",
+      "description": "Create canonical facts table ovc.ovc_blocks_v01_1_min",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/02_tables_run_reports.sql",
+      "description": "Create run reports table ovc.ovc_run_reports_v01",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/02_derived_c1_c2_tables_v0_1.sql",
+      "description": "Create derived feature tables for C1/C2",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/03_tables_outcomes.sql",
+      "description": "Create outcomes tables",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/04_threshold_registry_v0_1.sql",
+      "description": "Create threshold registry tables",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/derived_v0_1.sql",
+      "description": "Create legacy derived view (DEPRECATED)",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/derived/v_ovc_c1_features_v0_1.sql",
+      "description": "Create C1 features view",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/derived/v_ovc_c2_features_v0_1.sql",
+      "description": "Create C2 features view",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/derived/v_ovc_c3_features_v0_1.sql",
+      "description": "Create C3 features view",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/derived/v_ovc_c_outcomes_v0_1.sql",
+      "description": "Create authoritative Option C outcomes view",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/option_c_v0_1.sql",
+      "description": "Create Option C runner views (DEPRECATED outcomes)",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/path1/evidence/v_path1_evidence_dis_v1_1.sql",
+      "description": "Create Path1 evidence view for DIS score",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/path1/db_patches/patch_m15_raw_20260122.sql",
+      "description": "Create M15 raw candles table",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    }
+  ]
+}

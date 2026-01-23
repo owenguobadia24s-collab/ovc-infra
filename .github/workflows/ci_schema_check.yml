@@ -1,0 +1,95 @@
+name: "CI: Schema Object Verification"
+
+on:
+  pull_request:
+    paths:
+      - "sql/**"
+      - "schema/**"
+      - ".github/workflows/ci_schema_check.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "sql/**"
+      - "schema/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-schema-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  schema-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEON_DSN: ${{ secrets.NEON_DSN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install psycopg2-binary
+
+      - name: Verify required schema objects exist
+        run: |
+          python scripts/ci/verify_schema_objects.py
+
+      - name: Verify migration ledger exists
+        run: |
+          set -euo pipefail
+          echo "=== Checking migration ledger ==="
+
+          if [ ! -f "schema/applied_migrations.json" ]; then
+            echo "WARNING: schema/applied_migrations.json not found"
+            echo "DEGRADED GATE: Migration ledger missing. Schema state unverified."
+            # Not failing for now - this is a new requirement
+            exit 0
+          fi
+
+          echo "Migration ledger found."
+
+          # Validate JSON syntax
+          python3 -c "import json; json.load(open('schema/applied_migrations.json'))" || {
+            echo "ERROR: Invalid JSON in schema/applied_migrations.json"
+            exit 1
+          }
+
+          echo "Migration ledger JSON valid."
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## CI Schema Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "Schema verification passed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Schema verification failed. See job logs for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Objects Verified" >> $GITHUB_STEP_SUMMARY
+          echo "- ovc.ovc_blocks_v01_1_min" >> $GITHUB_STEP_SUMMARY
+          echo "- ovc.ovc_candles_m15_raw" >> $GITHUB_STEP_SUMMARY
+          echo "- ovc_cfg.threshold_pack" >> $GITHUB_STEP_SUMMARY
+          echo "- ovc_cfg.threshold_pack_active" >> $GITHUB_STEP_SUMMARY
+          echo "- derived.v_ovc_c1_features_v0_1" >> $GITHUB_STEP_SUMMARY
+          echo "- derived.v_ovc_c2_features_v0_1" >> $GITHUB_STEP_SUMMARY
+          echo "- derived.v_ovc_c3_features_v0_1" >> $GITHUB_STEP_SUMMARY
+          echo "- derived.v_ovc_c_outcomes_v0_1" >> $GITHUB_STEP_SUMMARY
+          echo "- derived.v_path1_evidence_dis_v1_1" >> $GITHUB_STEP_SUMMARY

@@ -130,6 +130,13 @@ jobs:
             --symbol GBPUSD \
             2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c2.log
 
+      - name: Step 4.5 - Compute C3 Features (Option B.1)
+        run: |
+          echo "=== COMPUTE C3: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
+          python src/derived/compute_c3_regime_trend_v0_1.py \
+            --symbol GBPUSD \
+            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c3.log
+
       - name: Step 5 - Validate Derived Features (Option B.2)
         run: |
           echo "=== VALIDATE DERIVED: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
@@ -166,7 +173,7 @@ jobs:
             "triggered_by": "${{ github.actor }}",
             "triggered_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "workflow": "backfill_then_validate",
-            "steps": ["backfill", "validate_facts", "compute_c1", "compute_c2", "validate_derived"]
+            "steps": ["backfill", "validate_facts", "compute_c1", "compute_c2", "compute_c3", "validate_derived"]
           }
           EOF
 
@@ -205,6 +212,7 @@ jobs:
           echo "2. ✅ Validate Facts (B-layer vs Tape)" >> $GITHUB_STEP_SUMMARY
           echo "3. ✅ Compute C1 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
           echo "4. ✅ Compute C2 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
+          echo "4.5. ✅ Compute C3 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
           echo "5. ✅ Validate Derived (Option B.2)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Artifacts uploaded to: \`ovc-run-${{ steps.run_id.outputs.run_id }}\`" >> $GITHUB_STEP_SUMMARY
