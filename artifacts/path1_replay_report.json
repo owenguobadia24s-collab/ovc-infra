@@ -1,0 +1,31 @@
+{
+  "mode": "structural",
+  "repo_root": "C:\\Users\\Owner\\projects\\ovc-infra",
+  "results": [
+    {
+      "failures": [],
+      "index_ref": true,
+      "ok": true,
+      "parsed": {
+        "date_from": "2024-01-08",
+        "date_to": "2024-01-12",
+        "n_obs": 48,
+        "symbol": "GBPUSD"
+      },
+      "run_id": "p1_20260120_001",
+      "warnings": [
+        "date_range_actual_from_range_start_end"
+      ]
+    }
+  ],
+  "run_ids_checked": [
+    "p1_20260120_001"
+  ],
+  "summary": {
+    "checked": 1,
+    "failed": 0,
+    "passed": 1,
+    "warnings": 1
+  },
+  "tool_version": "path1_replay_v0_1"
+}

@@ -1,0 +1,179 @@
+name: Path 1 Evidence Range Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: 'Symbol to analyze'
+        required: false
+        default: 'GBPUSD'
+        type: string
+      start_date:
+        description: 'Start date (YYYY-MM-DD). Optional if using end_date + length_days'
+        required: false
+        default: ''
+        type: string
+      end_date:
+        description: 'End date (YYYY-MM-DD). Required for length_days mode'
+        required: false
+        default: ''
+        type: string
+      length_days:
+        description: 'Length in days (inclusive). Used with end_date if start_date omitted'
+        required: false
+        default: '5'
+        type: string
+      commit_results:
+        description: 'Commit results to main'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+  schedule:
+    - cron: '15 3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: path1-evidence
+  cancel-in-progress: false
+
+jobs:
+  run-evidence-range:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEON_DSN: ${{ secrets.NEON_DSN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql --version
+
+      - name: Validate required secrets
+        run: |
+          python3 - << 'PY'
+          import os, sys
+          db_url = os.environ.get("DATABASE_URL") or os.environ.get("NEON_DSN")
+          if not db_url:
+              print("ERROR: DATABASE_URL or NEON_DSN secret not configured")
+              sys.exit(1)
+          print("Database secret: configured ✓")
+          PY
+
+      - name: Resolve run parameters
+        id: params
+        run: |
+          set -euo pipefail
+          SYMBOL_INPUT="${{ inputs.symbol }}"
+          START_INPUT="${{ inputs.start_date }}"
+          END_INPUT="${{ inputs.end_date }}"
+          LENGTH_INPUT="${{ inputs.length_days }}"
+
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            SYMBOL="GBPUSD"
+            END_DATE=$(date -u -d "yesterday" +%Y-%m-%d)
+            LENGTH_DAYS=5
+            START_DATE=""
+          else
+            SYMBOL="${SYMBOL_INPUT:-GBPUSD}"
+            END_DATE="${END_INPUT}"
+            START_DATE="${START_INPUT}"
+            LENGTH_DAYS="${LENGTH_INPUT:-5}"
+          fi
+
+          echo "symbol=${SYMBOL}" >> "$GITHUB_OUTPUT"
+          echo "start_date=${START_DATE}" >> "$GITHUB_OUTPUT"
+          echo "end_date=${END_DATE}" >> "$GITHUB_OUTPUT"
+          echo "length_days=${LENGTH_DAYS}" >> "$GITHUB_OUTPUT"
+
+          echo "Symbol: ${SYMBOL}"
+          echo "Start date: ${START_DATE:-<none>}"
+          echo "End date: ${END_DATE:-<none>}"
+          echo "Length days: ${LENGTH_DAYS}"
+
+      - name: Execute evidence range runner
+        id: runner
+        run: |
+          set -euo pipefail
+          CMD=(python scripts/path1/run_evidence_range.py --symbol "${{ steps.params.outputs.symbol }}")
+          if [ -n "${{ steps.params.outputs.start_date }}" ]; then
+            CMD+=(--start-date "${{ steps.params.outputs.start_date }}")
+            CMD+=(--end-date "${{ steps.params.outputs.end_date }}")
+          else
+            CMD+=(--end-date "${{ steps.params.outputs.end_date }}")
+            CMD+=(--length-days "${{ steps.params.outputs.length_days }}")
+          fi
+
+          echo "Executing: ${CMD[*]}"
+          "${CMD[@]}" | tee /tmp/runner_output.txt
+
+          RUN_ID=$(grep -E '^RUN_ID=' /tmp/runner_output.txt | tail -1 | cut -d= -f2)
+          if [ -z "$RUN_ID" ]; then
+            echo "ERROR: Could not extract RUN_ID from runner output"
+            exit 1
+          fi
+          echo "run_id=${RUN_ID}" >> "$GITHUB_OUTPUT"
+          echo "Run ID: ${RUN_ID}"
+
+      - name: List generated artifacts
+        run: |
+          set -euo pipefail
+          RUN_ID="${{ steps.runner.outputs.run_id }}"
+          echo "Run folder: reports/path1/evidence/runs/${RUN_ID}"
+          echo "SQL folder: sql/path1/evidence/runs/${RUN_ID}"
+          echo "Contents (reports):"
+          find "reports/path1/evidence/runs/${RUN_ID}" -type f -maxdepth 3
+          echo "Contents (sql):"
+          find "sql/path1/evidence/runs/${RUN_ID}" -type f -maxdepth 2
+
+      - name: Configure Git
+        if: inputs.commit_results == 'true' || github.event_name == 'schedule'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Stage and commit results
+        if: inputs.commit_results == 'true' || github.event_name == 'schedule'
+        run: |
+          set -euo pipefail
+          RUN_ID="${{ steps.runner.outputs.run_id }}"
+
+          git add "reports/path1/evidence/INDEX.md"
+          git add "reports/path1/evidence/runs/${RUN_ID}" 
+          git add "sql/path1/evidence/runs/${RUN_ID}"
+
+          echo "=== Git status (staged + unstaged) ==="
+          git status --short
+
+          if git diff --cached --quiet; then
+            echo "ERROR: No staged changes; failing to avoid false green"
+            exit 1
+          fi
+
+          git commit -m "path1 evidence: ${RUN_ID}"
+          git push origin HEAD:main
+
+      - name: Verify staged diff (commit disabled)
+        if: inputs.commit_results != 'true' && github.event_name != 'schedule'
+        run: |
+          set -euo pipefail
+          echo "Commit disabled; showing git status only."
+          git status --short
