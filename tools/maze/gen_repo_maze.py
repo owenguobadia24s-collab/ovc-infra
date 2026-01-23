@@ -26,7 +26,7 @@ The option nodes auto-link to directories/files by heuristic rules (no hallucina
 - If nothing matches, the option node stays sparse (truth > vibes).
 
 Usage:
-  python tools/maze/gen_repo_maze.py --repo . --out ../Testudo/OVC_REPO_MAZE --include-files
+  python tools/maze/gen_repo_maze.py --repo . --out ..Testsu/OVC_REPO_MAZE --include-files
 """
 
 from __future__ import annotations
