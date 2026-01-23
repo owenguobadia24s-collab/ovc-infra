@@ -1,0 +1,170 @@
+name: "CI: Workflow Sanity Checks"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "scripts/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-sanity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sanity-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Validate workflow YAML syntax
+        run: |
+          set -euo pipefail
+          echo "=== Validating workflow YAML files ==="
+
+          ERRORS=0
+          for file in .github/workflows/*.yml .github/workflows/*.yaml; do
+            [ -e "$file" ] || continue
+            echo "Checking: $file"
+            if ! python3 -c "import yaml; yaml.safe_load(open('$file'))" 2>&1; then
+              echo "ERROR: Invalid YAML in $file"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            echo "FAILED: $ERRORS workflow(s) have invalid YAML"
+            exit 1
+          fi
+          echo "All workflow YAML files are valid."
+
+      - name: Check permissions block exists
+        run: |
+          set -euo pipefail
+          echo "=== Checking for permissions blocks ==="
+
+          MISSING=0
+          for file in .github/workflows/*.yml .github/workflows/*.yaml; do
+            [ -e "$file" ] || continue
+            if ! grep -q "^permissions:" "$file"; then
+              echo "WARNING: Missing 'permissions:' block in $file"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+
+          if [ $MISSING -gt 0 ]; then
+            echo "FAILED: $MISSING workflow(s) missing permissions block"
+            exit 1
+          fi
+          echo "All workflows have permissions blocks."
+
+      - name: Validate referenced scripts exist
+        run: |
+          set -euo pipefail
+          echo "=== Checking referenced scripts ==="
+
+          python3 - << 'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          errors = []
+          workflow_dir = Path(".github/workflows")
+
+          # Patterns to find script references
+          patterns = [
+              r'python\s+([^\s|&;]+\.py)',
+              r'bash\s+([^\s|&;]+\.sh)',
+              r'python3\s+([^\s|&;]+\.py)',
+          ]
+
+          for wf_file in workflow_dir.glob("*.yml"):
+              content = wf_file.read_text(encoding="utf-8")
+              for pattern in patterns:
+                  for match in re.finditer(pattern, content):
+                      script_path = match.group(1)
+                      # Skip inline python scripts (<<)
+                      if script_path.startswith("-"):
+                          continue
+                      # Skip variable references
+                      if "${{" in script_path or "${" in script_path:
+                          continue
+                      # Check if file exists
+                      if not Path(script_path).exists():
+                          errors.append(f"{wf_file.name}: references non-existent script '{script_path}'")
+
+          if errors:
+              print("FAILED: Script reference errors found:")
+              for err in errors:
+                  print(f"  - {err}")
+              sys.exit(1)
+
+          print("All referenced scripts exist.")
+          PY
+
+      - name: Check for duplicate workflow names
+        run: |
+          set -euo pipefail
+          echo "=== Checking for duplicate workflow names ==="
+
+          python3 - << 'PY'
+          import yaml
+          import sys
+          from pathlib import Path
+          from collections import Counter
+
+          names = []
+          workflow_dir = Path(".github/workflows")
+
+          for wf_file in workflow_dir.glob("*.yml"):
+              try:
+                  data = yaml.safe_load(wf_file.read_text(encoding="utf-8"))
+                  if data and "name" in data:
+                      names.append((data["name"], wf_file.name))
+              except Exception as e:
+                  print(f"WARNING: Could not parse {wf_file.name}: {e}")
+
+          name_counts = Counter(name for name, _ in names)
+          duplicates = [(name, count) for name, count in name_counts.items() if count > 1]
+
+          if duplicates:
+              print("FAILED: Duplicate workflow names found:")
+              for name, count in duplicates:
+                  files = [f for n, f in names if n == name]
+                  print(f"  - '{name}' appears in: {', '.join(files)}")
+              sys.exit(1)
+
+          print("No duplicate workflow names.")
+          PY
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Workflow Sanity Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "All checks passed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Some checks failed. See job logs for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Checks Performed" >> $GITHUB_STEP_SUMMARY
+          echo "- YAML syntax validation" >> $GITHUB_STEP_SUMMARY
+          echo "- permissions block presence" >> $GITHUB_STEP_SUMMARY
+          echo "- Referenced script existence" >> $GITHUB_STEP_SUMMARY
+          echo "- Duplicate workflow name detection" >> $GITHUB_STEP_SUMMARY
