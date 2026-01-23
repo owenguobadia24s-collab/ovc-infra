@@ -1,0 +1,138 @@
+name: "CI: Pytest Suite"
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "sql/**"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/ci_pytest.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "sql/**"
+      - "tests/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-pytest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Use test database or mock if available
+      DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+      NEON_DSN: ${{ secrets.NEON_DSN_TEST }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run pytest suite
+        run: |
+          set -euo pipefail
+          echo "=== Running pytest suite ==="
+
+          # Run all contract and validation tests
+          pytest tests/ \
+            --verbose \
+            --tb=short \
+            -x \
+            --ignore=tests/__pycache__ \
+            2>&1 | tee pytest_output.log
+
+          echo "=== Pytest completed ==="
+
+      - name: Verify required test files exist
+        run: |
+          set -euo pipefail
+          echo "=== Checking required test files ==="
+
+          REQUIRED_TESTS=(
+            "tests/test_min_contract_validation.py"
+            "tests/test_contract_equivalence.py"
+            "tests/test_validate_derived.py"
+            "tests/test_threshold_registry.py"
+            "tests/test_path1_replay_structural.py"
+          )
+
+          MISSING=0
+          for test_file in "${REQUIRED_TESTS[@]}"; do
+            if [ ! -f "$test_file" ]; then
+              echo "ERROR: Required test file missing: $test_file"
+              MISSING=$((MISSING + 1))
+            else
+              echo "OK: $test_file"
+            fi
+          done
+
+          if [ $MISSING -gt 0 ]; then
+            echo "FAILED: $MISSING required test file(s) missing"
+            exit 1
+          fi
+
+          echo "All required test files present."
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: |
+            pytest_output.log
+            .coverage
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## CI Pytest Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "All tests passed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Some tests failed. See job logs for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tests Executed" >> $GITHUB_STEP_SUMMARY
+          echo "- test_min_contract_validation.py" >> $GITHUB_STEP_SUMMARY
+          echo "- test_contract_equivalence.py" >> $GITHUB_STEP_SUMMARY
+          echo "- test_validate_derived.py" >> $GITHUB_STEP_SUMMARY
+          echo "- test_threshold_registry.py" >> $GITHUB_STEP_SUMMARY
+          echo "- test_path1_replay_structural.py" >> $GITHUB_STEP_SUMMARY
+          echo "- test_fingerprint.py" >> $GITHUB_STEP_SUMMARY
+          echo "- test_fingerprint_determinism.py" >> $GITHUB_STEP_SUMMARY
+          echo "- (and other tests in tests/ directory)" >> $GITHUB_STEP_SUMMARY

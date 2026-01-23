@@ -79,7 +79,7 @@ jobs:
             args+=(--spotchecks-only)
           fi
           set +e
-          bash scripts/run_option_c.sh "${args[@]}"
+          bash scripts/run/run_option_c.sh "${args[@]}"
           exit_code=$?
           set -e
           if [[ $exit_code -eq 0 ]]; then
