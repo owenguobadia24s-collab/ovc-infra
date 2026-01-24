@@ -1,32 +1,31 @@
 #!/usr/bin/env python3
 """
-OVC Repo Maze Generator (Obsidian) — v2 (adds Option A/B/C/D special nodes)
+OVC Repo Maze Generator (CURATED) — Obsidian-friendly, low-node-count, semantic graph
 
-What it does:
-- Walks a repo folder
-- Generates an Obsidian “maze” folder with:
-  - one Markdown node per directory
-  - optional nodes for selected files (workflows/sql/docs/scripts)
-  - backlinks between nodes:
-      * parent <-> child directory links
-      * directory <-> file links
-      * inferred references from file contents (lightweight)
-- Generates:
-  - 00_REPO_MAZE.md (index)
-  - OVC_REPO_MAZE.canvas (Obsidian Canvas)
-  - OPTION nodes:
-      - OPT_A__CANONICAL_INGEST.md
-      - OPT_B__DERIVED_LAYERS.md
-      - OPT_C__OUTCOMES_EVAL.md
-      - OPT_D__PATHS_QA_BRIDGE.md
+Fixes the “1k empty notes” failure mode by generating ~10–30 *curated* notes total:
+- 00_REPO_MAZE.md (index)
+- OPT_A/B/C/D notes (Option spine)
+- ROOM__WORKFLOWS / DOCS / SQL / REPORTS / ARTIFACTS (system rooms)
+- Optional extra rooms only if they actually exist (TOOLS, SCRIPTS, SRC)
 
-The option nodes auto-link to directories/files by heuristic rules (no hallucinations):
-- If relevant directories exist, they get linked.
-- If relevant workflow files exist, they get linked.
-- If nothing matches, the option node stays sparse (truth > vibes).
+It DOES NOT:
+- create a note per directory
+- create a note per file
+
+It DOES:
+- scan the repo
+- pick “anchors” (real existing repo paths) and place them under Options + Rooms
+- generate a single Obsidian Canvas showing the spine + core rooms
 
 Usage:
-  python tools/maze/gen_repo_maze.py --repo . --out ..Testsu/OVC_REPO_MAZE --include-files
+  python tools/maze/gen_repo_maze_curated.py --repo . --out "C:\\Users\\Owner\\projects\\ovc-infra\\Tetsu\\OVC_REPO_MAZE" --wipe
+
+Recommended:
+  --wipe  (deletes the previous junk output folder contents safely)
+
+Constraints enforced:
+- note count <= 40
+- each note > 200 bytes
 """
 
 from __future__ import annotations
@@ -35,16 +34,17 @@ import argparse
 import json
 import os
 import re
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 
 # ----------------------------
-# Config / heuristics
+# Scanning limits / filtering
 # ----------------------------
 
-DEFAULT_IGNORE_DIRS = {
+IGNORE_DIRS = {
     ".git",
     "node_modules",
     ".venv",
@@ -60,565 +60,357 @@ DEFAULT_IGNORE_DIRS = {
     ".cache",
 }
 
-# We want workflows even if we ignore other .github contents
-FORCE_INCLUDE_DIRS = {
+# we only want to show these as “rooms” by default (plus extras if present)
+CORE_ROOM_DIRS = [
     ".github/workflows",
-}
-
-FILE_NODE_PATTERNS = [
-    re.compile(r"\.github/workflows/.*\.ya?ml$", re.I),
-    re.compile(r"^docs/.*\.md$", re.I),
-    re.compile(r"^sql/.*\.(sql|md)$", re.I),
-    re.compile(r"^reports/.*\.(md|json)$", re.I),
-    re.compile(r"^artifacts/.*\.(json|md)$", re.I),
-    re.compile(r"^tools/.*\.(py|ts|js|md|yml|yaml|sh)$", re.I),
-    re.compile(r"^scripts/.*\.(py|ts|js|sh|md)$", re.I),
-    re.compile(r"^src/.*\.(py|ts|js|md)$", re.I),
+    "docs",
+    "sql",
+    "reports",
+    "artifacts",
 ]
 
-PATH_REF_REGEXES = [
-    re.compile(r"(?P<path>(?:docs|sql|reports|artifacts|tools|scripts|src|\.github/workflows)/[A-Za-z0-9_\-./]+)"),
-    re.compile(r"(?P<path>\.github/workflows/[A-Za-z0-9_\-./]+\.ya?ml)", re.I),
+EXTRA_ROOM_DIRS = [
+    "tools",
+    "scripts",
+    "src",
 ]
 
-BAD_FILENAME_CHARS = re.compile(r"[<>:\"/\\|?*\x00-\x1F]")
+# anchor selection: prefer these extensions and key filenames
+PREFERRED_EXTS = {".md", ".sql", ".py", ".ts", ".js", ".yml", ".yaml", ".json", ".toml"}
+PREFERRED_NAME_HINTS = [
+    "readme", "contract", "spec", "boundary", "registry", "metric", "map",
+    "path1", "path2", "evidence", "validate", "validation", "determin", "fingerprint",
+    "ingest", "canonical", "export", "c0", "c1", "c2", "c3",
+    "outcome", "eval", "evaluation", "label",
+    "main.yml", "workflow",
+]
+
+MAX_ANCHORS_PER_ROOM = 30
+MAX_ANCHORS_PER_OPTION = 40
+
+MIN_NOTE_BYTES = 200
+MAX_NOTES = 40
 
 
 # ----------------------------
-# Data model
-# ----------------------------
-
-@dataclass
-class Node:
-    node_id: str
-    kind: str  # "dir" | "file" | "index" | "option"
-    repo_rel: str
-    title: str
-    links: Set[str]
-
-
-# ----------------------------
-# Helpers
-# ----------------------------
-
-def norm_relpath(p: Path) -> str:
-    return p.as_posix().lstrip("./")
-
-def safe_title_from_relpath(rel: str, kind: str) -> str:
-    rel = rel.strip("/")
-    if rel == "":
-        rel = "REPO_ROOT"
-
-    s = rel.replace("/", "__")
-    s = s.replace(".", "_")
-    s = BAD_FILENAME_CHARS.sub("_", s)
-
-    prefix = "DIR_" if kind == "dir" else "FILE_" if kind == "file" else "NODE_"
-    return f"{prefix}{s}"
-
-def should_ignore_dir(rel_dir: str, ignore_dirs: Set[str]) -> bool:
-    parts = rel_dir.split("/") if rel_dir else []
-    if parts and parts[0] in ignore_dirs:
-        # allow forced include subpaths
-        for forced in FORCE_INCLUDE_DIRS:
-            if rel_dir == forced or rel_dir.startswith(forced + "/"):
-                return False
-        return True
-    if rel_dir in ignore_dirs:
-        return True
-    return False
-
-def match_file_node(rel_file: str) -> bool:
-    rel_file = rel_file.lstrip("./")
-    for pat in FILE_NODE_PATTERNS:
-        if pat.search(rel_file):
-            return True
-    return False
-
-def read_text_limited(path: Path, max_bytes: int) -> Optional[str]:
-    try:
-        size = path.stat().st_size
-        if size > max_bytes:
-            return None
-        return path.read_text(encoding="utf-8", errors="replace")
-    except Exception:
-        return None
-
-def extract_referenced_paths(text: str) -> Set[str]:
-    refs: Set[str] = set()
-    for rx in PATH_REF_REGEXES:
-        for m in rx.finditer(text):
-            p = m.group("path").lstrip("./").rstrip(").,;:'\"")
-            refs.add(p)
-    return refs
-
-def title_exists(nodes_by_title: Dict[str, Node], title: str) -> bool:
-    return title in nodes_by_title
-
-def find_dir_title(title_by_repo_rel: Dict[str, str], rel_dir: str) -> Optional[str]:
-    return title_by_repo_rel.get(rel_dir)
-
-def find_any_dir_startswith(nodes_by_title: Dict[str, Node], rel_prefix: str) -> List[str]:
-    out = []
-    for n in nodes_by_title.values():
-        if n.kind == "dir" and n.repo_rel and (n.repo_rel == rel_prefix or n.repo_rel.startswith(rel_prefix + "/")):
-            out.append(n.title)
-    return sorted(set(out))
-
-def find_file_titles_matching(nodes_by_title: Dict[str, Node], rx: re.Pattern) -> List[str]:
-    out = []
-    for n in nodes_by_title.values():
-        if n.kind == "file" and rx.search(n.repo_rel):
-            out.append(n.title)
-    return sorted(set(out))
-
-
-# ----------------------------
-# Build nodes (dirs + files)
-# ----------------------------
-
-def build_nodes(
-    repo_root: Path,
-    include_files: bool,
-    ignore_dirs: Set[str],
-    max_file_bytes: int,
-) -> Tuple[Dict[str, Node], Dict[str, str], List[str]]:
-    nodes_by_title: Dict[str, Node] = {}
-    title_by_repo_rel: Dict[str, str] = {}
-
-    # Directory nodes
-    all_dirs: Set[str] = set()
-    all_dirs.add("")  # root
-
-    for dirpath, dirnames, filenames in os.walk(repo_root):
-        rel_dir = norm_relpath(Path(dirpath).relative_to(repo_root))
-        if rel_dir == ".":
-            rel_dir = ""
-        if rel_dir and should_ignore_dir(rel_dir, ignore_dirs):
-            dirnames[:] = []
-            continue
-
-        all_dirs.add(rel_dir)
-
-        pruned = []
-        for d in dirnames:
-            candidate = f"{rel_dir}/{d}".strip("/")
-            if should_ignore_dir(candidate, ignore_dirs):
-                keep = any(fi.startswith(candidate + "/") or fi == candidate for fi in FORCE_INCLUDE_DIRS)
-                if keep:
-                    pruned.append(d)
-            else:
-                pruned.append(d)
-        dirnames[:] = pruned
-
-    for rel_dir in sorted(all_dirs):
-        title = safe_title_from_relpath(rel_dir if rel_dir else "REPO_ROOT", "dir")
-        node = Node(
-            node_id=f"dir:{rel_dir or '.'}",
-            kind="dir",
-            repo_rel=rel_dir,
-            title=title,
-            links=set(),
-        )
-        nodes_by_title[title] = node
-        title_by_repo_rel[rel_dir] = title
-
-    # File nodes
-    file_relpaths: List[str] = []
-    if include_files:
-        for dirpath, dirnames, filenames in os.walk(repo_root):
-            rel_dir = norm_relpath(Path(dirpath).relative_to(repo_root))
-            if rel_dir == ".":
-                rel_dir = ""
-            if rel_dir and should_ignore_dir(rel_dir, ignore_dirs):
-                dirnames[:] = []
-                continue
-
-            pruned = []
-            for d in dirnames:
-                candidate = f"{rel_dir}/{d}".strip("/")
-                if should_ignore_dir(candidate, ignore_dirs):
-                    keep = any(fi.startswith(candidate + "/") or fi == candidate for fi in FORCE_INCLUDE_DIRS)
-                    if keep:
-                        pruned.append(d)
-                else:
-                    pruned.append(d)
-            dirnames[:] = pruned
-
-            for fn in filenames:
-                rel_file = f"{rel_dir}/{fn}".strip("/")
-                if rel_file.startswith(".github/workflows/") and re.search(r"\.ya?ml$", rel_file, re.I):
-                    file_relpaths.append(rel_file)
-                    continue
-                if match_file_node(rel_file):
-                    file_relpaths.append(rel_file)
-
-        file_relpaths = sorted(set(file_relpaths))
-
-        for rel_file in file_relpaths:
-            title = safe_title_from_relpath(rel_file, "file")
-            node = Node(
-                node_id=f"file:{rel_file}",
-                kind="file",
-                repo_rel=rel_file,
-                title=title,
-                links=set(),
-            )
-            nodes_by_title[title] = node
-            title_by_repo_rel[rel_file] = title
-
-    # Parent <-> child directory links
-    for rel_dir in sorted(all_dirs):
-        if not rel_dir:
-            continue
-        parent = str(Path(rel_dir).parent)
-        if parent == ".":
-            parent = ""
-        child_title = title_by_repo_rel.get(rel_dir)
-        parent_title = title_by_repo_rel.get(parent)
-        if child_title and parent_title:
-            nodes_by_title[parent_title].links.add(child_title)
-            nodes_by_title[child_title].links.add(parent_title)
-
-    # File <-> containing directory links
-    if include_files:
-        for rel_file in file_relpaths:
-            dir_rel = str(Path(rel_file).parent)
-            if dir_rel == ".":
-                dir_rel = ""
-            file_title = title_by_repo_rel.get(rel_file)
-            dir_title = title_by_repo_rel.get(dir_rel)
-            if file_title and dir_title:
-                nodes_by_title[file_title].links.add(dir_title)
-                nodes_by_title[dir_title].links.add(file_title)
-
-    # Infer links from file contents (file -> dirs/files)
-    if include_files:
-        for rel_file in file_relpaths:
-            abs_file = repo_root / rel_file
-            text = read_text_limited(abs_file, max_file_bytes)
-            if not text:
-                continue
-            refs = extract_referenced_paths(text)
-            from_title = title_by_repo_rel.get(rel_file)
-            if not from_title:
-                continue
-
-            for ref in refs:
-                # exact node (file or dir)
-                if ref in title_by_repo_rel:
-                    nodes_by_title[from_title].links.add(title_by_repo_rel[ref])
-                    continue
-
-                # walk up for nearest directory node
-                probe = ref
-                while probe and probe not in title_by_repo_rel:
-                    parent = str(Path(probe).parent)
-                    if parent in (".", probe):
-                        break
-                    probe = parent
-                if probe in title_by_repo_rel:
-                    nodes_by_title[from_title].links.add(title_by_repo_rel[probe])
-
-    return nodes_by_title, title_by_repo_rel, file_relpaths
-
-
-# ----------------------------
-# Option nodes (A/B/C/D)
+# Option classification heuristics
 # ----------------------------
 
 @dataclass(frozen=True)
-class OptionSpec:
+class OptionDef:
     key: str
     title: str
-    desc: str
-    # heuristics: relevant directories and workflow/file patterns
+    definition: str
+    keywords: Tuple[str, ...]
+    # directories that strongly indicate membership
     dir_prefixes: Tuple[str, ...]
-    file_title_regexes: Tuple[re.Pattern, ...]
 
 
-OPTION_SPECS: List[OptionSpec] = [
-    OptionSpec(
+OPTION_DEFS = [
+    OptionDef(
         key="A",
         title="OPT_A__CANONICAL_INGEST",
-        desc="Option A — Canonical Ingest (C0/R + C1). Raw → canonical facts you can re-run and audit.",
-        dir_prefixes=("ingest", "c0", "c1", "data", "raw", "canon", "canonical", "export", "contracts", "sql", "docs"),
-        file_title_regexes=(
-            re.compile(r"\.github/workflows/.*(ingest|canon|export|c0|c1).*\.ya?ml$", re.I),
-            re.compile(r"(^|/)compute_c1|c0|canonical|export", re.I),
-        ),
+        definition="Canonical ingest: raw/source → canonical facts (C0/R) and early primitives (C1).",
+        keywords=("ingest", "canonical", "canon", "export", "c0", "c1", "worker", "wrangler", "neon", "oanda", "tradingview"),
+        dir_prefixes=("ingest", "canonical", "c0", "c1", "export", "workers"),
     ),
-    OptionSpec(
-        key="B",
-        title="OPT_B__DERIVED_LAYERS",
-        desc="Option B — Derived Layers (C2/C3). Feature packs, evidence, registries, semantics.",
-        dir_prefixes=("c2", "c3", "derived", "features", "registry", "registries", "sql", "docs"),
-        file_title_regexes=(
-            re.compile(r"\.github/workflows/.*(c2|c3|derived|features|registry).*\.ya?ml$", re.I),
-            re.compile(r"(compute_c2|compute_c3|derived|registry|metric_map|boundary_spec)", re.I),
-        ),
-    ),
-    OptionSpec(
-        key="C",
-        title="OPT_C__OUTCOMES_EVAL",
-        desc="Option C — Outcomes/Evaluation. Labeling what happened + evaluation reports/regressions.",
-        dir_prefixes=("outcomes", "eval", "evaluation", "labels", "label", "reports", "artifacts", "docs"),
-        file_title_regexes=(
-            re.compile(r"\.github/workflows/.*(outcome|eval|evaluation|label).*\.ya?ml$", re.I),
-            re.compile(r"(outcome|evaluation|label|regression)", re.I),
-        ),
-    ),
-    OptionSpec(
+    OptionDef(
         key="D",
         title="OPT_D__PATHS_QA_BRIDGE",
-        desc="Option D — Paths + QA Bridge (Path1/Path2). Evidence runner + determinism tightening. A↔D is the famous pain corridor.",
-        dir_prefixes=("path1", "path2", "qa", "validation", "reports", "artifacts", "sql", ".github/workflows", "docs"),
-        file_title_regexes=(
-            re.compile(r"\.github/workflows/.*(path1|path2|qa|validate|validation|determin).*\.ya?ml$", re.I),
-            re.compile(r"(path1|path2|validation|determin|fingerprint|evidence)", re.I),
-        ),
+        definition="Paths + QA bridge: Path1 evidence runner + Path2 determinism tightening. This is the A↔D corridor.",
+        keywords=("path1", "path2", "qa", "validate", "validation", "evidence", "determin", "fingerprint", "harness", "drift"),
+        dir_prefixes=("path1", "path2", "qa", "validation", "evidence", "tests"),
+    ),
+    OptionDef(
+        key="B",
+        title="OPT_B__DERIVED_LAYERS",
+        definition="Derived layers: compute C2/C3 features, registries, thresholds, and semantic tags from canonical facts.",
+        keywords=("derived", "features", "feature", "registry", "threshold", "c2", "c3", "compute_c2", "compute_c3", "tag", "metric"),
+        dir_prefixes=("c2", "c3", "derived", "features", "registry", "registries"),
+    ),
+    OptionDef(
+        key="C",
+        title="OPT_C__OUTCOMES_EVAL",
+        definition="Outcomes & evaluation: labeling what happened, evaluation reports, regression checks, and feedback artifacts.",
+        keywords=("outcome", "outcomes", "eval", "evaluation", "label", "labels", "regression", "score", "grading"),
+        dir_prefixes=("outcomes", "evaluation", "eval", "labels"),
     ),
 ]
 
-def add_option_nodes(
-    nodes_by_title: Dict[str, Node],
-    title_by_repo_rel: Dict[str, str],
-    file_relpaths: List[str],
-    include_files: bool,
-) -> List[str]:
-    """
-    Create A/B/C/D nodes and wire them to existing directory/file nodes by heuristics.
-    Returns titles of created option nodes.
-    """
-    option_titles: List[str] = []
+OPTION_SPINE = ["A", "D", "B", "C"]
 
-    # index / root titles
-    root_title = title_by_repo_rel.get("", "DIR_REPO_ROOT")
-    workflows_dir_title = title_by_repo_rel.get(".github/workflows")
 
-    # precompute candidate directory titles by prefixes
-    dir_titles_by_prefix: Dict[str, List[str]] = {}
-    for spec in OPTION_SPECS:
-        collected: Set[str] = set()
-        for prefix in spec.dir_prefixes:
-            # exact directory
-            exact = find_dir_title(title_by_repo_rel, prefix)
-            if exact:
-                collected.add(exact)
-            # any directories that start with that prefix
-            for t in find_any_dir_startswith(nodes_by_title, prefix):
-                collected.add(t)
-        dir_titles_by_prefix[spec.key] = sorted(collected)
+# ----------------------------
+# Utility
+# ----------------------------
 
-    # map file relpaths -> file node title
-    file_titles: List[str] = []
-    if include_files:
-        for rel in file_relpaths:
-            t = title_by_repo_rel.get(rel)
-            if t:
-                file_titles.append(t)
+def rel(p: Path, root: Path) -> str:
+    return p.relative_to(root).as_posix()
 
-    # create option nodes
-    for spec in OPTION_SPECS:
-        t = spec.title
-        if t in nodes_by_title:
+def is_ignored_dir(path_parts: Tuple[str, ...]) -> bool:
+    return any(part in IGNORE_DIRS for part in path_parts)
+
+def score_path(path_str: str) -> int:
+    """Higher score = more likely to be a meaningful anchor."""
+    s = path_str.lower()
+    score = 0
+    # extension preference
+    ext = Path(path_str).suffix.lower()
+    if ext in PREFERRED_EXTS:
+        score += 3
+    # name hints
+    for h in PREFERRED_NAME_HINTS:
+        if h in s:
+            score += 5
+    # shorter paths tend to be more “core” (not always, but good heuristic)
+    score += max(0, 8 - s.count("/"))
+    return score
+
+def list_files_under(root: Path, subdir: str) -> List[str]:
+    base = root / subdir
+    if not base.exists():
+        return []
+    out: List[str] = []
+    for dirpath, dirnames, filenames in os.walk(base):
+        rp = Path(dirpath).relative_to(root)
+        if is_ignored_dir(rp.parts):
+            dirnames[:] = []
             continue
+        for fn in filenames:
+            # keep only reasonable candidates
+            p = (Path(dirpath) / fn)
+            ext = p.suffix.lower()
+            if ext and ext not in PREFERRED_EXTS:
+                continue
+            out.append(rel(p, root))
+    return sorted(set(out))
 
-        node = Node(
-            node_id=f"opt:{spec.key}",
-            kind="option",
-            repo_rel=f"OPTION_{spec.key}",
-            title=t,
-            links=set(),
+def top_n_scored(paths: List[str], n: int) -> List[str]:
+    scored = sorted(((score_path(p), p) for p in paths), key=lambda x: (-x[0], x[1]))
+    return [p for _, p in scored[:n]]
+
+def classify_option_for_path(path_str: str) -> Set[str]:
+    s = path_str.lower()
+    hits: Set[str] = set()
+    # directory prefix rule
+    for opt in OPTION_DEFS:
+        for pref in opt.dir_prefixes:
+            if s.startswith(pref + "/") or f"/{pref}/" in s:
+                hits.add(opt.key)
+        # keyword hits
+        for kw in opt.keywords:
+            if kw in s:
+                hits.add(opt.key)
+    return hits
+
+def mk_canvas(nodes: List[dict], edges: List[dict]) -> dict:
+    return {"nodes": nodes, "edges": edges}
+
+
+# ----------------------------
+# Content builders
+# ----------------------------
+
+def build_rooms(repo_root: Path) -> Dict[str, List[str]]:
+    rooms: Dict[str, List[str]] = {}
+    for d in CORE_ROOM_DIRS + EXTRA_ROOM_DIRS:
+        paths = list_files_under(repo_root, d)
+        if paths:
+            rooms[d] = top_n_scored(paths, MAX_ANCHORS_PER_ROOM)
+    return rooms
+
+def build_options_from_rooms(rooms: Dict[str, List[str]]) -> Dict[str, List[str]]:
+    """Assign anchors to options based on heuristics across discovered room files."""
+    opt_anchors: Dict[str, Set[str]] = {o.key: set() for o in OPTION_DEFS}
+    all_paths = []
+    for _, ps in rooms.items():
+        all_paths.extend(ps)
+    all_paths = sorted(set(all_paths))
+
+    for p in all_paths:
+        hits = classify_option_for_path(p)
+        for k in hits:
+            opt_anchors[k].add(p)
+
+    # cap + sort for stability
+    out: Dict[str, List[str]] = {}
+    for opt in OPTION_DEFS:
+        lst = sorted(opt_anchors[opt.key])
+        out[opt.key] = top_n_scored(lst, MAX_ANCHORS_PER_OPTION)
+    return out
+
+def build_workflow_list(rooms: Dict[str, List[str]]) -> List[str]:
+    wf = rooms.get(".github/workflows", [])
+    # only keep yaml
+    wf = [p for p in wf if p.lower().endswith((".yml", ".yaml"))]
+    return wf[:30]
+
+def note_header(frontmatter: Dict[str, str | List[str]]) -> str:
+    lines = ["---"]
+    for k, v in frontmatter.items():
+        if isinstance(v, list):
+            lines.append(f"{k}: [{', '.join(v)}]")
+        else:
+            lines.append(f"{k}: {v}")
+    lines.append("---\n")
+    return "\n".join(lines)
+
+def ensure_min_size(path: Path) -> None:
+    if not path.exists():
+        raise RuntimeError(f"Expected note not written: {path}")
+    if path.stat().st_size < MIN_NOTE_BYTES:
+        raise RuntimeError(f"Note too small (<{MIN_NOTE_BYTES} bytes): {path.name}")
+
+def write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+# ----------------------------
+# Note templates
+# ----------------------------
+
+def render_index(rooms: Dict[str, List[str]]) -> str:
+    room_links = []
+    for d in CORE_ROOM_DIRS:
+        if d in rooms:
+            room_links.append(f"- [[ROOM__{room_name(d)}]]  (`/{d}`)")
+    for d in EXTRA_ROOM_DIRS:
+        if d in rooms:
+            room_links.append(f"- [[ROOM__{room_name(d)}]]  (`/{d}`)")
+
+    return (
+        note_header({"type": "maze-index", "tags": ["ovc", "repo", "maze", "moc"]})
+        + "# OVC Repo Maze (Curated)\n\n"
+        + "This is the *semantic* map (low-node-count). It sorts the repo into **Option A/B/C/D** and links the real anchors.\n\n"
+        + "## Option Spine\n"
+        + "- [[OPT_A__CANONICAL_INGEST]] → [[OPT_D__PATHS_QA_BRIDGE]] → [[OPT_B__DERIVED_LAYERS]] → [[OPT_C__OUTCOMES_EVAL]]\n\n"
+        + "## System Rooms\n"
+        + ("\n".join(room_links) if room_links else "- _(no rooms detected)_")
+        + "\n\n"
+        + "## How to use\n"
+        + "- Open Graph View and filter: `path:\"OVC_REPO_MAZE\"`\n"
+        + "- Start at Option D for the A↔D corridor (2H→15m resample + workflow ordering).\n"
+    )
+
+def room_name(dir_path: str) -> str:
+    # ".github/workflows" -> "WORKFLOWS"
+    if dir_path == ".github/workflows":
+        return "WORKFLOWS"
+    return dir_path.strip("/").replace("/", "__").upper()
+
+def render_room(dir_path: str, anchors: List[str]) -> str:
+    rn = room_name(dir_path)
+    intro = {
+        ".github/workflows": "GitHub Actions: ordering is fate. These workflows orchestrate A→D→B→C.",
+        "docs": "Repo documentation: contracts, invariants, mental model. (This should be the source-of-truth for boundaries.)",
+        "sql": "SQL surface: migrations, queries, evidence-run SQL, validation queries.",
+        "reports": "Reports/evidence outputs: Path1 packs, validation summaries, run writeups.",
+        "artifacts": "Artifacts: small machine-readable outputs passed between steps (hashes, indexes, summaries).",
+    }.get(dir_path, "Repo area detected by scanner.")
+
+    body = "\n".join([f"- `{p}`" for p in anchors]) if anchors else "- _(no anchors)_"
+    return (
+        note_header({"type": "maze-room", "tags": ["ovc", "maze", "room"]})
+        + f"# ROOM__{rn}\n\n"
+        + f"**Directory:** `/{dir_path}`\n\n"
+        + f"## What this room is\n{intro}\n\n"
+        + "## Top anchors (curated)\n"
+        + body
+        + "\n\n"
+        + "## Used by\n"
+        + "- [[OPT_A__CANONICAL_INGEST]]\n"
+        + "- [[OPT_D__PATHS_QA_BRIDGE]]\n"
+        + "- [[OPT_B__DERIVED_LAYERS]]\n"
+        + "- [[OPT_C__OUTCOMES_EVAL]]\n"
+    )
+
+def render_option(opt: OptionDef, opt_anchors: List[str], workflows: List[str], rooms: Dict[str, List[str]]) -> str:
+    key = opt.key
+    spine_links = {
+        "A": "→ [[OPT_D__PATHS_QA_BRIDGE]]",
+        "D": "← [[OPT_A__CANONICAL_INGEST]]  → [[OPT_B__DERIVED_LAYERS]]",
+        "B": "← [[OPT_D__PATHS_QA_BRIDGE]]  → [[OPT_C__OUTCOMES_EVAL]]",
+        "C": "← [[OPT_B__DERIVED_LAYERS]]",
+    }[key]
+
+    # room links that exist
+    room_links = []
+    for d in CORE_ROOM_DIRS:
+        if d in rooms:
+            room_links.append(f"- [[ROOM__{room_name(d)}]]")
+    for d in EXTRA_ROOM_DIRS:
+        if d in rooms:
+            room_links.append(f"- [[ROOM__{room_name(d)}]]")
+
+    anchors_txt = "\n".join([f"- `{p}`" for p in opt_anchors]) if opt_anchors else "- _(no anchors matched heuristics; add keywords/dir rules)_"
+
+    # workflows relevant to this option by keyword (light filter)
+    kw = list(opt.keywords)
+    wf_relevant = []
+    for w in workflows:
+        wl = w.lower()
+        if any(k in wl for k in kw):
+            wf_relevant.append(w)
+    wf_relevant = wf_relevant[:20]
+    wf_txt = "\n".join([f"- `{p}`" for p in wf_relevant]) if wf_relevant else "- _(no obvious workflow matches)_"
+
+    # input/output “best effort” based on key
+    io = {
+        "A": ("Raw/source events → canonical facts (C0/R) (+ maybe C1 primitives).", "Canonical dataset + export contract outputs."),
+        "D": ("Option A outputs + run config → evidence packs + determinism checks.", "PASS/FAIL evidence, hashes, run-ledger artifacts."),
+        "B": ("Canonical facts + verified evidence → C2/C3 derived packs, registries, semantic tags.", "Derived tables/features, registry-driven tags."),
+        "C": ("Verified structure + derived evidence → outcomes/eval/regression outputs.", "Outcome labels + evaluation reports."),
+    }[key]
+
+    special = ""
+    if key == "D":
+        special = (
+            "\n## The A↔D pain corridor (explicit)\n"
+            "- Resample boundary: where 2H intake becomes 15m (must be *single source of truth*).\n"
+            "- Workflow ordering: ensure A completes and publishes artifacts *before* D consumes them.\n"
+            "- Determinism: stable hashes + normalized hashes for reruns.\n"
         )
 
-        # Always link to root + index-ish anchors (root node exists, index is separate file)
-        if root_title in nodes_by_title:
-            node.links.add(root_title)
-
-        # Always link to workflows dir if present (Option nodes often depend on orchestration)
-        if workflows_dir_title and workflows_dir_title in nodes_by_title:
-            node.links.add(workflows_dir_title)
-
-        # Link to relevant dirs found
-        for dt in dir_titles_by_prefix.get(spec.key, []):
-            if dt in nodes_by_title:
-                node.links.add(dt)
-
-        # Link to relevant file nodes by regex (only if include_files)
-        if include_files and file_titles:
-            for rx in spec.file_title_regexes:
-                # match against repo_rel (not title)
-                for n in nodes_by_title.values():
-                    if n.kind != "file":
-                        continue
-                    if rx.search(n.repo_rel):
-                        node.links.add(n.title)
-
-        nodes_by_title[t] = node
-        option_titles.append(t)
-
-    # Cross-link options in flow order A -> D -> B -> C (your canonical pipeline framing)
-    def link(a: str, b: str):
-        if a in nodes_by_title and b in nodes_by_title:
-            nodes_by_title[a].links.add(b)
-            nodes_by_title[b].links.add(a)
-
-    link("OPT_A__CANONICAL_INGEST", "OPT_D__PATHS_QA_BRIDGE")
-    link("OPT_D__PATHS_QA_BRIDGE", "OPT_B__DERIVED_LAYERS")
-    link("OPT_B__DERIVED_LAYERS", "OPT_C__OUTCOMES_EVAL")
-
-    return option_titles
+    return (
+        note_header({"type": "maze-option", "tags": ["ovc", "maze", "option", f"opt-{key.lower()}"]})
+        + f"# {opt.title}\n\n"
+        + f"**Definition:** {opt.definition}\n\n"
+        + f"**Spine:** {spine_links}\n\n"
+        + "## Inputs → Outputs\n"
+        + f"- **Inputs:** {io[0]}\n"
+        + f"- **Outputs:** {io[1]}\n\n"
+        + "## Key rooms\n"
+        + ("\n".join(room_links) if room_links else "- _(no rooms detected)_")
+        + "\n\n"
+        + "## Key workflows (heuristic)\n"
+        + wf_txt
+        + "\n\n"
+        + "## Anchors (real repo paths)\n"
+        + anchors_txt
+        + "\n"
+        + special
+    )
 
 
 # ----------------------------
-# Writers
+# Canvas generator (small)
 # ----------------------------
 
-def write_index(out_dir: Path, nodes_by_title: Dict[str, Node], title_by_repo_rel: Dict[str, str]) -> None:
-    out_dir.mkdir(parents=True, exist_ok=True)
-    root_title = title_by_repo_rel.get("", "DIR_REPO_ROOT")
-
-    index_md = [
-        "---",
-        "type: maze-index",
-        "tags: [ovc, repo, maze, moc]",
-        "---",
-        "",
-        "# OVC Repo Maze (Index)",
-        "",
-        "A link-web that Obsidian Graph View turns into a topology. Click rooms. Follow corridors. Laugh at Minotaurs.",
-        "",
-        "## Start",
-        f"- [[{root_title}]]",
-        "",
-        "## Option Spine",
-        "- [[OPT_A__CANONICAL_INGEST]] → [[OPT_D__PATHS_QA_BRIDGE]] → [[OPT_B__DERIVED_LAYERS]] → [[OPT_C__OUTCOMES_EVAL]]",
-        "",
-        "## High-signal Chambers (if they exist)",
-    ]
-
-    for rel in ["docs", "sql", "reports", "artifacts", ".github/workflows", "tools", "scripts", "src"]:
-        t = title_by_repo_rel.get(rel)
-        if t and t in nodes_by_title:
-            index_md.append(f"- [[{t}]]  (`/{rel}`)")
-        else:
-            # pick representative if any startwith
-            rep = None
-            for n in nodes_by_title.values():
-                if n.kind == "dir" and n.repo_rel and (n.repo_rel == rel or n.repo_rel.startswith(rel + "/")):
-                    rep = n.title
-                    break
-            if rep:
-                index_md.append(f"- [[{rep}]]  (`/{rel}`*)")
-
-    index_md += [
-        "",
-        "## Notes",
-        "- Dir nodes are prefixed `DIR_...`",
-        "- File nodes are prefixed `FILE_...` (only if `--include-files`)",
-        "- Option nodes are prefixed `OPT_...`",
-        "",
-    ]
-
-    (out_dir / "00_REPO_MAZE.md").write_text("\n".join(index_md), encoding="utf-8")
-
-def write_markdown_nodes(out_dir: Path, nodes_by_title: Dict[str, Node]) -> None:
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    for title, node in nodes_by_title.items():
-        # we will write the index separately as 00_REPO_MAZE.md
-        if title == "00_REPO_MAZE":
-            continue
-
-        filename = f"{title}.md"
-        if len(filename) > 180:
-            filename = filename[:180] + ".md"
-
-        p = out_dir / filename
-
-        tags = "tags: [ovc, maze, repo, graph]"
-        if node.kind == "option":
-            tags = "tags: [ovc, maze, repo, option]"
-
-        fm = [
-            "---",
-            "type: maze-node",
-            f"kind: {node.kind}",
-            f"repo_rel: {node.repo_rel}",
-            tags,
-            "---",
-            "",
-        ]
-
-        header = f"# {title}\n\n"
-
-        body: List[str] = []
-        if node.kind == "dir":
-            rel_display = "/" + node.repo_rel if node.repo_rel else "/"
-            body.append(f"**Directory:** `{rel_display}`\n")
-            body.append("## Purpose\n")
-            body.append("_What lives here? What invariants matter? What breaks when this breaks?_\n")
-        elif node.kind == "file":
-            body.append(f"**File:** `{node.repo_rel}`\n")
-            body.append("## Role\n")
-            body.append("_What does this file do in the system? Why does it exist?_\n")
-        elif node.kind == "option":
-            # option description hint (stored in title naming)
-            body.append("## Summary\n")
-            if title == "OPT_A__CANONICAL_INGEST":
-                body.append("Canonical ingest: raw → canonical facts (C0/R + C1).")
-            elif title == "OPT_B__DERIVED_LAYERS":
-                body.append("Derived layers: compute C2/C3 features/registries/semantics.")
-            elif title == "OPT_C__OUTCOMES_EVAL":
-                body.append("Outcomes & evaluation: labels, eval reports, regressions.")
-            elif title == "OPT_D__PATHS_QA_BRIDGE":
-                body.append("Paths + QA bridge: Path1 evidence runner + Path2 determinism tightening (A↔D corridor).")
-            body.append("")
-            body.append("## What to lock here\n")
-            body.append("- Contracts and boundaries (what belongs in this option)\n- Determinism rules (if applicable)\n- PASS/FAIL criteria\n")
-        else:
-            body.append("## Node\n")
-
-        body.append("## Doors (Links)\n")
-        if node.links:
-            for t in sorted(node.links):
-                body.append(f"- [[{t}]]")
-        else:
-            body.append("- _(none)_")
-
-        p.write_text("\n".join(fm) + header + "\n".join(body) + "\n", encoding="utf-8")
-
-def write_canvas(out_dir: Path, nodes_by_title: Dict[str, Node], title_by_repo_rel: Dict[str, str]) -> None:
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    root_title = title_by_repo_rel.get("", "DIR_REPO_ROOT")
-
-    featured = [
-        root_title,
+def render_canvas(out_dir: Path, rooms: Dict[str, List[str]]) -> None:
+    # nodes to include
+    spine_titles = [
+        "00_REPO_MAZE",
         "OPT_A__CANONICAL_INGEST",
         "OPT_D__PATHS_QA_BRIDGE",
         "OPT_B__DERIVED_LAYERS",
         "OPT_C__OUTCOMES_EVAL",
     ]
-    featured = [t for t in featured if t in nodes_by_title]
 
-    # add common chambers if present
-    for rel in ["docs", "sql", "reports", "artifacts", ".github/workflows"]:
-        t = title_by_repo_rel.get(rel)
-        if t and t in nodes_by_title:
-            featured.append(t)
-
-    # add a handful of neighbors for context
-    extras: Set[str] = set()
-    for t in featured:
-        for l in list(nodes_by_title[t].links)[:8]:
-            extras.add(l)
-    for t in sorted(extras):
-        if t in nodes_by_title and t not in featured:
-            featured.append(t)
-
-    id_by_title = {t: f"n{i}" for i, t in enumerate(featured)}
+    room_titles = []
+    for d in CORE_ROOM_DIRS:
+        if d in rooms:
+            room_titles.append(f"ROOM__{room_name(d)}")
 
     nodes = []
     edges = []
@@ -626,57 +418,40 @@ def write_canvas(out_dir: Path, nodes_by_title: Dict[str, Node], title_by_repo_r
     def add_node(nid: str, text: str, x: int, y: int, w: int = 280, h: int = 160):
         nodes.append({"id": nid, "type": "text", "text": text, "x": x, "y": y, "width": w, "height": h})
 
+    id_by = {t: f"n{i}" for i, t in enumerate(spine_titles + room_titles)}
+
     x0, y0 = -760, -220
-    dx, dy = 320, 210
+    dx, dy = 330, 210
 
-    # root
-    if root_title in id_by_title:
-        add_node(id_by_title[root_title], f"# Repo Root\n[[00_REPO_MAZE]]\n[[{root_title}]]", x0, y0, 300, 170)
+    # index
+    add_node(id_by["00_REPO_MAZE"], "# Index\n[[00_REPO_MAZE]]", x0, y0, 260, 140)
 
-    # option spine in a row
-    spine = ["OPT_A__CANONICAL_INGEST", "OPT_D__PATHS_QA_BRIDGE", "OPT_B__DERIVED_LAYERS", "OPT_C__OUTCOMES_EVAL"]
-    spine = [t for t in spine if t in id_by_title]
-    for i, t in enumerate(spine):
-        add_node(
-            id_by_title[t],
-            f"## {t}\n[[{t}]]",
-            x0 + dx * (i + 1),
-            y0,
-            300 if "OPT_D" in t else 280,
-            170,
-        )
+    # spine row
+    for i, t in enumerate(spine_titles[1:]):
+        add_node(id_by[t], f"## {t}\n[[{t}]]", x0 + dx * (i + 1), y0, 320 if "OPT_D" in t else 280, 160)
 
-    # chambers beneath spine
-    chamber_rels = ["docs", "sql", "reports", "artifacts", ".github/workflows"]
-    chamber_titles = []
-    for rel in chamber_rels:
-        t = title_by_repo_rel.get(rel)
-        if t and t in id_by_title:
-            chamber_titles.append(t)
+    # rooms under
+    for j, t in enumerate(room_titles):
+        add_node(id_by[t], f"## {t}\n[[{t}]]", x0 + dx * (j + 1), y0 + dy, 280, 140)
 
-    for j, t in enumerate(chamber_titles):
-        rel = nodes_by_title[t].repo_rel
-        add_node(id_by_title[t], f"## /{rel}\n[[{t}]]", x0 + dx * (j + 1), y0 + dy, 280, 150)
+    # edges: index -> options
+    e = 0
+    for t in spine_titles[1:]:
+        edges.append({"id": f"e{e}", "fromNode": id_by["00_REPO_MAZE"], "fromSide": "right", "toNode": id_by[t], "toSide": "left"})
+        e += 1
 
-    # edges among featured nodes
-    edge_i = 0
-    featured_set = set(featured)
-    for t in featured:
-        n = nodes_by_title[t]
-        for l in n.links:
-            if l not in featured_set:
-                continue
-            if t < l:  # de-dupe
-                edges.append({
-                    "id": f"e{edge_i}",
-                    "fromNode": id_by_title[t],
-                    "fromSide": "right",
-                    "toNode": id_by_title[l],
-                    "toSide": "left",
-                })
-                edge_i += 1
+    # edges: spine order A->D->B->C
+    spine = spine_titles[1:]
+    for a, b in zip(spine, spine[1:]):
+        edges.append({"id": f"e{e}", "fromNode": id_by[a], "fromSide": "right", "toNode": id_by[b], "toSide": "left"})
+        e += 1
 
-    canvas = {"nodes": nodes, "edges": edges}
+    # edges: rooms connect to D (bridge), and to A/B/C lightly
+    for t in room_titles:
+        edges.append({"id": f"e{e}", "fromNode": id_by[t], "fromSide": "top", "toNode": id_by["OPT_D__PATHS_QA_BRIDGE"], "toSide": "bottom"})
+        e += 1
+
+    canvas = mk_canvas(nodes, edges)
     (out_dir / "OVC_REPO_MAZE.canvas").write_text(json.dumps(canvas, indent=2), encoding="utf-8")
 
 
@@ -685,12 +460,10 @@ def write_canvas(out_dir: Path, nodes_by_title: Dict[str, Node], title_by_repo_r
 # ----------------------------
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Generate an Obsidian repo maze (Markdown + Canvas) from a repo tree.")
-    ap.add_argument("--repo", type=str, required=True, help="Path to repo root (e.g. .)")
-    ap.add_argument("--out", type=str, required=True, help="Output folder inside your Obsidian vault (will be created).")
-    ap.add_argument("--include-files", action="store_true", help="Create nodes for selected files (workflows/sql/docs/etc).")
-    ap.add_argument("--max-file-bytes", type=int, default=250_000, help="Max bytes to read per file for reference linking.")
-    ap.add_argument("--ignore", type=str, default="", help="Comma-separated extra ignore dir names, e.g. 'data,tmp'")
+    ap = argparse.ArgumentParser(description="Generate a curated Obsidian repo maze (low node count).")
+    ap.add_argument("--repo", required=True, help="Repo root path (e.g. .)")
+    ap.add_argument("--out", required=True, help="Output folder inside Obsidian vault (e.g. .../Tetsu/OVC_REPO_MAZE)")
+    ap.add_argument("--wipe", action="store_true", help="Delete output folder contents before writing")
     args = ap.parse_args()
 
     repo_root = Path(args.repo).resolve()
@@ -699,39 +472,64 @@ def main() -> int:
     if not repo_root.exists() or not repo_root.is_dir():
         raise SystemExit(f"--repo is not a directory: {repo_root}")
 
-    ignore_dirs = set(DEFAULT_IGNORE_DIRS)
-    if args.ignore.strip():
-        ignore_dirs |= {x.strip() for x in args.ignore.split(",") if x.strip()}
+    if args.wipe and out_dir.exists():
+        shutil.rmtree(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    nodes_by_title, title_by_repo_rel, file_relpaths = build_nodes(
-        repo_root=repo_root,
-        include_files=args.include_files,
-        ignore_dirs=ignore_dirs,
-        max_file_bytes=args.max_file_bytes,
-    )
+    # Scan
+    rooms = build_rooms(repo_root)
+    workflows = build_workflow_list(rooms)
+    opt_anchors = build_options_from_rooms(rooms)
 
-    # Add the special Option A/B/C/D nodes + wire them
-    add_option_nodes(
-        nodes_by_title=nodes_by_title,
-        title_by_repo_rel=title_by_repo_rel,
-        file_relpaths=file_relpaths,
-        include_files=args.include_files,
-    )
+    # Write notes (curated set)
+    written: List[Path] = []
 
-    # Write outputs
-    write_index(out_dir, nodes_by_title, title_by_repo_rel)
-    write_markdown_nodes(out_dir, nodes_by_title)
-    write_canvas(out_dir, nodes_by_title, title_by_repo_rel)
+    # Index
+    write_text(out_dir / "00_REPO_MAZE.md", render_index(rooms))
+    written.append(out_dir / "00_REPO_MAZE.md")
 
-    print("✅ Repo Maze generated (with Option A/B/C/D nodes)")
-    print(f"   Output folder: {out_dir}")
-    print(f"   Start here:    {out_dir / '00_REPO_MAZE.md'}")
-    print(f"   Canvas:        {out_dir / 'OVC_REPO_MAZE.canvas'}")
-    print()
-    print("Obsidian:")
-    print("- Open 00_REPO_MAZE.md")
-    print("- Graph View will show the maze via backlinks")
-    print("- Open OVC_REPO_MAZE.canvas for a draggable map")
+    # Rooms
+    for d, anchors in rooms.items():
+        # only create room notes for core + extras that exist
+        if d not in CORE_ROOM_DIRS and d not in EXTRA_ROOM_DIRS:
+            continue
+        nm = f"ROOM__{room_name(d)}.md"
+        write_text(out_dir / nm, render_room(d, anchors))
+        written.append(out_dir / nm)
+
+    # Options
+    opt_by_key = {o.key: o for o in OPTION_DEFS}
+    for k in OPTION_SPINE:
+        o = opt_by_key[k]
+        nm = f"{o.title}.md"
+        write_text(out_dir / nm, render_option(o, opt_anchors.get(k, []), workflows, rooms))
+        written.append(out_dir / nm)
+
+    # Canvas
+    render_canvas(out_dir, rooms)
+    canvas_path = out_dir / "OVC_REPO_MAZE.canvas"
+
+    # Verification
+    created_notes = [p for p in written if p.suffix.lower() == ".md"]
+    note_count = len(created_notes)
+
+    if note_count > MAX_NOTES:
+        raise RuntimeError(f"Too many notes generated: {note_count} > {MAX_NOTES}")
+
+    for p in created_notes:
+        ensure_min_size(p)
+
+    if not canvas_path.exists():
+        raise RuntimeError("Canvas missing")
+
+    # Print summary
+    print("✅ Curated Repo Maze generated")
+    print(f"Output folder: {out_dir}")
+    print(f"Notes created: {note_count}")
+    for p in sorted(created_notes):
+        print(f" - {p.name}")
+    print(f"Canvas: {canvas_path.name} (exists=True)")
+    print("\nObsidian tip: Graph filter →  path:\"OVC_REPO_MAZE\"")
     return 0
 
 
