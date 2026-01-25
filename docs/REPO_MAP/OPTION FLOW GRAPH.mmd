@@ -1,0 +1,140 @@
+%%─────────────────────────────────────────────────────────────────────────────
+%% GRAPH 1 — HIGH-LEVEL OPTION FLOW GRAPH (BOX FORM)
+%% Source: docs/REPO_MAP/*_ORG_MAP_DRAFT.md, CATEGORY_PROCESS_APPENDIX_DRAFT.md
+%%─────────────────────────────────────────────────────────────────────────────
+flowchart TB
+
+  %% External sources
+  subgraph EXT[External Sources]
+    TV[TradingView Alerts]
+    OANDA[OANDA API]
+  end
+
+  %% Option A
+  subgraph OPTA[Option A — Canonical Ingest (C0/C1)]
+    direction TB
+    A_WORKER[infra/ovc-webhook (Cloudflare Worker)]
+    A_BACKFILL[src/backfill_* (OANDA backfill)]
+    A_INGEST[src/ingest_history_day.py]
+    A_CANON_BLOCKS[ovc.ovc_blocks_v01_1_min (CANONICAL)]
+    A_CANON_M15[ovc.ovc_candles_m15_raw (CANONICAL)]
+    A_R2[R2: tv/YYYY-MM-DD/ (raw archive)]
+  end
+
+  %% Option B
+  subgraph OPTB[Option B — Derived Features (C2/C3)]
+    direction TB
+    B_C1[src/derived/compute_c1_v0_1.py]
+    B_C2[src/derived/compute_c2_v0_1.py]
+    B_C3[src/derived/compute_c3_regime_trend_v0_1.py (IMPLIED / NOT INVOKED)]
+    B_VIEWS[sql/derived views: v_ovc_c1_features, v_ovc_c2_features, v_ovc_c3_features]
+    B_TF[trajectory_families/ (fingerprint models)]
+    B_REG[configs/threshold_packs + ovc_cfg.threshold_packs]
+  end
+
+  %% Option C
+  subgraph OPTC[Option C — Outcomes & Evaluation]
+    direction TB
+    C_RUNNER[scripts/run/run_option_c.sh]
+    C_OUTCOMES[derived.v_ovc_c_outcomes_v0_1 (CANONICAL)]
+    C_ARTIFACTS[artifacts/option_c/]
+  end
+
+  %% Option D
+  subgraph OPTD[Option D — Paths / Bridge]
+    direction TB
+    D_PATH1[scripts/path1: build_evidence_pack_v0_2.py + run_evidence_queue.py]
+    D_REPORTS[reports/path1/evidence/runs/]
+    D_SCORES[reports/path1/scores/]
+    D_NOTION[scripts/export/notion_sync.py]
+    D_OPS[src/ovc_ops/run_artifact.py]
+  end
+
+  %% QA
+  subgraph QA[QA — Validation, Determinism, Governance]
+    direction TB
+    QA_TESTS[tests/ (134 tests)]
+    QA_VALIDATE[src/validate_day.py + src/validate_range.py + src/validate/validate_derived_range_v0_1.py]
+    QA_SQL[sql/qa_validation_pack*.sql + sql/90_verify_gate2.sql]
+    QA_CONTRACTS[contracts/*.json + docs/contracts/*.md]
+    QA_DOCTRINE[docs/doctrine + docs/governance]
+    QA_REPLAY[scripts/path1_replay: run_replay_verification.py]
+    QA_REPORTS[reports/validation + reports/verification]
+    QA_CI[.github/workflows: ci_pytest.yml + ci_schema_check.yml + ci_workflow_sanity.yml]
+  end
+
+  %% Stores
+  subgraph STORES[External Stores]
+    NEON[Neon PostgreSQL]
+    NOTION[Notion Databases]
+  end
+
+  %% Data flows
+  TV -->|POST /tv| A_WORKER
+  OANDA -->|API fetch| A_BACKFILL
+
+  A_WORKER -->|upsert| A_CANON_BLOCKS
+  A_WORKER -->|archive| A_R2
+
+  A_BACKFILL -->|upsert 2H| A_CANON_BLOCKS
+  A_BACKFILL -->|upsert M15| A_CANON_M15
+
+  A_INGEST -->|CSV ingest| A_CANON_BLOCKS
+
+  A_CANON_BLOCKS -->|read canonical| B_C1
+  A_CANON_BLOCKS -->|read canonical| B_C2
+  A_CANON_BLOCKS -->|read canonical| B_C3
+
+  B_C1 --> B_VIEWS
+  B_C2 --> B_VIEWS
+  B_C3 -.->|NOT INVOKED| B_VIEWS
+
+  B_REG -->|thresholds| B_C3
+  B_TF -->|fingerprints| D_REPORTS
+
+  B_VIEWS -->|read derived| C_RUNNER
+  C_RUNNER --> C_OUTCOMES
+  C_RUNNER --> C_ARTIFACTS
+
+  C_OUTCOMES -->|read outcomes| D_PATH1
+  D_PATH1 --> D_REPORTS
+  D_PATH1 --> D_SCORES
+  D_OPS -->|run.json| D_REPORTS
+  D_NOTION -->|sync| NOTION
+
+  %% QA gates
+  A_CANON_BLOCKS -.->|validate| QA_VALIDATE
+  B_VIEWS -.->|validate| QA_SQL
+  C_OUTCOMES -.->|validate| QA_VALIDATE
+  D_REPORTS -.->|replay verify| QA_REPLAY
+  QA_VALIDATE --> QA_REPORTS
+  QA_REPLAY --> QA_REPORTS
+
+  %% QA enforcement
+  QA_CONTRACTS -.->|enforce boundaries| OPTA
+  QA_CONTRACTS -.->|enforce boundaries| OPTB
+  QA_CONTRACTS -.->|enforce boundaries| OPTC
+  QA_CONTRACTS -.->|enforce boundaries| OPTD
+  QA_DOCTRINE -.->|govern| QA
+  QA_TESTS -.->|CI gate| QA_CI
+
+  %% Store links
+  A_CANON_BLOCKS --- NEON
+  A_CANON_M15 --- NEON
+  B_VIEWS --- NEON
+  C_OUTCOMES --- NEON
+
+  %% Styling
+  classDef canonical fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+  classDef supporting fill:#fff3e0,stroke:#ef6c00,stroke-width:1px
+  classDef experimental fill:#ffcdd2,stroke:#c62828,stroke-width:1px,stroke-dasharray:5
+  classDef qaStyle fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
+  classDef external fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+
+  class A_CANON_BLOCKS,A_CANON_M15,C_OUTCOMES,B_VIEWS canonical
+  class A_R2,B_REG,C_ARTIFACTS,D_REPORTS,D_SCORES supporting
+  class B_C3 experimental
+  class QA_TESTS,QA_VALIDATE,QA_SQL,QA_CONTRACTS,QA_DOCTRINE,QA_REPLAY,QA_REPORTS,QA_CI qaStyle
+  class TV,OANDA,NEON,NOTION external
+
+%%─────────────────────────────────────────────────────────────────────────────

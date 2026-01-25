@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OVC_REPO_MAZE/ANCHOR_CATALOG.md",
+                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_30__CONTRACTS_MAP.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ANCHOR_CATALOG"
+              "title": "GRAPH_30__CONTRACTS_MAP"
             }
           }
         ]
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "OVC_REPO_MAZE/QA_GOVERNANCE.md",
+                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_30__CONTRACTS_MAP.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from QA_GOVERNANCE"
+              "title": "Outgoing links from GRAPH_30__CONTRACTS_MAP"
             }
           },
           {
@@ -156,16 +156,27 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OVC_REPO_MAZE/QA_GOVERNANCE.md",
+                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_30__CONTRACTS_MAP.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of QA_GOVERNANCE"
+              "title": "Outline of GRAPH_30__CONTRACTS_MAP"
+            }
+          },
+          {
+            "id": "13355bb7558ffd80",
+            "type": "leaf",
+            "state": {
+              "type": "mermaid-toolbar-view",
+              "state": {},
+              "icon": "trident-custom",
+              "title": "Mermaid Toolbar"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -180,38 +191,50 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "mermaid-tools:Open Mermaid Toolbar": false,
+      "markdown-importer:Open format converter": false
     }
   },
-  "active": "c679af1450b7745e",
+  "active": "1d1db3783e86ef1f",
   "lastOpenFiles": [
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_40__ARTIFACT_LIFECYCLE.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_41__VALIDATION_CHAIN.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_12__OVERVIEW__ORCHESTRATION.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_11__OVERVIEW__QA_GATES.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_31__ENFORCEMENT_POINTS.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/01_CANVAS_LAYOUT_SPEC.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/00_README__GRAPH_ATLAS.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/02_CANVAS__OVC_ATLAS.canvas",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/OPTION INTERNAL PIPELINE GRAPH.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_30__CONTRACTS_MAP.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_24__QA__PIPELINE.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_23__OPT_D__PIPELINE.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_22__OPT_C__PIPELINE.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_21__OPT_B__PIPELINE.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_20__OPT_A__PIPELINE.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/A&C FLOW GRAPH.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/OPTION FLOW GRAPH.md",
+    "OVC_REPO_MAZE/01_OPTION_A__INGEST.md",
+    "Untitled.base",
+    "Untitled 1.base",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/OPTION INTERNAL PIPELINE GRAPH.mmd",
+    "15_REPO_GRAPHS.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS",
+    "OVC_REPO_MAZE/ANCHOR_CATALOG.md",
     "OVC_REPO_MAZE/ROOM__ARTIFACTS.md",
     "OVC_REPO_MAZE/ROOM__DOCS.md",
     "OVC_REPO_MAZE/ROOM__REPORTS.md",
     "OVC_REPO_MAZE/ROOM__SQL.md",
     "OVC_REPO_MAZE/ROOM__WORKFLOWS.md",
     "OVC_REPO_MAZE/00_REPO_MAZE.md",
-    "OVC_REPO_MAZE/05_QA_GOVERNANCE.md",
-    "OVC_REPO_MAZE/01_OPTION_A__INGEST.md",
-    "05_QA_GOVERNANCE.md",
-    "OVC_REPO_MAZE/02_OPTION_B_DERIVED.md",
-    "OVC_REPO_MAZE/04_OPTION_D_PATHS_BRIDGE.md",
-    "OVC_REPO_MAZE/ANCHOR_CATALOG.md",
-    "OVC_REPO_MAZE/A_D_BOUNDARY.md",
-    "OVC_REPO_MAZE/03_OPTION_C_OUTCOMES.md",
-    "OVC_REPO_MAZE/OVC_REPO_MAZE.canvas",
-    "OVC_REPO_MAZE/OPT_D__PATHS_QA_BRIDGE.md",
-    "OVC_REPO_MAZE",
-    "OVC_REPO_MAZE/DIR_REPO_ROOT.md",
-    "DIR_specs.md",
-    "OVC_REPO_MAZE/FILE_reports__path1__evidence__runs__p1_20260120_019__DIS_v1_1_evidence_md.md",
-    "FILE_src__ovc_ops__run_artifact_py.md",
-    "OVC_REPO_MAZE/DIR_docs.md",
-    "OVC_REPO_MAZE/DIR_infra__ovc-webhook__node_modules__miniflare__node_modules__zod__lib__helpers.md",
-    "OVC_REPO_MAZE/FILE_reports__path1__evidence__runs__p1_20260120_019__RES_v1_0_evidence_md.md",
-    "OVC_REPO_MAZE/FILE_reports__path1__evidence__runs__p1_20260120_019__LID_v1_0_evidence_md.md",
-    "OVC_REPO_MAZE/FILE_reports__path1__evidence__runs__p1_20260120_018__RUN_md.md",
-    "OVC_REPO_MAZE/FILE_reports__path1__evidence__runs__p1_20260120_018__RES_v1_0_evidence_md.md",
-    "OVC_REPO_MAZE/DIR_reports__path1__evidence__runs__p1_20260120_028__outputs.md"
+    "OVC_REPO_MAZE/OVC_REPO_MAZE.canvas"
   ]
 }
