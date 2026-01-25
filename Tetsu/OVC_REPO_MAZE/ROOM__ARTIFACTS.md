@@ -19,6 +19,6 @@ tags: [ovc, repo, maze, room]
 - `artifacts/option_c/sanity_local/spotchecks_sanity_local.txt`
 
 ## Options that use this room
-- [[OPT_B__DERIVED_LAYERS]]
-- [[OPT_C__OUTCOMES_EVAL]]
-- [[OPT_D__PATHS_BRIDGE]]
+- [[02_OPTION_B_DERIVED]]
+- [[03_OPTION_C_OUTCOMES]]
+- [[04_OPTION_D_PATHS_BRIDGE]]

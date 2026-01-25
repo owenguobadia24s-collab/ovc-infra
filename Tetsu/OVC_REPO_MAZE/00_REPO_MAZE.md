@@ -12,17 +12,14 @@ This map is intentionally small and semantic. Use it as a navigation spine, not 
 - Jump to a Room to browse concrete artifacts (workflows/docs/sql/reports/artifacts).
 - Each Option lists anchors and workflows, with inputs/outputs derived from actual files.
 
-## Option spine
-- [[OPT_A__CANONICAL_INGEST]]
-- [[OPT_D__PATHS_BRIDGE]]
-- [[OPT_B__DERIVED_LAYERS]]
-- [[OPT_C__OUTCOMES_EVAL]]
-
-## System canopy
-- [[QA_GOVERNANCE]]
-
-## Rooms
-- [[ROOM__WORKFLOWS]]
+## The Spine (Option Flow)
+- [[01_OPTION_A__INGEST]]
+- [[02_OPTION_B_DERIVED]]
+- [[03_OPTION_C_OUTCOMES]]
+- [[05_QA_GOVERNANCE]]
+- [[04_OPTION_D_PATHS_BRIDGE]]
+- 
+## The Chambers 
 - [[ROOM__DOCS]]
 - [[ROOM__SQL]]
 - [[ROOM__REPORTS]]
@@ -57,3 +54,5 @@ This map is intentionally small and semantic. Use it as a navigation spine, not 
 ## Notes
 - No per-dir or per-file notes are generated.
 - This vault folder is fully regeneratable.
+
+
