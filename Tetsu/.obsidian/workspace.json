@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OVC_REPO_MAZE/00_REPO_MAZE.md",
+                "file": "OVC_REPO_MAZE/ANCHOR_CATALOG.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "00_REPO_MAZE"
+              "title": "ANCHOR_CATALOG"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "OVC_REPO_MAZE/00_REPO_MAZE.md",
+                "file": "OVC_REPO_MAZE/QA_GOVERNANCE.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 00_REPO_MAZE"
+              "title": "Backlinks for QA_GOVERNANCE"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "OVC_REPO_MAZE/00_REPO_MAZE.md",
+                "file": "OVC_REPO_MAZE/QA_GOVERNANCE.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 00_REPO_MAZE"
+              "title": "Outgoing links from QA_GOVERNANCE"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OVC_REPO_MAZE/00_REPO_MAZE.md",
+                "file": "OVC_REPO_MAZE/QA_GOVERNANCE.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 00_REPO_MAZE"
+              "title": "Outline of QA_GOVERNANCE"
             }
           }
         ]
@@ -183,23 +183,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "1d1db3783e86ef1f",
+  "active": "c679af1450b7745e",
   "lastOpenFiles": [
-    "OVC_REPO_MAZE/QA_GOVERNANCE.md",
     "OVC_REPO_MAZE/ROOM__ARTIFACTS.md",
     "OVC_REPO_MAZE/ROOM__DOCS.md",
     "OVC_REPO_MAZE/ROOM__REPORTS.md",
     "OVC_REPO_MAZE/ROOM__SQL.md",
     "OVC_REPO_MAZE/ROOM__WORKFLOWS.md",
-    "OVC_REPO_MAZE/OVC_REPO_MAZE.canvas",
-    "OVC_REPO_MAZE/A_D_BOUNDARY.md",
-    "OVC_REPO_MAZE/OPT_A__CANONICAL_INGEST.md",
-    "OVC_REPO_MAZE/ANCHOR_CATALOG.md",
-    "OVC_REPO_MAZE/OPT_D__PATHS_QA_BRIDGE.md",
-    "OVC_REPO_MAZE/OPT_D__PATHS_BRIDGE.md",
     "OVC_REPO_MAZE/00_REPO_MAZE.md",
-    "OVC_REPO_MAZE/OPT_C__OUTCOMES_EVAL.md",
-    "OVC_REPO_MAZE/OPT_B__DERIVED_LAYERS.md",
+    "OVC_REPO_MAZE/05_QA_GOVERNANCE.md",
+    "OVC_REPO_MAZE/01_OPTION_A__INGEST.md",
+    "05_QA_GOVERNANCE.md",
+    "OVC_REPO_MAZE/02_OPTION_B_DERIVED.md",
+    "OVC_REPO_MAZE/04_OPTION_D_PATHS_BRIDGE.md",
+    "OVC_REPO_MAZE/ANCHOR_CATALOG.md",
+    "OVC_REPO_MAZE/A_D_BOUNDARY.md",
+    "OVC_REPO_MAZE/03_OPTION_C_OUTCOMES.md",
+    "OVC_REPO_MAZE/OVC_REPO_MAZE.canvas",
+    "OVC_REPO_MAZE/OPT_D__PATHS_QA_BRIDGE.md",
     "OVC_REPO_MAZE",
     "OVC_REPO_MAZE/DIR_REPO_ROOT.md",
     "DIR_specs.md",

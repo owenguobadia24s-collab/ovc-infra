@@ -77,7 +77,7 @@ This document defines the single authoritative boundary between Option A and Opt
 - Alignment patch not present for 15m inputs: `sql/path1/db_patches/patch_m15_raw_20260122.sql`
 
 ## References
-- [[OPT_A__CANONICAL_INGEST]]
-- [[OPT_D__PATHS_BRIDGE]]
-- [[QA_GOVERNANCE]]
+- [[01_OPTION_A__INGEST]]
+- [[04_OPTION_D_PATHS_BRIDGE]]
+- [[05_QA_GOVERNANCE]]
 - [[ANCHOR_CATALOG]]

@@ -42,7 +42,7 @@ tags: [ovc, repo, maze, room]
 - `docs/contracts/min_contract_alignment.md`
 
 ## Options that use this room
-- [[OPT_A__CANONICAL_INGEST]]
-- [[OPT_B__DERIVED_LAYERS]]
-- [[OPT_C__OUTCOMES_EVAL]]
-- [[OPT_D__PATHS_BRIDGE]]
+- [[01_OPTION_A__INGEST]]
+- [[02_OPTION_B_DERIVED]]
+- [[03_OPTION_C_OUTCOMES]]
+- [[04_OPTION_D_PATHS_BRIDGE]]
