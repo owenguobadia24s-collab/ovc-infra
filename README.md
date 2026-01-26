@@ -1,5 +1,22 @@
 # ovc-infra
 
+## 📚 Documentation
+
+### Comprehensive Workflow Guide
+**[→ Complete System Workflows](docs/WORKFLOWS_COMPREHENSIVE_v0.1.md)** - Detailed documentation of all pipelines, data flows, and operations
+
+### Quick Reference
+- **Data Flow**: [`docs/architecture/OVC_DATA_FLOW_CANON_v0.1.md`](docs/architecture/OVC_DATA_FLOW_CANON_v0.1.md)
+- **Pipeline Status**: [`docs/operations/WORKFLOW_STATUS.md`](docs/operations/WORKFLOW_STATUS.md)
+- **Pipeline Reality Map**: [`docs/architecture/PIPELINE_REALITY_MAP_v0.1.md`](docs/architecture/PIPELINE_REALITY_MAP_v0.1.md)
+
+### Operating Base
+- Start here: `docs/OPERATING_BASE.md`
+- Index: `docs/OPERATING_BASE.index.md`
+- Validation report: `docs/OPERATING_BASE.validation.md`
+
+---
+
 ## Lock the Win (v0.1 ingest)
 
 ### Verify + Deploy + Post
