@@ -1,0 +1,35 @@
+{
+	"nodes":[
+		{"id":"ctrl-1","type":"text","x":0,"y":0,"width":400,"height":200,"text":"# HOW TO USE THIS CANVAS\n\n1. **Pan**: Click and drag on empty space\n2. **Zoom**: Scroll wheel or pinch\n3. **Open graph**: Double-click file cards\n4. **Navigate**: Follow left-to-right data flow\n\nSee: [[00_README__GRAPH_ATLAS]]"},
+		{"id":"ext-idx","type":"text","x":0,"y":250,"width":300,"height":400,"text":"# EXTERNAL SOURCES\n\n**Entry points into OVC system:**\n\n- **TradingView**: Alert webhooks → Worker\n- **OANDA API**: History fetch → Backfill\n- **R2**: Raw archive storage\n- **Notion**: External sync target\n\n*These are inputs/outputs, not OVC-owned.*"},
+		{"id":"opta-idx","type":"text","x":350,"y":250,"width":500,"height":150,"text":"# OPTION A — Canonical Ingest\n\n**Scope:** Raw ingest, C0/C1 foundations, canonical tables\n\n**Key outputs:**\n- `ovc.ovc_blocks_v01_1_min`\n- `ovc.ovc_candles_m15_raw`"},
+		{"id":"opta-g10","type":"file","x":350,"y":420,"width":500,"height":200,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md"},
+		{"id":"opta-g20","type":"file","x":350,"y":640,"width":500,"height":200,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_20__OPT_A__PIPELINE.md"},
+		{"id":"optb-idx","type":"text","x":900,"y":250,"width":500,"height":150,"text":"# OPTION B — Derived Features\n\n**Scope:** C1/C2/C3 computations, registries, trajectory families\n\n**Key outputs:**\n- `derived.ovc_c1_features`\n- `derived.ovc_c2_features`\n- `derived.ovc_c3_features`"},
+		{"id":"optb-g21","type":"file","x":900,"y":420,"width":500,"height":200,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_21__OPT_B__PIPELINE.md"},
+		{"id":"optb-g50","type":"text","x":900,"y":640,"width":500,"height":200,"text":"NEON schema topology graph is not implemented (GRAPH_50__NEON_SCHEMA_TOPOLOGY.md)"},
+		{"id":"optc-idx","type":"text","x":1450,"y":250,"width":500,"height":150,"text":"# OPTION C — Outcomes\n\n**Scope:** Labels, outcome definitions, backtests\n\n**Key outputs:**\n- `derived.v_ovc_c_outcomes_v0_1`\n- `artifacts/option_c/`"},
+		{"id":"optc-g22","type":"file","x":1450,"y":420,"width":500,"height":400,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_22__OPT_C__PIPELINE.md"},
+		{"id":"optd-idx","type":"text","x":2000,"y":250,"width":500,"height":150,"text":"# OPTION D — Paths / Bridge\n\n**Scope:** Path1 workflows, reports, evidence packs, integrations\n\n**Key outputs:**\n- `reports/path1/evidence/runs/`\n- `reports/runs/`"},
+		{"id":"optd-g23","type":"file","x":2000,"y":420,"width":500,"height":180,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_23__OPT_D__PIPELINE.md"},
+		{"id":"optd-g40","type":"file","x":2000,"y":620,"width":500,"height":180,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_40__ARTIFACT_LIFECYCLE.md"},
+		{"id":"optd-g51","type":"text","x":2000,"y":820,"width":500,"height":180,"text":"External stores topology graph is not implemented (GRAPH_51__EXTERNAL_STORES.md)"},
+		{"id":"qa-idx","type":"text","x":2550,"y":250,"width":600,"height":150,"text":"# QA — Validation, Governance, Enforcement\n\n**Scope:** Tests, validation harness, contracts, doctrine\n\n**Key outputs:**\n- `reports/validation/`\n- `reports/verification/`\n- Contract enforcement at all boundaries"},
+		{"id":"qa-g11","type":"file","x":2550,"y":420,"width":290,"height":180,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_11__OVERVIEW__QA_GATES.md"},
+		{"id":"qa-g12","type":"file","x":2860,"y":420,"width":290,"height":180,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_12__OVERVIEW__ORCHESTRATION.md"},
+		{"id":"qa-g24","type":"file","x":2550,"y":620,"width":290,"height":180,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_24__QA__PIPELINE.md"},
+		{"id":"qa-g30","type":"file","x":2860,"y":620,"width":290,"height":180,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_30__CONTRACTS_MAP.md"},
+		{"id":"qa-g31","type":"file","x":2550,"y":820,"width":290,"height":180,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_31__ENFORCEMENT_POINTS.md"},
+		{"id":"qa-g41","type":"file","x":2860,"y":820,"width":290,"height":180,"file":"OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_41__VALIDATION_CHAIN.md"},
+		{"id":"legend-idx","type":"text","x":0,"y":700,"width":300,"height":150,"text":"# LEGENDS & REFERENCE\n\nNode ID lookups and graph-specific legends.\n\nThese are documented within each graph markdown file."},
+		{"id":"legend-master","type":"text","x":0,"y":870,"width":300,"height":100,"text":"Master legend not implemented – refer to graph-specific legends."},
+		{"id":"legend-per","type":"text","x":0,"y":990,"width":300,"height":100,"text":"Per-graph legend not implemented – each graph contains its own legend section."}
+	],
+	"edges":[
+		{"id":"e-ext-opta","fromNode":"ext-idx","fromSide":"right","toNode":"opta-idx","toSide":"left","label":"ingest"},
+		{"id":"e-opta-optb","fromNode":"opta-idx","fromSide":"right","toNode":"optb-idx","toSide":"left","label":"canonical"},
+		{"id":"e-optb-optc","fromNode":"optb-idx","fromSide":"right","toNode":"optc-idx","toSide":"left","label":"derived"},
+		{"id":"e-optc-optd","fromNode":"optc-idx","fromSide":"right","toNode":"optd-idx","toSide":"left","label":"outcomes"},
+		{"id":"e-optd-qa","fromNode":"optd-idx","fromSide":"right","toNode":"qa-idx","toSide":"left","label":"evidence"}
+	]
+}

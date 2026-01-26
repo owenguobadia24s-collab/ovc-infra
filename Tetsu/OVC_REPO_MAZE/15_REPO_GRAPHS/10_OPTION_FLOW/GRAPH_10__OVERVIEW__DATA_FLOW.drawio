@@ -1,0 +1,113 @@
+<mxfile host="65bd71144e">
+    <diagram name="Graph 10 — Data Flow Overview" id="graph10-dataflow">
+        <mxGraphModel dx="14455" dy="10687" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <root>
+                    <mxCell id="0" />
+                    <mxCell id="1" parent="0" />
+                    <!-- Group: External -->
+                    <mxCell id="EXT_GROUP" value="External" style="swimlane;fillColor=#111111;strokeColor=#1565c0;strokeWidth=2;fontColor=#e3f2fd;" vertex="1" parent="1">
+                        <mxGeometry x="20" y="20" width="180" height="160" as="geometry" />
+                    </mxCell>
+                    <mxCell id="TV" value="TV: TradingView" style="rounded=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=1;" vertex="1" parent="EXT_GROUP">
+                        <mxGeometry x="20" y="20" width="120" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="OANDA" value="OANDA: API" style="rounded=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=1;" vertex="1" parent="EXT_GROUP">
+                        <mxGeometry x="20" y="80" width="120" height="40" as="geometry" />
+                    </mxCell>
+                    <!-- Group: Option A -->
+                    <mxCell id="OPTA_GROUP" value="Option A: Canonical Ingest" style="swimlane;fillColor=#111111;strokeColor=#2e7d32;strokeWidth=2;fontColor=#c8e6c9;" vertex="1" parent="1">
+                        <mxGeometry x="220" y="20" width="380" height="200" as="geometry" />
+                    </mxCell>
+                    <mxCell id="A_WORKER" value="A_WORKER: Worker" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTA_GROUP">
+                        <mxGeometry x="20" y="20" width="140" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="A_BACKFILL" value="A_BACKFILL: Backfill scripts" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTA_GROUP">
+                        <mxGeometry x="20" y="80" width="140" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="A_BLOCKS" value="A_BLOCKS: ovc_blocks_v01_1_min" style="rounded=1;fillColor=#c8e6c9;strokeColor=#2e7d32;strokeWidth=2;" vertex="1" parent="OPTA_GROUP">
+                        <mxGeometry x="200" y="20" width="180" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="A_M15" value="A_M15: ovc_candles_m15_raw" style="rounded=1;fillColor=#c8e6c9;strokeColor=#2e7d32;strokeWidth=2;" vertex="1" parent="OPTA_GROUP">
+                        <mxGeometry x="200" y="80" width="180" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="A_R2" value="A_R2: R2 archive" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTA_GROUP">
+                        <mxGeometry x="200" y="140" width="180" height="40" as="geometry" />
+                    </mxCell>
+                    <!-- Group: Option B -->
+                    <mxCell id="OPTB_GROUP" value="Option B: Derived Features" style="swimlane;fillColor=#111111;strokeColor=#ef6c00;strokeWidth=2;fontColor=#fff3e0;" vertex="1" parent="1">
+                        <mxGeometry x="620" y="20" width="600" height="200" as="geometry" />
+                    </mxCell>
+                    <mxCell id="B_C1" value="B_C1: C1 compute" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTB_GROUP">
+                        <mxGeometry x="20" y="20" width="140" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="B_C2" value="B_C2: C2 compute" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTB_GROUP">
+                        <mxGeometry x="20" y="80" width="140" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="B_C3" value="B_C3: C3 compute (NOT INVOKED)" style="rounded=1;fillColor=#ffcdd2;strokeColor=#c62828;strokeWidth=1;dashed=1;" vertex="1" parent="OPTB_GROUP">
+                        <mxGeometry x="20" y="140" width="180" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="B_VIEWS" value="B_VIEWS: derived views" style="rounded=1;fillColor=#c8e6c9;strokeColor=#2e7d32;strokeWidth=2;" vertex="1" parent="OPTB_GROUP">
+                        <mxGeometry x="220" y="50" width="160" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="B_TF" value="B_TF: trajectory families" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTB_GROUP">
+                        <mxGeometry x="420" y="50" width="160" height="40" as="geometry" />
+                    </mxCell>
+                    <!-- Group: Option C -->
+                    <mxCell id="OPTC_GROUP" value="Option C: Outcomes" style="swimlane;fillColor=#111111;strokeColor=#ef6c00;strokeWidth=2;fontColor=#fff3e0;" vertex="1" parent="1">
+                        <mxGeometry x="1240" y="20" width="400" height="120" as="geometry" />
+                    </mxCell>
+                    <mxCell id="C_RUNNER" value="C_RUNNER: Option C runner" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTC_GROUP">
+                        <mxGeometry x="20" y="20" width="180" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="C_OUTCOMES" value="C_OUTCOMES: v_ovc_c_outcomes" style="rounded=1;fillColor=#c8e6c9;strokeColor=#2e7d32;strokeWidth=2;" vertex="1" parent="OPTC_GROUP">
+                        <mxGeometry x="220" y="20" width="180" height="40" as="geometry" />
+                    </mxCell>
+                    <!-- Group: Option D -->
+                    <mxCell id="OPTD_GROUP" value="Option D: Paths/Bridge" style="swimlane;fillColor=#111111;strokeColor=#ef6c00;strokeWidth=2;fontColor=#fff3e0;" vertex="1" parent="1">
+                        <mxGeometry x="1660" y="20" width="540" height="200" as="geometry" />
+                    </mxCell>
+                    <mxCell id="D_PATH1" value="D_PATH1: Path1 scripts" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTD_GROUP">
+                        <mxGeometry x="20" y="20" width="160" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="D_EVIDENCE" value="D_EVIDENCE: evidence runs" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTD_GROUP">
+                        <mxGeometry x="220" y="20" width="160" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="D_SCORES" value="D_SCORES: score reports" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTD_GROUP">
+                        <mxGeometry x="220" y="80" width="160" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="D_NOTION" value="D_NOTION: Notion sync" style="rounded=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=1;" vertex="1" parent="OPTD_GROUP">
+                        <mxGeometry x="220" y="140" width="160" height="40" as="geometry" />
+                    </mxCell>
+                    <!-- Group: Stores -->
+                    <mxCell id="STORES_GROUP" value="Stores" style="swimlane;fillColor=#111111;strokeColor=#1565c0;strokeWidth=2;fontColor=#e3f2fd;" vertex="1" parent="1">
+                        <mxGeometry x="400" y="240" width="400" height="80" as="geometry" />
+                    </mxCell>
+                    <mxCell id="NEON" value="NEON: PostgreSQL" style="rounded=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=1;" vertex="1" parent="STORES_GROUP">
+                        <mxGeometry x="20" y="20" width="180" height="40" as="geometry" />
+                    </mxCell>
+                    <mxCell id="NOTION" value="NOTION: Notion DB" style="rounded=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=1;" vertex="1" parent="STORES_GROUP">
+                        <mxGeometry x="220" y="20" width="160" height="40" as="geometry" />
+                    </mxCell>
+                <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;dashed=1;" edge="1" parent="1" source="A_BLOCKS" target="B_C3"/>
+                <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="B_C1" target="B_VIEWS"/>
+                <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="B_C2" target="B_VIEWS"/>
+                <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;dashed=1;" edge="1" parent="1" source="B_C3" target="B_VIEWS"/>
+                <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="B_VIEWS" target="B_TF"/>
+                <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="B_VIEWS" target="C_RUNNER"/>
+                <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="C_RUNNER" target="C_OUTCOMES"/>
+                <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="C_OUTCOMES" target="D_PATH1"/>
+                <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="B_TF" target="D_EVIDENCE"/>
+                <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="D_PATH1" target="D_EVIDENCE"/>
+                <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="D_PATH1" target="D_SCORES"/>
+                <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="D_PATH1" target="D_NOTION"/>
+                <mxCell id="e21" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" edge="1" parent="1" source="D_NOTION" target="NOTION"/>
+                <mxCell id="e22" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;dashed=1;" edge="1" parent="1" source="A_BLOCKS" target="NEON"/>
+                <mxCell id="e23" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;dashed=1;" edge="1" parent="1" source="A_M15" target="NEON"/>
+                <mxCell id="e24" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;dashed=1;" edge="1" parent="1" source="B_VIEWS" target="NEON"/>
+                <mxCell id="e25" style="edgeStyle=orthogonalEdgeStyle;endArrow=none;dashed=1;" edge="1" parent="1" source="C_OUTCOMES" target="NEON"/>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
