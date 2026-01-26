@@ -80,14 +80,14 @@ REQUIRED_ENV_VARS = ["NEON_DSN"]
 REQUIRED_WINDOW_SPECS = ["N=1", "N=12", "session=date_ny", "rd_len="]
 
 # L1 feature columns for null rate analysis
-C1_FEATURE_COLUMNS = [
+L1_FEATURE_COLUMNS = [
     "range", "body", "direction", "ret", "logret", 
     "body_ratio", "close_pos", "upper_wick", "lower_wick", "clv",
     "range_zero", "inputs_valid"
 ]
 
 # L2 feature columns for null rate analysis
-C2_FEATURE_COLUMNS = [
+L2_FEATURE_COLUMNS = [
     "gap", "took_prev_high", "took_prev_low",
     "sess_high", "sess_low", "dist_sess_high", "dist_sess_low",
     "roll_avg_range_12", "roll_std_logret_12", "range_z_12",
@@ -96,7 +96,7 @@ C2_FEATURE_COLUMNS = [
 ]
 
 # L3 classification tables and required provenance columns
-C3_TABLES = {
+L3_TABLES = {
     "l3_regime_trend": {
         "table": "derived.ovc_l3_regime_trend_v0_1",
         "classification_column": "l3_regime_trend",
@@ -654,7 +654,7 @@ def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
 
 # ---------- L3 Validation Functions ----------
 
-def validate_c3_classifier(
+def validate_l3_classifier(
     cur,
     classifier_name: str,
     config: dict,
@@ -1161,11 +1161,11 @@ def main() -> int:
                 # 3. Null rates
                 print("Checking null rates...")
                 result.l1_null_rates = check_null_rates(
-                    cur, "derived.ovc_l1_features_v0_1", C1_FEATURE_COLUMNS,
+                    cur, "derived.ovc_l1_features_v0_1", L1_FEATURE_COLUMNS,
                     args.symbol, start_date, end_date
                 )
                 result.l2_null_rates = check_null_rates(
-                    cur, "derived.ovc_l2_features_v0_1", C2_FEATURE_COLUMNS,
+                    cur, "derived.ovc_l2_features_v0_1", L2_FEATURE_COLUMNS,
                     args.symbol, start_date, end_date
                 )
                 
@@ -1234,18 +1234,18 @@ def main() -> int:
                     print("\n--- L3 Classifier Validation ---")
                     
                     # Determine which classifiers to validate
-                    classifiers_to_check = args.l3_classifiers or list(C3_TABLES.keys())
+                    classifiers_to_check = args.l3_classifiers or list(L3_TABLES.keys())
                     
                     for classifier_name in classifiers_to_check:
-                        if classifier_name not in C3_TABLES:
+                        if classifier_name not in L3_TABLES:
                             result.warnings.append(f"Unknown L3 classifier: {classifier_name}")
                             print(f"  WARN: Unknown classifier '{classifier_name}', skipping")
                             continue
                         
-                        config = C3_TABLES[classifier_name]
+                        config = L3_TABLES[classifier_name]
                         print(f"\n  Validating {classifier_name} ({config['table']})...")
                         
-                        l3_result = validate_c3_classifier(
+                        l3_result = validate_l3_classifier(
                             cur, classifier_name, config,
                             args.symbol, start_date, end_date
                         )

@@ -243,7 +243,7 @@ flowchart TD
 | src/derived/compute_l3_regime_trend_v0_1.py | 86, 419 | RunWriter import and instantiation |
 | tests/test_derived_features.py | - | 24 tests (all pass) |
 | tests/test_l3_regime_trend.py | - | 20 tests (19 pass, 1 skip) |
-| .github/workflows/backfill_then_validate.yml | 119-136 | Steps 3-4 call compute_c1, compute_c2 |
+| .github/workflows/backfill_then_validate.yml | 119-136 | Steps 3-4 call compute_l1, compute_l2 |
 
 ### B2-DerivedValidation
 | Path | Line(s) | Evidence |

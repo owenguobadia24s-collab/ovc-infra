@@ -125,7 +125,7 @@ OPTION_DEFS = [
         key="B",
         title="OPT_B__DERIVED_LAYERS",
         definition="Derived layers: compute L2/L3 features, registries, thresholds, and semantic tags from canonical facts.",
-        keywords=("derived", "features", "feature", "registry", "threshold", "l2", "l3", "compute_c2", "compute_c3", "tag", "metric"),
+        keywords=("derived", "features", "feature", "registry", "threshold", "l2", "l3", "compute_l2", "compute_l3", "tag", "metric"),
         dir_prefixes=("l2", "l3", "derived", "features", "registry", "registries"),
     ),
     OptionDef(

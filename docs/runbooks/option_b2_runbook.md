@@ -359,8 +359,8 @@ pytest tests/test_validate_derived.py -v
 | Issue | Cause | Fix |
 |-------|-------|-----|
 | "Missing NEON_DSN" | Env var not set | `$env:NEON_DSN = '...'` |
-| "L1 table not found" | Migration not run | Run `sql/02_derived_c1_c2_tables_v0_1.sql` |
-| Coverage mismatch | Compute not run | Run compute_c1 and compute_c2 |
+| "L1 table not found" | Migration not run | Run `sql/02_derived_l1_l2_tables_v0_1.sql` |
+| Coverage mismatch | Compute not run | Run compute_l1 and compute_l2 |
 | Determinism failures | Formula changed | Re-run compute with `--recompute` |
 | TV not available | No TV-sourced blocks | Use `--mode skip` or omit `--compare-tv` |
 

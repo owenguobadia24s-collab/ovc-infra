@@ -319,30 +319,30 @@ class TestColumnLists:
     """Tests for feature column lists."""
 
     def test_l1_columns(self):
-        """L1 columns should match compute_c1 output."""
-        from validate_derived_range_v0_1 import C1_FEATURE_COLUMNS
+        """L1 columns should match compute_l1 output."""
+        from validate_derived_range_v0_1 import L1_FEATURE_COLUMNS
         
         expected = [
             "range", "body", "direction", "ret", "logret",
             "body_ratio", "close_pos", "upper_wick", "lower_wick", "clv",
             "range_zero", "inputs_valid"
         ]
-        assert set(C1_FEATURE_COLUMNS) == set(expected)
+        assert set(L1_FEATURE_COLUMNS) == set(expected)
 
     def test_l2_columns(self):
         """L2 columns should include all documented features."""
-        from validate_derived_range_v0_1 import C2_FEATURE_COLUMNS
+        from validate_derived_range_v0_1 import L2_FEATURE_COLUMNS
         
         # Key features that must exist
-        assert "gap" in C2_FEATURE_COLUMNS
-        assert "sess_high" in C2_FEATURE_COLUMNS
-        assert "sess_low" in C2_FEATURE_COLUMNS
-        assert "roll_avg_range_12" in C2_FEATURE_COLUMNS
-        assert "hh_12" in C2_FEATURE_COLUMNS
-        assert "ll_12" in C2_FEATURE_COLUMNS
-        assert "rd_hi" in C2_FEATURE_COLUMNS
-        assert "rd_lo" in C2_FEATURE_COLUMNS
-        assert "rd_mid" in C2_FEATURE_COLUMNS
+        assert "gap" in L2_FEATURE_COLUMNS
+        assert "sess_high" in L2_FEATURE_COLUMNS
+        assert "sess_low" in L2_FEATURE_COLUMNS
+        assert "roll_avg_range_12" in L2_FEATURE_COLUMNS
+        assert "hh_12" in L2_FEATURE_COLUMNS
+        assert "ll_12" in L2_FEATURE_COLUMNS
+        assert "rd_hi" in L2_FEATURE_COLUMNS
+        assert "rd_lo" in L2_FEATURE_COLUMNS
+        assert "rd_mid" in L2_FEATURE_COLUMNS
 
 
 # ---------- Edge Cases ----------

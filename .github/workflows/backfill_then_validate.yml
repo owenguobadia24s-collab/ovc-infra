@@ -121,21 +121,21 @@ jobs:
           echo "=== COMPUTE L1: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
           python src/derived/compute_l1_v0_1.py \
             --symbol GBPUSD \
-            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c1.log
+            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_l1.log
 
       - name: Step 4 - Compute L2 Features (Option B.1)
         run: |
           echo "=== COMPUTE L2: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
           python src/derived/compute_l2_v0_1.py \
             --symbol GBPUSD \
-            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c2.log
+            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_l2.log
 
       - name: Step 4.5 - Compute L3 Features (Option B.1)
         run: |
           echo "=== COMPUTE L3: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
           python src/derived/compute_l3_regime_trend_v0_1.py \
             --symbol GBPUSD \
-            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c3.log
+            2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_l3.log
 
       - name: Step 5 - Validate Derived Features (Option B.2)
         run: |
@@ -173,7 +173,7 @@ jobs:
             "triggered_by": "${{ github.actor }}",
             "triggered_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "workflow": "backfill_then_validate",
-            "steps": ["backfill", "validate_facts", "compute_c1", "compute_c2", "compute_c3", "validate_derived"]
+            "steps": ["backfill", "validate_facts", "compute_l1", "compute_l2", "compute_l3", "validate_derived"]
           }
           EOF
 
