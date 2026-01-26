@@ -1,8 +1,8 @@
-# C1 v0.1 Validation Report
+# L1 v0.1 Validation Report
 
 **Validation Date:** 2026-01-20  
 **Status:** ✅ ALL FIXTURES PASSED  
-**Outcome:** C1 eligible for CANONICAL promotion
+**Outcome:** L1 eligible for CANONICAL promotion
 
 ---
 
@@ -10,16 +10,16 @@
 
 | Property | Value |
 |----------|-------|
-| View | `derived.v_ovc_c1_features_v0_1` |
-| SQL File | `sql/derived/v_ovc_c1_features_v0_1.sql` |
-| Feature Spec | `docs/ops/OPTION_B_C1_FEATURES_v0.1.md` |
-| Implementation Contract | `docs/ops/OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md` |
+| View | `derived.v_ovc_l1_features_v0_1` |
+| SQL File | `sql/derived/v_ovc_l1_features_v0_1.sql` |
+| Feature Spec | `docs/ops/OPTION_B_L1_FEATURES_v0.1.md` |
+| Implementation Contract | `docs/ops/OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md` |
 
 ---
 
 ## 2. Mandatory Fixtures Executed
 
-Per `OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md §5.2`, the following mandatory fixtures were executed:
+Per `OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md §5.2`, the following mandatory fixtures were executed:
 
 | Fixture ID | Description | Condition |
 |------------|-------------|-----------|
@@ -108,11 +108,11 @@ Per `OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md §5.2`, the following mandatory
 
 ## 7. Conformance Statement
 
-> **All C1 features conform exactly to OPTION_B_C1_FEATURES_v0.1.md.**  
+> **All L1 features conform exactly to OPTION_B_L1_FEATURES_v0.1.md.**  
 > **No deviations detected.**
 
-The implementation in `sql/derived/v_ovc_c1_features_v0_1.sql`:
-- Implements all 12 C1 features as defined in the feature specification
+The implementation in `sql/derived/v_ovc_l1_features_v0_1.sql`:
+- Implements all 12 L1 features as defined in the feature specification
 - Handles all edge cases as required by the implementation contract
 - Uses correct types and explicit casts
 - Is deterministic and side-effect free
@@ -122,7 +122,7 @@ The implementation in `sql/derived/v_ovc_c1_features_v0_1.sql`:
 
 ## 8. Promotion Recommendation
 
-**RECOMMENDATION: PROMOTE C1 TO CANONICAL**
+**RECOMMENDATION: PROMOTE L1 TO CANONICAL**
 
 | Promotion Criterion | Status |
 |---------------------|--------|
@@ -135,10 +135,10 @@ The implementation in `sql/derived/v_ovc_c1_features_v0_1.sql`:
 | No implicit casts | ✅ |
 | Determinism verified | ✅ |
 
-All prerequisites from `OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md §6.2` are satisfied.
+All prerequisites from `OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md §6.2` are satisfied.
 
 ---
 
 *Validation completed: 2026-01-20*  
 *Validated by: Governance process*  
-*Next step: Update C1 specs to [STATUS: CANONICAL]*
+*Next step: Update L1 specs to [STATUS: CANONICAL]*

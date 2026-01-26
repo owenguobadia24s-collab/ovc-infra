@@ -1,14 +1,14 @@
-# C3 Semantic Contract (v0.1)
+# L3 Semantic Contract (v0.1)
 
 > **Status**: FROZEN  
 > **Effective**: OVC v0.1  
-> **Purpose**: Define invariants and rules for all C3 semantic tags to ensure determinism, provenance, and replay certification.
+> **Purpose**: Define invariants and rules for all L3 semantic tags to ensure determinism, provenance, and replay certification.
 
 ---
 
-## 1. What Is a C3 Tag?
+## 1. What Is a L3 Tag?
 
-A **C3 tag** is a **semantic classification** derived from C1/C2 features and versioned threshold packs. C3 tags represent market regime interpretations, not raw metrics.
+A **L3 tag** is a **semantic classification** derived from L1/L2 features and versioned threshold packs. L3 tags represent market regime interpretations, not raw metrics.
 
 ### Defining Characteristics
 
@@ -16,13 +16,13 @@ A **C3 tag** is a **semantic classification** derived from C1/C2 features and ve
 |----------|-------------|
 | **Semantic** | Must represent a meaningful market state (e.g., TREND, REVERSAL, BREAKOUT) |
 | **Non-primitive** | Cannot be a single arithmetic operation on OHLC |
-| **Derived** | Must be computed from C1/C2 features only—never raw B-layer OHLC |
+| **Derived** | Must be computed from L1/L2 features only—never raw B-layer OHLC |
 | **Discrete** | Must output a finite set of categorical values (not continuous) |
 | **Deterministic** | Same inputs + same threshold pack = identical output, always |
 
-### What C3 Is NOT
+### What L3 Is NOT
 
-- ❌ A raw metric (use C1 for single-block, C2 for multi-block)
+- ❌ A raw metric (use L1 for single-block, L2 for multi-block)
 - ❌ A prediction or forecast
 - ❌ A signal with external dependencies (news, sentiment, calendar)
 - ❌ A mutable or adaptive classification
@@ -31,21 +31,21 @@ A **C3 tag** is a **semantic classification** derived from C1/C2 features and ve
 
 ## 2. Mandatory Inputs
 
-Every C3 tag MUST derive its classification from:
+Every L3 tag MUST derive its classification from:
 
 | Source | Examples | Notes |
 |--------|----------|-------|
-| **C1 Features** | `direction`, `range`, `body`, `ret`, `logret`, `body_ratio`, `close_pos`, `clv` | Single-block derived metrics |
-| **C2 Features** | `hh_12`, `ll_12`, `roll_avg_range_12`, `range_z_12`, `sess_high`, `sess_low` | Multi-block/session features |
+| **L1 Features** | `direction`, `range`, `body`, `ret`, `logret`, `body_ratio`, `close_pos`, `clv` | Single-block derived metrics |
+| **L2 Features** | `hh_12`, `ll_12`, `roll_avg_range_12`, `range_z_12`, `sess_high`, `sess_low` | Multi-block/session features |
 | **Threshold Pack** | Versioned config from `ovc_cfg.threshold_pack` | All semantic boundaries |
 
 ### Prohibited Inputs
 
 | Source | Why Prohibited |
 |--------|----------------|
-| Raw OHLC from B-layer | Bypasses C1/C2 abstraction; breaks layering |
+| Raw OHLC from B-layer | Bypasses L1/L2 abstraction; breaks layering |
 | TradingView-computed fields | External dependency; not replay-certifiable |
-| Time-of-day heuristics | Leaks non-price information unless in C2 session features |
+| Time-of-day heuristics | Leaks non-price information unless in L2 session features |
 | External APIs/feeds | Non-deterministic; unavailable during replay |
 | Inline magic numbers | Violates threshold provenance requirement |
 
@@ -53,14 +53,14 @@ Every C3 tag MUST derive its classification from:
 
 ## 3. Mandatory Outputs
 
-Every C3 row MUST contain these columns:
+Every L3 row MUST contain these columns:
 
 | Column | Type | Purpose |
 |--------|------|---------|
 | `block_id` | TEXT | FK to B-layer (for joins) |
 | `symbol` | TEXT | Trading symbol |
 | `ts` | TIMESTAMPTZ | Block timestamp |
-| `c3_<tag_name>` | TEXT | Classification value (discrete, finite set) |
+| `l3_<tag_name>` | TEXT | Classification value (discrete, finite set) |
 | `threshold_pack_id` | TEXT | Pack ID from registry (NOT NULL) |
 | `threshold_pack_version` | INT | Pack version used (NOT NULL) |
 | `threshold_pack_hash` | TEXT | SHA256 of config (64 hex chars, NOT NULL) |
@@ -82,7 +82,7 @@ If any provenance column is NULL, the row is **invalid** and will fail B.2 valid
 
 ### The Determinism Guarantee
 
-> Given identical C1/C2 inputs and identical threshold pack (id, version, hash), a C3 classifier MUST produce **byte-identical** output rows.
+> Given identical L1/L2 inputs and identical threshold pack (id, version, hash), a L3 classifier MUST produce **byte-identical** output rows.
 
 ### Implementation Rules
 
@@ -138,7 +138,7 @@ row["threshold_pack_version"] = pack["version"]
 row["threshold_pack_hash"] = pack["config_hash"]
 
 # ❌ WRONG: Hardcoded or missing
-row["threshold_pack_id"] = "c3_regime_trend"  # What version?
+row["threshold_pack_id"] = "l3_regime_trend"  # What version?
 row["threshold_pack_hash"] = None  # Cannot verify!
 ```
 
@@ -150,18 +150,18 @@ If a compute run starts with pack v1, it MUST complete with pack v1. Activating 
 
 ## 6. Validation Requirements
 
-Every C3 tag MUST pass B.2+C3 validation:
+Every L3 tag MUST pass B.2+L3 validation:
 
 ### Mandatory Checks
 
 | Check | Failure Condition |
 |-------|-------------------|
-| Table exists | `derived.ovc_c3_<tag>_v*` not found |
+| Table exists | `derived.ovc_l3_<tag>_v*` not found |
 | Provenance not null | Any `threshold_pack_*` column is NULL |
 | Pack exists in registry | Referenced pack not in `ovc_cfg.threshold_pack` |
 | Hash matches registry | Stored hash ≠ registry hash for (pack_id, version) |
 | Values valid | Classification value not in allowed set |
-| Coverage parity | Row count mismatch vs C1/C2 (if strict mode) |
+| Coverage parity | Row count mismatch vs L1/L2 (if strict mode) |
 
 ### Running Validation
 
@@ -171,7 +171,7 @@ python src/validate/validate_derived_range_v0_1.py \
   --start-date 2026-01-13 \
   --end-date 2026-01-17 \
   --validate-c3 \
-  --c3-classifiers c3_regime_trend
+  --c3-classifiers l3_regime_trend
 ```
 
 ### Validation Artifacts
@@ -252,12 +252,12 @@ class StatefulClassifier:
 ### Table Naming
 
 ```
-derived.ovc_c3_<tag_name>_v<major>_<minor>
+derived.ovc_l3_<tag_name>_v<major>_<minor>
 ```
 
 Examples:
-- `derived.ovc_c3_regime_trend_v0_1`
-- `derived.ovc_c3_reversal_v0_1`
+- `derived.ovc_l3_regime_trend_v0_1`
+- `derived.ovc_l3_reversal_v0_1`
 
 ### Primary Key
 
@@ -269,20 +269,20 @@ PRIMARY KEY (symbol, ts)
 
 ```sql
 -- For B-layer joins
-CREATE UNIQUE INDEX idx_c3_<tag>_block_id ON derived.ovc_c3_<tag>_v* (block_id);
+CREATE UNIQUE INDEX idx_c3_<tag>_block_id ON derived.ovc_l3_<tag>_v* (block_id);
 
 -- For threshold audit
-CREATE INDEX idx_c3_<tag>_threshold_pack ON derived.ovc_c3_<tag>_v* (threshold_pack_id, threshold_pack_version);
+CREATE INDEX idx_c3_<tag>_threshold_pack ON derived.ovc_l3_<tag>_v* (threshold_pack_id, threshold_pack_version);
 
 -- For run tracking
-CREATE INDEX idx_c3_<tag>_run_id ON derived.ovc_c3_<tag>_v* (run_id);
+CREATE INDEX idx_c3_<tag>_run_id ON derived.ovc_l3_<tag>_v* (run_id);
 ```
 
 ### Classification Constraint
 
 ```sql
 CONSTRAINT chk_c3_<tag>_valid CHECK (
-    c3_<tag_name> IN ('VALUE1', 'VALUE2', ...)
+    l3_<tag_name> IN ('VALUE1', 'VALUE2', ...)
 )
 ```
 
@@ -290,15 +290,15 @@ CONSTRAINT chk_c3_<tag>_valid CHECK (
 
 ## 9. Reference Implementation
 
-The canonical reference for C3 implementation is:
+The canonical reference for L3 implementation is:
 
 ```
-src/derived/compute_c3_regime_trend_v0_1.py
+src/derived/compute_l3_regime_trend_v0_1.py
 ```
 
-All future C3 tags MUST follow the same patterns for:
+All future L3 tags MUST follow the same patterns for:
 - Threshold pack resolution
-- C1/C2 data fetching
+- L1/L2 data fetching
 - Classification logic structure
 - Provenance column population
 - Upsert mechanics
@@ -309,7 +309,7 @@ All future C3 tags MUST follow the same patterns for:
 
 | Invariant | Enforcement |
 |-----------|-------------|
-| C3 derives from C1/C2 only | Code review + no B-layer queries in C3 scripts |
+| L3 derives from L1/L2 only | Code review + no B-layer queries in L3 scripts |
 | All thresholds from registry | Code review + no magic numbers |
 | Provenance columns never NULL | SQL NOT NULL constraint + B.2 validation |
 | Hash matches registry | B.2 validation check |

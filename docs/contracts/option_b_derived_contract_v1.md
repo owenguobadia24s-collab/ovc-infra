@@ -17,7 +17,7 @@ Option B computes derived features from canonical facts. All features are recomp
 | Source | Table/Config | Description |
 |--------|--------------|-------------|
 | Canonical facts | `ovc.ovc_blocks_v01_1_min` | 2H block OHLC |
-| Threshold config | `ovc_cfg.threshold_pack` | C3 regime thresholds |
+| Threshold config | `ovc_cfg.threshold_pack` | L3 regime thresholds |
 | Active threshold | `ovc_cfg.threshold_pack_active` | Current threshold version |
 
 ---
@@ -28,11 +28,11 @@ Option B computes derived features from canonical facts. All features are recomp
 
 | Output | Type | Source Definition |
 |--------|------|-------------------|
-| `derived.v_ovc_c1_features_v0_1` | View | `sql/derived/v_ovc_c1_features_v0_1.sql` |
-| `derived.v_ovc_c2_features_v0_1` | View | `sql/derived/v_ovc_c2_features_v0_1.sql` |
-| `derived.v_ovc_c3_features_v0_1` | View | `sql/derived/v_ovc_c3_features_v0_1.sql` |
-| `derived.ovc_c1_features_v0_1` | Table | `src/derived/compute_c1_v0_1.py` |
-| `derived.ovc_c2_features_v0_1` | Table | `src/derived/compute_c2_v0_1.py` |
+| `derived.v_ovc_l1_features_v0_1` | View | `sql/derived/v_ovc_l1_features_v0_1.sql` |
+| `derived.v_ovc_l2_features_v0_1` | View | `sql/derived/v_ovc_l2_features_v0_1.sql` |
+| `derived.v_ovc_l3_features_v0_1` | View | `sql/derived/v_ovc_l3_features_v0_1.sql` |
+| `derived.ovc_l1_features_v0_1` | Table | `src/derived/compute_l1_v0_1.py` |
+| `derived.ovc_l2_features_v0_1` | Table | `src/derived/compute_l2_v0_1.py` |
 
 ### 3.2 DEPRECATED (Legacy Implementation)
 
@@ -40,7 +40,7 @@ Option B computes derived features from canonical facts. All features are recomp
 |--------|------|--------|
 | `derived.ovc_block_features_v0_1` | View | **DEPRECATED** — Do not use for new code |
 
-**v1 Resolution**: The split C1/C2/C3 implementation is authoritative. The legacy combined view is deprecated and will be removed in v2.
+**v1 Resolution**: The split L1/L2/L3 implementation is authoritative. The legacy combined view is deprecated and will be removed in v2.
 
 ---
 
@@ -48,11 +48,11 @@ Option B computes derived features from canonical facts. All features are recomp
 
 | Layer | Content | Example Features |
 |-------|---------|------------------|
-| C0 | Raw passthrough | `block_id`, `sym`, `bar_close_ms`, `o`, `h`, `l`, `c` |
+| L0 | Raw passthrough | `block_id`, `sym`, `bar_close_ms`, `o`, `h`, `l`, `c` |
 | R | Immediate risk | `rng`, `ret`, `body_ratio`, `close_pos` |
-| C1 | Block physics | `range`, `body`, `direction`, `gap`, rolling stats |
-| C2 | Structural | `sess_high`, `sess_low`, `hh_12`, `ll_12`, structure state |
-| C3 | Regime/trend | `c3_volatility_regime`, `c3_trend_bias` |
+| L1 | Block physics | `range`, `body`, `direction`, `gap`, rolling stats |
+| L2 | Structural | `sess_high`, `sess_low`, `hh_12`, `ll_12`, structure state |
+| L3 | Regime/trend | `l3_volatility_regime`, `l3_trend_bias` |
 
 ---
 
@@ -90,7 +90,7 @@ src/derived/compute_{layer}_v{major}_{minor}.py
 
 Each view/table MUST include a deterministic `formula_hash`:
 ```sql
-md5('derived.v_ovc_c1_features_v0_1:v0.1:{computation_spec}')
+md5('derived.v_ovc_l1_features_v0_1:v0.1:{computation_spec}')
 ```
 
 ---
@@ -121,9 +121,9 @@ md5('derived.v_ovc_c1_features_v0_1:v0.1:{computation_spec}')
 ### 9.1 v1 Required Workflow
 
 `backfill_then_validate.yml` MUST invoke:
-1. `compute_c1_v0_1.py` → materializes C1 table
-2. `compute_c2_v0_1.py` → materializes C2 table
-3. `compute_c3_regime_trend_v0_1.py` → materializes C3 table (**currently missing**)
+1. `compute_l1_v0_1.py` → materializes L1 table
+2. `compute_l2_v0_1.py` → materializes L2 table
+3. `compute_l3_regime_trend_v0_1.py` → materializes L3 table (**currently missing**)
 
 ### 9.2 Validation Gate
 
@@ -142,5 +142,5 @@ After compute, workflow MUST run `validate_derived_range_v0_1.py` to verify:
 | 2 | Writes only to derived schema | SQL/code review |
 | 3 | Formula hash present | View definition |
 | 4 | Run provenance logged | `derived.derived_runs` query |
-| 5 | All C1/C2/C3 computes invoked | Workflow YAML |
+| 5 | All L1/L2/L3 computes invoked | Workflow YAML |
 | 6 | Validation gate passes | CI logs |

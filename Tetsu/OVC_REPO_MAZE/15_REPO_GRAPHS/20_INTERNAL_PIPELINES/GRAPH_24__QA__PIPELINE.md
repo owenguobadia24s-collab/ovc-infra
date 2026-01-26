@@ -19,7 +19,7 @@ flowchart TB
   %% Test Suite
   subgraph TESTS[tests/]
     T_DERIVED[T_DERIVED: test_derived_features.py]
-    T_C3[T_C3: test_c3_regime_trend.py]
+    T_C3[T_C3: test_l3_regime_trend.py]
     T_CONTRACT[T_CONTRACT: test_contract_equivalence.py]
     T_MIN[T_MIN: test_min_contract_validation.py]
     T_REG[T_REG: test_threshold_registry.py]
@@ -147,7 +147,7 @@ flowchart TB
 | WF_SCHEMA | .github/workflows/ci_schema_check.yml | Orchestration |
 | WF_SANITY | .github/workflows/ci_workflow_sanity.yml | Orchestration |
 | T_DERIVED | tests/test_derived_features.py | QA |
-| T_C3 | tests/test_c3_regime_trend.py | QA |
+| T_C3 | tests/test_l3_regime_trend.py | QA |
 | T_CONTRACT | tests/test_contract_equivalence.py | QA |
 | T_MIN | tests/test_min_contract_validation.py | QA |
 | T_REG | tests/test_threshold_registry.py | QA |

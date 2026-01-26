@@ -8,8 +8,8 @@
 -- Formula: RES_raw = (rng / rng_avg_6) × body_ratio
 --
 -- Source Views (CANONICAL - READ ONLY):
---   - derived.v_ovc_c1_features_v0_1 (rng, body_ratio)
---   - derived.v_ovc_c2_features_v0_1 (rng_avg_6, bar_close_ms)
+--   - derived.v_ovc_l1_features_v0_1 (rng, body_ratio)
+--   - derived.v_ovc_l2_features_v0_1 (rng_avg_6, bar_close_ms)
 --
 -- DISCLAIMER: This score is NOT predictive. Association with outcomes
 --             does NOT imply predictability. NOT a strategy component.
@@ -18,7 +18,7 @@
 WITH
 -- -----------------------------------------------------------------------------
 -- CTE: base_data
--- Join C1 and C2 to get required columns
+-- Join L1 and L2 to get required columns
 -- -----------------------------------------------------------------------------
 base_data AS (
     SELECT
@@ -28,8 +28,8 @@ base_data AS (
         c1.rng,
         c1.body_ratio,
         c2.rng_avg_6
-    FROM derived.v_ovc_c1_features_v0_1 c1
-    INNER JOIN derived.v_ovc_c2_features_v0_1 c2
+    FROM derived.v_ovc_l1_features_v0_1 c1
+    INNER JOIN derived.v_ovc_l2_features_v0_1 c2
         ON c1.block_id = c2.block_id
     WHERE c1.block_id IS NOT NULL
 ),

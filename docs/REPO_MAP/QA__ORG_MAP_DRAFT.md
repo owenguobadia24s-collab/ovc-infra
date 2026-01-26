@@ -66,7 +66,7 @@ OUTPUTS (artifacts/data): pytest outputs, test artifacts
 
 CONTAINS (high-signal items):
 - test_derived_features.py -> QA/QA/CANONICAL -> derived feature tests
-- test_c3_regime_trend.py -> QA/QA/CANONICAL -> C3 regime tests
+- test_l3_regime_trend.py -> QA/QA/CANONICAL -> L3 regime tests
 - test_contract_equivalence.py -> QA/QA/CANONICAL -> contract consistency
 - test_min_contract_validation.py -> QA/QA/CANONICAL -> export contract tests
 - test_threshold_registry.py -> QA/QA/CANONICAL -> registry tests
@@ -658,7 +658,7 @@ OUTPUTS (artifacts/data): *.txt output captures
 CONTAINS (high-signal items):
 - a0_wrangler_config.txt -> Artifacts & Evidence/QA/SUPPORTING -> wrangler config output
 - b2_workflow_files.txt -> Artifacts & Evidence/QA/SUPPORTING -> workflow listing
-- c1_neon_schema_verification.txt -> Artifacts & Evidence/QA/SUPPORTING -> schema verification
+- l1_neon_schema_verification.txt -> Artifacts & Evidence/QA/SUPPORTING -> schema verification
 
 CROSS-REFERENCES:
 - reports/verification/2026-01-19/outputs

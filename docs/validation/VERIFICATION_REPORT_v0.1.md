@@ -14,7 +14,7 @@
 |---------|-----------|--------|----------|
 | A | Cloudflare Worker Deployment | **VERIFIED** | [outputs/a1_wrangler_whoami.txt](../../reports/verification/2026-01-19/outputs/a1_wrangler_whoami.txt), [outputs/a2_wrangler_deployments.txt](../../reports/verification/2026-01-19/outputs/a2_wrangler_deployments.txt) |
 | B | GitHub Actions Workflows | **VERIFIED** | [outputs/gh_section_b_*.txt](../../reports/verification/2026-01-19/outputs/) |
-| C | Neon Schema | **VERIFIED** | [outputs/c1_neon_schema_verification.txt](../../reports/verification/2026-01-19/outputs/c1_neon_schema_verification.txt) |
+| C | Neon Schema | **VERIFIED** | [outputs/l1_neon_schema_verification.txt](../../reports/verification/2026-01-19/outputs/l1_neon_schema_verification.txt) |
 
 ---
 
@@ -276,8 +276,8 @@ All four target workflows have been verified:
 #### Derived Features (derived schema)
 | Object | Type | Exists | Row Count |
 |--------|------|--------|-----------|
-| `derived.ovc_c1_features_v0_1` | TABLE | ✅ | 804 |
-| `derived.ovc_c2_features_v0_1` | TABLE | ✅ | 804 |
+| `derived.ovc_l1_features_v0_1` | TABLE | ✅ | 804 |
+| `derived.ovc_l2_features_v0_1` | TABLE | ✅ | 804 |
 | `derived.derived_runs_v0_1` | TABLE | ✅ | - |
 | `derived.eval_runs` | TABLE | ✅ | - |
 | `derived.ovc_outcomes_v0_1` | VIEW | ✅ | - |
@@ -303,11 +303,11 @@ All four target workflows have been verified:
 
 ### Notes
 - `derived.ovc_block_features_v0_1` view NOT FOUND (listed in PIPELINE_REALITY_MAP but not present)
-  - May be deprecated or renamed to `derived.ovc_c1_features_v0_1` (TABLE)
+  - May be deprecated or renamed to `derived.ovc_l1_features_v0_1` (TABLE)
 - All four schemas exist with expected objects: `ovc`, `derived`, `ovc_qa`, `ovc_cfg`
 
 ### Evidence
-- [outputs/c1_neon_schema_verification.txt](../../reports/verification/2026-01-19/outputs/c1_neon_schema_verification.txt)
+- [outputs/l1_neon_schema_verification.txt](../../reports/verification/2026-01-19/outputs/l1_neon_schema_verification.txt)
 
 ---
 
@@ -338,7 +338,7 @@ All four target workflows have been verified:
    - headSha alignment
 
 3. **Clarify `ovc_block_features_v0_1`** reference in PIPELINE_REALITY_MAP
-   - View does not exist; likely replaced by `derived.ovc_c1_features_v0_1` table
+   - View does not exist; likely replaced by `derived.ovc_l1_features_v0_1` table
    - Update documentation if confirmed
 
 4. **Update PIPELINE_REALITY_MAP**
@@ -361,7 +361,7 @@ reports/verification/2026-01-19/
     ├── b1_gh_auth_status.txt
     ├── b2_workflow_files.txt
     ├── b3_workflow_analysis.txt
-    └── c1_neon_schema_verification.txt
+    └── l1_neon_schema_verification.txt
 ```
 
 ---

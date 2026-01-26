@@ -1,36 +1,36 @@
 """
-OVC C3 Regime Trend Classifier (v0.1)
+OVC L3 Regime Trend Classifier (v0.1)
 
 ================================================================================
-REFERENCE IMPLEMENTATION FOR C3 TAGS
+REFERENCE IMPLEMENTATION FOR L3 TAGS
 ================================================================================
-This script is the canonical reference for all future C3 classifiers.
-New C3 tags MUST follow the same patterns for:
+This script is the canonical reference for all future L3 classifiers.
+New L3 tags MUST follow the same patterns for:
     - Threshold pack resolution (resolve once at start, not per-block)
-    - C1/C2 data fetching (never query B-layer OHLC directly)
+    - L1/L2 data fetching (never query B-layer OHLC directly)
     - Classification logic structure (pure function of inputs + config)
     - Provenance column population (pack_id, version, hash from resolved pack)
     - Upsert mechanics (ON CONFLICT DO UPDATE for idempotence)
 
-Before implementing a new C3 tag, read:
-    - docs/c3_semantic_contract_v0_1.md (rules and invariants)
-    - docs/c3_entry_checklist.md (required artifacts)
-    - docs/option_threshold_registry_runbook.md (C3 Lifecycle section)
+Before implementing a new L3 tag, read:
+    - docs/l3_semantic_contract_v0_1.md (rules and invariants)
+    - docs/l3_entry_checklist.md (required artifacts)
+    - docs/option_threshold_registry_runbook.md (L3 Lifecycle section)
 ================================================================================
 
-Purpose: Classify market regime as TREND or NON_TREND using C1/C2 features
+Purpose: Classify market regime as TREND or NON_TREND using L1/L2 features
          and versioned threshold packs from the registry.
 
 Tier Boundary (per c_layer_boundary_spec_v0.1.md):
-    C3 = Semantic tags derived from C1/C2 features + threshold packs.
+    L3 = Semantic tags derived from L1/L2 features + threshold packs.
     All semantic decisions come from versioned threshold packs.
     Every output row stores threshold provenance for replay certification.
 
-C1/C2 Inputs Used:
-    - direction (C1): +1/-1/0 for bullish/bearish/neutral
-    - range (C1): h - l in price units
-    - hh_12 (C2): Boolean, h > max(h[-12:-1])
-    - ll_12 (C2): Boolean, l < min(l[-12:-1])
+L1/L2 Inputs Used:
+    - direction (L1): +1/-1/0 for bullish/bearish/neutral
+    - range (L1): h - l in price units
+    - hh_12 (L2): Boolean, h > max(h[-12:-1])
+    - ll_12 (L2): Boolean, l < min(l[-12:-1])
 
 Classification Logic:
     TREND if ALL conditions met over lookback window:
@@ -42,9 +42,9 @@ Classification Logic:
     NON_TREND otherwise.
 
 Usage:
-    python src/derived/compute_c3_regime_trend_v0_1.py \\
+    python src/derived/compute_l3_regime_trend_v0_1.py \\
         --symbol GBPUSD \\
-        --threshold-pack c3_regime_trend \\
+        --threshold-pack l3_regime_trend \\
         --scope GLOBAL \\
         [--threshold-version 1] \\
         [--run-id <uuid>] \\
@@ -55,7 +55,7 @@ Environment:
     NEON_DSN or DATABASE_URL: PostgreSQL connection string
 
 Guarantees:
-    - Deterministic: Same C1/C2 inputs + same threshold pack => same outputs
+    - Deterministic: Same L1/L2 inputs + same threshold pack => same outputs
     - Idempotent: Reruns produce identical results (upsert on symbol, ts)
     - Auditable: Every row stores threshold pack provenance
 """
@@ -104,8 +104,8 @@ load_env()
 
 # ---------- Constants ----------
 VERSION = "v0.1"
-RUN_TYPE = "c3_regime_trend"
-C3_TABLE = "derived.ovc_c3_regime_trend_v0_1"
+RUN_TYPE = "l3_regime_trend"
+C3_TABLE = "derived.ovc_l3_regime_trend_v0_1"
 PIPELINE_ID = "B1-DerivedC3"
 PIPELINE_VERSION = "0.1.0"
 REQUIRED_ENV_VARS = ["NEON_DSN"]
@@ -127,7 +127,7 @@ def resolve_dsn() -> str:
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(
-        description="Compute C3 regime trend classifications from C1/C2 features."
+        description="Compute L3 regime trend classifications from L1/L2 features."
     )
     parser.add_argument(
         "--symbol",
@@ -137,7 +137,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--threshold-pack",
         required=True,
-        help="Threshold pack ID (e.g., c3_regime_trend)",
+        help="Threshold pack ID (e.g., l3_regime_trend)",
     )
     parser.add_argument(
         "--scope",
@@ -224,13 +224,13 @@ def fetch_c1_c2_data(
     limit: Optional[int],
 ) -> List[Dict[str, Any]]:
     """
-    Fetch C1/C2 features for classification.
+    Fetch L1/L2 features for classification.
     
     Returns list of dicts with:
         block_id, symbol, ts, direction, range, hh_12, ll_12, c (for bp calc)
     """
-    # Build query to join B, C1, C2
-    # If not recompute, exclude blocks that already have C3 rows
+    # Build query to join B, L1, L2
+    # If not recompute, exclude blocks that already have L3 rows
     exclude_clause = ""
     if not recompute:
         exclude_clause = f"""
@@ -253,8 +253,8 @@ def fetch_c1_c2_data(
             c2.hh_12,
             c2.ll_12
         FROM ovc.ovc_blocks_v01_1_min b
-        JOIN derived.ovc_c1_features_v0_1 c1 ON b.block_id = c1.block_id
-        JOIN derived.ovc_c2_features_v0_1 c2 ON b.block_id = c2.block_id
+        JOIN derived.ovc_l1_features_v0_1 c1 ON b.block_id = c1.block_id
+        JOIN derived.ovc_l2_features_v0_1 c2 ON b.block_id = c2.block_id
         WHERE b.sym = %s
         {exclude_clause}
         ORDER BY b.bar_close_ms ASC
@@ -295,7 +295,7 @@ def classify_regime_trend(
         config: Threshold config from pack (lookback, min_range_bp, etc.).
         
     Returns:
-        List of classification results with block_id, symbol, ts, c3_regime_trend.
+        List of classification results with block_id, symbol, ts, l3_regime_trend.
     """
     lookback = config.get("lookback", 12)
     min_range_bp = config.get("min_range_bp", 30)
@@ -346,7 +346,7 @@ def classify_regime_trend(
             "block_id": block["block_id"],
             "symbol": block["symbol"],
             "ts": ts,
-            "c3_regime_trend": classification,
+            "l3_regime_trend": classification,
         })
     
     return results
@@ -362,7 +362,7 @@ def write_c3_rows(
     run_id: str,
 ) -> int:
     """
-    Write C3 classification rows to database.
+    Write L3 classification rows to database.
     
     Uses upsert (ON CONFLICT DO UPDATE) for idempotency.
     
@@ -378,7 +378,7 @@ def write_c3_rows(
             r["block_id"],
             r["symbol"],
             r["ts"],
-            r["c3_regime_trend"],
+            r["l3_regime_trend"],
             pack_id,
             pack_version,
             pack_hash,
@@ -389,14 +389,14 @@ def write_c3_rows(
     
     insert_sql = f"""
         INSERT INTO {C3_TABLE} (
-            block_id, symbol, ts, c3_regime_trend,
+            block_id, symbol, ts, l3_regime_trend,
             threshold_pack_id, threshold_pack_version, threshold_pack_hash,
             run_id
         )
         VALUES %s
         ON CONFLICT (symbol, ts) DO UPDATE SET
             block_id = EXCLUDED.block_id,
-            c3_regime_trend = EXCLUDED.c3_regime_trend,
+            l3_regime_trend = EXCLUDED.l3_regime_trend,
             threshold_pack_id = EXCLUDED.threshold_pack_id,
             threshold_pack_version = EXCLUDED.threshold_pack_version,
             threshold_pack_hash = EXCLUDED.threshold_pack_hash,
@@ -423,7 +423,7 @@ def main() -> None:
         # Generate run ID if not provided
         run_id = args.run_id or str(uuid.uuid4())
         
-        writer.log(f"[C3 Regime Trend v0.1] Starting classification")
+        writer.log(f"[L3 Regime Trend v0.1] Starting classification")
         writer.log(f"  Symbol: {args.symbol}")
         writer.log(f"  Threshold Pack: {args.threshold_pack}")
         writer.log(f"  Scope: {args.scope}")
@@ -450,7 +450,7 @@ def main() -> None:
             writer.log(f"ERROR: {e}")
             writer.log("")
             writer.log("To create and activate the threshold pack, run:")
-            writer.log(f'  python -m src.config.threshold_registry_cli create --pack-id {args.threshold_pack} --version 1 --scope {args.scope} --config-file configs/threshold_packs/c3_regime_trend_v1.json')
+            writer.log(f'  python -m src.config.threshold_registry_cli create --pack-id {args.threshold_pack} --version 1 --scope {args.scope} --config-file configs/threshold_packs/l3_regime_trend_v1.json')
             writer.log(f'  python -m src.config.threshold_registry_cli activate --pack-id {args.threshold_pack} --version 1 --scope {args.scope}')
             writer.check("threshold_pack_resolved", "Threshold pack resolved", "fail", [])
             writer.finish("failed")
@@ -478,8 +478,8 @@ def main() -> None:
         
         with psycopg2.connect(dsn) as conn:
             with conn.cursor() as cur:
-                # Fetch C1/C2 data
-                writer.log(f"Fetching C1/C2 data for {args.symbol}...")
+                # Fetch L1/L2 data
+                writer.log(f"Fetching L1/L2 data for {args.symbol}...")
                 blocks = fetch_c1_c2_data(
                     cur=cur,
                     symbol=args.symbol,
@@ -499,7 +499,7 @@ def main() -> None:
                 results = classify_regime_trend(blocks, config)
                 
                 # Count classifications
-                trend_count = sum(1 for r in results if r["c3_regime_trend"] == "TREND")
+                trend_count = sum(1 for r in results if r["l3_regime_trend"] == "TREND")
                 non_trend_count = len(results) - trend_count
                 writer.log(f"  TREND: {trend_count}")
                 writer.log(f"  NON_TREND: {non_trend_count}")
@@ -514,7 +514,7 @@ def main() -> None:
                     # Show sample rows
                     writer.log("Sample rows (first 5):")
                     for r in results[:5]:
-                        writer.log(f"  {r['block_id']}: {r['c3_regime_trend']}")
+                        writer.log(f"  {r['block_id']}: {r['l3_regime_trend']}")
                     writer.check("dry_run", "Dry run completed", "pass", [])
                     writer.finish("success")
                     return
@@ -533,12 +533,12 @@ def main() -> None:
                 writer.log(f"  Wrote {rows_written} rows")
         
         writer.log("")
-        writer.log(f"[C3 Regime Trend v0.1] Completed successfully")
+        writer.log(f"[L3 Regime Trend v0.1] Completed successfully")
         writer.log(f"  Run ID: {run_id}")
         writer.log(f"  Threshold pack: {pack_id} v{pack_version} ({pack_hash[:16]}...)")
         
         writer.add_output(type="neon_table", ref=C3_TABLE, rows_written=rows_written)
-        writer.check("classification_complete", "C3 regime trend classification completed", "pass", ["run.json:$.outputs[0].rows_written"])
+        writer.check("classification_complete", "L3 regime trend classification completed", "pass", ["run.json:$.outputs[0].rows_written"])
         writer.finish("success")
         
     except Exception as e:

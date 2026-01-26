@@ -3,7 +3,7 @@
 > **Status**: WORKING DRAFT / NON-CANONICAL  
 > **Created**: 2026-01-18  
 > **Purpose**: Consolidate metric trial findings, domain coverage, and tier review outcomes  
-> **Scope**: C1, C2, C3 trial results; domain coverage map; blocking decisions  
+> **Scope**: L1, L2, L3 trial results; domain coverage map; blocking decisions  
 > **Authority**: NONE — this document is advisory only until decisions are ratified
 
 ---
@@ -27,23 +27,23 @@
 
 ---
 
-## B) Tier Boundary Reminder (C1/C2/C3)
+## B) Tier Boundary Reminder (L1/L2/L3)
 
 The following rules summarize the tier boundaries per `c_layer_boundary_spec_v0.1.md` Section A:
 
 - **B-Layer**: Raw OHLC + identity + ingest metadata. Source-agnostic. No derived values.
-- **C1 (Single-Bar)**: Formulas operating on `{o, h, l, c}` of ONE block only. No lookback, no history, no rolling windows.
-- **C2 (Multi-Bar)**: Features requiring cross-bar relationships, rolling windows, or session context. Must have explicit `window_spec`.
-- **C3 (Categorical)**: Categorical/enum outputs derived from C2 numeric features + versioned threshold parameters. Thresholds must be frozen per version.
-- **Decision**: Synthesis of C2/C3 evidence into bias/play/prediction objects. Not raw features.
-- **Strict Upward Flow**: B → C1 → C2 → C3 → Decision. No tier may depend on outputs from a higher tier.
-- **Replay Rule**: All derived metrics (C1–C3) must be replayable from:
+- **L1 (Single-Bar)**: Formulas operating on `{o, h, l, c}` of ONE block only. No lookback, no history, no rolling windows.
+- **L2 (Multi-Bar)**: Features requiring cross-bar relationships, rolling windows, or session context. Must have explicit `window_spec`.
+- **L3 (Categorical)**: Categorical/enum outputs derived from L2 numeric features + versioned threshold parameters. Thresholds must be frozen per version.
+- **Decision**: Synthesis of L2/L3 evidence into bias/play/prediction objects. Not raw features.
+- **Strict Upward Flow**: B → L1 → L2 → L3 → Decision. No tier may depend on outputs from a higher tier.
+- **Replay Rule**: All derived metrics (L1–L3) must be replayable from:
   - B-layer facts (`ovc.ovc_blocks_v01_1_min`)
   - Versioned config (formula_hash, window_spec, threshold_version)
   - Provenance-stamped external context streams (if any)
 - **No TV as Truth**: TradingView is a reference engine for real-time display; Python/SQL implementations are authoritative for replay.
-- **Window Spec Required**: All C2+ fields must document window specification (e.g., `N=12`, `session=date_ny`, `parameterized=rd_len`).
-- **Threshold Version Required**: All C3 fields must reference a `threshold_version` for replay certification.
+- **Window Spec Required**: All L2+ fields must document window specification (e.g., `N=12`, `session=date_ny`, `parameterized=rd_len`).
+- **Threshold Version Required**: All L3 fields must reference a `threshold_version` for replay certification.
 
 ---
 
@@ -53,7 +53,7 @@ A metric earns its place in the derived layer by passing four gates:
 
 | Gate | Name | Criterion |
 |------|------|-----------|
-| **A** | Replay Legitimacy | Has documented `window_spec` (C2) or `threshold_version` (C3). Can be recomputed from B + config. |
+| **A** | Replay Legitimacy | Has documented `window_spec` (L2) or `threshold_version` (L3). Can be recomputed from B + config. |
 | **B** | Uniqueness | Non-redundant; does not duplicate information already captured by another metric at the same tier. |
 | **C** | Downstream Usefulness | Supports at least one of: structure detection, classification, validation, or research. |
 | **D** | Robustness | Stable under reasonable data variations; not overly sensitive to noise or edge cases. |
@@ -70,14 +70,14 @@ A metric earns its place in the derived layer by passing four gates:
 
 | # | Domain | Tier | Description |
 |---|--------|------|-------------|
-| 1 | Bar geometry | C1 | Single-bar shape: range, body, wicks, ratios |
-| 2 | Volatility baseline/dispersion | C2 | Rolling averages and standard deviations of range/return |
-| 3 | Volatility anomaly | C2 | Z-scores, extreme flags, deviation from baseline |
-| 4 | Session context | C2 | Session-scoped running max/min, distance from session extremes |
-| 5 | Range/balance evidence | C2 | RD numeric outputs: rd_hi, rd_lo, rd_mid, rd_w_rrc (confirmed in mapping) |
-| 6 | Structure breaks | C2 | Higher-highs, lower-lows, took-prev-high/low |
-| 7 | Regime/state semantics | C3 | Categorical tags: state_tag, value_tag, rd_state, rd_brkdir |
-| 8 | Event semantics | C3 | Event classification: event_tag, sweep, flip, tis |
+| 1 | Bar geometry | L1 | Single-bar shape: range, body, wicks, ratios |
+| 2 | Volatility baseline/dispersion | L2 | Rolling averages and standard deviations of range/return |
+| 3 | Volatility anomaly | L2 | Z-scores, extreme flags, deviation from baseline |
+| 4 | Session context | L2 | Session-scoped running max/min, distance from session extremes |
+| 5 | Range/balance evidence | L2 | RD numeric outputs: rd_hi, rd_lo, rd_mid, rd_w_rrc (confirmed in mapping) |
+| 6 | Structure breaks | L2 | Higher-highs, lower-lows, took-prev-high/low |
+| 7 | Regime/state semantics | L3 | Categorical tags: state_tag, value_tag, rd_state, rd_brkdir |
+| 8 | Event semantics | L3 | Event classification: event_tag, sweep, flip, tis |
 | 9 | External context streams | N/A | News, calendar, sentiment. NOT B-layer; provenance required. |
 
 ### D.2 — Coverage Score Legend
@@ -93,23 +93,23 @@ A metric earns its place in the derived layer by passing four gates:
 
 | Domain | Score | Notes |
 |--------|-------|-------|
-| 1. Bar geometry (C1) | **3** | Fully implemented in SQL view; deterministic |
-| 2. Volatility baseline (C2) | **2** | `roll_avg_range_12`, `roll_std_logret_12` present; window_spec documented |
-| 3. Volatility anomaly (C2) | **2** | `range_z_12`, extreme flags present; depends on rolling stats |
-| 4. Session context (C2) | **2** | `sess_high`, `sess_low`, `dist_*` present; `session=date_ny` implicit |
-| 5. Range/balance evidence (C2) | **1** | `rd_hi`, `rd_lo`, `rd_mid` present but `rd_len` not versioned |
-| 6. Structure breaks (C2) | **2** | `hh_12`, `ll_12`, `took_prev_*` present; `N=12` or `N=1` documented |
-| 7. Regime/state semantics (C3) | **1** | Tags present; thresholds not versioned (blocks replay) |
-| 8. Event semantics (C3) | **1** | Tags present; thresholds not versioned (blocks replay) |
+| 1. Bar geometry (L1) | **3** | Fully implemented in SQL view; deterministic |
+| 2. Volatility baseline (L2) | **2** | `roll_avg_range_12`, `roll_std_logret_12` present; window_spec documented |
+| 3. Volatility anomaly (L2) | **2** | `range_z_12`, extreme flags present; depends on rolling stats |
+| 4. Session context (L2) | **2** | `sess_high`, `sess_low`, `dist_*` present; `session=date_ny` implicit |
+| 5. Range/balance evidence (L2) | **1** | `rd_hi`, `rd_lo`, `rd_mid` present but `rd_len` not versioned |
+| 6. Structure breaks (L2) | **2** | `hh_12`, `ll_12`, `took_prev_*` present; `N=12` or `N=1` documented |
+| 7. Regime/state semantics (L3) | **1** | Tags present; thresholds not versioned (blocks replay) |
+| 8. Event semantics (L3) | **1** | Tags present; thresholds not versioned (blocks replay) |
 | 9. External context streams | **0** | `news_flag` exists but violates B-layer; provenance undefined |
 
-**Summary**: C1/C2 domains mostly 2–3. C3 domains 1–2 until threshold registry implemented. Context stream domain incomplete until provenance separation.
+**Summary**: L1/L2 domains mostly 2–3. L3 domains 1–2 until threshold registry implemented. Context stream domain incomplete until provenance separation.
 
-> **Note**: C1 domain coverage is complete, but the current C1 SQL view contains 12 C2 metrics (tier violation) pending C1/C2 split, per `mapping_validation_report_v0.1.md` Section 1.1.
+> **Note**: L1 domain coverage is complete, but the current L1 SQL view contains 12 L2 metrics (tier violation) pending L1/L2 split, per `mapping_validation_report_v0.1.md` Section 1.1.
 
 ---
 
-## E) C1 Trial Results (Compliant Single-Bar Set)
+## E) L1 Trial Results (Compliant Single-Bar Set)
 
 ### E.1 — Trialed Metrics
 
@@ -135,40 +135,40 @@ A metric earns its place in the derived layer by passing four gates:
 
 ---
 
-## F) C2 Trial Results
+## F) L2 Trial Results
 
-### F.1 — Reclassified from C1 View (Should Be C2)
+### F.1 — Reclassified from L1 View (Should Be L2)
 
-Per `mapping_validation_report_v0.1.md` Section 1.1, the following 12 fields are currently in the "C1" SQL view but require history:
-
-| Field | Current Tier | Correct Tier | Required window_spec |
-|-------|--------------|--------------|----------------------|
-| `gap` | C1 (impl) | **C2** | `N=1` (prev_c) |
-| `sess_high` | C1 (impl) | **C2** | `session=date_ny` |
-| `sess_low` | C1 (impl) | **C2** | `session=date_ny` |
-| `dist_sess_high` | C1 (impl) | **C2** | `session=date_ny` (inherits) |
-| `dist_sess_low` | C1 (impl) | **C2** | `session=date_ny` (inherits) |
-| `roll_avg_range_12` | C1 (impl) | **C2** | `N=12` |
-| `roll_std_logret_12` | C1 (impl) | **C2** | `N=12` |
-| `range_z_12` | C1 (impl) | **C2** | `N=12` (inherits) |
-| `hh_12` | C1 (impl) | **C2** | `N=12` |
-| `ll_12` | C1 (impl) | **C2** | `N=12` |
-| `took_prev_high` | C1 (impl) | **C2** | `N=1` |
-| `took_prev_low` | C1 (impl) | **C2** | `N=1` |
-
-### F.2 — RD Numeric Outputs (Should Be C2)
-
-Per `mapping_validation_report_v0.1.md` Section 1.2, the following 3 RD fields are classified as C3 but are numeric rolling-window outputs:
+Per `mapping_validation_report_v0.1.md` Section 1.1, the following 12 fields are currently in the "L1" SQL view but require history:
 
 | Field | Current Tier | Correct Tier | Required window_spec |
 |-------|--------------|--------------|----------------------|
-| `rd_hi` | C3 | **C2** | `parameterized=rd_len` |
-| `rd_lo` | C3 | **C2** | `parameterized=rd_len` |
-| `rd_mid` | C3 | **C2** | `parameterized=rd_len` (derived) |
+| `gap` | L1 (impl) | **L2** | `N=1` (prev_c) |
+| `sess_high` | L1 (impl) | **L2** | `session=date_ny` |
+| `sess_low` | L1 (impl) | **L2** | `session=date_ny` |
+| `dist_sess_high` | L1 (impl) | **L2** | `session=date_ny` (inherits) |
+| `dist_sess_low` | L1 (impl) | **L2** | `session=date_ny` (inherits) |
+| `roll_avg_range_12` | L1 (impl) | **L2** | `N=12` |
+| `roll_std_logret_12` | L1 (impl) | **L2** | `N=12` |
+| `range_z_12` | L1 (impl) | **L2** | `N=12` (inherits) |
+| `hh_12` | L1 (impl) | **L2** | `N=12` |
+| `ll_12` | L1 (impl) | **L2** | `N=12` |
+| `took_prev_high` | L1 (impl) | **L2** | `N=1` |
+| `took_prev_low` | L1 (impl) | **L2** | `N=1` |
+
+### F.2 — RD Numeric Outputs (Should Be L2)
+
+Per `mapping_validation_report_v0.1.md` Section 1.2, the following 3 RD fields are classified as L3 but are numeric rolling-window outputs:
+
+| Field | Current Tier | Correct Tier | Required window_spec |
+|-------|--------------|--------------|----------------------|
+| `rd_hi` | L3 | **L2** | `parameterized=rd_len` |
+| `rd_lo` | L3 | **L2** | `parameterized=rd_len` |
+| `rd_mid` | L3 | **L2** | `parameterized=rd_len` (derived) |
 
 ### F.3 — Paperwork Gaps (Missing window_spec / params)
 
-Per `mapping_validation_report_v0.1.md` Section 2, the following C2 fields lack explicit window specification:
+Per `mapping_validation_report_v0.1.md` Section 2, the following L2 fields lack explicit window specification:
 
 | Field Family | Fields | Required window_spec Format |
 |--------------|--------|----------------------------|
@@ -194,7 +194,7 @@ Per `mapping_validation_report_v0.1.md` Section 2, the following C2 fields lack 
 
 ---
 
-## G) C3 Trial Results (Worthy but Admissibility Blocked)
+## G) L3 Trial Results (Worthy but Admissibility Blocked)
 
 ### G.1 — Trialed Metrics
 
@@ -213,14 +213,14 @@ Per `mapping_validation_report_v0.1.md` Section 2, the following C2 fields lack 
 
 ### G.2 — Blocking Statement
 
-> **C3 outputs are NOT replay-certifiable until `threshold_version` is implemented and persisted per run.**
+> **L3 outputs are NOT replay-certifiable until `threshold_version` is implemented and persisted per run.**
 
-All C3 metrics fail Gate A (Replay Legitimacy) because:
+All L3 metrics fail Gate A (Replay Legitimacy) because:
 1. Threshold parameters (`th_move_OR`, `th_move_RER`, `th_accept_SD`, `cp_hi`, `cp_lo`, `rd_width_th`, `rd_drift_th`) are Pine script inputs, not persisted.
 2. Without `threshold_version`, the same formula can produce different categorical outputs.
 3. See `versioned_config_proposal_v0.1.md` Section 1 (Problem Statement) and Section 3 (Proposed Storage Path).
 
-**Remediation**: Implement threshold registry before C3 implementation in Python/SQL.
+**Remediation**: Implement threshold registry before L3 implementation in Python/SQL.
 
 ---
 
@@ -232,9 +232,9 @@ Per `c_layer_boundary_spec_v0.1.md` Section H, five decisions block implementati
 
 | ID | Question | Recommended Direction |
 |----|----------|----------------------|
-| **D1** | Should C1 include trivial rolling features? | **No** — keep strict C1 (single-bar only); split view into `ovc_c1_pure_*` and `ovc_c2_simple_*` |
-| **D2** | Should immediate categorical tags be C2.5 or C3? | **Conceptual C2.5 only** — no physical tier; document as "C2-tags" in mapping but keep in C3 schema |
-| **D3** | Should RD module be split by output type? | **Yes** — split RD numeric (C2) vs categorical (C3) for tier purity |
+| **D1** | Should L1 include trivial rolling features? | **No** — keep strict L1 (single-bar only); split view into `ovc_l1_pure_*` and `ovc_l2_simple_*` |
+| **D2** | Should immediate categorical tags be L2.5 or L3? | **Conceptual L2.5 only** — no physical tier; document as "L2-tags" in mapping but keep in L3 schema |
+| **D3** | Should RD module be split by output type? | **Yes** — split RD numeric (L2) vs categorical (L3) for tier purity |
 | **D4** | How to version threshold parameters? | **Threshold registry required** — implement `derived.threshold_registry` per versioned_config_proposal |
 | **D5** | Where does `news_flag` belong? | **Not B-layer** — becomes external/context stream with explicit provenance; store in `ovc.external_context` or similar |
 
@@ -242,16 +242,16 @@ Per `c_layer_boundary_spec_v0.1.md` Section H, five decisions block implementati
 
 The following actions require NO code changes; documentation edits only:
 
-1. **Add window_spec entries** for all C2+ fields in `metric_map_pine_to_c_layers.md`
+1. **Add window_spec entries** for all L2+ fields in `metric_map_pine_to_c_layers.md`
    - Format: `window_spec: N=12` or `window_spec: session=date_ny` or `window_spec: parameterized=rd_len`
 
 2. **Mark tier violations** in `metric_map_pine_to_c_layers.md`
-   - Add annotation `[VIOLATES: C1 boundary]` to fields in C1 section that require history
-   - Add annotation `[SHOULD BE: C2]` to RD numeric fields currently in C3 section
+   - Add annotation `[VIOLATES: L1 boundary]` to fields in L1 section that require history
+   - Add annotation `[SHOULD BE: L2]` to RD numeric fields currently in L3 section
 
 3. **Add threshold inventory** to `metric_map_pine_to_c_layers.md`
    - Reference `versioned_config_proposal_v0.1.md` Section 2 for parameter list
-   - Add `threshold_ref: <param_name>` to C3 fields
+   - Add `threshold_ref: <param_name>` to L3 fields
 
 4. **Define context stream provenance** (doc-only)
    - Create section in `ovc_metric_architecture.md` or new doc: "External Context Streams"
@@ -262,7 +262,7 @@ The following actions require NO code changes; documentation edits only:
 
 The following require code/schema changes and are **blocked until D1–D5 are ratified**:
 
-- Restructure `derived.ovc_block_features_v0_1` to split C1/C2 (blocked by D1)
+- Restructure `derived.ovc_block_features_v0_1` to split L1/L2 (blocked by D1)
 - Create `derived.threshold_registry` table (blocked by D4)
 - Relocate `news_flag` from B-layer (blocked by D5)
 - Update tier assignments in SQL comments (blocked by D1–D3)
@@ -277,8 +277,8 @@ This document references the following sections in existing docs:
 |-----------|----------|---------|
 | Tier definitions | `c_layer_boundary_spec_v0.1.md` | Section A — Tier Purpose |
 | Allowed/Forbidden inputs | `c_layer_boundary_spec_v0.1.md` | Section B, Section C |
-| C1 violations | `mapping_validation_report_v0.1.md` | Section 1.1 |
-| C3 violations | `mapping_validation_report_v0.1.md` | Section 1.2 |
+| L1 violations | `mapping_validation_report_v0.1.md` | Section 1.1 |
+| L3 violations | `mapping_validation_report_v0.1.md` | Section 1.2 |
 | B-layer violations | `mapping_validation_report_v0.1.md` | Section 1.3 |
 | Window spec gaps | `mapping_validation_report_v0.1.md` | Section 2 |
 | Threshold gaps | `mapping_validation_report_v0.1.md` | Section 3 |

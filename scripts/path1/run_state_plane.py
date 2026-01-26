@@ -26,9 +26,9 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 STATE_PLANE_VIEW = "derived.v_ovc_state_plane_v0_2"
 OUTPUT_SUBDIR = "state_plane_v0_2"
 SOURCE_VIEW_NAMES = [
-    "derived.v_ovc_c1_features_v0_1",
-    "derived.v_ovc_c2_features_v0_1",
-    "derived.v_ovc_c3_features_v0_1",
+    "derived.v_ovc_l1_features_v0_1",
+    "derived.v_ovc_l2_features_v0_1",
+    "derived.v_ovc_l3_features_v0_1",
 ]
 
 
@@ -351,7 +351,7 @@ def write_run_md(
 ## Invariants Reminder
 
 1. Observational only (no outcomes or decision surfaces).
-2. Canonical inputs only (C1/C2/C3 views).
+2. Canonical inputs only (L1/L2/L3 views).
 3. Thresholds and weights are versioned in the registry.
 
 ---

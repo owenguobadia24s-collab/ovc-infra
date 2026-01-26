@@ -1,4 +1,4 @@
-# Option B – C3 Implementation Contract v0.1
+# Option B – L3 Implementation Contract v0.1
 
 **[STATUS: CANONICAL]**
 
@@ -13,8 +13,8 @@
 | Created | 2026-01-20 |
 | Promoted | 2026-01-20 |
 | Author | OVC Infrastructure Team |
-| Governs | C3 Implementation Behavior |
-| Parent Documents | OPTION_B_C3_CHARTER_v0.1.md, OPTION_B_C3_FEATURES_v0.1.md |
+| Governs | L3 Implementation Behavior |
+| Parent Documents | OPTION_B_L3_CHARTER_v0.1.md, OPTION_B_L3_FEATURES_v0.1.md |
 | Governance | GOVERNANCE_RULES_v0.1.md |
 
 ---
@@ -23,10 +23,10 @@
 
 ### 1.1 Semantic Authority
 
-The **semantic meaning** of each C3 feature is defined in:
+The **semantic meaning** of each L3 feature is defined in:
 
 ```
-docs/ops/OPTION_B_C3_FEATURES_v0.1.md
+docs/ops/OPTION_B_L3_FEATURES_v0.1.md
 ```
 
 This implementation contract defines **how** those meanings are computed, not **what** they mean.
@@ -53,15 +53,15 @@ If implementation code produces outputs that disagree with the feature specifica
 
 ### 2.1 Required Inputs by Feature
 
-| Feature | Required C1 Inputs | Required C2 Inputs |
+| Feature | Required L1 Inputs | Required L2 Inputs |
 |---------|-------------------|-------------------|
-| `c3_trend_bias` | — | `dir_streak`, `dir_change` |
-| `c3_volatility_regime` | — | `rng_streak` |
-| `c3_structure_type` | `body`, `rng` | — |
-| `c3_momentum_state` | `body` | `dir_streak`, `dir_change` |
-| `c3_session_position` | `block_id` | — |
-| `c3_wick_dominance` | `wick_top`, `wick_bot`, `rng` | — |
-| `c3_range_context` | `rng` | `rng_avg_5` |
+| `l3_trend_bias` | — | `dir_streak`, `dir_change` |
+| `l3_volatility_regime` | — | `rng_streak` |
+| `l3_structure_type` | `body`, `rng` | — |
+| `l3_momentum_state` | `body` | `dir_streak`, `dir_change` |
+| `l3_session_position` | `block_id` | — |
+| `l3_wick_dominance` | `wick_top`, `wick_bot`, `rng` | — |
+| `l3_range_context` | `rng` | `rng_avg_5` |
 
 ### 2.2 NULL Handling Rules
 
@@ -69,8 +69,8 @@ When a required input is NULL:
 
 | Condition | Behavior |
 |-----------|----------|
-| Any required C1 input is NULL | Output the feature's **fallback label** |
-| Any required C2 input is NULL | Output the feature's **fallback label** |
+| Any required L1 input is NULL | Output the feature's **fallback label** |
+| Any required L2 input is NULL | Output the feature's **fallback label** |
 | `block_id` is NULL | Output NULL (row is invalid) |
 | `rng = 0` (not NULL) | Apply specific edge case rules per feature |
 
@@ -78,13 +78,13 @@ When a required input is NULL:
 
 | Feature | Fallback Label | Rationale |
 |---------|----------------|-----------|
-| `c3_trend_bias` | `'neutral'` | No directional information available |
-| `c3_volatility_regime` | `'normal'` | Assume baseline volatility |
-| `c3_structure_type` | `'balanced'` | Assume typical structure |
-| `c3_momentum_state` | `'steady'` | Assume no momentum change |
-| `c3_session_position` | NULL | Cannot determine without block_id |
-| `c3_wick_dominance` | `'balanced'` | Assume no dominant rejection |
-| `c3_range_context` | `'typical'` | Assume average range |
+| `l3_trend_bias` | `'neutral'` | No directional information available |
+| `l3_volatility_regime` | `'normal'` | Assume baseline volatility |
+| `l3_structure_type` | `'balanced'` | Assume typical structure |
+| `l3_momentum_state` | `'steady'` | Assume no momentum change |
+| `l3_session_position` | NULL | Cannot determine without block_id |
+| `l3_wick_dominance` | `'balanced'` | Assume no dominant rejection |
+| `l3_range_context` | `'typical'` | Assume average range |
 
 ### 2.4 "Unknown" vs NULL
 
@@ -109,7 +109,7 @@ For every feature, **exactly one label** MUST be assigned per block.
 
 ### 3.2 Precedence Rules by Feature
 
-#### `c3_trend_bias`
+#### `l3_trend_bias`
 
 Evaluation order (first match wins):
 
@@ -118,7 +118,7 @@ Evaluation order (first match wins):
 3. If `dir_streak IN (1, 2)` → `'nascent'`
 4. Otherwise → `'neutral'`
 
-#### `c3_volatility_regime`
+#### `l3_volatility_regime`
 
 Evaluation order:
 
@@ -128,7 +128,7 @@ Evaluation order:
 
 Note: "narrowing" and "widening" refer to consecutive ranges decreasing or increasing.
 
-#### `c3_structure_type`
+#### `l3_structure_type`
 
 Evaluation order:
 
@@ -137,7 +137,7 @@ Evaluation order:
 3. If `body / rng <= 0.3` → `'indecisive'`
 4. Otherwise → `'balanced'`
 
-#### `c3_momentum_state`
+#### `l3_momentum_state`
 
 Evaluation order:
 
@@ -146,7 +146,7 @@ Evaluation order:
 3. If streak continuing AND `body < prev_body * 0.8` → `'decelerating'`
 4. Otherwise → `'steady'`
 
-#### `c3_session_position`
+#### `l3_session_position`
 
 Deterministic mapping (no precedence needed):
 
@@ -157,7 +157,7 @@ Deterministic mapping (no precedence needed):
 | I, J, K, L | `'late'` |
 | Other/Invalid | NULL |
 
-#### `c3_wick_dominance`
+#### `l3_wick_dominance`
 
 Evaluation order:
 
@@ -167,7 +167,7 @@ Evaluation order:
 4. If `wick_bot / rng >= 0.3` AND `wick_top / rng < 0.15` → `'bottom_heavy'`
 5. Otherwise → `'balanced'`
 
-#### `c3_range_context`
+#### `l3_range_context`
 
 Evaluation order:
 
@@ -184,13 +184,13 @@ Evaluation order:
 
 | Feature | Maximum Lookback | Notes |
 |---------|------------------|-------|
-| `c3_trend_bias` | Current + C2 streak | Streak computed in C2 |
-| `c3_volatility_regime` | Current + C2 streak | Streak computed in C2 |
-| `c3_structure_type` | Current block only | No lookback required |
-| `c3_momentum_state` | Current + 1 prior | Compares current vs previous body |
-| `c3_session_position` | Current block only | Deterministic from block_id |
-| `c3_wick_dominance` | Current block only | No lookback required |
-| `c3_range_context` | Current + 5-block average | Uses C2's `rng_avg_5` |
+| `l3_trend_bias` | Current + L2 streak | Streak computed in L2 |
+| `l3_volatility_regime` | Current + L2 streak | Streak computed in L2 |
+| `l3_structure_type` | Current block only | No lookback required |
+| `l3_momentum_state` | Current + 1 prior | Compares current vs previous body |
+| `l3_session_position` | Current block only | Deterministic from block_id |
+| `l3_wick_dominance` | Current block only | No lookback required |
+| `l3_range_context` | Current + 5-block average | Uses L2's `rng_avg_5` |
 
 ### 4.2 Session Boundary Handling
 
@@ -198,12 +198,12 @@ Session boundaries (block A following block L) affect:
 
 | Feature | Boundary Behavior |
 |---------|-------------------|
-| `c3_trend_bias` | Streaks reset at session start (handled in C2) |
-| `c3_volatility_regime` | Streaks reset at session start (handled in C2) |
-| `c3_momentum_state` | No prior block available → fallback to `'steady'` |
-| `c3_range_context` | Lookback average may span sessions (allowed) |
+| `l3_trend_bias` | Streaks reset at session start (handled in L2) |
+| `l3_volatility_regime` | Streaks reset at session start (handled in L2) |
+| `l3_momentum_state` | No prior block available → fallback to `'steady'` |
+| `l3_range_context` | Lookback average may span sessions (allowed) |
 
-C3 does NOT independently detect session boundaries; it relies on C2's streak calculations.
+L3 does NOT independently detect session boundaries; it relies on L2's streak calculations.
 
 ### 4.3 Short History Handling
 
@@ -212,7 +212,7 @@ When insufficient history exists:
 | Condition | Behavior |
 |-----------|----------|
 | First block of dataset | Use fallback labels for lookback features |
-| First block of session | Streaks = 0 or 1 (from C2), labels derived normally |
+| First block of session | Streaks = 0 or 1 (from L2), labels derived normally |
 | Fewer than 5 blocks for average | Use available blocks; if none, fallback |
 
 ---
@@ -221,7 +221,7 @@ When insufficient history exists:
 
 ### 5.1 Determinism Guarantee
 
-Given identical C1 and C2 inputs, C3 MUST produce **identical outputs**.
+Given identical L1 and L2 inputs, L3 MUST produce **identical outputs**.
 
 - No randomness in any computation
 - No dependence on row processing order
@@ -230,7 +230,7 @@ Given identical C1 and C2 inputs, C3 MUST produce **identical outputs**.
 
 ### 5.2 Prohibited Dependencies
 
-C3 computations MUST NOT depend on:
+L3 computations MUST NOT depend on:
 
 | Prohibited Dependency | Reason |
 |-----------------------|--------|
@@ -242,7 +242,7 @@ C3 computations MUST NOT depend on:
 
 ### 5.3 Replay Guarantee
 
-C3 outputs MUST be fully reproducible:
+L3 outputs MUST be fully reproducible:
 
 ```
 Historical backfill on day D₁ → Output set O
@@ -261,16 +261,16 @@ All numeric thresholds are defined in **this contract** (Section 3.2).
 
 | Feature | Threshold | Value | Meaning |
 |---------|-----------|-------|---------|
-| `c3_trend_bias` | Sustained streak minimum | 3 | Streak ≥ 3 = sustained |
-| `c3_structure_type` | Decisive ratio | 0.7 | body/rng ≥ 0.7 = decisive |
-| `c3_structure_type` | Indecisive ratio | 0.3 | body/rng ≤ 0.3 = indecisive |
-| `c3_momentum_state` | Acceleration ratio | 1.2 | body > prev * 1.2 = accelerating |
-| `c3_momentum_state` | Deceleration ratio | 0.8 | body < prev * 0.8 = decelerating |
-| `c3_wick_dominance` | Dominance threshold | 0.3 | wick/rng ≥ 0.3 = dominant |
-| `c3_wick_dominance` | Non-dominant threshold | 0.15 | wick/rng < 0.15 = not dominant |
-| `c3_wick_dominance` | No-wick threshold | 0.1 | total_wick/rng < 0.1 = no wicks |
-| `c3_range_context` | Narrow multiplier | 0.6 | rng < avg * 0.6 = narrow |
-| `c3_range_context` | Wide multiplier | 1.4 | rng > avg * 1.4 = wide |
+| `l3_trend_bias` | Sustained streak minimum | 3 | Streak ≥ 3 = sustained |
+| `l3_structure_type` | Decisive ratio | 0.7 | body/rng ≥ 0.7 = decisive |
+| `l3_structure_type` | Indecisive ratio | 0.3 | body/rng ≤ 0.3 = indecisive |
+| `l3_momentum_state` | Acceleration ratio | 1.2 | body > prev * 1.2 = accelerating |
+| `l3_momentum_state` | Deceleration ratio | 0.8 | body < prev * 0.8 = decelerating |
+| `l3_wick_dominance` | Dominance threshold | 0.3 | wick/rng ≥ 0.3 = dominant |
+| `l3_wick_dominance` | Non-dominant threshold | 0.15 | wick/rng < 0.15 = not dominant |
+| `l3_wick_dominance` | No-wick threshold | 0.1 | total_wick/rng < 0.1 = no wicks |
+| `l3_range_context` | Narrow multiplier | 0.6 | rng < avg * 0.6 = narrow |
+| `l3_range_context` | Wide multiplier | 1.4 | rng > avg * 1.4 = wide |
 
 ### 6.2 Threshold Change Rules
 
@@ -295,7 +295,7 @@ All thresholds in this contract are **descriptive, not decisional**.
 
 ### 7.1 Minimum Test Cases per Feature
 
-Each C3 feature MUST have at least **5 test cases**:
+Each L3 feature MUST have at least **5 test cases**:
 
 1. **Happy path**: Standard input → expected label
 2. **Boundary condition**: Input at exact threshold → verify correct label
@@ -334,7 +334,7 @@ No exception: implementation may not override specification.
 
 ### 8.1 Preconditions for CANONICAL Promotion
 
-C3 may be promoted to CANONICAL only when:
+L3 may be promoted to CANONICAL only when:
 
 | Precondition | Evidence Required |
 |--------------|-------------------|
@@ -343,7 +343,7 @@ C3 may be promoted to CANONICAL only when:
 | Lookback compliance | Audit confirming no future data access |
 | NULL handling verified | Test cases for all NULL scenarios |
 | Threshold documentation | All thresholds listed in this contract |
-| Downstream compatibility | Option C can consume C3 outputs |
+| Downstream compatibility | Option C can consume L3 outputs |
 
 ### 8.2 Required Validation Artifacts
 
@@ -351,10 +351,10 @@ Before promotion, the following artifacts MUST exist:
 
 | Artifact | Location | Contents |
 |----------|----------|----------|
-| Test report | `artifacts/c3_validation/test_report.json` | Fixture results |
-| Replay log | `artifacts/c3_validation/replay_log.txt` | 3+ run comparison |
-| Coverage report | `artifacts/c3_validation/coverage.json` | Feature × fixture matrix |
-| Threshold audit | `artifacts/c3_validation/threshold_audit.md` | All thresholds documented |
+| Test report | `artifacts/l3_validation/test_report.json` | Fixture results |
+| Replay log | `artifacts/l3_validation/replay_log.txt` | 3+ run comparison |
+| Coverage report | `artifacts/l3_validation/coverage.json` | Feature × fixture matrix |
+| Threshold audit | `artifacts/l3_validation/threshold_audit.md` | All thresholds documented |
 
 ### 8.3 Required Reviewers
 
@@ -362,12 +362,12 @@ Promotion to CANONICAL requires approval from:
 
 | Role | Responsibility |
 |------|----------------|
-| C3 Feature Owner | Semantic correctness |
-| C2 Maintainer | Input compatibility |
+| L3 Feature Owner | Semantic correctness |
+| L2 Maintainer | Input compatibility |
 | Option C Consumer | Downstream compatibility |
 | Governance Lead | Charter compliance |
 
-Minimum: 2 reviewers, including at least one from outside C3 implementation team.
+Minimum: 2 reviewers, including at least one from outside L3 implementation team.
 
 ---
 
@@ -383,7 +383,7 @@ Minimum: 2 reviewers, including at least one from outside C3 implementation team
 
 ### 10.1 Contract Status
 
-This implementation contract is **CANONICAL** and governs all C3 implementations.
+This implementation contract is **CANONICAL** and governs all L3 implementations.
 
 > **[CHANGE][CHANGED]** Contract promoted to CANONICAL (2026-01-20).
 
@@ -391,7 +391,7 @@ This implementation contract is **CANONICAL** and governs all C3 implementations
 
 Implementation is complete and validated:
 
-- SQL View: `derived.v_ovc_c3_features_v0_1`
+- SQL View: `derived.v_ovc_l3_features_v0_1`
 - Implementation CONFORMS to this contract
 - Validation evidence: [C3_v0_1_validation.md](../../reports/validation/C3_v0_1_validation.md)
 
@@ -404,10 +404,10 @@ Implementation is complete and validated:
 
 ### 10.4 Downstream Authorization
 
-With C3 CANONICAL:
+With L3 CANONICAL:
 
-- Option C is authorized to consume C3 features
-- C3 outputs are stable and may be depended upon
+- Option C is authorized to consume L3 features
+- L3 outputs are stable and may be depended upon
 - Label vocabularies and thresholds are frozen
 
 ---

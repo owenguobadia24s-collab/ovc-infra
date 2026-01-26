@@ -1,18 +1,18 @@
 """
-OVC Option B.1: C1 Feature Pack Compute Script (v0.1)
+OVC Option B.1: L1 Feature Pack Compute Script (v0.1)
 
-Purpose: Compute single-bar OHLC primitives (C1 tier) from B-layer facts.
+Purpose: Compute single-bar OHLC primitives (L1 tier) from B-layer facts.
 
 Tier Boundary (per c_layer_boundary_spec_v0.1.md):
-    C1 = Single-bar OHLC math. No history, no lookback, no rolling windows.
+    L1 = Single-bar OHLC math. No history, no lookback, no rolling windows.
     Inputs: ONLY {o, h, l, c} of current block.
 
-C1 KEEP Set (per metric_trial_log_noncanonical_v0.md Section E.1):
+L1 KEEP Set (per metric_trial_log_noncanonical_v0.md Section E.1):
     range, body, direction, ret, logret, body_ratio, close_pos,
     upper_wick, lower_wick, clv
 
 Usage:
-    python src/derived/compute_c1_v0_1.py [--dry-run] [--limit N] [--symbol SYM]
+    python src/derived/compute_l1_v0_1.py [--dry-run] [--limit N] [--symbol SYM]
 
 Environment:
     NEON_DSN or DATABASE_URL: PostgreSQL connection string
@@ -58,7 +58,7 @@ load_env()
 
 # ---------- Constants ----------
 VERSION = "v0.1"
-RUN_TYPE = "c1"
+RUN_TYPE = "l1"
 PIPELINE_ID = "B1-DerivedC1"
 PIPELINE_VERSION = "0.1.0"
 REQUIRED_ENV_VARS = ["NEON_DSN"]
@@ -101,7 +101,7 @@ def resolve_dsn() -> str:
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(
-        description="Compute C1 (single-bar OHLC) features from B-layer facts."
+        description="Compute L1 (single-bar OHLC) features from B-layer facts."
     )
     parser.add_argument(
         "--dry-run",
@@ -128,17 +128,17 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# ---------- C1 Computation Functions ----------
+# ---------- L1 Computation Functions ----------
 
-def compute_c1_features(o: float, h: float, l: float, c: float) -> dict:
+def compute_l1_features(o: float, h: float, l: float, c: float) -> dict:
     """
-    Compute C1 single-bar OHLC features.
+    Compute L1 single-bar OHLC features.
     
-    Per c_layer_boundary_spec_v0.1.md Section A (C1 — Single-Bar Primitives):
+    Per c_layer_boundary_spec_v0.1.md Section A (L1 — Single-Bar Primitives):
         "Formulas that operate on {o, h, l, c} of ONE block only.
         No lookback, no history, no rolling windows."
     
-    Returns dict with all C1 features. NULL values are Python None.
+    Returns dict with all L1 features. NULL values are Python None.
     """
     # Validate inputs
     inputs_valid = all(x is not None for x in [o, h, l, c])
@@ -158,7 +158,7 @@ def compute_c1_features(o: float, h: float, l: float, c: float) -> dict:
             "inputs_valid": False,
         }
     
-    # C1 primitives
+    # L1 primitives
     range_val = h - l
     body = abs(c - o)
     direction = 1 if c > o else (-1 if c < o else 0)
@@ -216,8 +216,8 @@ def create_run_record(conn, run_id: uuid.UUID, config: dict) -> None:
             RUN_TYPE,
             VERSION,
             FORMULA_HASH,
-            None,  # C1 has no window_spec
-            None,  # C1 has no threshold_version
+            None,  # L1 has no window_spec
+            None,  # L1 has no threshold_version
             datetime.now(timezone.utc),
             "running",
             psycopg2.extras.Json(config),
@@ -244,7 +244,7 @@ def complete_run_record(conn, run_id: uuid.UUID, block_count: int, status: str, 
 
 def fetch_blocks(conn, symbol: str = None, limit: int = None, recompute: bool = False) -> list:
     """
-    Fetch B-layer blocks for C1 computation.
+    Fetch B-layer blocks for L1 computation.
     
     Returns list of (block_id, o, h, l, c) tuples.
     """
@@ -259,7 +259,7 @@ def fetch_blocks(conn, symbol: str = None, limit: int = None, recompute: bool = 
         query = """
             SELECT b.block_id, b.o, b.h, b.l, b.c
             FROM ovc.ovc_blocks_v01_1_min b
-            LEFT JOIN derived.ovc_c1_features_v0_1 c1 ON b.block_id = c1.block_id
+            LEFT JOIN derived.ovc_l1_features_v0_1 c1 ON b.block_id = c1.block_id
         """
         conditions.append("c1.block_id IS NULL")
     
@@ -282,7 +282,7 @@ def fetch_blocks(conn, symbol: str = None, limit: int = None, recompute: bool = 
 
 def upsert_c1_features(conn, run_id: uuid.UUID, features_batch: list) -> int:
     """
-    Upsert computed C1 features to derived.ovc_c1_features_v0_1.
+    Upsert computed L1 features to derived.ovc_l1_features_v0_1.
     
     Uses ON CONFLICT DO UPDATE for idempotency.
     Returns count of rows upserted.
@@ -291,7 +291,7 @@ def upsert_c1_features(conn, run_id: uuid.UUID, features_batch: list) -> int:
         return 0
     
     sql = """
-        INSERT INTO derived.ovc_c1_features_v0_1 (
+        INSERT INTO derived.ovc_l1_features_v0_1 (
             block_id, run_id, computed_at, formula_hash, derived_version,
             range, body, direction, ret, logret, body_ratio, close_pos,
             upper_wick, lower_wick, clv, range_zero, inputs_valid
@@ -358,7 +358,7 @@ def main() -> None:
     try:
         dsn = resolve_dsn()
         
-        writer.log(f"OVC C1 Feature Compute v{VERSION}")
+        writer.log(f"OVC L1 Feature Compute v{VERSION}")
         writer.log(f"Formula hash: {FORMULA_HASH}")
         writer.log(f"Dry run: {args.dry_run}")
         if args.symbol:
@@ -398,10 +398,10 @@ def main() -> None:
                 writer.finish("success")
                 return
             
-            # Compute C1 features
+            # Compute L1 features
             features_batch = []
             for block_id, o, h, l, c in blocks:
-                features = compute_c1_features(o, h, l, c)
+                features = compute_l1_features(o, h, l, c)
                 features["block_id"] = block_id
                 features_batch.append(features)
             
@@ -429,7 +429,7 @@ def main() -> None:
             writer.log(f"\nCompleted. Total rows upserted: {total_upserted}")
             
             writer.add_output(type="neon_table", ref="derived.ovc_block_features_c1_v0_1", rows_written=total_upserted)
-            writer.check("features_computed", "C1 features computed", "pass", ["run.json:$.outputs[0].rows_written"])
+            writer.check("features_computed", "L1 features computed", "pass", ["run.json:$.outputs[0].rows_written"])
             writer.finish("success")
             
         except Exception as e:

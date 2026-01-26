@@ -28,8 +28,8 @@ WITH base_data AS (
         c1.sym,
         c2.bar_close_ms,
         c1.body_ratio
-    FROM derived.v_ovc_c1_features_v0_1 c1
-    INNER JOIN derived.v_ovc_c2_features_v0_1 c2
+    FROM derived.v_ovc_l1_features_v0_1 c1
+    INNER JOIN derived.v_ovc_l2_features_v0_1 c2
         ON c1.block_id = c2.block_id
     WHERE c1.block_id IS NOT NULL
 ),
@@ -66,19 +66,19 @@ WITH base_data AS (
         c1.sym,
         c2.bar_close_ms,
         c1.body_ratio,
-        c1.rng AS c1_rng
-    FROM derived.v_ovc_c1_features_v0_1 c1
-    INNER JOIN derived.v_ovc_c2_features_v0_1 c2
+        c1.rng AS l1_rng
+    FROM derived.v_ovc_l1_features_v0_1 c1
+    INNER JOIN derived.v_ovc_l2_features_v0_1 c2
         ON c1.block_id = c2.block_id
     WHERE c1.block_id IS NOT NULL
 ),
 with_stats AS (
     SELECT
         sym,
-        AVG(c1_rng) AS mean_rng,
-        STDDEV_POP(c1_rng) AS stddev_rng
+        AVG(l1_rng) AS mean_rng,
+        STDDEV_POP(l1_rng) AS stddev_rng
     FROM base_data
-    WHERE c1_rng IS NOT NULL
+    WHERE l1_rng IS NOT NULL
     GROUP BY sym
 ),
 with_raw_score AS (
@@ -87,9 +87,9 @@ with_raw_score AS (
         bd.sym,
         bd.bar_close_ms,
         CASE
-            WHEN bd.c1_rng IS NULL THEN NULL
+            WHEN bd.l1_rng IS NULL THEN NULL
             WHEN ws.mean_rng IS NULL OR ws.mean_rng = 0 THEN NULL
-            ELSE bd.c1_rng / ws.mean_rng
+            ELSE bd.l1_rng / ws.mean_rng
         END AS res_score
     FROM base_data bd
     LEFT JOIN with_stats ws ON bd.sym = ws.sym
@@ -117,8 +117,8 @@ WITH base_data AS (
         c2.bar_close_ms,
         c1.upper_wick_ratio,
         c1.lower_wick_ratio
-    FROM derived.v_ovc_c1_features_v0_1 c1
-    INNER JOIN derived.v_ovc_c2_features_v0_1 c2
+    FROM derived.v_ovc_l1_features_v0_1 c1
+    INNER JOIN derived.v_ovc_l2_features_v0_1 c2
         ON c1.block_id = c2.block_id
     WHERE c1.block_id IS NOT NULL
 ),

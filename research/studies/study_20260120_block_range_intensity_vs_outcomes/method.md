@@ -83,14 +83,14 @@ WHERE s.score_value IS NOT NULL;
 
 ---
 
-## Step C1: Correlation Analysis
+## Step L1: Correlation Analysis
 
 **Purpose:** Compute linear association between score and each outcome
 
 **Method:** Pearson correlation coefficient
 
 ```sql
--- Step C1: Correlations
+-- Step L1: Correlations
 SELECT
     CORR(score_value, fwd_ret_3) AS corr_fwd_ret_3,
     CORR(score_value, mfe_3) AS corr_mfe_3,
@@ -109,7 +109,7 @@ FROM combined;
 
 ---
 
-## Step C2: Bucket Summaries
+## Step L2: Bucket Summaries
 
 **Purpose:** Summarize outcome distributions conditional on score percentile buckets
 
@@ -127,7 +127,7 @@ FROM combined;
 **Method:** Assign bucket using `NTILE` or percentile boundaries, then aggregate
 
 ```sql
--- Step C2: Bucket summaries
+-- Step L2: Bucket summaries
 WITH bucket_assignment AS (
     SELECT
         *,
@@ -169,14 +169,14 @@ ORDER BY bucket;
 
 ---
 
-## Step C3: Tail Comparison
+## Step L3: Tail Comparison
 
 **Purpose:** Compare top decile vs bottom decile outcome distributions (descriptive only)
 
 **Method:** Extract statistics for bucket '0-10' and bucket '90-100', present side-by-side
 
 ```sql
--- Step C3: Tail comparison
+-- Step L3: Tail comparison
 SELECT
     bucket,
     COUNT(*) AS n,

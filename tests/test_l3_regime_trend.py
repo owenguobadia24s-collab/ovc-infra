@@ -1,8 +1,8 @@
 """
-Tests for OVC C3 Regime Trend Classifier (v0.1)
+Tests for OVC L3 Regime Trend Classifier (v0.1)
 
 Test Coverage:
-    1. Determinism: same C1/C2 inputs + same threshold pack => same classification
+    1. Determinism: same L1/L2 inputs + same threshold pack => same classification
     2. Classification logic correctness: TREND vs NON_TREND boundary cases
     3. Registry integrity: stored hash matches registry hash
     4. Scope enforcement: GLOBAL vs SYMBOL resolution
@@ -12,7 +12,7 @@ Environment:
     NEON_DSN or DATABASE_URL: PostgreSQL connection string (for DB tests)
 
 Run:
-    python -m pytest tests/test_c3_regime_trend.py -v
+    python -m pytest tests/test_l3_regime_trend.py -v
 """
 
 import hashlib
@@ -40,10 +40,10 @@ from config.threshold_registry_v0_1 import (
 # ============================================================================
 
 class TestClassificationLogic(unittest.TestCase):
-    """Test C3 regime trend classification logic."""
+    """Test L3 regime trend classification logic."""
     
     def setUp(self):
-        """Set up default threshold config (matches c3_regime_trend_v1.json)."""
+        """Set up default threshold config (matches l3_regime_trend_v1.json)."""
         self.default_config = {
             "lookback": 12,
             "min_range_bp": 30,
@@ -62,7 +62,7 @@ class TestClassificationLogic(unittest.TestCase):
         """
         Classify regime based on lookback window data.
         
-        This mirrors the classification logic in compute_c3_regime_trend_v0_1.py.
+        This mirrors the classification logic in compute_l3_regime_trend_v0_1.py.
         """
         cfg = config or self.default_config
         lookback = cfg["lookback"]
@@ -422,8 +422,8 @@ class TestDBIntegration(unittest.TestCase):
         except Exception as e:
             raise unittest.SkipTest(f"Cannot connect to database: {e}")
     
-    def test_c3_table_exists(self):
-        """C3 regime trend table exists in derived schema."""
+    def test_l3_table_exists(self):
+        """L3 regime trend table exists in derived schema."""
         import psycopg2
         
         with psycopg2.connect(self.dsn) as conn:
@@ -432,14 +432,14 @@ class TestDBIntegration(unittest.TestCase):
                     SELECT EXISTS (
                         SELECT FROM information_schema.tables 
                         WHERE table_schema = 'derived' 
-                        AND table_name = 'ovc_c3_regime_trend_v0_1'
+                        AND table_name = 'ovc_l3_regime_trend_v0_1'
                     )
                 """)
                 exists = cur.fetchone()[0]
         
         # This may fail if migration hasn't been applied
         # That's expected for a fresh database
-        self.skipTest("C3 table test skipped - run migration first") if not exists else None
+        self.skipTest("L3 table test skipped - run migration first") if not exists else None
     
     def test_threshold_registry_tables_exist(self):
         """Threshold registry tables exist in ovc_cfg schema."""

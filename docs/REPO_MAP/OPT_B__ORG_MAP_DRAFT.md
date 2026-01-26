@@ -3,7 +3,7 @@
 Map derived-feature computation, registries, and supporting SQL for Option B.
 
 ## Option Scope (brief)
-C1/C2/C3 computations, tagging, feature engineering, and feature/threshold registries.
+L1/L2/L3 computations, tagging, feature engineering, and feature/threshold registries.
 
 ## Category Index (list folders by category)
 - Registries: configs, configs/threshold_packs, src/config
@@ -31,14 +31,14 @@ FOLDER: configs/threshold_packs
 PRIMARY CATEGORY: Registries
 OPTION OWNER: B
 AUTHORITY: SUPPORTING
-ROLE (1 line): Versioned threshold packs for C3/state plane logic.
+ROLE (1 line): Versioned threshold packs for L3/state plane logic.
 
 INPUTS (contracts/interfaces): docs/specs/system/Quadrant State Plane v0.2.md
 OUTPUTS (artifacts/data): threshold pack JSONs consumed by compute pipelines
 
 CONTAINS (high-signal items):
-- c3_example_pack_v1.json -> Registries/B/SUPPORTING -> example pack
-- c3_regime_trend_v1.json -> Registries/B/SUPPORTING -> regime trend thresholds
+- l3_example_pack_v1.json -> Registries/B/SUPPORTING -> example pack
+- l3_regime_trend_v1.json -> Registries/B/SUPPORTING -> regime trend thresholds
 - state_plane_v0_2_default_v1.json -> Registries/B/SUPPORTING -> state plane defaults
 
 CROSS-REFERENCES:
@@ -64,16 +64,16 @@ FOLDER: src/derived
 PRIMARY CATEGORY: Pipelines
 OPTION OWNER: B
 AUTHORITY: CANONICAL
-ROLE (1 line): Derived feature computation pipelines (C1/C2/C3).
+ROLE (1 line): Derived feature computation pipelines (L1/L2/L3).
 
 INPUTS (contracts/interfaces): contracts/derived_feature_set_v0.1.json; sql/02_derived_c1_c2_tables_v0_1.sql
 OUTPUTS (artifacts/data): derived feature tables/views
 
 CONTAINS (high-signal items):
-- compute_c1_v0_1.py -> Pipelines/B/CANONICAL -> C1 feature computation
-- compute_c2_v0_1.py -> Pipelines/B/CANONICAL -> C2 feature computation
-- compute_c3_regime_trend_v0_1.py -> Pipelines/B/CANONICAL -> C3 regime trend
-- compute_c3_stub_v0_1.py -> Pipelines/B/EXPERIMENTAL -> C3 stub
+- compute_l1_v0_1.py -> Pipelines/B/CANONICAL -> L1 feature computation
+- compute_l2_v0_1.py -> Pipelines/B/CANONICAL -> L2 feature computation
+- compute_l3_regime_trend_v0_1.py -> Pipelines/B/CANONICAL -> L3 regime trend
+- compute_l3_stub_v0_1.py -> Pipelines/B/EXPERIMENTAL -> L3 stub
 
 CROSS-REFERENCES:
 - QA map for tests/test_derived_features.py and validation harnesses
@@ -106,9 +106,9 @@ INPUTS (contracts/interfaces): docs/specs/system/*; docs/specs/OPTION_B_*; docs/
 OUTPUTS (artifacts/data): database schema, derived tables, QA validation packs
 
 CONTAINS (high-signal items):
-- 02_derived_c1_c2_tables_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> C1/C2 tables
+- 02_derived_c1_c2_tables_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> L1/L2 tables
 - 04_threshold_registry_v0_1.sql -> Registries/B/CANONICAL -> threshold registry tables
-- 05_c3_regime_trend_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> C3 trend logic
+- 05_c3_regime_trend_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> L3 trend logic
 - 06_state_plane_threshold_pack_v0_2.sql -> Data Stores & Interfaces/B/CANONICAL -> state plane pack
 - derived_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> derived schema rollup
 - qa_validation_pack*.sql -> QA/QA/SUPPORTING -> QA validation SQL
@@ -130,9 +130,9 @@ INPUTS (contracts/interfaces): sql/02_derived_c1_c2_tables_v0_1.sql
 OUTPUTS (artifacts/data): derived view definitions
 
 CONTAINS (high-signal items):
-- v_ovc_c1_features_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> C1 view
-- v_ovc_c2_features_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> C2 view
-- v_ovc_c3_features_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> C3 view
+- v_ovc_l1_features_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> L1 view
+- v_ovc_l2_features_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> L2 view
+- v_ovc_l3_features_v0_1.sql -> Data Stores & Interfaces/B/CANONICAL -> L3 view
 - v_ovc_state_plane_v0_2.sql -> Data Stores & Interfaces/B/CANONICAL -> state plane view
 
 CROSS-REFERENCES:

@@ -30,8 +30,8 @@ score_data AS (
                 + CAST(c1.lower_wick_ratio AS DOUBLE PRECISION))
                / CAST(c1.body_ratio AS DOUBLE PRECISION)
         END AS raw_score
-    FROM derived.v_ovc_c1_features_v0_1 c1
-    INNER JOIN derived.v_ovc_c2_features_v0_1 c2
+    FROM derived.v_ovc_l1_features_v0_1 c1
+    INNER JOIN derived.v_ovc_l2_features_v0_1 c2
         ON c1.block_id = c2.block_id
     WHERE c1.block_id IS NOT NULL
 ),

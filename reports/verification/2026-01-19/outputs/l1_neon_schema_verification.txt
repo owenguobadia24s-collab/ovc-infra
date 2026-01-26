@@ -11,8 +11,8 @@ TABLES AND VIEWS BY SCHEMA:
 ---
 derived.derived_runs_v0_1 (BASE TABLE)
 derived.eval_runs (BASE TABLE)
-derived.ovc_c1_features_v0_1 (BASE TABLE)
-derived.ovc_c2_features_v0_1 (BASE TABLE)
+derived.ovc_l1_features_v0_1 (BASE TABLE)
+derived.ovc_l2_features_v0_1 (BASE TABLE)
 derived.ovc_outcomes_v0_1 (VIEW)
 derived.ovc_scores_v0_1 (VIEW)
 derived.v_pattern_outcomes_v01 (VIEW)
@@ -36,8 +36,8 @@ ovc_qa.validation_run (BASE TABLE)
 
 === EXISTENCE CHECKS ===
 ovc.ovc_blocks_v01_1_min: EXISTS (1764 rows)
-derived.ovc_c1_features_v0_1: EXISTS (804 rows)
-derived.ovc_c2_features_v0_1: EXISTS (804 rows)
+derived.ovc_l1_features_v0_1: EXISTS (804 rows)
+derived.ovc_l2_features_v0_1: EXISTS (804 rows)
 derived.ovc_outcomes_v0_1 (VIEW): EXISTS
 ovc_qa.validation_run: EXISTS
 ovc_cfg.threshold_pack: EXISTS

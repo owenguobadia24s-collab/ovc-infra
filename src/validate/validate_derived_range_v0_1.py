@@ -1,14 +1,14 @@
 """
 OVC Option B.2: Derived Feature Pack Validator (v0.1)
 
-Purpose: Validate C1/C2 derived feature packs against B-layer facts,
+Purpose: Validate L1/L2 derived feature packs against B-layer facts,
          with optional TradingView reference comparison.
 
 Validation Checks:
-    1. Coverage parity: count(B) == count(C1) == count(C2)
-    2. Key uniqueness: no duplicate block_id in C1/C2
+    1. Coverage parity: count(B) == count(L1) == count(L2)
+    2. Key uniqueness: no duplicate block_id in L1/L2
     3. Null/invalid checks: no NaN/Inf, deterministic nulls
-    4. Window_spec enforcement: C2 has required window specs
+    4. Window_spec enforcement: L2 has required window specs
     5. Determinism quickcheck: recompute sample blocks and verify
 
 Usage:
@@ -76,17 +76,17 @@ PIPELINE_ID = "B2-DerivedValidation"
 PIPELINE_VERSION = "0.1.0"
 REQUIRED_ENV_VARS = ["NEON_DSN"]
 
-# Required window_spec components per C2 spec
+# Required window_spec components per L2 spec
 REQUIRED_WINDOW_SPECS = ["N=1", "N=12", "session=date_ny", "rd_len="]
 
-# C1 feature columns for null rate analysis
+# L1 feature columns for null rate analysis
 C1_FEATURE_COLUMNS = [
     "range", "body", "direction", "ret", "logret", 
     "body_ratio", "close_pos", "upper_wick", "lower_wick", "clv",
     "range_zero", "inputs_valid"
 ]
 
-# C2 feature columns for null rate analysis
+# L2 feature columns for null rate analysis
 C2_FEATURE_COLUMNS = [
     "gap", "took_prev_high", "took_prev_low",
     "sess_high", "sess_low", "dist_sess_high", "dist_sess_low",
@@ -95,18 +95,18 @@ C2_FEATURE_COLUMNS = [
     "prev_block_exists", "sess_block_count", "roll_12_count", "rd_count"
 ]
 
-# C3 classification tables and required provenance columns
+# L3 classification tables and required provenance columns
 C3_TABLES = {
-    "c3_regime_trend": {
-        "table": "derived.ovc_c3_regime_trend_v0_1",
-        "classification_column": "c3_regime_trend",
+    "l3_regime_trend": {
+        "table": "derived.ovc_l3_regime_trend_v0_1",
+        "classification_column": "l3_regime_trend",
         "valid_values": ["TREND", "NON_TREND"],
         "provenance_columns": ["threshold_pack_id", "threshold_pack_version", "threshold_pack_hash"],
     },
-    # Future C3 classifiers can be added here
+    # Future L3 classifiers can be added here
 }
 
-# C3 threshold pack configuration schema
+# L3 threshold pack configuration schema
 C3_THRESHOLD_PACK_TABLE = "ovc_cfg.threshold_pack"
 C3_THRESHOLD_PACK_ACTIVE_TABLE = "ovc_cfg.threshold_pack_active"
 
@@ -124,17 +124,17 @@ class ValidationResult:
     
     # Counts
     b_block_count: int = 0
-    c1_row_count: int = 0
-    c2_row_count: int = 0
+    l1_row_count: int = 0
+    l2_row_count: int = 0
     
     # Integrity checks
     coverage_parity: bool = True
-    c1_duplicates: int = 0
-    c2_duplicates: int = 0
-    c1_null_rates: dict = field(default_factory=dict)
-    c2_null_rates: dict = field(default_factory=dict)
-    c2_window_spec_valid: bool = True
-    c2_window_spec_errors: list = field(default_factory=list)
+    l1_duplicates: int = 0
+    l2_duplicates: int = 0
+    l1_null_rates: dict = field(default_factory=dict)
+    l2_null_rates: dict = field(default_factory=dict)
+    l2_window_spec_valid: bool = True
+    l2_window_spec_errors: list = field(default_factory=list)
     
     # Determinism check
     determinism_sample_size: int = 0
@@ -148,9 +148,9 @@ class ValidationResult:
     tv_diff_summary: dict = field(default_factory=dict)
     tv_top_mismatches: list = field(default_factory=list)
     
-    # C3 validation (per-classifier results)
-    c3_enabled: bool = False
-    c3_results: dict = field(default_factory=dict)  # {classifier_name: C3ValidationResult}
+    # L3 validation (per-classifier results)
+    l3_enabled: bool = False
+    l3_results: dict = field(default_factory=dict)  # {classifier_name: C3ValidationResult}
     
     # Overall status
     errors: list = field(default_factory=list)
@@ -163,7 +163,7 @@ class ValidationResult:
 
 @dataclass
 class C3ValidationResult:
-    """Container for per-classifier C3 validation results."""
+    """Container for per-classifier L3 validation results."""
     classifier_name: str
     table_name: str
     
@@ -202,7 +202,7 @@ def resolve_dsn() -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Validate C1/C2 derived feature packs against B-layer facts."
+        description="Validate L1/L2 derived feature packs against B-layer facts."
     )
     parser.add_argument("--symbol", default="GBPUSD", help="Symbol to validate")
     parser.add_argument("--start-date", required=True, help="Start date (NY, YYYY-MM-DD)")
@@ -242,13 +242,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--validate-c3",
         action="store_true",
-        help="Enable C3 classifier validation (threshold provenance, registry integrity)"
+        help="Enable L3 classifier validation (threshold provenance, registry integrity)"
     )
     parser.add_argument(
         "--c3-classifiers",
         nargs="+",
         default=None,
-        help="Specific C3 classifiers to validate (default: all known classifiers)"
+        help="Specific L3 classifiers to validate (default: all known classifiers)"
     )
     return parser.parse_args()
 
@@ -278,7 +278,7 @@ def table_exists(cur, qualified_name: str) -> bool:
 
 def check_coverage_parity(cur, symbol: str, start_date, end_date) -> dict:
     """
-    Check that B, C1, and C2 have matching block counts.
+    Check that B, L1, and L2 have matching block counts.
     """
     # Count B-layer blocks
     cur.execute("""
@@ -287,27 +287,27 @@ def check_coverage_parity(cur, symbol: str, start_date, end_date) -> dict:
     """, (symbol, start_date, end_date))
     b_count = cur.fetchone()[0]
     
-    # Count C1 rows
+    # Count L1 rows
     cur.execute("""
-        SELECT COUNT(*) FROM derived.ovc_c1_features_v0_1 c1
+        SELECT COUNT(*) FROM derived.ovc_l1_features_v0_1 c1
         JOIN ovc.ovc_blocks_v01_1_min b ON c1.block_id = b.block_id
         WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
     """, (symbol, start_date, end_date))
-    c1_count = cur.fetchone()[0]
+    l1_count = cur.fetchone()[0]
     
-    # Count C2 rows
+    # Count L2 rows
     cur.execute("""
-        SELECT COUNT(*) FROM derived.ovc_c2_features_v0_1 c2
+        SELECT COUNT(*) FROM derived.ovc_l2_features_v0_1 c2
         JOIN ovc.ovc_blocks_v01_1_min b ON c2.block_id = b.block_id
         WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
     """, (symbol, start_date, end_date))
-    c2_count = cur.fetchone()[0]
+    l2_count = cur.fetchone()[0]
     
     return {
         "b_count": b_count,
-        "c1_count": c1_count,
-        "c2_count": c2_count,
-        "parity": b_count == c1_count == c2_count,
+        "l1_count": l1_count,
+        "l2_count": l2_count,
+        "parity": b_count == l1_count == l2_count,
     }
 
 
@@ -373,11 +373,11 @@ def check_nan_inf(cur, table: str, columns: list, symbol: str, start_date, end_d
 
 def check_window_spec(cur, symbol: str, start_date, end_date) -> dict:
     """
-    Validate that C2 rows have window_spec populated and contain required components.
+    Validate that L2 rows have window_spec populated and contain required components.
     """
     # Check for NULL window_spec
     cur.execute("""
-        SELECT COUNT(*) FROM derived.ovc_c2_features_v0_1 c2
+        SELECT COUNT(*) FROM derived.ovc_l2_features_v0_1 c2
         JOIN ovc.ovc_blocks_v01_1_min b ON c2.block_id = b.block_id
         WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
         AND c2.window_spec IS NULL
@@ -386,7 +386,7 @@ def check_window_spec(cur, symbol: str, start_date, end_date) -> dict:
     
     # Get distinct window_specs
     cur.execute("""
-        SELECT DISTINCT c2.window_spec FROM derived.ovc_c2_features_v0_1 c2
+        SELECT DISTINCT c2.window_spec FROM derived.ovc_l2_features_v0_1 c2
         JOIN ovc.ovc_blocks_v01_1_min b ON c2.block_id = b.block_id
         WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
         AND c2.window_spec IS NOT NULL
@@ -410,17 +410,17 @@ def check_window_spec(cur, symbol: str, start_date, end_date) -> dict:
 
 def determinism_quickcheck(cur, symbol: str, start_date, end_date, sample_size: int) -> dict:
     """
-    Sample blocks and recompute C1 values to verify determinism.
+    Sample blocks and recompute L1 values to verify determinism.
     Compare stored values vs freshly computed values.
     """
-    # Fetch sample of blocks with B-layer OHLC and stored C1 values
+    # Fetch sample of blocks with B-layer OHLC and stored L1 values
     cur.execute("""
         SELECT 
             b.block_id, b.o, b.h, b.l, b.c,
             c1.range, c1.body, c1.direction, c1.ret, c1.logret,
             c1.body_ratio, c1.close_pos, c1.upper_wick, c1.lower_wick, c1.clv
         FROM ovc.ovc_blocks_v01_1_min b
-        JOIN derived.ovc_c1_features_v0_1 c1 ON b.block_id = c1.block_id
+        JOIN derived.ovc_l1_features_v0_1 c1 ON b.block_id = c1.block_id
         WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
         ORDER BY RANDOM()
         LIMIT %s
@@ -438,8 +438,8 @@ def determinism_quickcheck(cur, symbol: str, start_date, end_date, sample_size: 
             "clv": row[14]
         }
         
-        # Recompute C1 values
-        computed = compute_c1_inline(o, h, l, c)
+        # Recompute L1 values
+        computed = compute_l1_inline(o, h, l, c)
         
         # Compare with tolerance
         for key in ["range", "body", "upper_wick", "lower_wick"]:
@@ -477,10 +477,10 @@ def determinism_quickcheck(cur, symbol: str, start_date, end_date, sample_size: 
     }
 
 
-def compute_c1_inline(o: float, h: float, l: float, c: float) -> dict:
+def compute_l1_inline(o: float, h: float, l: float, c: float) -> dict:
     """
-    Compute C1 features inline for determinism verification.
-    Must match logic in compute_c1_v0_1.py exactly.
+    Compute L1 features inline for determinism verification.
+    Must match logic in compute_l1_v0_1.py exactly.
     """
     range_val = h - l
     body = abs(c - o)
@@ -527,7 +527,7 @@ def values_match(stored, computed, tolerance: float = 1e-9) -> bool:
 
 def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
     """
-    Compare C1/C2 derived features against TradingView reference data.
+    Compare L1/L2 derived features against TradingView reference data.
     TV data is in ovc.ovc_blocks_v01_1_min (rng, body, dir, ret fields).
     """
     # Check what TV-sourced blocks exist
@@ -544,15 +544,15 @@ def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
             "message": "REFERENCE_NOT_AVAILABLE: No TV-sourced blocks in range",
         }
     
-    # Compare C1 features against TV-stored values (rng, body, dir, ret)
+    # Compare L1 features against TV-stored values (rng, body, dir, ret)
     cur.execute("""
         SELECT 
             c1.block_id,
-            b.rng as tv_range, c1.range as c1_range,
-            b.body as tv_body, c1.body as c1_body,
-            b.dir as tv_dir, c1.direction as c1_dir,
-            b.ret as tv_ret, c1.ret as c1_ret
-        FROM derived.ovc_c1_features_v0_1 c1
+            b.rng as tv_range, c1.range as l1_range,
+            b.body as tv_body, c1.body as l1_body,
+            b.dir as tv_dir, c1.direction as l1_dir,
+            b.ret as tv_ret, c1.ret as l1_ret
+        FROM derived.ovc_l1_features_v0_1 c1
         JOIN ovc.ovc_blocks_v01_1_min b ON c1.block_id = b.block_id
         WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
         AND b.source = 'tv'
@@ -572,14 +572,14 @@ def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
     
     for row in rows:
         block_id = row[0]
-        tv_range, c1_range = row[1], row[2]
-        tv_body, c1_body = row[3], row[4]
-        tv_dir, c1_dir = row[5], row[6]
-        tv_ret, c1_ret = row[7], row[8]
+        tv_range, l1_range = row[1], row[2]
+        tv_body, l1_body = row[3], row[4]
+        tv_dir, l1_dir = row[5], row[6]
+        tv_ret, l1_ret = row[7], row[8]
         
         # Range diff
-        if tv_range is not None and c1_range is not None:
-            diff = abs(tv_range - c1_range)
+        if tv_range is not None and l1_range is not None:
+            diff = abs(tv_range - l1_range)
             diffs["range"]["sum_abs_diff"] += diff
             diffs["range"]["max_diff"] = max(diffs["range"]["max_diff"], diff)
             if diff > 1e-6:
@@ -588,13 +588,13 @@ def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
                     "block_id": block_id,
                     "field": "range",
                     "tv": tv_range,
-                    "c1": c1_range,
+                    "l1": l1_range,
                     "diff": diff,
                 })
         
         # Body diff
-        if tv_body is not None and c1_body is not None:
-            diff = abs(tv_body - c1_body)
+        if tv_body is not None and l1_body is not None:
+            diff = abs(tv_body - l1_body)
             diffs["body"]["sum_abs_diff"] += diff
             diffs["body"]["max_diff"] = max(diffs["body"]["max_diff"], diff)
             if diff > 1e-6:
@@ -603,25 +603,25 @@ def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
                     "block_id": block_id,
                     "field": "body",
                     "tv": tv_body,
-                    "c1": c1_body,
+                    "l1": l1_body,
                     "diff": diff,
                 })
         
         # Direction diff
-        if tv_dir is not None and c1_dir is not None:
-            if tv_dir != c1_dir:
+        if tv_dir is not None and l1_dir is not None:
+            if tv_dir != l1_dir:
                 diffs["direction"]["mismatches"] += 1
                 top_mismatches.append({
                     "block_id": block_id,
                     "field": "direction",
                     "tv": tv_dir,
-                    "c1": c1_dir,
-                    "diff": abs(tv_dir - c1_dir),
+                    "l1": l1_dir,
+                    "diff": abs(tv_dir - l1_dir),
                 })
         
         # Ret diff
-        if tv_ret is not None and c1_ret is not None:
-            diff = abs(tv_ret - c1_ret)
+        if tv_ret is not None and l1_ret is not None:
+            diff = abs(tv_ret - l1_ret)
             diffs["ret"]["sum_abs_diff"] += diff
             diffs["ret"]["max_diff"] = max(diffs["ret"]["max_diff"], diff)
             if diff > 1e-6:
@@ -630,7 +630,7 @@ def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
                     "block_id": block_id,
                     "field": "ret",
                     "tv": tv_ret,
-                    "c1": c1_ret,
+                    "l1": l1_ret,
                     "diff": diff,
                 })
     
@@ -652,7 +652,7 @@ def check_tv_reference(cur, symbol: str, start_date, end_date) -> dict:
     }
 
 
-# ---------- C3 Validation Functions ----------
+# ---------- L3 Validation Functions ----------
 
 def validate_c3_classifier(
     cur,
@@ -663,11 +663,11 @@ def validate_c3_classifier(
     end_date
 ) -> C3ValidationResult:
     """
-    Validate a single C3 classifier table.
+    Validate a single L3 classifier table.
     
     Checks:
     1. Table exists
-    2. Row count matches expected (based on B-layer or C1)
+    2. Row count matches expected (based on B-layer or L1)
     3. No NULL provenance columns (threshold_pack_id, version, hash)
     4. All referenced threshold packs exist in ovc_cfg.threshold_pack
     5. Stored hash matches registry hash
@@ -698,7 +698,7 @@ def validate_c3_classifier(
     result.row_count = cur.fetchone()[0]
     
     if result.row_count == 0:
-        result.warnings.append(f"No C3 rows found for {symbol} in date range")
+        result.warnings.append(f"No L3 rows found for {symbol} in date range")
         return result
     
     # 3. Check for NULL provenance columns
@@ -733,7 +733,7 @@ def validate_c3_classifier(
         result.warnings.append("Threshold registry table not found, skipping pack verification")
         return result
     
-    # Get distinct (pack_id, version, hash) from C3 data
+    # Get distinct (pack_id, version, hash) from L3 data
     cur.execute(f"""
         SELECT DISTINCT 
             c3.threshold_pack_id,
@@ -744,9 +744,9 @@ def validate_c3_classifier(
         WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
     """, (symbol, start_date, end_date))
     
-    c3_packs = cur.fetchall()
+    l3_packs = cur.fetchall()
     
-    for pack_id, pack_version, c3_hash in c3_packs:
+    for pack_id, pack_version, l3_hash in l3_packs:
         # Check pack exists in registry
         cur.execute("""
             SELECT config_hash FROM ovc_cfg.threshold_pack
@@ -763,11 +763,11 @@ def validate_c3_classifier(
         registry_hash = registry_row[0]
         
         # Verify hash matches
-        if c3_hash != registry_hash:
+        if l3_hash != registry_hash:
             result.registry_hash_mismatches += 1
             result.errors.append(
                 f"Hash mismatch for {pack_id} v{pack_version}: "
-                f"C3={c3_hash[:16]}... registry={registry_hash[:16]}..."
+                f"L3={l3_hash[:16]}... registry={registry_hash[:16]}..."
             )
         
         # Optionally check if version equals active version (warning only)
@@ -786,10 +786,10 @@ def validate_c3_classifier(
     return result
 
 
-def check_c3_coverage_parity(cur, c3_table: str, symbol: str, start_date, end_date) -> dict:
+def check_c3_coverage_parity(cur, l3_table: str, symbol: str, start_date, end_date) -> dict:
     """
-    Check that C3 rows match B-layer block count.
-    Similar to C1/C2 parity but for C3.
+    Check that L3 rows match B-layer block count.
+    Similar to L1/L2 parity but for L3.
     """
     # Count B-layer blocks
     cur.execute("""
@@ -798,18 +798,18 @@ def check_c3_coverage_parity(cur, c3_table: str, symbol: str, start_date, end_da
     """, (symbol, start_date, end_date))
     b_count = cur.fetchone()[0]
     
-    # Count C3 rows
+    # Count L3 rows
     cur.execute(f"""
-        SELECT COUNT(*) FROM {c3_table} c3
+        SELECT COUNT(*) FROM {l3_table} c3
         JOIN ovc.ovc_blocks_v01_1_min b ON c3.block_id = b.block_id
         WHERE b.sym = %s AND b.date_ny BETWEEN %s AND %s
     """, (symbol, start_date, end_date))
-    c3_count = cur.fetchone()[0]
+    l3_count = cur.fetchone()[0]
     
     return {
         "b_count": b_count,
-        "c3_count": c3_count,
-        "parity": b_count == c3_count,
+        "l3_count": l3_count,
+        "parity": b_count == l3_count,
     }
 
 
@@ -820,9 +820,9 @@ def store_validation_run(cur, result: ValidationResult) -> None:
     cur.execute("""
         INSERT INTO ovc_qa.derived_validation_run (
             run_id, created_at, symbol, start_date, end_date,
-            b_block_count, c1_row_count, c2_row_count,
-            coverage_parity, c1_duplicates, c2_duplicates,
-            c2_window_spec_valid, determinism_sample_size, determinism_mismatches,
+            b_block_count, l1_row_count, l2_row_count,
+            coverage_parity, l1_duplicates, l2_duplicates,
+            l2_window_spec_valid, determinism_sample_size, determinism_mismatches,
             tv_comparison_enabled, tv_reference_available, tv_matched_blocks,
             status, errors, warnings
         ) VALUES (
@@ -836,17 +836,17 @@ def store_validation_run(cur, result: ValidationResult) -> None:
         ON CONFLICT (run_id) DO UPDATE SET
             created_at = NOW(),
             b_block_count = EXCLUDED.b_block_count,
-            c1_row_count = EXCLUDED.c1_row_count,
-            c2_row_count = EXCLUDED.c2_row_count,
+            l1_row_count = EXCLUDED.l1_row_count,
+            l2_row_count = EXCLUDED.l2_row_count,
             coverage_parity = EXCLUDED.coverage_parity,
             status = EXCLUDED.status,
             errors = EXCLUDED.errors,
             warnings = EXCLUDED.warnings
     """, (
         result.run_id, result.symbol, result.start_date, result.end_date,
-        result.b_block_count, result.c1_row_count, result.c2_row_count,
-        result.coverage_parity, result.c1_duplicates, result.c2_duplicates,
-        result.c2_window_spec_valid, result.determinism_sample_size, result.determinism_mismatches,
+        result.b_block_count, result.l1_row_count, result.l2_row_count,
+        result.coverage_parity, result.l1_duplicates, result.l2_duplicates,
+        result.l2_window_spec_valid, result.determinism_sample_size, result.determinism_mismatches,
         result.tv_comparison_enabled, result.tv_reference_available, result.tv_matched_blocks,
         result.status, json.dumps(result.errors), json.dumps(result.warnings),
     ))
@@ -883,8 +883,8 @@ def generate_report_md(result: ValidationResult, out_path: Path) -> Path:
         f"| Layer | Count |",
         f"|-------|-------|",
         f"| B-layer blocks | {result.b_block_count} |",
-        f"| C1 rows | {result.c1_row_count} |",
-        f"| C2 rows | {result.c2_row_count} |",
+        f"| L1 rows | {result.l1_row_count} |",
+        f"| L2 rows | {result.l2_row_count} |",
         f"",
         f"**Parity**: {'✅ PASS' if result.coverage_parity else '❌ FAIL'}",
         f"",
@@ -892,43 +892,43 @@ def generate_report_md(result: ValidationResult, out_path: Path) -> Path:
         f"",
         f"| Table | Duplicates |",
         f"|-------|------------|",
-        f"| C1 | {result.c1_duplicates} |",
-        f"| C2 | {result.c2_duplicates} |",
+        f"| L1 | {result.l1_duplicates} |",
+        f"| L2 | {result.l2_duplicates} |",
         f"",
-        f"## 3. Null Rates (C1)",
+        f"## 3. Null Rates (L1)",
         f"",
         f"| Column | Null Rate |",
         f"|--------|-----------|",
     ]
     
     # Sort by null rate descending (top offenders first)
-    sorted_c1_nulls = sorted(result.c1_null_rates.items(), key=lambda x: x[1], reverse=True)
+    sorted_c1_nulls = sorted(result.l1_null_rates.items(), key=lambda x: x[1], reverse=True)
     for col, rate in sorted_c1_nulls[:10]:
         lines.append(f"| {col} | {rate:.2%} |")
     
     lines.extend([
         f"",
-        f"## 4. Null Rates (C2)",
+        f"## 4. Null Rates (L2)",
         f"",
         f"| Column | Null Rate |",
         f"|--------|-----------|",
     ])
     
-    sorted_c2_nulls = sorted(result.c2_null_rates.items(), key=lambda x: x[1], reverse=True)
+    sorted_c2_nulls = sorted(result.l2_null_rates.items(), key=lambda x: x[1], reverse=True)
     for col, rate in sorted_c2_nulls[:10]:
         lines.append(f"| {col} | {rate:.2%} |")
     
     lines.extend([
         f"",
-        f"## 5. Window Spec Enforcement (C2)",
+        f"## 5. Window Spec Enforcement (L2)",
         f"",
-        f"**Valid**: {'✅ PASS' if result.c2_window_spec_valid else '❌ FAIL'}",
+        f"**Valid**: {'✅ PASS' if result.l2_window_spec_valid else '❌ FAIL'}",
         f"",
     ])
     
-    if result.c2_window_spec_errors:
+    if result.l2_window_spec_errors:
         lines.append("**Errors**:")
-        for err in result.c2_window_spec_errors[:10]:
+        for err in result.l2_window_spec_errors[:10]:
             lines.append(f"- {err}")
     
     lines.extend([
@@ -969,38 +969,38 @@ def generate_report_md(result: ValidationResult, out_path: Path) -> Path:
                 rate = stats.get("mismatch_rate", 0)
                 lines.append(f"| {field} | {mean:.6f} | {max_d:.6f} | {rate:.2%} |")
     
-    # C3 Classifier Validation Section
-    if result.c3_enabled and result.c3_results:
+    # L3 Classifier Validation Section
+    if result.l3_enabled and result.l3_results:
         section_num = 8 if result.tv_comparison_enabled else 7
         lines.extend([
             f"",
-            f"## {section_num}. C3 Classifier Validation",
+            f"## {section_num}. L3 Classifier Validation",
             f"",
         ])
         
-        for classifier_name, c3_data in result.c3_results.items():
+        for classifier_name, l3_data in result.l3_results.items():
             lines.extend([
                 f"### {classifier_name}",
                 f"",
-                f"- **Table**: `{c3_data.get('table_name', 'unknown')}`",
-                f"- **Table Exists**: {'✅' if c3_data.get('table_exists', False) else '❌'}",
+                f"- **Table**: `{l3_data.get('table_name', 'unknown')}`",
+                f"- **Table Exists**: {'✅' if l3_data.get('table_exists', False) else '❌'}",
             ])
             
-            if c3_data.get('table_exists', False):
+            if l3_data.get('table_exists', False):
                 lines.extend([
-                    f"- **Row Count**: {c3_data.get('row_count', 0)}",
-                    f"- **Provenance Valid**: {'✅' if c3_data.get('provenance_columns_valid', False) else '❌'}",
+                    f"- **Row Count**: {l3_data.get('row_count', 0)}",
+                    f"- **Provenance Valid**: {'✅' if l3_data.get('provenance_columns_valid', False) else '❌'}",
                     f"",
                     f"**Registry Integrity**:",
-                    f"- Packs Verified: {c3_data.get('registry_packs_verified', 0)}",
-                    f"- Packs Missing: {c3_data.get('registry_packs_missing', 0)}",
-                    f"- Hash Mismatches: {c3_data.get('registry_hash_mismatches', 0)}",
-                    f"- Invalid Classification Values: {c3_data.get('invalid_values', 0)}",
+                    f"- Packs Verified: {l3_data.get('registry_packs_verified', 0)}",
+                    f"- Packs Missing: {l3_data.get('registry_packs_missing', 0)}",
+                    f"- Hash Mismatches: {l3_data.get('registry_hash_mismatches', 0)}",
+                    f"- Invalid Classification Values: {l3_data.get('invalid_values', 0)}",
                     f"",
                 ])
                 
                 # Version warnings
-                version_warnings = c3_data.get('registry_version_warnings', [])
+                version_warnings = l3_data.get('registry_version_warnings', [])
                 if version_warnings:
                     lines.append("**Version Warnings**:")
                     for vw in version_warnings[:5]:
@@ -1055,7 +1055,7 @@ def generate_diffs_csv(result: ValidationResult, out_path: Path) -> Optional[Pat
     
     csv_path = out_path / "derived_validation_diffs.csv"
     with csv_path.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["block_id", "field", "tv", "c1", "diff"])
+        writer = csv.DictWriter(f, fieldnames=["block_id", "field", "tv", "l1", "diff"])
         writer.writeheader()
         writer.writerows(result.tv_top_mismatches)
     
@@ -1105,78 +1105,78 @@ def main() -> int:
         writer.log(f"Compare TV: {args.compare_tv}")
         writer.log("")
         
-        writer.add_input(type="neon_table", ref="derived.ovc_c1_features_v0_1")
-        writer.add_input(type="neon_table", ref="derived.ovc_c2_features_v0_1")
+        writer.add_input(type="neon_table", ref="derived.ovc_l1_features_v0_1")
+        writer.add_input(type="neon_table", ref="derived.ovc_l2_features_v0_1")
         
         dsn = resolve_dsn()
     
         with psycopg2.connect(dsn) as conn:
             with conn.cursor() as cur:
                 # Check required tables exist
-                if not table_exists(cur, "derived.ovc_c1_features_v0_1"):
-                    result.errors.append("Table derived.ovc_c1_features_v0_1 does not exist")
+                if not table_exists(cur, "derived.ovc_l1_features_v0_1"):
+                    result.errors.append("Table derived.ovc_l1_features_v0_1 does not exist")
                     result.status = "FAIL"
-                    print("ERROR: C1 table not found")
+                    print("ERROR: L1 table not found")
                     return 1
                 
-                if not table_exists(cur, "derived.ovc_c2_features_v0_1"):
-                    result.errors.append("Table derived.ovc_c2_features_v0_1 does not exist")
+                if not table_exists(cur, "derived.ovc_l2_features_v0_1"):
+                    result.errors.append("Table derived.ovc_l2_features_v0_1 does not exist")
                     result.status = "FAIL"
-                    print("ERROR: C2 table not found")
+                    print("ERROR: L2 table not found")
                     return 1
                 
                 # 1. Coverage parity
                 print("Checking coverage parity...")
                 coverage = check_coverage_parity(cur, args.symbol, start_date, end_date)
                 result.b_block_count = coverage["b_count"]
-                result.c1_row_count = coverage["c1_count"]
-                result.c2_row_count = coverage["c2_count"]
+                result.l1_row_count = coverage["l1_count"]
+                result.l2_row_count = coverage["l2_count"]
                 result.coverage_parity = coverage["parity"]
                 
                 if not coverage["parity"]:
-                    msg = f"Coverage mismatch: B={coverage['b_count']}, C1={coverage['c1_count']}, C2={coverage['c2_count']}"
+                    msg = f"Coverage mismatch: B={coverage['b_count']}, L1={coverage['l1_count']}, L2={coverage['l2_count']}"
                     if args.mode == "fail":
                         result.errors.append(msg)
                     else:
                         result.warnings.append(msg)
                 
-                print(f"  B={coverage['b_count']}, C1={coverage['c1_count']}, C2={coverage['c2_count']}")
+                print(f"  B={coverage['b_count']}, L1={coverage['l1_count']}, L2={coverage['l2_count']}")
                 
                 # 2. Key uniqueness
                 print("Checking key uniqueness...")
-                result.c1_duplicates = check_duplicates(
-                    cur, "derived.ovc_c1_features_v0_1", args.symbol, start_date, end_date
+                result.l1_duplicates = check_duplicates(
+                    cur, "derived.ovc_l1_features_v0_1", args.symbol, start_date, end_date
                 )
-                result.c2_duplicates = check_duplicates(
-                    cur, "derived.ovc_c2_features_v0_1", args.symbol, start_date, end_date
+                result.l2_duplicates = check_duplicates(
+                    cur, "derived.ovc_l2_features_v0_1", args.symbol, start_date, end_date
                 )
                 
-                if result.c1_duplicates > 0:
-                    result.errors.append(f"C1 has {result.c1_duplicates} duplicate block_ids")
-                if result.c2_duplicates > 0:
-                    result.errors.append(f"C2 has {result.c2_duplicates} duplicate block_ids")
+                if result.l1_duplicates > 0:
+                    result.errors.append(f"L1 has {result.l1_duplicates} duplicate block_ids")
+                if result.l2_duplicates > 0:
+                    result.errors.append(f"L2 has {result.l2_duplicates} duplicate block_ids")
                 
-                print(f"  C1 duplicates: {result.c1_duplicates}, C2 duplicates: {result.c2_duplicates}")
+                print(f"  L1 duplicates: {result.l1_duplicates}, L2 duplicates: {result.l2_duplicates}")
                 
                 # 3. Null rates
                 print("Checking null rates...")
-                result.c1_null_rates = check_null_rates(
-                    cur, "derived.ovc_c1_features_v0_1", C1_FEATURE_COLUMNS,
+                result.l1_null_rates = check_null_rates(
+                    cur, "derived.ovc_l1_features_v0_1", C1_FEATURE_COLUMNS,
                     args.symbol, start_date, end_date
                 )
-                result.c2_null_rates = check_null_rates(
-                    cur, "derived.ovc_c2_features_v0_1", C2_FEATURE_COLUMNS,
+                result.l2_null_rates = check_null_rates(
+                    cur, "derived.ovc_l2_features_v0_1", C2_FEATURE_COLUMNS,
                     args.symbol, start_date, end_date
                 )
                 
                 # Check for NaN/Inf
                 nan_issues = check_nan_inf(
-                    cur, "derived.ovc_c1_features_v0_1",
+                    cur, "derived.ovc_l1_features_v0_1",
                     ["range", "body", "ret", "logret", "body_ratio", "close_pos", "upper_wick", "lower_wick", "clv"],
                     args.symbol, start_date, end_date
                 )
                 nan_issues.extend(check_nan_inf(
-                    cur, "derived.ovc_c2_features_v0_1",
+                    cur, "derived.ovc_l2_features_v0_1",
                     ["gap", "sess_high", "sess_low", "roll_avg_range_12", "roll_std_logret_12", "range_z_12", "rd_hi", "rd_lo", "rd_mid"],
                     args.symbol, start_date, end_date
                 ))
@@ -1184,18 +1184,18 @@ def main() -> int:
                 for issue in nan_issues:
                     result.errors.append(issue)
                 
-                print(f"  C1 columns with >10% null: {sum(1 for r in result.c1_null_rates.values() if r > 0.1)}")
-                print(f"  C2 columns with >10% null: {sum(1 for r in result.c2_null_rates.values() if r > 0.1)}")
+                print(f"  L1 columns with >10% null: {sum(1 for r in result.l1_null_rates.values() if r > 0.1)}")
+                print(f"  L2 columns with >10% null: {sum(1 for r in result.l2_null_rates.values() if r > 0.1)}")
                 
                 # 4. Window_spec enforcement
                 print("Checking window_spec enforcement...")
                 ws_result = check_window_spec(cur, args.symbol, start_date, end_date)
-                result.c2_window_spec_valid = ws_result["valid"]
-                result.c2_window_spec_errors = ws_result["errors"]
+                result.l2_window_spec_valid = ws_result["valid"]
+                result.l2_window_spec_errors = ws_result["errors"]
                 
                 if not ws_result["valid"]:
                     if ws_result["null_count"] > 0:
-                        result.errors.append(f"C2 has {ws_result['null_count']} rows with NULL window_spec")
+                        result.errors.append(f"L2 has {ws_result['null_count']} rows with NULL window_spec")
                     for err in ws_result["errors"]:
                         result.errors.append(err)
                 
@@ -1228,51 +1228,51 @@ def main() -> int:
                         result.warnings.append(tv_result.get("message", "TV reference not available"))
                         print(f"  {tv_result.get('message', 'TV reference not available')}")
                 
-                # 7. C3 validation (optional)
+                # 7. L3 validation (optional)
                 if args.validate_c3:
-                    result.c3_enabled = True
-                    print("\n--- C3 Classifier Validation ---")
+                    result.l3_enabled = True
+                    print("\n--- L3 Classifier Validation ---")
                     
                     # Determine which classifiers to validate
-                    classifiers_to_check = args.c3_classifiers or list(C3_TABLES.keys())
+                    classifiers_to_check = args.l3_classifiers or list(C3_TABLES.keys())
                     
                     for classifier_name in classifiers_to_check:
                         if classifier_name not in C3_TABLES:
-                            result.warnings.append(f"Unknown C3 classifier: {classifier_name}")
+                            result.warnings.append(f"Unknown L3 classifier: {classifier_name}")
                             print(f"  WARN: Unknown classifier '{classifier_name}', skipping")
                             continue
                         
                         config = C3_TABLES[classifier_name]
                         print(f"\n  Validating {classifier_name} ({config['table']})...")
                         
-                        c3_result = validate_c3_classifier(
+                        l3_result = validate_c3_classifier(
                             cur, classifier_name, config,
                             args.symbol, start_date, end_date
                         )
                         
                         # Store result
-                        result.c3_results[classifier_name] = c3_result.to_dict()
+                        result.l3_results[classifier_name] = l3_result.to_dict()
                         
                         # Print summary
-                        if not c3_result.table_exists:
+                        if not l3_result.table_exists:
                             print(f"    Table not found: {config['table']}")
                         else:
-                            print(f"    Rows: {c3_result.row_count}")
-                            print(f"    Provenance valid: {c3_result.provenance_columns_valid}")
-                            print(f"    Registry packs verified: {c3_result.registry_packs_verified}")
-                            print(f"    Registry packs missing: {c3_result.registry_packs_missing}")
-                            print(f"    Hash mismatches: {c3_result.registry_hash_mismatches}")
-                            print(f"    Invalid values: {c3_result.invalid_values}")
+                            print(f"    Rows: {l3_result.row_count}")
+                            print(f"    Provenance valid: {l3_result.provenance_columns_valid}")
+                            print(f"    Registry packs verified: {l3_result.registry_packs_verified}")
+                            print(f"    Registry packs missing: {l3_result.registry_packs_missing}")
+                            print(f"    Hash mismatches: {l3_result.registry_hash_mismatches}")
+                            print(f"    Invalid values: {l3_result.invalid_values}")
                         
                         # Propagate errors/warnings to main result
-                        for err in c3_result.errors:
-                            result.errors.append(f"[C3:{classifier_name}] {err}")
-                        for warn in c3_result.warnings:
-                            result.warnings.append(f"[C3:{classifier_name}] {warn}")
+                        for err in l3_result.errors:
+                            result.errors.append(f"[L3:{classifier_name}] {err}")
+                        for warn in l3_result.warnings:
+                            result.warnings.append(f"[L3:{classifier_name}] {warn}")
                         
                         # Version warnings are informational
-                        for vw in c3_result.registry_version_warnings:
-                            result.warnings.append(f"[C3:{classifier_name}] Version warning: {vw}")
+                        for vw in l3_result.registry_version_warnings:
+                            result.warnings.append(f"[L3:{classifier_name}] Version warning: {vw}")
                 
                 # Determine final status
                 if result.errors:
@@ -1303,8 +1303,8 @@ def main() -> int:
         write_meta(out_dir, "derived_validation", run_id, sys.argv, {
             "status": result.status,
             "b_count": result.b_block_count,
-            "c1_count": result.c1_row_count,
-            "c2_count": result.c2_row_count,
+            "l1_count": result.l1_row_count,
+            "l2_count": result.l2_row_count,
         })
         
         # Write LATEST pointer

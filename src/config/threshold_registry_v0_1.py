@@ -1,7 +1,7 @@
 """
 OVC Threshold Registry (v0.1)
 
-Purpose: Deterministic, versioned threshold pack management for C3+ layers.
+Purpose: Deterministic, versioned threshold pack management for L3+ layers.
 
 Design principles:
     - Immutable packs: Once created, a (pack_id, pack_version) never changes.
@@ -13,7 +13,7 @@ Usage:
     from src.config.threshold_registry_v0_1 import ThresholdRegistry
     
     registry = ThresholdRegistry()
-    pack = registry.get_active_pack("c3_reversal", "GLOBAL")
+    pack = registry.get_active_pack("l3_reversal", "GLOBAL")
     print(pack["config_json"], pack["config_hash"])
 
 Environment:

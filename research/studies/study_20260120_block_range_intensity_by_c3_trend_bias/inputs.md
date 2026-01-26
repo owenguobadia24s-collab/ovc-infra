@@ -17,7 +17,7 @@ ovc-v0.1-spine
 
 | Object | Schema | Description |
 |--------|--------|-------------|
-| `ovc_block_features_v0_1` | `derived` | Option B block features (includes C1/C2/C3 columns) |
+| `ovc_block_features_v0_1` | `derived` | Option B block features (includes L1/L2/L3 columns) |
 
 **Columns Used:**
 
@@ -27,7 +27,7 @@ ovc-v0.1-spine
 | `ts` | timestamptz | Block timestamp (UTC) |
 | `instrument` | text | Trading pair (e.g., GBPUSD) |
 | `rng` | numeric | Block range (high - low), used for score computation |
-| `c3_trend_bias` | text/categorical | Canonical C3 trend bias state (taken as-is) |
+| `l3_trend_bias` | text/categorical | Canonical L3 trend bias state (taken as-is) |
 
 ### Outcome Source
 
@@ -57,21 +57,21 @@ ovc-v0.1-spine
 
 ---
 
-## Conditioning Variable: c3_trend_bias
+## Conditioning Variable: l3_trend_bias
 
-**Source:** `derived.ovc_block_features_v0_1.c3_trend_bias`
+**Source:** `derived.ovc_block_features_v0_1.l3_trend_bias`
 
 **Usage:**
-- This field is taken **as-is** from the canonical C3 layer.
+- This field is taken **as-is** from the canonical L3 layer.
 - This study does NOT define, compute, or modify the trend bias logic.
-- The underlying derivation (from C2 inputs such as `dir_streak`, `dir_change`) is specified in C3 documentation.
+- The underlying derivation (from L2 inputs such as `dir_streak`, `dir_change`) is specified in L3 documentation.
 
 **Observed Categories:**
 - Categories will be documented at execution time; no assumptions are made about specific values.
-- Expected categories may include labels like `bullish`, `bearish`, `neutral`, `mixed`, etc., but the actual values depend on canonical C3 implementation.
+- Expected categories may include labels like `bullish`, `bearish`, `neutral`, `mixed`, etc., but the actual values depend on canonical L3 implementation.
 
 **NULL Handling:**
-- Blocks with NULL `c3_trend_bias` are excluded from category-specific analysis.
+- Blocks with NULL `l3_trend_bias` are excluded from category-specific analysis.
 - NULL rate will be documented in results.
 
 ---
@@ -88,7 +88,7 @@ ovc-v0.1-spine
 
 **Handling of Missing Rows:**
 - Missing `rng`: Excluded (NULL `rng` filtered out in score computation)
-- Missing `c3_trend_bias`: Documented as NULL rate; excluded from per-category analysis
+- Missing `l3_trend_bias`: Documented as NULL rate; excluded from per-category analysis
 - Missing outcomes: Excluded (INNER JOIN drops blocks without outcome rows)
 - Missing `block_id`: Not applicable (PK in both tables)
 
@@ -114,7 +114,7 @@ WHERE instrument = 'GBPUSD'
   AND rng IS NOT NULL
 ```
 
-**Note:** `c3_trend_bias IS NOT NULL` filter applied only for per-category analysis; NULL count reported separately.
+**Note:** `l3_trend_bias IS NOT NULL` filter applied only for per-category analysis; NULL count reported separately.
 
 ---
 
@@ -134,15 +134,15 @@ WHERE instrument = 'GBPUSD'
 - [ ] Confirmed time window has expected bar count
 - [ ] Confirmed canonical release matches expected schema
 - [ ] Confirmed outcomes exist for majority of feature rows
-- [ ] Documented NULL rate for `c3_trend_bias`
-- [ ] Documented observed categories for `c3_trend_bias`
+- [ ] Documented NULL rate for `l3_trend_bias`
+- [ ] Documented observed categories for `l3_trend_bias`
 
 ---
 
 ## Query for Input Extraction
 
 ```sql
--- Base feature extraction with c3_trend_bias
+-- Base feature extraction with l3_trend_bias
 -- Join key: block_id
 
 SELECT
@@ -150,7 +150,7 @@ SELECT
     f.ts,
     f.instrument,
     f.rng,
-    f.c3_trend_bias,
+    f.l3_trend_bias,
     o.fwd_ret_3,
     o.mfe_3,
     o.mae_3

@@ -24,9 +24,9 @@ This document defines three orthogonal, purely descriptive scores for Path 1 res
 
 | View | Purpose |
 |------|---------|
-| `derived.v_ovc_c1_features_v0_1` | Single-bar features (ratios, positions, shapes) |
-| `derived.v_ovc_c2_features_v0_1` | Multi-bar features (rolling, session, streak) |
-| `derived.v_ovc_c3_features_v0_1` | Semantic features (regime, trend, structure) |
+| `derived.v_ovc_l1_features_v0_1` | Single-bar features (ratios, positions, shapes) |
+| `derived.v_ovc_l2_features_v0_1` | Multi-bar features (rolling, session, streak) |
+| `derived.v_ovc_l3_features_v0_1` | Semantic features (regime, trend, structure) |
 | `derived.v_ovc_c_outcomes_v0_1` | Forward outcomes (returns, excursions, vol) - **JOIN ONLY IN STUDIES** |
 
 ---
@@ -58,10 +58,10 @@ DIS measures the degree of body utilization within a bar relative to its total r
 
 | Column | Source View | Type |
 |--------|-------------|------|
-| `block_id` | `v_ovc_c1_features_v0_1` | TEXT |
-| `sym` | `v_ovc_c1_features_v0_1` | TEXT |
-| `body_ratio` | `v_ovc_c1_features_v0_1` | DOUBLE PRECISION |
-| `bar_close_ms` | `v_ovc_c2_features_v0_1` | BIGINT |
+| `block_id` | `v_ovc_l1_features_v0_1` | TEXT |
+| `sym` | `v_ovc_l1_features_v0_1` | TEXT |
+| `body_ratio` | `v_ovc_l1_features_v0_1` | DOUBLE PRECISION |
+| `bar_close_ms` | `v_ovc_l2_features_v0_1` | BIGINT |
 
 #### 2.1.3 Formula
 
@@ -83,7 +83,7 @@ Where:
 | Condition | Result |
 |-----------|--------|
 | `body_ratio IS NULL` | `raw_score = NULL` |
-| Zero-range bar (rng = 0) | `raw_score = NULL` (inherited from C1) |
+| Zero-range bar (rng = 0) | `raw_score = NULL` (inherited from L1) |
 
 #### 2.1.5 Z-Score Normalization
 
@@ -125,12 +125,12 @@ RES measures how efficiently the current bar's range compares to the recent aver
 
 | Column | Source View | Type |
 |--------|-------------|------|
-| `block_id` | `v_ovc_c1_features_v0_1` | TEXT |
-| `sym` | `v_ovc_c1_features_v0_1` | TEXT |
-| `rng` | `v_ovc_c1_features_v0_1` | NUMERIC |
-| `body_ratio` | `v_ovc_c1_features_v0_1` | DOUBLE PRECISION |
-| `rng_avg_6` | `v_ovc_c2_features_v0_1` | DOUBLE PRECISION |
-| `bar_close_ms` | `v_ovc_c2_features_v0_1` | BIGINT |
+| `block_id` | `v_ovc_l1_features_v0_1` | TEXT |
+| `sym` | `v_ovc_l1_features_v0_1` | TEXT |
+| `rng` | `v_ovc_l1_features_v0_1` | NUMERIC |
+| `body_ratio` | `v_ovc_l1_features_v0_1` | DOUBLE PRECISION |
+| `rng_avg_6` | `v_ovc_l2_features_v0_1` | DOUBLE PRECISION |
+| `bar_close_ms` | `v_ovc_l2_features_v0_1` | BIGINT |
 
 #### 2.2.3 Formula
 
@@ -199,12 +199,12 @@ LID measures the degree of wick activity relative to body, describing how much "
 
 | Column | Source View | Type |
 |--------|-------------|------|
-| `block_id` | `v_ovc_c1_features_v0_1` | TEXT |
-| `sym` | `v_ovc_c1_features_v0_1` | TEXT |
-| `upper_wick_ratio` | `v_ovc_c1_features_v0_1` | DOUBLE PRECISION |
-| `lower_wick_ratio` | `v_ovc_c1_features_v0_1` | DOUBLE PRECISION |
-| `body_ratio` | `v_ovc_c1_features_v0_1` | DOUBLE PRECISION |
-| `bar_close_ms` | `v_ovc_c2_features_v0_1` | BIGINT |
+| `block_id` | `v_ovc_l1_features_v0_1` | TEXT |
+| `sym` | `v_ovc_l1_features_v0_1` | TEXT |
+| `upper_wick_ratio` | `v_ovc_l1_features_v0_1` | DOUBLE PRECISION |
+| `lower_wick_ratio` | `v_ovc_l1_features_v0_1` | DOUBLE PRECISION |
+| `body_ratio` | `v_ovc_l1_features_v0_1` | DOUBLE PRECISION |
+| `bar_close_ms` | `v_ovc_l2_features_v0_1` | BIGINT |
 
 #### 2.3.3 Formula
 

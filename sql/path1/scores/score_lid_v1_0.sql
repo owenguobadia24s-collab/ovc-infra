@@ -8,8 +8,8 @@
 -- Formula: LID_raw = (upper_wick_ratio + lower_wick_ratio) / body_ratio
 --
 -- Source Views (CANONICAL - READ ONLY):
---   - derived.v_ovc_c1_features_v0_1 (upper_wick_ratio, lower_wick_ratio, body_ratio)
---   - derived.v_ovc_c2_features_v0_1 (bar_close_ms for ordering)
+--   - derived.v_ovc_l1_features_v0_1 (upper_wick_ratio, lower_wick_ratio, body_ratio)
+--   - derived.v_ovc_l2_features_v0_1 (bar_close_ms for ordering)
 --
 -- DISCLAIMER: This score is NOT predictive. Association with outcomes
 --             does NOT imply predictability. NOT a strategy component.
@@ -18,7 +18,7 @@
 WITH
 -- -----------------------------------------------------------------------------
 -- CTE: base_data
--- Join C1 and C2 to get required columns
+-- Join L1 and L2 to get required columns
 -- -----------------------------------------------------------------------------
 base_data AS (
     SELECT
@@ -28,8 +28,8 @@ base_data AS (
         c1.upper_wick_ratio,
         c1.lower_wick_ratio,
         c1.body_ratio
-    FROM derived.v_ovc_c1_features_v0_1 c1
-    INNER JOIN derived.v_ovc_c2_features_v0_1 c2
+    FROM derived.v_ovc_l1_features_v0_1 c1
+    INNER JOIN derived.v_ovc_l2_features_v0_1 c2
         ON c1.block_id = c2.block_id
     WHERE c1.block_id IS NOT NULL
 ),
@@ -127,7 +127,7 @@ ORDER BY wrs.sym, wrs.bar_close_ms;
 --   7. Doji-like bars: raw_score → ∞ (but NULL due to body_ratio ≈ 0)
 --
 -- Mathematical identity check:
---   upper_wick_ratio + lower_wick_ratio + body_ratio = 1 (by C1 construction)
+--   upper_wick_ratio + lower_wick_ratio + body_ratio = 1 (by L1 construction)
 --   Therefore: LID = (1 - body_ratio) / body_ratio when body_ratio > 0
 --
 -- Sample validation query:

@@ -1,4 +1,4 @@
-# Option B – C2 Charter v0.1
+# Option B – L2 Charter v0.1
 
 **[STATUS: ACTIVE]**
 
@@ -8,36 +8,36 @@
 | Effective Date | 2026-01-20                     |
 | Parent Charter | OPTION_B_CHARTER_v0.1.md       |
 | Governance     | GOVERNANCE_RULES_v0.1.md       |
-| Predecessor    | C1 (CANONICAL, frozen)         |
+| Predecessor    | L1 (CANONICAL, frozen)         |
 
 ---
 
-## 1. Purpose of C2
+## 1. Purpose of L2
 
-### 1.1 What C2 Represents
+### 1.1 What L2 Represents
 
-C2 is the **multi-bar / sequence-derived facts** layer within Option B. It computes contextual features that require information from multiple consecutive blocks, enabling temporal patterns and rolling statistics that cannot be expressed within a single-bar scope.
+L2 is the **multi-bar / sequence-derived facts** layer within Option B. It computes contextual features that require information from multiple consecutive blocks, enabling temporal patterns and rolling statistics that cannot be expressed within a single-bar scope.
 
-### 1.2 How C2 Differs from C1
+### 1.2 How L2 Differs from L1
 
-| Aspect         | C1                              | C2                                      |
+| Aspect         | L1                              | L2                                      |
 |----------------|--------------------------------|----------------------------------------|
 | Scope          | Single-bar facts               | Multi-bar / sequence facts             |
-| Input          | Canonical blocks only          | C1 outputs + canonical blocks          |
+| Input          | Canonical blocks only          | L1 outputs + canonical blocks          |
 | Temporality    | Point-in-time                  | Window-based / rolling                 |
 | Aggregation    | None                           | Fixed-window aggregations allowed      |
 | Context        | Self-contained                 | Session-relative, sequence-aware       |
 
-C1 answers: *"What happened in this block?"*  
-C2 answers: *"What is the context surrounding this block?"*
+L1 answers: *"What happened in this block?"*  
+L2 answers: *"What is the context surrounding this block?"*
 
 ### 1.3 Problem Statement
 
-C2 exists to solve the following problem:
+L2 exists to solve the following problem:
 
-> Many meaningful market structure features require awareness of prior bars—volatility regimes, session position, rolling ranges, and sequence patterns. These cannot be computed within C1's single-bar boundary without violating its immutability and scope guarantees.
+> Many meaningful market structure features require awareness of prior bars—volatility regimes, session position, rolling ranges, and sequence patterns. These cannot be computed within L1's single-bar boundary without violating its immutability and scope guarantees.
 
-C2 provides a controlled, auditable layer where such multi-bar derivations can occur without contaminating the canonical single-bar fact layer.
+L2 provides a controlled, auditable layer where such multi-bar derivations can occur without contaminating the canonical single-bar fact layer.
 
 ---
 
@@ -45,27 +45,27 @@ C2 provides a controlled, auditable layer where such multi-bar derivations can o
 
 ### 2.1 Explicit Source List
 
-C2 **MAY** consume:
+L2 **MAY** consume:
 
 | Source                          | Status    | Justification                                      |
 |---------------------------------|-----------|---------------------------------------------------|
-| `derived.ovc_c1_*` outputs      | ALLOWED   | Primary input; C1 is canonical upstream           |
-| `ovc.ovc_blocks_v01_1_min`      | ALLOWED   | Canonical blocks when C1 does not expose needed fields |
+| `derived.ovc_l1_*` outputs      | ALLOWED   | Primary input; L1 is canonical upstream           |
+| `ovc.ovc_blocks_v01_1_min`      | ALLOWED   | Canonical blocks when L1 does not expose needed fields |
 
-C2 **MAY NOT** consume:
+L2 **MAY NOT** consume:
 
 | Source                          | Status     | Reason                                            |
 |---------------------------------|------------|--------------------------------------------------|
 | Any `ovc_qa.*` artifacts        | PROHIBITED | QA layer is not a fact source                    |
 | External APIs at runtime        | PROHIBITED | Breaks replayability                             |
-| Any C3 or downstream outputs    | PROHIBITED | Circular dependency                              |
+| Any L3 or downstream outputs    | PROHIBITED | Circular dependency                              |
 | Raw R2 archives                 | PROHIBITED | Not validated; use canonical tables only         |
 
 ### 2.2 Window Size Constraints
 
 | Constraint     | Value       | Rationale                                         |
 |----------------|-------------|--------------------------------------------------|
-| Minimum window | 2 bars      | Single-bar belongs to C1                         |
+| Minimum window | 2 bars      | Single-bar belongs to L1                         |
 | Maximum window | 1 session   | Prevents unbounded memory; session = 12 blocks   |
 
 Window sizes exceeding one session require explicit charter amendment and governance review.
@@ -74,22 +74,22 @@ Window sizes exceeding one session require explicit charter amendment and govern
 
 **LOOKBACK ONLY.**
 
-C2 computations must use only:
+L2 computations must use only:
 - The current bar
 - Prior confirmed bars
 
-C2 **MAY NOT** use:
+L2 **MAY NOT** use:
 - Future bars (lookahead)
 - Unconfirmed bars
 - Speculative data
 
-This guarantees that C2 outputs are replayable from historical data without leakage.
+This guarantees that L2 outputs are replayable from historical data without leakage.
 
 ---
 
 ## 3. Allowed Computations
 
-C2 is authorized to perform the following computation classes:
+L2 is authorized to perform the following computation classes:
 
 ### 3.1 Rolling Statistics
 
@@ -121,7 +121,7 @@ C2 is authorized to perform the following computation classes:
 
 ## 4. Explicit Prohibitions
 
-C2 is **PROHIBITED** from the following:
+L2 is **PROHIBITED** from the following:
 
 ### 4.1 Outcome Computation
 
@@ -137,7 +137,7 @@ C2 is **PROHIBITED** from the following:
 - No "breakout" / "consolidation" classifications
 - No regime determination
 
-*Rationale: Threshold application belongs to C3 or Option C.*
+*Rationale: Threshold application belongs to L3 or Option C.*
 
 ### 4.3 Signals or Labels
 
@@ -154,11 +154,11 @@ C2 is **PROHIBITED** from the following:
 - **PROHIBITED:** `ovc_qa.*` schema (QA artifacts)
 - **PROHIBITED:** Any external system writes
 
-### 4.5 C1 Mutation
+### 4.5 L1 Mutation
 
-- C2 may not alter, overwrite, or reinterpret C1 outputs
-- C2 may not backfill or "correct" C1 values
-- C2 must treat C1 as immutable input
+- L2 may not alter, overwrite, or reinterpret L1 outputs
+- L2 may not backfill or "correct" L1 values
+- L2 must treat L1 as immutable input
 
 ---
 
@@ -176,7 +176,7 @@ C2 is **PROHIBITED** from the following:
 
 | Guarantee                        | Commitment                                        |
 |----------------------------------|--------------------------------------------------|
-| Historical replay                | C2 can be fully regenerated from C1 + blocks     |
+| Historical replay                | L2 can be fully regenerated from L1 + blocks     |
 | No external state                | No runtime API calls or cache dependencies       |
 | Idempotent computation           | Re-running produces identical results            |
 
@@ -186,24 +186,24 @@ C2 is **PROHIBITED** from the following:
 |----------------------------------|--------------------------------------------------|
 | Semantic versioning              | Breaking changes increment major version         |
 | Backward compatibility window    | Prior version available for 30 days post-deprecation |
-| Version in output                | All C2 outputs carry version metadata            |
+| Version in output                | All L2 outputs carry version metadata            |
 
 ---
 
-## 6. Relationship to C1
+## 6. Relationship to L1
 
-### 6.1 C1 Immutability
+### 6.1 L1 Immutability
 
-C1 is the **immutable upstream** for C2. C2:
-- Reads C1 outputs as-is
-- Does not transform C1 semantics
-- Does not override C1 values
+L1 is the **immutable upstream** for L2. L2:
+- Reads L1 outputs as-is
+- Does not transform L1 semantics
+- Does not override L1 values
 
 ### 6.2 Semantic Boundary
 
-C2 **MAY NOT** reinterpret C1 semantics. Examples:
+L2 **MAY NOT** reinterpret L1 semantics. Examples:
 
-| C1 Field       | C2 Allowed                     | C2 Prohibited                          |
+| L1 Field       | L2 Allowed                     | L2 Prohibited                          |
 |----------------|-------------------------------|---------------------------------------|
 | `dir`          | Count consecutive dirs        | Relabel dir based on context          |
 | `rng`          | Rolling avg of rng            | "Normalize" rng to different scale    |
@@ -211,11 +211,11 @@ C2 **MAY NOT** reinterpret C1 semantics. Examples:
 
 ### 6.3 Failure Isolation
 
-**C2 failures must not invalidate C1.**
+**L2 failures must not invalidate L1.**
 
-- If C2 computation fails, C1 remains intact
-- C2 errors are logged to `derived.*` error tables, not `ovc.*`
-- Downstream consumers may fall back to C1-only mode
+- If L2 computation fails, L1 remains intact
+- L2 errors are logged to `derived.*` error tables, not `ovc.*`
+- Downstream consumers may fall back to L1-only mode
 
 ---
 
@@ -223,7 +223,7 @@ C2 **MAY NOT** reinterpret C1 semantics. Examples:
 
 ### 7.1 Audit Triggers
 
-A C2 audit is required when:
+A L2 audit is required when:
 
 | Trigger                          | Action Required                                   |
 |----------------------------------|--------------------------------------------------|
@@ -256,13 +256,13 @@ DRAFT → ACTIVE → CANONICAL
 | ACTIVE    | Stable; may be consumed by downstream layers       | Passes validation; documented         |
 | CANONICAL | Immutable reference; breaking changes prohibited   | 30-day stability + governance sign-off|
 
-C2 features begin as DRAFT and must demonstrate stability before ACTIVE promotion.
+L2 features begin as DRAFT and must demonstrate stability before ACTIVE promotion.
 
 ---
 
 ## 8. Authorization
 
-This charter authorizes the **design** of C2 features under the constraints defined herein.
+This charter authorizes the **design** of L2 features under the constraints defined herein.
 
 **What is authorized:**
 - Feature specification documents
@@ -282,7 +282,7 @@ Implementation authorization requires separate approval per GOVERNANCE_RULES_v0.
 
 | Action         | Date       | Author     | Notes                              |
 |----------------|------------|------------|------------------------------------|
-| Created        | 2026-01-20 | —          | Initial charter; C2 scope defined  |
+| Created        | 2026-01-20 | —          | Initial charter; L2 scope defined  |
 
 ---
 

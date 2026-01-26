@@ -70,7 +70,7 @@ flowchart TB
   %% QA reports
   subgraph QAR[QA Reports]
     direction TB
-    R_valid[reports/validation/ - C1/C2/C3 validations]
+    R_valid[reports/validation/ - L1/L2/L3 validations]
     R_verif[reports/verification/ - REPRO_REPORT_*, dated folders]
     R_audit[reports/pipeline_audit/ - dated folders]
   end

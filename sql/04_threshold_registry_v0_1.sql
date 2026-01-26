@@ -155,7 +155,7 @@ COMMENT ON TABLE ovc_cfg.threshold_pack IS
 'Immutable configuration packs with versioning. Each (pack_id, pack_version) is unique and immutable once created.';
 
 COMMENT ON COLUMN ovc_cfg.threshold_pack.pack_id IS 
-'Logical identifier for a threshold pack (e.g., c3_reversal_thresholds)';
+'Logical identifier for a threshold pack (e.g., l3_reversal_thresholds)';
 
 COMMENT ON COLUMN ovc_cfg.threshold_pack.pack_version IS 
 'Version number, monotonically increasing per pack_id';

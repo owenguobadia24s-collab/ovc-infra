@@ -6,15 +6,15 @@ tags: [ovc, repo, maze, option]
 # OPT_A__CANONICAL_INGEST
 
 ## Definition
-Canonical ingest: raw -> canonical facts (C0/R + C1).
+Canonical ingest: raw -> canonical facts (L0/R + L1).
 
 ## Anchors (real repo paths)
 - `docs/contracts/PATH2_CONTRACT_v1_0.md`
 - `docs/contracts/c_layer_boundary_spec_v0.1.md`
 - `docs/contracts/qa_validation_contract_v1.md`
-- `docs/specs/OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/specs/OPTION_C_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/ingest_boundary.md`
@@ -35,12 +35,12 @@ Canonical ingest: raw -> canonical facts (C0/R + C1).
 - `docs/contracts/PATH2_CONTRACT_v1_0.md`
 - `docs/contracts/c_layer_boundary_spec_v0.1.md`
 - `docs/contracts/qa_validation_contract_v1.md`
-- `docs/specs/OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
 
 ## Outputs
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/option_b_derived_contract_v1.md`
 - `docs/contracts/option_c_outcomes_contract_v1.md`

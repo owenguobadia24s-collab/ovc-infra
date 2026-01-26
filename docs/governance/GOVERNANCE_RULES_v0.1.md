@@ -39,7 +39,7 @@
 | **Renaming** | ALLOWED with grep verification of all references |
 
 **Examples:**
-- `src/derived/compute_c1_v0_1.py` — C1 feature computation
+- `src/derived/compute_l1_v0_1.py` — L1 feature computation
 - `.github/workflows/backfill_then_validate.yml` — manual validation workflow
 - `docs/ops/PIPELINE_REALITY_MAP_v0.1.md` — pipeline documentation
 
@@ -98,7 +98,7 @@
 | Bug fix in ACTIVE script | **MINOR UPDATE** — standard code review |
 | New DEPRECATED status assigned | **MINOR UPDATE** — update PRUNING_CANDIDATES |
 | ORPHANED artifact deleted | **MINOR UPDATE** — update PRUNING_CANDIDATES |
-| New Option (B2, C2, etc.) started | **NEW AUDIT** — full lifecycle review |
+| New Option (B2, L2, etc.) started | **NEW AUDIT** — full lifecycle review |
 
 ---
 

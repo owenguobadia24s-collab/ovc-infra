@@ -1,15 +1,15 @@
 """
-Tests for OVC Option B.1 Derived Feature Packs (C1 + C2)
+Tests for OVC Option B.1 Derived Feature Packs (L1 + L2)
 
 Test Coverage:
     1. Determinism: Same inputs → same outputs
     2. Idempotency: Rerun produces no duplicates and same results
-    3. Window_spec presence for all C2 outputs
+    3. Window_spec presence for all L2 outputs
     4. Formula correctness against known values
 
 Per c_layer_boundary_spec_v0.1.md:
-    - C1: Single-bar OHLC math. No history.
-    - C2: Multi-bar structure. Explicit window_spec required.
+    - L1: Single-bar OHLC math. No history.
+    - L2: Multi-bar structure. Explicit window_spec required.
 """
 
 import hashlib
@@ -22,15 +22,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from derived.compute_c1_v0_1 import (
-    compute_c1_features,
+from derived.compute_l1_v0_1 import (
+    compute_l1_features,
     compute_formula_hash,
     C1_FORMULA_DEFINITION,
     FORMULA_HASH as C1_FORMULA_HASH,
 )
-from derived.compute_c2_v0_1 import (
-    compute_c2_features_for_block,
-    compute_formula_hash as compute_c2_formula_hash,
+from derived.compute_l2_v0_1 import (
+    compute_l2_features_for_block,
+    compute_formula_hash as compute_l2_formula_hash,
     build_aggregated_window_spec,
     C2_FORMULA_DEFINITION,
     WINDOW_SPECS,
@@ -39,14 +39,14 @@ from derived.compute_c2_v0_1 import (
 
 
 class TestC1Determinism(unittest.TestCase):
-    """Test that C1 computations are deterministic."""
+    """Test that L1 computations are deterministic."""
     
     def test_same_inputs_same_outputs(self):
-        """Same OHLC values should produce identical C1 features."""
+        """Same OHLC values should produce identical L1 features."""
         o, h, l, c = 1.2500, 1.2550, 1.2480, 1.2520
         
-        result1 = compute_c1_features(o, h, l, c)
-        result2 = compute_c1_features(o, h, l, c)
+        result1 = compute_l1_features(o, h, l, c)
+        result2 = compute_l1_features(o, h, l, c)
         
         self.assertEqual(result1, result2)
     
@@ -60,108 +60,108 @@ class TestC1Determinism(unittest.TestCase):
         ]
         
         for o, h, l, c in test_cases:
-            results = [compute_c1_features(o, h, l, c) for _ in range(5)]
+            results = [compute_l1_features(o, h, l, c) for _ in range(5)]
             for r in results[1:]:
                 self.assertEqual(results[0], r)
 
 
 class TestC1Correctness(unittest.TestCase):
-    """Test C1 formula correctness."""
+    """Test L1 formula correctness."""
     
     def test_range_formula(self):
         """range = h - l"""
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         self.assertAlmostEqual(result["range"], 0.7, places=10)
     
     def test_body_formula(self):
         """body = abs(c - o)"""
         # Bullish
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         self.assertAlmostEqual(result["body"], 0.2, places=10)
         
         # Bearish
-        result = compute_c1_features(1.2, 1.5, 0.8, 1.0)
+        result = compute_l1_features(1.2, 1.5, 0.8, 1.0)
         self.assertAlmostEqual(result["body"], 0.2, places=10)
     
     def test_direction_formula(self):
         """direction = sign(c - o)"""
         # Bullish
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         self.assertEqual(result["direction"], 1)
         
         # Bearish
-        result = compute_c1_features(1.2, 1.5, 0.8, 1.0)
+        result = compute_l1_features(1.2, 1.5, 0.8, 1.0)
         self.assertEqual(result["direction"], -1)
         
         # Neutral (doji)
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.0)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.0)
         self.assertEqual(result["direction"], 0)
     
     def test_ret_formula(self):
         """ret = (c - o) / o"""
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         self.assertAlmostEqual(result["ret"], 0.2, places=10)
         
         # o=0 edge case
-        result = compute_c1_features(0.0, 1.0, 0.0, 0.5)
+        result = compute_l1_features(0.0, 1.0, 0.0, 0.5)
         self.assertIsNone(result["ret"])
     
     def test_logret_formula(self):
         """logret = ln(c / o)"""
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         expected = math.log(1.2 / 1.0)
         self.assertAlmostEqual(result["logret"], expected, places=10)
         
         # c=0 or o=0 edge case
-        result = compute_c1_features(0.0, 1.0, 0.0, 0.5)
+        result = compute_l1_features(0.0, 1.0, 0.0, 0.5)
         self.assertIsNone(result["logret"])
     
     def test_body_ratio_formula(self):
         """body_ratio = body / range"""
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         # body=0.2, range=0.7
         self.assertAlmostEqual(result["body_ratio"], 0.2 / 0.7, places=10)
         
         # Zero range
-        result = compute_c1_features(1.0, 1.0, 1.0, 1.0)
+        result = compute_l1_features(1.0, 1.0, 1.0, 1.0)
         self.assertIsNone(result["body_ratio"])
     
     def test_close_pos_formula(self):
         """close_pos = (c - l) / range"""
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         # (1.2 - 0.8) / 0.7 = 0.4 / 0.7
         self.assertAlmostEqual(result["close_pos"], 0.4 / 0.7, places=10)
     
     def test_upper_wick_formula(self):
         """upper_wick = h - max(o, c)"""
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         # h=1.5, max(o,c)=1.2 → 0.3
         self.assertAlmostEqual(result["upper_wick"], 0.3, places=10)
     
     def test_lower_wick_formula(self):
         """lower_wick = min(o, c) - l"""
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         # min(o,c)=1.0, l=0.8 → 0.2
         self.assertAlmostEqual(result["lower_wick"], 0.2, places=10)
     
     def test_clv_formula(self):
         """clv = ((c - l) - (h - c)) / (h - l)"""
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         # ((1.2 - 0.8) - (1.5 - 1.2)) / 0.7 = (0.4 - 0.3) / 0.7 = 0.1 / 0.7
         expected = 0.1 / 0.7
         self.assertAlmostEqual(result["clv"], expected, places=10)
     
     def test_range_zero_flag(self):
         """range_zero = (range == 0)"""
-        result = compute_c1_features(1.0, 1.0, 1.0, 1.0)
+        result = compute_l1_features(1.0, 1.0, 1.0, 1.0)
         self.assertTrue(result["range_zero"])
         
-        result = compute_c1_features(1.0, 1.5, 0.8, 1.2)
+        result = compute_l1_features(1.0, 1.5, 0.8, 1.2)
         self.assertFalse(result["range_zero"])
 
 
 class TestC1FormulaHash(unittest.TestCase):
-    """Test C1 formula hash computation."""
+    """Test L1 formula hash computation."""
     
     def test_formula_hash_deterministic(self):
         """Formula hash should be deterministic."""
@@ -182,11 +182,11 @@ class TestC1FormulaHash(unittest.TestCase):
 
 
 class TestC2WindowSpec(unittest.TestCase):
-    """Test that all C2 features have window_spec defined."""
+    """Test that all L2 features have window_spec defined."""
     
     def test_all_c2_features_have_window_spec(self):
-        """Every C2 feature must have an explicit window_spec."""
-        c2_features = [
+        """Every L2 feature must have an explicit window_spec."""
+        l2_features = [
             "gap", "took_prev_high", "took_prev_low",
             "sess_high", "sess_low", "dist_sess_high", "dist_sess_low",
             "roll_avg_range_12", "roll_std_logret_12", "range_z_12",
@@ -194,14 +194,14 @@ class TestC2WindowSpec(unittest.TestCase):
             "rd_hi", "rd_lo", "rd_mid",
         ]
         
-        for feature in c2_features:
+        for feature in l2_features:
             self.assertIn(
                 feature, WINDOW_SPECS,
-                f"C2 feature '{feature}' missing from WINDOW_SPECS"
+                f"L2 feature '{feature}' missing from WINDOW_SPECS"
             )
             self.assertIsNotNone(
                 WINDOW_SPECS[feature],
-                f"C2 feature '{feature}' has None window_spec"
+                f"L2 feature '{feature}' has None window_spec"
             )
     
     def test_window_spec_format(self):
@@ -215,7 +215,7 @@ class TestC2WindowSpec(unittest.TestCase):
         for feature, spec in WINDOW_SPECS.items():
             self.assertIn(
                 spec, valid_formats,
-                f"C2 feature '{feature}' has invalid window_spec: {spec}"
+                f"L2 feature '{feature}' has invalid window_spec: {spec}"
             )
     
     def test_aggregated_window_spec(self):
@@ -228,7 +228,7 @@ class TestC2WindowSpec(unittest.TestCase):
 
 
 class TestC2Determinism(unittest.TestCase):
-    """Test that C2 computations are deterministic."""
+    """Test that L2 computations are deterministic."""
     
     def _make_block(self, block_id: str, o: float, h: float, l: float, c: float, date_ny: str, bar_close_ms: int):
         return {
@@ -243,10 +243,10 @@ class TestC2Determinism(unittest.TestCase):
         current = self._make_block("20260118-A-GBPUSD", 1.25, 1.26, 1.24, 1.255, "2026-01-18", 1737151200000)
         prev = self._make_block("20260117-L-GBPUSD", 1.24, 1.25, 1.23, 1.245, "2026-01-17", 1737144000000)
         
-        result1 = compute_c2_features_for_block(
+        result1 = compute_l2_features_for_block(
             current, prev, [current], [prev, current], [prev, current], {}, 12
         )
-        result2 = compute_c2_features_for_block(
+        result2 = compute_l2_features_for_block(
             current, prev, [current], [prev, current], [prev, current], {}, 12
         )
         
@@ -256,7 +256,7 @@ class TestC2Determinism(unittest.TestCase):
 
 
 class TestC2Correctness(unittest.TestCase):
-    """Test C2 formula correctness."""
+    """Test L2 formula correctness."""
     
     def _make_block(self, block_id: str, o: float, h: float, l: float, c: float, date_ny: str, bar_close_ms: int):
         return {
@@ -271,7 +271,7 @@ class TestC2Correctness(unittest.TestCase):
         current = self._make_block("20260118-A-GBPUSD", 1.2500, 1.2600, 1.2400, 1.2550, "2026-01-18", 1737151200000)
         prev = self._make_block("20260117-L-GBPUSD", 1.2400, 1.2500, 1.2300, 1.2450, "2026-01-17", 1737144000000)
         
-        result = compute_c2_features_for_block(
+        result = compute_l2_features_for_block(
             current, prev, [current], [prev, current], [prev, current], {}, 12
         )
         
@@ -283,7 +283,7 @@ class TestC2Correctness(unittest.TestCase):
         current = self._make_block("20260118-A-GBPUSD", 1.25, 1.26, 1.24, 1.255, "2026-01-18", 1737151200000)
         prev = self._make_block("20260117-L-GBPUSD", 1.24, 1.25, 1.23, 1.245, "2026-01-17", 1737144000000)
         
-        result = compute_c2_features_for_block(
+        result = compute_l2_features_for_block(
             current, prev, [current], [prev, current], [prev, current], {}, 12
         )
         
@@ -295,7 +295,7 @@ class TestC2Correctness(unittest.TestCase):
         current = self._make_block("20260118-A-GBPUSD", 1.25, 1.26, 1.22, 1.255, "2026-01-18", 1737151200000)
         prev = self._make_block("20260117-L-GBPUSD", 1.24, 1.25, 1.23, 1.245, "2026-01-17", 1737144000000)
         
-        result = compute_c2_features_for_block(
+        result = compute_l2_features_for_block(
             current, prev, [current], [prev, current], [prev, current], {}, 12
         )
         
@@ -310,7 +310,7 @@ class TestC2Correctness(unittest.TestCase):
             self._make_block("20260118-C-GBPUSD", 1.26, 1.265, 1.25, 1.26, "2026-01-18", 1737165600000),
         ]
         
-        result = compute_c2_features_for_block(
+        result = compute_l2_features_for_block(
             blocks[2], blocks[1], blocks, blocks, blocks, {}, 12
         )
         
@@ -321,7 +321,7 @@ class TestC2Correctness(unittest.TestCase):
         """Features requiring prev block should be None when no prev exists."""
         current = self._make_block("20260118-A-GBPUSD", 1.25, 1.26, 1.24, 1.255, "2026-01-18", 1737151200000)
         
-        result = compute_c2_features_for_block(
+        result = compute_l2_features_for_block(
             current, None, [current], [current], [current], {}, 12
         )
         
@@ -332,18 +332,18 @@ class TestC2Correctness(unittest.TestCase):
 
 
 class TestC2FormulaHash(unittest.TestCase):
-    """Test C2 formula hash computation."""
+    """Test L2 formula hash computation."""
     
     def test_formula_hash_includes_rd_len(self):
         """Formula hash should change with rd_len parameter."""
-        hash1 = compute_c2_formula_hash(C2_FORMULA_DEFINITION, 12)
-        hash2 = compute_c2_formula_hash(C2_FORMULA_DEFINITION, 24)
+        hash1 = compute_l2_formula_hash(C2_FORMULA_DEFINITION, 12)
+        hash2 = compute_l2_formula_hash(C2_FORMULA_DEFINITION, 24)
         self.assertNotEqual(hash1, hash2)
     
     def test_formula_hash_deterministic(self):
         """Same formula + params should produce same hash."""
-        hash1 = compute_c2_formula_hash(C2_FORMULA_DEFINITION, 12)
-        hash2 = compute_c2_formula_hash(C2_FORMULA_DEFINITION, 12)
+        hash1 = compute_l2_formula_hash(C2_FORMULA_DEFINITION, 12)
+        hash2 = compute_l2_formula_hash(C2_FORMULA_DEFINITION, 12)
         self.assertEqual(hash1, hash2)
 
 

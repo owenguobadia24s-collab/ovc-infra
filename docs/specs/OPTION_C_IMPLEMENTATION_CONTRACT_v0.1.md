@@ -85,7 +85,7 @@ The anchor bar provides the **reference price** (close[T]) but is not part of th
 | Gap between sessions                  | Use actual prices; do not interpolate         |
 | Weekend/holiday gap                   | Treat as continuous sequence (no bar skip)    |
 
-Bars are indexed sequentially as they appear in the canonical C1 table. Session boundaries do not interrupt the sequence.
+Bars are indexed sequentially as they appear in the canonical L1 table. Session boundaries do not interrupt the sequence.
 
 ### 2.4 Lookahead Prohibition Outside Option C
 
@@ -111,8 +111,8 @@ Any Option B code that references T+1 or later is **non-conformant** and must be
 
 | Input       | Source | Field              |
 |-------------|--------|--------------------|
-| close[T]    | C1     | Anchor block close |
-| close[T+N]  | C1     | Forward block close|
+| close[T]    | L1     | Anchor block close |
+| close[T+N]  | L1     | Forward block close|
 
 #### 3.1.2 Computation Definition
 
@@ -161,8 +161,8 @@ Where:
 
 | Input         | Source | Field                        |
 |---------------|--------|------------------------------|
-| close[T]      | C1     | Anchor block close           |
-| high[T+1..N]  | C1     | High prices of forward bars  |
+| close[T]      | L1     | Anchor block close           |
+| high[T+1..N]  | L1     | High prices of forward bars  |
 
 #### 3.2.2 Computation Definition
 
@@ -216,8 +216,8 @@ where max_high = max(high[T+k] for k in 1..N)
 
 | Input        | Source | Field                       |
 |--------------|--------|-----------------------------|
-| close[T]     | C1     | Anchor block close          |
-| low[T+1..N]  | C1     | Low prices of forward bars  |
+| close[T]     | L1     | Anchor block close          |
+| low[T+1..N]  | L1     | Low prices of forward bars  |
 
 #### 3.3.2 Computation Definition
 
@@ -271,8 +271,8 @@ where min_low = min(low[T+k] for k in 1..N)
 
 | Input           | Source | Field                         |
 |-----------------|--------|-------------------------------|
-| close[T]        | C1     | Anchor block close            |
-| close[T+1..N]   | C1     | Close prices of forward bars  |
+| close[T]        | L1     | Anchor block close            |
+| close[T+1..N]   | L1     | Close prices of forward bars  |
 
 #### 3.4.2 Computation Definition
 
@@ -416,9 +416,9 @@ Outcome computation **SHALL NOT** depend on:
 **Full historical replay MUST reproduce identical results.**
 
 If Option C is recomputed from scratch using the same:
-- C1 data
-- C2 data
-- C3 data
+- L1 data
+- L2 data
+- L3 data
 - Implementation version
 
 Then all outcome values **MUST** be bit-for-bit identical to the original computation.

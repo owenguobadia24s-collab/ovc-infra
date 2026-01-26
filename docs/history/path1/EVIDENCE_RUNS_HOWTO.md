@@ -45,10 +45,10 @@ Deploy views in strict dependency order. Stop on first failure.
 # Step A: Apply DB patches (if needed for schema drift)
 psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/path1/db_patches/patch_align_c1_tf_column_20260120.sql
 
-# Step B: Deploy canonical C1/C2/C3 feature views
-psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/derived/v_ovc_c1_features_v0_1.sql
-psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/derived/v_ovc_c2_features_v0_1.sql
-psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/derived/v_ovc_c3_features_v0_1.sql
+# Step B: Deploy canonical L1/L2/L3 feature views
+psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/derived/v_ovc_l1_features_v0_1.sql
+psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/derived/v_ovc_l2_features_v0_1.sql
+psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/derived/v_ovc_l3_features_v0_1.sql
 
 # Step C: Deploy Option C outcomes view
 psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f sql/derived/v_ovc_c_outcomes_v0_1.sql
@@ -67,7 +67,7 @@ psql $env:DATABASE_URL -c "SELECT table_name FROM information_schema.views WHERE
 ```
 
 Expected views:
-- `v_ovc_c1_features_v0_1`, `v_ovc_c2_features_v0_1`, `v_ovc_c3_features_v0_1`
+- `v_ovc_l1_features_v0_1`, `v_ovc_l2_features_v0_1`, `v_ovc_l3_features_v0_1`
 - `v_ovc_c_outcomes_v0_1`
 - `v_ovc_b_scores_dis_v1_1`, `v_ovc_b_scores_res_v1_0`, `v_ovc_b_scores_lid_v1_0`
 - `v_path1_evidence_dis_v1_1`, `v_path1_evidence_res_v1_0`, `v_path1_evidence_lid_v1_0`
@@ -76,7 +76,7 @@ Expected views:
 
 | Patch | Purpose | Status |
 |-------|---------|--------|
-| `patch_align_c1_tf_column_20260120.sql` | Add `tf` column alias (C1 drift fix) | Applied 2026-01-20 |
+| `patch_align_c1_tf_column_20260120.sql` | Add `tf` column alias (L1 drift fix) | Applied 2026-01-20 |
 | `patch_create_score_views_20260120.sql` | Create persistent score views | Applied 2026-01-20 |
 | `patch_create_evidence_views_20260120.sql` | Create evidence join views | Applied 2026-01-20 |
 

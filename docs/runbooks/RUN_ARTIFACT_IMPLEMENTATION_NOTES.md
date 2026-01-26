@@ -22,9 +22,9 @@ Example: `20260117T143052Z__P2-Backfill__a1b2c3d`
 | Pipeline ID | File | Status |
 |------------|------|--------|
 | P2-Backfill | [src/backfill_oanda_2h_checkpointed.py](../src/backfill_oanda_2h_checkpointed.py) | ✅ Instrumented |
-| B1-DerivedC1 | [src/derived/compute_c1_v0_1.py](../src/derived/compute_c1_v0_1.py) | ✅ Instrumented |
-| B1-DerivedC2 | [src/derived/compute_c2_v0_1.py](../src/derived/compute_c2_v0_1.py) | ✅ Instrumented |
-| B1-DerivedC3 | [src/derived/compute_c3_regime_trend_v0_1.py](../src/derived/compute_c3_regime_trend_v0_1.py) | ✅ Instrumented |
+| B1-DerivedC1 | [src/derived/compute_l1_v0_1.py](../src/derived/compute_l1_v0_1.py) | ✅ Instrumented |
+| B1-DerivedC2 | [src/derived/compute_l2_v0_1.py](../src/derived/compute_l2_v0_1.py) | ✅ Instrumented |
+| B1-DerivedC3 | [src/derived/compute_l3_regime_trend_v0_1.py](../src/derived/compute_l3_regime_trend_v0_1.py) | ✅ Instrumented |
 | B2-DerivedValidation | [src/validate/validate_derived_range_v0_1.py](../src/validate/validate_derived_range_v0_1.py) | ✅ Instrumented |
 | D-NotionSync | [scripts/notion_sync.py](../scripts/notion_sync.py) | ✅ Instrumented |
 | D-ValidationHarness | [src/validate_day.py](../src/validate_day.py) | ✅ Instrumented |

@@ -58,9 +58,9 @@ Option C MAY consume outputs from:
 
 | Source | Description | Access Type |
 |--------|-------------|-------------|
-| **C1** | Canonical block-level facts | READ-ONLY |
-| **C2** | Canonical derived features | READ-ONLY |
-| **C3** | Canonical regime and context | READ-ONLY |
+| **L1** | Canonical block-level facts | READ-ONLY |
+| **L2** | Canonical derived features | READ-ONLY |
+| **L3** | Canonical regime and context | READ-ONLY |
 
 All inputs MUST be sourced from CANONICAL Option B outputs only.
 
@@ -71,7 +71,7 @@ Option C **SHALL NOT** directly access:
 - `ovc.ovc_blocks_v01_1_min` (raw ingest table)
 - Any raw ingestion artifacts
 - R2 archive files
-- Any source upstream of C1
+- Any source upstream of L1
 
 **Rationale**: Option C evaluates meaning, not raw data. All semantic interpretation must flow through the canonical Option B pipeline.
 
@@ -80,7 +80,7 @@ Option C **SHALL NOT** directly access:
 Option C **SHALL NOT**:
 
 - Write to any Option B table or view
-- Modify C1, C2, or C3 outputs
+- Modify L1, L2, or L3 outputs
 - Create derived features that feed back into Option B
 - Alter the schema or semantics of Option B artifacts
 
@@ -110,7 +110,7 @@ Option C is authorized to perform the following categories of computation:
 
 ### 3.3 Regime-Conditioned Outcome Analysis
 
-- Outcome stratification by C3 regime labels
+- Outcome stratification by L3 regime labels
 - Performance breakdown by market context
 - Conditional expectancy given regime state
 
@@ -133,19 +133,19 @@ Option C evaluates historical signals against known outcomes. It does not:
 Option C outputs **SHALL NOT** influence Option B computations. The data flow is strictly one-directional:
 
 ```
-Option B (C1 → C2 → C3) → Option C
+Option B (L1 → L2 → L3) → Option C
           ↑                    ↓
           └────── PROHIBITED ──┘
 ```
 
-### 4.2 No Mutation of C1/C2/C3
+### 4.2 No Mutation of L1/L2/L3
 
 Option C **SHALL NOT**:
 
-- UPDATE any C1, C2, or C3 record
-- DELETE any C1, C2, or C3 record
-- ALTER any C1, C2, or C3 schema
-- INSERT into any C1, C2, or C3 table
+- UPDATE any L1, L2, or L3 record
+- DELETE any L1, L2, or L3 record
+- ALTER any L1, L2, or L3 schema
+- INSERT into any L1, L2, or L3 table
 
 ### 4.3 No Real-Time Decision Logic
 
@@ -229,7 +229,7 @@ From Option C's perspective:
 
 ### 6.2 Option C May Evaluate But Never Redefine Meaning
 
-Option C may ask: *"How did signals with this C3 regime label perform?"*
+Option C may ask: *"How did signals with this L3 regime label perform?"*
 
 Option C may NOT ask: *"Should this signal have a different regime label based on its outcome?"*
 
@@ -311,7 +311,7 @@ This charter authorizes **what Option C is**. It does not authorize **building O
 
 | Category          | Option C MAY                          | Option C SHALL NOT                    |
 |-------------------|---------------------------------------|---------------------------------------|
-| **Inputs**        | Read C1, C2, C3 outputs               | Access raw blocks, modify Option B    |
+| **Inputs**        | Read L1, L2, L3 outputs               | Access raw blocks, modify Option B    |
 | **Computation**   | Label outcomes, compute metrics       | Optimize without approval, predict    |
 | **Temporal**      | Evaluate retrospectively              | Generate real-time signals            |
 | **Execution**     | Score historical signals              | Generate orders, size positions       |

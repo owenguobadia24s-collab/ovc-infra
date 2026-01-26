@@ -22,9 +22,9 @@ System-wide QA/Governance layer (referee for A/B/C/D).
 - `docs/contracts/PATH2_CONTRACT_v1_0.md`
 - `docs/contracts/c_layer_boundary_spec_v0.1.md`
 - `docs/contracts/qa_validation_contract_v1.md`
-- `docs/specs/OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/specs/OPTION_C_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/ingest_boundary.md`
@@ -35,7 +35,7 @@ System-wide QA/Governance layer (referee for A/B/C/D).
 - `docs/contracts/outcomes_definitions_v0.1.md`
 - `docs/specs/system/parsing_validation_rules_v0.1.md`
 - `docs/contracts/A_TO_D_CONTRACT_v1.md`
-- `docs/contracts/c3_semantic_contract_v0_1.md`
+- `docs/contracts/l3_semantic_contract_v0_1.md`
 - `docs/contracts/min_contract_alignment.md`
 - `docs/contracts/option_c_boundary.md`
 - `docs/contracts/option_d_ops_boundary.md`

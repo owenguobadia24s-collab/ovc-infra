@@ -88,7 +88,7 @@ From [C_v0_1_validation.md](C_v0_1_validation.md):
 
 | Requirement                                | Contract Ref | Status |
 |--------------------------------------------|--------------|--------|
-| Reads only from C1/C2/C3 views             | Charter §2.1 | ✓      |
+| Reads only from L1/L2/L3 views             | Charter §2.1 | ✓      |
 | No raw block access                        | Charter §2.2 | ✓      |
 | Anchor bar excluded from forward window    | Contract §2.2| ✓      |
 | Lookahead only in Option C                 | Contract §2.4| ✓      |

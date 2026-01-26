@@ -38,15 +38,15 @@ flowchart LR
       B_wf_validate[.github/workflows/backfill_then_validate.yml - DORMANT]
     end
     subgraph B_SRC[src/derived/]
-      B_c1[src/derived/compute_c1_v0_1.py]
-      B_c2[src/derived/compute_c2_v0_1.py]
-      B_c3[src/derived/compute_c3_regime_trend_v0_1.py - NOT INVOKED]
-      B_stub[src/derived/compute_c3_stub_v0_1.py]
+      B_c1[src/derived/compute_l1_v0_1.py]
+      B_c2[src/derived/compute_l2_v0_1.py]
+      B_c3[src/derived/compute_l3_regime_trend_v0_1.py - NOT INVOKED]
+      B_stub[src/derived/compute_l3_stub_v0_1.py]
     end
     subgraph B_SQL[sql/derived/]
-      B_v_c1[sql/derived/v_ovc_c1_features_v0_1.sql]
-      B_v_c2[sql/derived/v_ovc_c2_features_v0_1.sql]
-      B_v_c3[sql/derived/v_ovc_c3_features_v0_1.sql]
+      B_v_c1[sql/derived/v_ovc_l1_features_v0_1.sql]
+      B_v_c2[sql/derived/v_ovc_l2_features_v0_1.sql]
+      B_v_c3[sql/derived/v_ovc_l3_features_v0_1.sql]
       B_v_sp[sql/derived/v_ovc_state_plane_v0_2.sql]
     end
     subgraph B_MODELS[trajectory_families/]
@@ -55,7 +55,7 @@ flowchart LR
       B_params[trajectory_families/params_v0_1.json]
     end
     subgraph B_CFG[configs/threshold_packs/]
-      B_th_c3[configs/threshold_packs/c3_regime_trend_v1.json]
+      B_th_c3[configs/threshold_packs/l3_regime_trend_v1.json]
       B_th_sp[configs/threshold_packs/state_plane_v0_2_default_v1.json]
     end
     subgraph B_REG[src/config/]
@@ -138,7 +138,7 @@ flowchart LR
     end
     subgraph QA_TESTS[tests/]
       QA_t_derived[test_derived_features.py]
-      QA_t_c3[test_c3_regime_trend.py]
+      QA_t_c3[test_l3_regime_trend.py]
       QA_t_contract[test_contract_equivalence.py]
       QA_t_fp[test_fingerprint.py]
       QA_t_replay[test_path1_replay_structural.py]

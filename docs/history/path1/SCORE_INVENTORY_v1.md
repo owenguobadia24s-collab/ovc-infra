@@ -25,10 +25,10 @@ Canonical facts remain in `reports/path1/evidence/INDEX.md`.
 
 | Column | Source View |
 |--------|-------------|
-| `block_id` | `derived.v_ovc_c1_features_v0_1` |
-| `sym` | `derived.v_ovc_c1_features_v0_1` |
-| `body_ratio` | `derived.v_ovc_c1_features_v0_1` |
-| `bar_close_ms` | `derived.v_ovc_c2_features_v0_1` |
+| `block_id` | `derived.v_ovc_l1_features_v0_1` |
+| `sym` | `derived.v_ovc_l1_features_v0_1` |
+| `body_ratio` | `derived.v_ovc_l1_features_v0_1` |
+| `bar_close_ms` | `derived.v_ovc_l2_features_v0_1` |
 
 **Output Fields:**
 
@@ -56,12 +56,12 @@ Canonical facts remain in `reports/path1/evidence/INDEX.md`.
 
 | Column | Source View |
 |--------|-------------|
-| `block_id` | `derived.v_ovc_c1_features_v0_1` |
-| `sym` | `derived.v_ovc_c1_features_v0_1` |
-| `rng` | `derived.v_ovc_c1_features_v0_1` |
-| `body_ratio` | `derived.v_ovc_c1_features_v0_1` |
-| `rng_avg_6` | `derived.v_ovc_c2_features_v0_1` |
-| `bar_close_ms` | `derived.v_ovc_c2_features_v0_1` |
+| `block_id` | `derived.v_ovc_l1_features_v0_1` |
+| `sym` | `derived.v_ovc_l1_features_v0_1` |
+| `rng` | `derived.v_ovc_l1_features_v0_1` |
+| `body_ratio` | `derived.v_ovc_l1_features_v0_1` |
+| `rng_avg_6` | `derived.v_ovc_l2_features_v0_1` |
+| `bar_close_ms` | `derived.v_ovc_l2_features_v0_1` |
 
 **Output Fields:**
 
@@ -89,12 +89,12 @@ Canonical facts remain in `reports/path1/evidence/INDEX.md`.
 
 | Column | Source View |
 |--------|-------------|
-| `block_id` | `derived.v_ovc_c1_features_v0_1` |
-| `sym` | `derived.v_ovc_c1_features_v0_1` |
-| `upper_wick_ratio` | `derived.v_ovc_c1_features_v0_1` |
-| `lower_wick_ratio` | `derived.v_ovc_c1_features_v0_1` |
-| `body_ratio` | `derived.v_ovc_c1_features_v0_1` |
-| `bar_close_ms` | `derived.v_ovc_c2_features_v0_1` |
+| `block_id` | `derived.v_ovc_l1_features_v0_1` |
+| `sym` | `derived.v_ovc_l1_features_v0_1` |
+| `upper_wick_ratio` | `derived.v_ovc_l1_features_v0_1` |
+| `lower_wick_ratio` | `derived.v_ovc_l1_features_v0_1` |
+| `body_ratio` | `derived.v_ovc_l1_features_v0_1` |
+| `bar_close_ms` | `derived.v_ovc_l2_features_v0_1` |
 
 **Output Fields:**
 

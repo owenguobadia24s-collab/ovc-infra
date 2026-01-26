@@ -31,7 +31,7 @@
 | `docs/OVC_DOCTRINE.md` | Epistemic principles — what OVC is and is not |
 | `docs/IMMUTABILITY_NOTICE.md` | Rules for modifying canonical layers |
 | `docs/ops/GOVERNANCE_RULES_v0.1.md` | Change control process |
-| `docs/c_layer_boundary_spec_v0.1.md` | C1/C2/C3 tier definitions |
+| `docs/c_layer_boundary_spec_v0.1.md` | L1/L2/L3 tier definitions |
 | `releases/ovc-v0.1-spine.md` | Frozen scope definition |
 
 ### Contracts & Schemas
@@ -42,7 +42,7 @@
 | `contracts/export_contract_v0.1_full.json` | FULL export schema (cold path) |
 | `contracts/eval_contract_v0.1.json` | Option C evaluation parameters |
 | `contracts/run_artifact_spec_v0.1.json` | Run artifact directory structure |
-| `contracts/derived_feature_set_v0.1.json` | C1/C2 feature definitions |
+| `contracts/derived_feature_set_v0.1.json` | L1/L2 feature definitions |
 
 ### SQL / Database
 
@@ -50,11 +50,11 @@
 |------|---------|
 | `sql/00_schema.sql` | Schema creation |
 | `sql/01_tables_min.sql` | `ovc.ovc_blocks_v01_1_min` table |
-| `sql/02_derived_c1_c2_tables_v0_1.sql` | C1/C2 feature tables |
+| `sql/02_derived_c1_c2_tables_v0_1.sql` | L1/L2 feature tables |
 | `sql/02_tables_run_reports.sql` | Run reports table |
 | `sql/03_qa_derived_validation_v0_1.sql` | QA validation tables |
-| `sql/04_threshold_registry_v0_1.sql` | C3 threshold configuration |
-| `sql/05_c3_regime_trend_v0_1.sql` | C3 regime tags |
+| `sql/04_threshold_registry_v0_1.sql` | L3 threshold configuration |
+| `sql/05_c3_regime_trend_v0_1.sql` | L3 regime tags |
 | `sql/option_c_v0_1.sql` | Option C views (outcomes, scores) |
 | `sql/qa_validation_pack_core.sql` | Core validation SQL pack |
 
@@ -66,8 +66,8 @@
 | `src/validate_day.py` | D: Single-day validation harness |
 | `src/validate_range.py` | D: Date range validation |
 | `src/ovc_ops/run_artifact.py` | RunWriter utility for artifacts |
-| `src/derived/compute_c1_v0_1.py` | C1 feature computation |
-| `src/derived/compute_c2_v0_1.py` | C2 feature computation |
+| `src/derived/compute_l1_v0_1.py` | L1 feature computation |
+| `src/derived/compute_l2_v0_1.py` | L2 feature computation |
 | `src/full_ingest_stub.py` | FULL ingest (dormant) |
 | `scripts/run_option_c.sh` | Option C automation entry |
 | `scripts/pipeline_status.py` | Pipeline status harness |
@@ -119,9 +119,9 @@ ovc (CANONICAL - LOCKED)
 
 derived (VERSIONED)
 ├── derived_runs_v0_1           # Run provenance
-├── ovc_c1_features_v0_1        # C1 features
-├── ovc_c2_features_v0_1        # C2 features
-├── ovc_c3_regime_trend_v0_1    # C3 semantic tags
+├── ovc_l1_features_v0_1        # L1 features
+├── ovc_l2_features_v0_1        # L2 features
+├── ovc_l3_regime_trend_v0_1    # L3 semantic tags
 ├── ovc_outcomes_v0_1           # Option C outcomes (view)
 └── eval_runs                   # Eval run metadata
 
@@ -146,9 +146,9 @@ ops (OPERATIONAL)
 | ID | Script | Schedule |
 |----|--------|----------|
 | `P2-Backfill` | `backfill_oanda_2h_checkpointed.py` | Every 6h |
-| `B1-DerivedC1` | `compute_c1_v0_1.py` | On demand |
-| `B1-DerivedC2` | `compute_c2_v0_1.py` | On demand |
-| `B1-DerivedC3` | (C3 compute) | On demand |
+| `B1-DerivedC1` | `compute_l1_v0_1.py` | On demand |
+| `B1-DerivedC2` | `compute_l2_v0_1.py` | On demand |
+| `B1-DerivedC3` | (L3 compute) | On demand |
 | `D-ValidationHarness` | `validate_day.py` | On demand |
 | `D-ValidationRange` | `validate_range.py` | On demand |
 | `D-NotionSync` | `notion_sync.py` | Every 2h |

@@ -6,7 +6,7 @@ This repo implements and governs the OVC pipeline: ingest canonical market facts
 
 Pipeline stages (high level):
 - **Ingest (P1/P2):** TradingView/Pine export → webhook ingest (P1) and backfill (P2) into Neon Postgres canonical tables.
-- **Transform/Compute (Option B):** deterministic derived features (C1/C2/C3) computed from canonical facts, with versioned threshold/config provenance.
+- **Transform/Compute (Option B):** deterministic derived features (L1/L2/L3) computed from canonical facts, with versioned threshold/config provenance.
 - **Evaluation/Outcomes (Option C):** forward-return/outcome views and run reports derived from Option B outputs.
 - **Validation/QA:** contract validation + derived validation packs + tape/consistency checks; produces evidence artifacts.
 - **Ops/Orchestration:** GitHub Actions schedules and operator scripts to run/deploy/verify and to sync operational surfaces (Option D).

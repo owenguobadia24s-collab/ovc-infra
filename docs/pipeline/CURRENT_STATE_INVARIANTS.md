@@ -18,19 +18,19 @@ Facts that are true TODAY (even if wrong). Each references a specific file/table
 
 ### Option B Invariants
 
-4. **INV-B1**: Two derived feature implementations coexist: legacy view `derived.ovc_block_features_v0_1` (in `sql/derived_v0_1.sql`) AND split C1/C2/C3 tables/views (in `sql/derived/`).
+4. **INV-B1**: Two derived feature implementations coexist: legacy view `derived.ovc_block_features_v0_1` (in `sql/derived_v0_1.sql`) AND split L1/L2/L3 tables/views (in `sql/derived/`).
 
-5. **INV-B2**: The workflow `backfill_then_validate.yml` invokes only `compute_c1_v0_1.py` and `compute_c2_v0_1.py`; it does NOT invoke `compute_c3_regime_trend_v0_1.py`.
+5. **INV-B2**: The workflow `backfill_then_validate.yml` invokes only `compute_l1_v0_1.py` and `compute_l2_v0_1.py`; it does NOT invoke `compute_l3_regime_trend_v0_1.py`.
 
-6. **INV-B3**: The threshold registry tables (`ovc_cfg.threshold_pack`, `ovc_cfg.threshold_pack_active`) are defined in `sql/04_threshold_registry_v0_1.sql` and consumed by `v_ovc_c3_features_v0_1.sql`.
+6. **INV-B3**: The threshold registry tables (`ovc_cfg.threshold_pack`, `ovc_cfg.threshold_pack_active`) are defined in `sql/04_threshold_registry_v0_1.sql` and consumed by `v_ovc_l3_features_v0_1.sql`.
 
 ### Option C Invariants
 
-7. **INV-C1**: The Option C runner (`sql/option_c_v0_1.sql`) creates view `derived.ovc_outcomes_v0_1` by reading directly from `ovc.ovc_blocks_v01_1_min`.
+7. **INV-L1**: The Option C runner (`sql/option_c_v0_1.sql`) creates view `derived.ovc_outcomes_v0_1` by reading directly from `ovc.ovc_blocks_v01_1_min`.
 
-8. **INV-C2**: A separate view `derived.v_ovc_c_outcomes_v0_1` (in `sql/derived/v_ovc_c_outcomes_v0_1.sql`) computes outcomes from C1/C2/C3 feature views, NOT from the canonical table.
+8. **INV-L2**: A separate view `derived.v_ovc_c_outcomes_v0_1` (in `sql/derived/v_ovc_c_outcomes_v0_1.sql`) computes outcomes from L1/L2/L3 feature views, NOT from the canonical table.
 
-9. **INV-C3**: The scheduled workflow `ovc_option_c_schedule.yml` references `scripts/run_option_c.sh` at line 82, but the actual script exists at `scripts/run/run_option_c.sh`.
+9. **INV-L3**: The scheduled workflow `ovc_option_c_schedule.yml` references `scripts/run_option_c.sh` at line 82, but the actual script exists at `scripts/run/run_option_c.sh`.
 
 ### Option D Invariants
 
@@ -61,10 +61,10 @@ Facts that are true TODAY (even if wrong). Each references a specific file/table
 | INV-A1 | F1 (Option boundary breach) |
 | INV-A3 | F1 (Option boundary breach) |
 | INV-B1 | F2 (Multiple sources of truth) |
-| INV-B2 | F3 (Unused C3 compute path) |
-| INV-C1 | F5 (Outcome view mismatch) |
-| INV-C2 | F5 (Outcome view mismatch) |
-| INV-C3 | F4 (Option C scheduling mismatch) |
+| INV-B2 | F3 (Unused L3 compute path) |
+| INV-L1 | F5 (Outcome view mismatch) |
+| INV-L2 | F5 (Outcome view mismatch) |
+| INV-L3 | F4 (Option C scheduling mismatch) |
 | INV-D1 | F5 (Outcome view mismatch) |
 | INV-QA1 | F8 (QA vs CI gap) |
 | INV-QA2 | F8 (QA vs CI gap) |

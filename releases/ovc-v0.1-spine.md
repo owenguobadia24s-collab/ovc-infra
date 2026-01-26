@@ -14,9 +14,9 @@ This release formally freezes the **OVC epistemic spine**—the complete descrip
 
 | Layer | Status | Description |
 |-------|--------|-------------|
-| C1 | CANONICAL | Block-level descriptive features |
-| C2 | CANONICAL | Session-level aggregations |
-| C3 | CANONICAL | Cross-session semantic features |
+| L1 | CANONICAL | Block-level descriptive features |
+| L2 | CANONICAL | Session-level aggregations |
+| L3 | CANONICAL | Cross-session semantic features |
 
 ### Option C (Outcomes) — CANONICAL
 
@@ -59,7 +59,7 @@ This release does **NOT** include and does **NOT** authorize:
 
 > **"This release freezes the descriptive and evaluative truth layers of OVC."**
 
-All canonical layers (Option B C1/C2/C3, Option C Outcomes) are now **FROZEN**.
+All canonical layers (Option B L1/L2/L3, Option C Outcomes) are now **FROZEN**.
 
 - Meanings are fixed and must not be reinterpreted
 - Implementations are locked and must not be modified in place

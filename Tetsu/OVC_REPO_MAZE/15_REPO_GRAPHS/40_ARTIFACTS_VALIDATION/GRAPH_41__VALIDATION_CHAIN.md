@@ -140,7 +140,7 @@ flowchart TB
 |-------|-------|---------|--------|
 | Day Validation | ovc_blocks | validate_day.py | reports/validation/validate_range_* |
 | Range Validation | ovc_blocks + outcomes | validate_range.py | reports/validation/validate_range_* |
-| Derived Validation | derived features | validate_derived_range_v0_1.py | C1/C2/C3 validation reports |
+| Derived Validation | derived features | validate_derived_range_v0_1.py | L1/L2/L3 validation reports |
 | Replay Verification | evidence runs | run_replay_verification.py | path1_replay_report.json |
 | Gate Verification | schema objects | 90_verify_gate2.sql | (NOT AUTOMATED) |
 

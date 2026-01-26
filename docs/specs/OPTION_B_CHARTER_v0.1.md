@@ -92,7 +92,7 @@ All Option B tables and views must follow semantic versioning:
 
 | Pattern | Example | When to Use |
 |---------|---------|-------------|
-| `<name>_v<major>_<minor>` | `ovc_c1_features_v0_1` | New feature set |
+| `<name>_v<major>_<minor>` | `ovc_l1_features_v0_1` | New feature set |
 | Increment minor | `v0_1` → `v0_2` | Additive changes (new columns) |
 | Increment major | `v0_2` → `v1_0` | Breaking changes (column removal, type change) |
 
@@ -102,9 +102,9 @@ All Option B tables and views must follow semantic versioning:
 
 | Object Type | Pattern | Example |
 |-------------|---------|---------|
-| C1 features (single-bar) | `ovc_c1_<name>_v<ver>` | `ovc_c1_features_v0_1` |
-| C2 features (multi-bar) | `ovc_c2_<name>_v<ver>` | `ovc_c2_session_features_v0_1` |
-| C3 features (semantic) | `ovc_c3_<name>_v<ver>` | `ovc_c3_regime_trend_v0_1` |
+| L1 features (single-bar) | `ovc_l1_<name>_v<ver>` | `ovc_l1_features_v0_1` |
+| L2 features (multi-bar) | `ovc_l2_<name>_v<ver>` | `ovc_l2_session_features_v0_1` |
+| L3 features (semantic) | `ovc_l3_<name>_v<ver>` | `ovc_l3_regime_trend_v0_1` |
 | Run metadata | `derived_runs_v<ver>` | `derived_runs_v0_1` |
 | Feature views | `v_<name>_v<ver>` | `v_block_features_v0_1` |
 
@@ -148,7 +148,7 @@ Experimental features that have not been reviewed must use:
 derived.ovc_c<N>_<name>_exp_v<ver>
 ```
 
-Example: `derived.ovc_c2_momentum_exp_v0_1`
+Example: `derived.ovc_l2_momentum_exp_v0_1`
 
 Experimental tables:
 - May be dropped without audit
@@ -169,7 +169,7 @@ Option B operates under the rules defined in:
 
 | Event | Audit Type | Reference |
 |-------|------------|-----------|
-| New C-level feature category (C4, C5, etc.) | Full audit | GOVERNANCE_RULES §2 |
+| New C-level feature category (L4, C5, etc.) | Full audit | GOVERNANCE_RULES §2 |
 | Breaking change to existing feature table | Schema audit | GOVERNANCE_RULES §5 |
 | New dependency on Option A artifact | Boundary audit | GOVERNANCE_RULES §4 |
 | Promotion of experimental feature | Feature audit | This document §4 |
@@ -224,27 +224,27 @@ Before Option B work begins on a new feature category, the following must exist:
 
 ---
 
-## [CHANGE][ADDED] 8. C1 Status
+## [CHANGE][ADDED] 8. L1 Status
 
-**C1 is now CANONICAL** (promoted 2026-01-20).
+**L1 is now CANONICAL** (promoted 2026-01-20).
 
 | Property | Value |
 |----------|-------|
-| Feature Spec | `OPTION_B_C1_FEATURES_v0.1.md` [CANONICAL] |
-| Implementation Contract | `OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md` [CANONICAL] |
-| SQL View | `derived.v_ovc_c1_features_v0_1` |
+| Feature Spec | `OPTION_B_L1_FEATURES_v0.1.md` [CANONICAL] |
+| Implementation Contract | `OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md` [CANONICAL] |
+| SQL View | `derived.v_ovc_l1_features_v0_1` |
 | Validation Evidence | `reports/validation/C1_v0_1_validation.md` |
 
 ### Downstream Authorization
 
-- ✅ **C2** (multi-bar features) may depend on C1 outputs
-- ✅ **C3** (signals/classifications) may depend on C1 outputs
-- ✅ **Option C** (outcomes/evaluation) may depend on C1 outputs
+- ✅ **L2** (multi-bar features) may depend on L1 outputs
+- ✅ **L3** (signals/classifications) may depend on L1 outputs
+- ✅ **Option C** (outcomes/evaluation) may depend on L1 outputs
 
 ### Modification Restrictions
 
-- ❌ C1 feature meanings may NOT be changed without governance approval
-- ❌ C1 implementation may NOT deviate from spec
+- ❌ L1 feature meanings may NOT be changed without governance approval
+- ❌ L1 implementation may NOT deviate from spec
 - ❌ Breaking changes require MAJOR version bump (v0.1 → v1.0)
 
 ---
@@ -255,7 +255,7 @@ Before Option B work begins on a new feature category, the following must exist:
 |--------|-------------------|
 | **Reads from** | `ovc.*` (canonical facts), `ovc_cfg.*` (thresholds) |
 | **Writes to** | `derived.*` only |
-| **Computes** | Features derived from facts (C1, C2, C3) |
+| **Computes** | Features derived from facts (L1, L2, L3) |
 | **Does not compute** | Outcomes, signals, recommendations |
 | **Syncs to Notion** | ❌ NEVER |
 | **Modifies Option A** | ❌ NEVER |

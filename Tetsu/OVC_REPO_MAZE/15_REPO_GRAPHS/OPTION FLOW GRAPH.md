@@ -14,7 +14,7 @@ flowchart TB
   end
 
   %% Option A
-  subgraph OPTA[Option A — Canonical Ingest C0/C1]
+  subgraph OPTA[Option A — Canonical Ingest L0/L1]
     direction TB
     A_WORKER[infra/ovc-webhook - Cloudflare Worker]
     A_BACKFILL[src/backfill_* - OANDA backfill]
@@ -25,12 +25,12 @@ flowchart TB
   end
 
   %% Option B
-  subgraph OPTB[Option B — Derived Features C2/C3]
+  subgraph OPTB[Option B — Derived Features L2/L3]
     direction TB
-    B_C1[src/derived/compute_c1_v0_1.py]
-    B_C2[src/derived/compute_c2_v0_1.py]
-    B_C3[src/derived/compute_c3_regime_trend_v0_1.py - IMPLIED / NOT INVOKED]
-    B_VIEWS[sql/derived views: v_ovc_c1_features, v_ovc_c2_features, v_ovc_c3_features]
+    B_C1[src/derived/compute_l1_v0_1.py]
+    B_C2[src/derived/compute_l2_v0_1.py]
+    B_C3[src/derived/compute_l3_regime_trend_v0_1.py - IMPLIED / NOT INVOKED]
+    B_VIEWS[sql/derived views: v_ovc_l1_features, v_ovc_l2_features, v_ovc_l3_features]
     B_TF[trajectory_families/ - fingerprint models]
     B_REG[configs/threshold_packs + ovc_cfg.threshold_packs]
   end

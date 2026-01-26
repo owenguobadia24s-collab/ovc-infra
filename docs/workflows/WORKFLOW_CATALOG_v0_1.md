@@ -50,7 +50,7 @@
 | **Secrets** | `NEON_DSN`, `OANDA_API_TOKEN`, `OANDA_ENV` |
 | **Permissions** | `contents: read` |
 | **Concurrency** | None |
-| **Scripts** | `src/backfill_oanda_2h_checkpointed.py`, `src/validate_range.py`, `src/derived/compute_c1_v0_1.py`, `src/derived/compute_c2_v0_1.py`, `src/validate/validate_derived_range_v0_1.py` |
+| **Scripts** | `src/backfill_oanda_2h_checkpointed.py`, `src/validate_range.py`, `src/derived/compute_l1_v0_1.py`, `src/derived/compute_l2_v0_1.py`, `src/validate/validate_derived_range_v0_1.py` |
 | **Outputs** | Artifact: `ovc-run-{run_id}`, `run-artifacts-{run_id}` |
 | **Persistence** | Artifacts-only (ephemeral diagnostics) |
 

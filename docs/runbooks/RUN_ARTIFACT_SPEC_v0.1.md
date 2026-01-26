@@ -41,9 +41,9 @@ Components:
 | Pipeline | ID | Description |
 |----------|-----|-------------|
 | OANDA Backfill | `P2-Backfill` | Historical 2H block backfill from OANDA |
-| C1 Features | `B1-DerivedC1` | Single-bar OHLC primitive computation |
-| C2 Features | `B1-DerivedC2` | Multi-bar structure feature computation |
-| C3 Regime | `B1-DerivedC3` | Regime/trend classification |
+| L1 Features | `B1-DerivedC1` | Single-bar OHLC primitive computation |
+| L2 Features | `B1-DerivedC2` | Multi-bar structure feature computation |
+| L3 Regime | `B1-DerivedC3` | Regime/trend classification |
 | Derived Validation | `B2-DerivedValidation` | Validate derived feature packs |
 | Day Validation | `D-ValidationHarness` | Single-day validation harness |
 | Range Validation | `D-ValidationRange` | Multi-day range validation |

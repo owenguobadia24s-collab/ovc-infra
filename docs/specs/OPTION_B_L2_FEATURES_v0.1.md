@@ -1,4 +1,4 @@
-# Option B – C2 Feature Definitions v0.1
+# Option B – L2 Feature Definitions v0.1
 
 [CHANGE][CHANGED] **[STATUS: CANONICAL]**
 
@@ -10,50 +10,50 @@
 |--------------------|------------------------------------|
 | Version            | 0.1                                |
 | Effective Date     | 2026-01-20                         |
-| Governing Charter  | OPTION_B_C2_CHARTER_v0.1.md        |
-| Upstream Dependency| C1 Features (CANONICAL)            |
+| Governing Charter  | OPTION_B_L2_CHARTER_v0.1.md        |
+| Upstream Dependency| L1 Features (CANONICAL)            |
 | Governance         | GOVERNANCE_RULES_v0.1.md           |
 
 ---
 
-## 1. Purpose of C2 Features
+## 1. Purpose of L2 Features
 
-### 1.1 What C2 Represents
+### 1.1 What L2 Represents
 
-C2 features are **multi-bar / sequence-derived facts** that provide temporal context around individual blocks. They answer questions that require awareness of prior bars:
+L2 features are **multi-bar / sequence-derived facts** that provide temporal context around individual blocks. They answer questions that require awareness of prior bars:
 
 - *"How does this bar's range compare to recent bars?"*
 - *"Where are we within the current session?"*
 - *"How many consecutive bars have moved in this direction?"*
 
-### 1.2 How C2 Extends C1
+### 1.2 How L2 Extends L1
 
-C2 **extends** C1 by computing derived context; it does not **reinterpret** C1.
+L2 **extends** L1 by computing derived context; it does not **reinterpret** L1.
 
 | Principle                  | Meaning                                              |
 |----------------------------|------------------------------------------------------|
-| Additive only              | C2 adds columns; never modifies C1 values            |
-| Semantic preservation      | C1 field meanings are unchanged                      |
-| Compositional              | C2 features are functions of C1 outputs              |
+| Additive only              | L2 adds columns; never modifies L1 values            |
+| Semantic preservation      | L1 field meanings are unchanged                      |
+| Compositional              | L2 features are functions of L1 outputs              |
 
 Example of valid extension:
-- C1 provides `rng` (single-bar range)
-- C2 computes `rng_avg_3` (rolling average of `rng` over last 3 bars)
+- L1 provides `rng` (single-bar range)
+- L2 computes `rng_avg_3` (rolling average of `rng` over last 3 bars)
 
 Example of invalid reinterpretation:
-- C2 redefines `rng` as "normalized range" with different semantics
+- L2 redefines `rng` as "normalized range" with different semantics
 
-### 1.3 Why C2 Features Remain Non-Decisional
+### 1.3 Why L2 Features Remain Non-Decisional
 
-C2 features are **descriptive facts**, not **prescriptive signals**.
+L2 features are **descriptive facts**, not **prescriptive signals**.
 
-| C2 Provides                | C2 Does NOT Provide                    |
+| L2 Provides                | L2 Does NOT Provide                    |
 |----------------------------|----------------------------------------|
 | Rolling average of range   | "Volatility is high" (threshold)       |
 | Consecutive up-bar count   | "Trend confirmed" (interpretation)     |
 | Session block index        | "Trade entry window" (decision)        |
 
-Decision logic belongs to C3 (thresholds) or Option C (outcomes).
+Decision logic belongs to L3 (thresholds) or Option C (outcomes).
 
 ---
 
@@ -61,24 +61,24 @@ Decision logic belongs to C3 (thresholds) or Option C (outcomes).
 
 ### 2.1 Explicit Sources
 
-C2 features **MAY** consume:
+L2 features **MAY** consume:
 
 | Source                        | Priority  | Usage                                    |
 |-------------------------------|-----------|------------------------------------------|
-| C1 feature outputs            | PRIMARY   | Preferred for all computations           |
-| `ovc.ovc_blocks_v01_1_min`    | SECONDARY | Only when C1 does not expose needed field|
+| L1 feature outputs            | PRIMARY   | Preferred for all computations           |
+| `ovc.ovc_blocks_v01_1_min`    | SECONDARY | Only when L1 does not expose needed field|
 
 When canonical blocks are used directly, the feature definition must include explicit justification.
 
 ### 2.2 Lookback-Only Rule
 
-**All C2 computations are strictly lookback.**
+**All L2 computations are strictly lookback.**
 
-For any bar at time `t`, C2 features may use:
+For any bar at time `t`, L2 features may use:
 - The bar at `t` (current)
 - Bars at `t-1, t-2, ..., t-N` (prior confirmed bars)
 
-C2 features **MAY NOT** use:
+L2 features **MAY NOT** use:
 - Bars at `t+1, t+2, ...` (future bars)
 - Unconfirmed or provisional data
 
@@ -87,7 +87,7 @@ C2 features **MAY NOT** use:
 | Constraint       | Value         | Rationale                              |
 |------------------|---------------|----------------------------------------|
 | Maximum lookback | 12 bars       | One full session (12 × 2H = 24H)       |
-| Minimum lookback | 2 bars        | Single-bar scope belongs to C1         |
+| Minimum lookback | 2 bars        | Single-bar scope belongs to L1         |
 
 Windows exceeding 12 bars require charter amendment.
 
@@ -130,7 +130,7 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 | Gap in sequence             | Skip gap; use available bars with NULL flag   |
 | Session start (STD window)  | Compute with available bars; minimum = 1      |
 
-**Null propagation rule:** If any required input within the window is NULL, the C2 output is NULL unless the feature definition explicitly handles NULLs.
+**Null propagation rule:** If any required input within the window is NULL, the L2 output is NULL unless the feature definition explicitly handles NULLs.
 
 ---
 
@@ -140,27 +140,27 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 
 | ID    | Feature Name              | Type   | Window        | Status |
 |-------|---------------------------|--------|---------------|--------|
-| C2-01 | `rng_avg_3`               | float  | Fixed 3-bar   | ACTIVE |
-| C2-02 | `rng_avg_6`               | float  | Fixed 6-bar   | ACTIVE |
-| C2-03 | `dir_streak`              | int    | Dynamic       | ACTIVE |
-| C2-04 | `session_block_idx`       | int    | Session       | ACTIVE |
-| C2-05 | `session_rng_cum`         | float  | Session STD   | ACTIVE |
-| C2-06 | `session_dir_net`         | int    | Session STD   | ACTIVE |
-| C2-07 | `rng_rank_6`              | float  | Fixed 6-bar   | ACTIVE |
-| C2-08 | `body_rng_pct_avg_3`      | float  | Fixed 3-bar   | ACTIVE |
+| L2-01 | `rng_avg_3`               | float  | Fixed 3-bar   | ACTIVE |
+| L2-02 | `rng_avg_6`               | float  | Fixed 6-bar   | ACTIVE |
+| L2-03 | `dir_streak`              | int    | Dynamic       | ACTIVE |
+| L2-04 | `session_block_idx`       | int    | Session       | ACTIVE |
+| L2-05 | `session_rng_cum`         | float  | Session STD   | ACTIVE |
+| L2-06 | `session_dir_net`         | int    | Session STD   | ACTIVE |
+| L2-07 | `rng_rank_6`              | float  | Fixed 6-bar   | ACTIVE |
+| L2-08 | `body_rng_pct_avg_3`      | float  | Fixed 3-bar   | ACTIVE |
 
 ---
 
 ### 4.2 Feature Specifications
 
-#### C2-01: `rng_avg_3`
+#### L2-01: `rng_avg_3`
 
 | Property         | Value                                                  |
 |------------------|--------------------------------------------------------|
 | **Name**         | `rng_avg_3`                                            |
 | **Type**         | float                                                  |
 | **Description**  | Rolling arithmetic mean of bar range over last 3 bars  |
-| **Required Inputs** | C1: `rng` (float, pips)                             |
+| **Required Inputs** | L1: `rng` (float, pips)                             |
 | **Window**       | Fixed 3-bar (current + 2 prior)                        |
 | **Formula**      | `rng_avg_3 = (rng[t] + rng[t-1] + rng[t-2]) / 3`       |
 | **Domain**       | [0, +∞)                                                |
@@ -170,14 +170,14 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 
 ---
 
-#### C2-02: `rng_avg_6`
+#### L2-02: `rng_avg_6`
 
 | Property         | Value                                                  |
 |------------------|--------------------------------------------------------|
 | **Name**         | `rng_avg_6`                                            |
 | **Type**         | float                                                  |
 | **Description**  | Rolling arithmetic mean of bar range over last 6 bars  |
-| **Required Inputs** | C1: `rng` (float, pips)                             |
+| **Required Inputs** | L1: `rng` (float, pips)                             |
 | **Window**       | Fixed 6-bar (current + 5 prior)                        |
 | **Formula**      | `rng_avg_6 = sum(rng[t-5:t]) / 6`                      |
 | **Domain**       | [0, +∞)                                                |
@@ -187,14 +187,14 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 
 ---
 
-#### C2-03: `dir_streak`
+#### L2-03: `dir_streak`
 
 | Property         | Value                                                  |
 |------------------|--------------------------------------------------------|
 | **Name**         | `dir_streak`                                           |
 | **Type**         | int (signed)                                           |
 | **Description**  | Count of consecutive bars with same direction, signed  |
-| **Required Inputs** | C1: `dir` (int: -1, 0, +1)                          |
+| **Required Inputs** | L1: `dir` (int: -1, 0, +1)                          |
 | **Window**       | Dynamic (lookback until direction changes, max 12)     |
 | **Formula**      | Count consecutive bars where `dir[t-k] == dir[t]`, for k=0,1,2,... until `dir` changes or k=11. Sign matches `dir[t]`. |
 | **Domain**       | [-12, +12]                                             |
@@ -209,7 +209,7 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 
 ---
 
-#### C2-04: `session_block_idx`
+#### L2-04: `session_block_idx`
 
 | Property         | Value                                                  |
 |------------------|--------------------------------------------------------|
@@ -224,18 +224,18 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 | **Edge Cases**   | Invalid block letter → NULL                            |
 | **NULL Handling**| If `block_id` is NULL or malformed → NULL              |
 
-**Justification for canonical block access:** Block letter is embedded in `block_id` and not exposed as a C1 feature. Direct extraction is required.
+**Justification for canonical block access:** Block letter is embedded in `block_id` and not exposed as a L1 feature. Direct extraction is required.
 
 ---
 
-#### C2-05: `session_rng_cum`
+#### L2-05: `session_rng_cum`
 
 | Property         | Value                                                  |
 |------------------|--------------------------------------------------------|
 | **Name**         | `session_rng_cum`                                      |
 | **Type**         | float                                                  |
 | **Description**  | Cumulative sum of bar ranges within current session    |
-| **Required Inputs** | C1: `rng` (float, pips); C2: `session_block_idx`    |
+| **Required Inputs** | L1: `rng` (float, pips); L2: `session_block_idx`    |
 | **Window**       | Session-to-date (block 1 through current)              |
 | **Formula**      | `session_rng_cum = sum(rng[session_start:t])`          |
 | **Domain**       | [0, +∞)                                                |
@@ -245,14 +245,14 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 
 ---
 
-#### C2-06: `session_dir_net`
+#### L2-06: `session_dir_net`
 
 | Property         | Value                                                  |
 |------------------|--------------------------------------------------------|
 | **Name**         | `session_dir_net`                                      |
 | **Type**         | int (signed)                                           |
 | **Description**  | Net directional count within current session           |
-| **Required Inputs** | C1: `dir` (int: -1, 0, +1); C2: `session_block_idx` |
+| **Required Inputs** | L1: `dir` (int: -1, 0, +1); L2: `session_block_idx` |
 | **Window**       | Session-to-date (block 1 through current)              |
 | **Formula**      | `session_dir_net = sum(dir[session_start:t])`          |
 | **Domain**       | [-12, +12]                                             |
@@ -266,14 +266,14 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 
 ---
 
-#### C2-07: `rng_rank_6`
+#### L2-07: `rng_rank_6`
 
 | Property         | Value                                                  |
 |------------------|--------------------------------------------------------|
 | **Name**         | `rng_rank_6`                                           |
 | **Type**         | float                                                  |
 | **Description**  | Percentile rank of current bar's range within last 6 bars |
-| **Required Inputs** | C1: `rng` (float, pips)                             |
+| **Required Inputs** | L1: `rng` (float, pips)                             |
 | **Window**       | Fixed 6-bar (current + 5 prior)                        |
 | **Formula**      | `rng_rank_6 = (count of bars where rng < rng[t]) / 5`  |
 | **Domain**       | [0.0, 1.0]                                             |
@@ -288,14 +288,14 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 
 ---
 
-#### C2-08: `body_rng_pct_avg_3`
+#### L2-08: `body_rng_pct_avg_3`
 
 | Property         | Value                                                  |
 |------------------|--------------------------------------------------------|
 | **Name**         | `body_rng_pct_avg_3`                                   |
 | **Type**         | float                                                  |
 | **Description**  | Rolling mean of body-to-range percentage over last 3 bars |
-| **Required Inputs** | C1: `body_rng_pct` (float, percentage)              |
+| **Required Inputs** | L1: `body_rng_pct` (float, percentage)              |
 | **Window**       | Fixed 3-bar (current + 2 prior)                        |
 | **Formula**      | `body_rng_pct_avg_3 = sum(body_rng_pct[t-2:t]) / 3`    |
 | **Domain**       | [0.0, 100.0]                                           |
@@ -307,25 +307,25 @@ When a window contains fewer than N bars (e.g., start of data, gaps):
 
 ## 5. Explicit Exclusions
 
-### 5.1 Intentionally NOT Part of C2
+### 5.1 Intentionally NOT Part of L2
 
-The following are explicitly excluded from C2 scope:
+The following are explicitly excluded from L2 scope:
 
 | Exclusion                          | Rationale                                  |
 |------------------------------------|--------------------------------------------|
-| Volatility regime labels           | Requires threshold; deferred to C3         |
-| Trend classification               | Semantic interpretation; deferred to C3    |
-| Range expansion/contraction flags  | Requires threshold; deferred to C3         |
+| Volatility regime labels           | Requires threshold; deferred to L3         |
+| Trend classification               | Semantic interpretation; deferred to L3    |
+| Range expansion/contraction flags  | Requires threshold; deferred to L3         |
 | Session quality scores             | Evaluative; deferred to Option C           |
 | Forward returns                    | Outcome; prohibited in Option B            |
 | Entry/exit signals                 | Decision logic; prohibited in Option B     |
 | Cross-symbol correlations          | Multi-symbol scope; future consideration   |
 
-### 5.2 Deferred to C3
+### 5.2 Deferred to L3
 
-The following will be defined in C3, building on C2:
+The following will be defined in L3, building on L2:
 
-| C3 Responsibility                  | C2 Prerequisite                            |
+| L3 Responsibility                  | L2 Prerequisite                            |
 |------------------------------------|--------------------------------------------|
 | `rng_is_elevated` (bool)           | `rng_avg_6`, `rng_rank_6`                  |
 | `session_is_directional` (bool)    | `session_dir_net`                          |
@@ -393,7 +393,7 @@ Canonical Blocks
       │
       ▼
 ┌─────────────┐
-│     C1      │
+│     L1      │
 │  (single-   │
 │   bar)      │
 ├─────────────┤
@@ -405,7 +405,7 @@ Canonical Blocks
                 │ │   │          │          │
                 ▼ ▼   ▼          ▼          ▼
 ┌─────────────────────────────────────────────┐
-│                    C2                        │
+│                    L2                        │
 ├──────────────────┬──────────────────────────┤
 │ body_rng_pct_avg_3│ rng_avg_3  rng_avg_6    │
 │                   │ rng_rank_6              │

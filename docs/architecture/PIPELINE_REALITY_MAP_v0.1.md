@@ -15,9 +15,9 @@
 | **A-Ingest** | PARTIAL | HTTP webhook | `infra/ovc-webhook/src/index.ts` | Neon (DATABASE_URL), R2 (RAW_EVENTS), OVC_TOKEN | Worker compiles (tsc); tests PASS; deployment status UNKNOWN |
 | **P2-Backfill** | LIVE | GitHub Actions schedule + manual | `src/backfill_oanda_2h_checkpointed.py`, `.github/workflows/backfill.yml` | NEON_DSN, OANDA_API_TOKEN, OANDA_ENV | Scheduled cron `17 */6 * * *`; RunWriter instrumented; upload-artifact:58 |
 | **P2-BackfillValidate** | DORMANT | GitHub Actions manual | `.github/workflows/backfill_then_validate.yml` | NEON_DSN, OANDA_API_TOKEN | No schedule; workflow_dispatch only; upload-artifact:175,183 |
-| **B1-DerivedC1** | LIVE | Called by workflows | `src/derived/compute_c1_v0_1.py` | NEON_DSN | Tests pass; RunWriter instrumented (line 42, 355) |
-| **B1-DerivedC2** | LIVE | Called by workflows | `src/derived/compute_c2_v0_1.py` | NEON_DSN | Tests pass; RunWriter instrumented (line 46, 569) |
-| **B1-DerivedC3** | PARTIAL | CLI only | `src/derived/compute_c3_regime_trend_v0_1.py` | NEON_DSN, ovc_cfg.threshold_packs | Tests pass; RunWriter instrumented (line 86, 419); no workflow integration |
+| **B1-DerivedC1** | LIVE | Called by workflows | `src/derived/compute_l1_v0_1.py` | NEON_DSN | Tests pass; RunWriter instrumented (line 42, 355) |
+| **B1-DerivedC2** | LIVE | Called by workflows | `src/derived/compute_l2_v0_1.py` | NEON_DSN | Tests pass; RunWriter instrumented (line 46, 569) |
+| **B1-DerivedC3** | PARTIAL | CLI only | `src/derived/compute_l3_regime_trend_v0_1.py` | NEON_DSN, ovc_cfg.threshold_packs | Tests pass; RunWriter instrumented (line 86, 419); no workflow integration |
 | **B2-DerivedValidation** | LIVE | Called by workflows | `src/validate/validate_derived_range_v0_1.py` | NEON_DSN, derived.* tables | Tests pass; RunWriter instrumented (line 55, 1072) |
 | **C-Eval** | LIVE | GitHub Actions schedule + manual | `scripts/run_option_c.sh`, `.github/workflows/ovc_option_c_schedule.yml` | DATABASE_URL, derived.* views | Scheduled cron `15 6 * * *`; upload-artifact:99,107 |
 | **D-NotionSync** | LIVE | GitHub Actions schedule + manual | `scripts/notion_sync.py`, `.github/workflows/notion_sync.yml` | DATABASE_URL, NOTIOM_TOKEN (canonical), NOTION_*_DB_ID | Scheduled cron `17 */2 * * *`; RunWriter instrumented; upload-artifact:34 |
@@ -54,10 +54,10 @@ flowchart TD
     end
 
     subgraph "B1-Derived Compute"
-        C1["compute_c1_v0_1.py<br/>(src/derived/)"]
-        C2["compute_c2_v0_1.py<br/>(src/derived/)"]
-        C3["compute_c3_regime_trend_v0_1.py<br/>(src/derived/)"]
-        DERIVED_TABLES["derived.c1_block_features_v0_1<br/>derived.c2_session_features_v0_1<br/>(sql/02_derived_c1_c2_tables_v0_1.sql)"]
+        L1["compute_l1_v0_1.py<br/>(src/derived/)"]
+        L2["compute_l2_v0_1.py<br/>(src/derived/)"]
+        L3["compute_l3_regime_trend_v0_1.py<br/>(src/derived/)"]
+        DERIVED_TABLES["derived.l1_block_features_v0_1<br/>derived.l2_session_features_v0_1<br/>(sql/02_derived_c1_c2_tables_v0_1.sql)"]
     end
 
     subgraph "B2-Derived Validation"
@@ -102,11 +102,11 @@ flowchart TD
     BACKFILL -->|"2H blocks"| MIN_TABLE
 
     %% B1 Flow (Derived)
-    MIN_TABLE --> C1
-    MIN_TABLE --> C2
-    C1 --> DERIVED_TABLES
-    C2 --> DERIVED_TABLES
-    DERIVED_TABLES --> C3
+    MIN_TABLE --> L1
+    MIN_TABLE --> L2
+    L1 --> DERIVED_TABLES
+    L2 --> DERIVED_TABLES
+    DERIVED_TABLES --> L3
 
     %% B2 Flow (Validation)
     DERIVED_TABLES --> VAL_DERIVED
@@ -132,9 +132,9 @@ flowchart TD
 
     %% Run Artifact Emissions
     BACKFILL -.->|"run.json"| ARTIFACT_DIR
-    C1 -.->|"run.json"| ARTIFACT_DIR
-    C2 -.->|"run.json"| ARTIFACT_DIR
-    C3 -.->|"run.json"| ARTIFACT_DIR
+    L1 -.->|"run.json"| ARTIFACT_DIR
+    L2 -.->|"run.json"| ARTIFACT_DIR
+    L3 -.->|"run.json"| ARTIFACT_DIR
     VAL_DERIVED -.->|"run.json"| ARTIFACT_DIR
     VAL_DAY -.->|"run.json"| ARTIFACT_DIR
     VAL_RANGE -.->|"run.json"| ARTIFACT_DIR
@@ -174,9 +174,9 @@ flowchart TD
         NO_SCHEDULE["NO SCHEDULE<br/>workflow_dispatch only"]
     end
 
-    subgraph "PARTIAL - C3 Integration"
-        C3_SCRIPT["src/derived/compute_c3_regime_trend_v0_1.py"]
-        NO_WORKFLOW["NOT INTEGRATED<br/>No workflow calls C3"]
+    subgraph "PARTIAL - L3 Integration"
+        C3_SCRIPT["src/derived/compute_l3_regime_trend_v0_1.py"]
+        NO_WORKFLOW["NOT INTEGRATED<br/>No workflow calls L3"]
         THRESH_REG["ovc_cfg.threshold_packs<br/>Requires manual setup"]
     end
 
@@ -210,7 +210,7 @@ flowchart TD
 | G4 | UNKNOWN | Worker secrets (OVC_TOKEN, DATABASE_URL) | Should be set in Cloudflare | No verification possible without API access |
 | G5 | DORMANT | `backfill_then_validate.yml` manual only | Could be scheduled for regression | workflow_dispatch without schedule |
 | G6 | DORMANT | `ovc_full_ingest.yml` manual only | N/A (stub) | workflow_dispatch without schedule |
-| G7 | PARTIAL | C3 not in any workflow | Should be integrated post-C2 | compute_c3_regime_trend_v0_1.py exists but not called |
+| G7 | PARTIAL | L3 not in any workflow | Should be integrated post-L2 | compute_l3_regime_trend_v0_1.py exists but not called |
 | G8 | ~~UNKNOWN~~ **RESOLVED** | Run artifacts now emitted | Run artifacts in all scheduled pipelines | backfill.yml:58, notion_sync.yml:34, ovc_option_c_schedule.yml:99,107 all have `upload-artifact`; all scripts import RunWriter |
 
 ---
@@ -238,11 +238,11 @@ flowchart TD
 ### B1-DerivedCompute
 | Path | Line(s) | Evidence |
 |------|---------|----------|
-| src/derived/compute_c1_v0_1.py | 42, 355 | RunWriter import and instantiation |
-| src/derived/compute_c2_v0_1.py | 46, 569 | RunWriter import and instantiation |
-| src/derived/compute_c3_regime_trend_v0_1.py | 86, 419 | RunWriter import and instantiation |
+| src/derived/compute_l1_v0_1.py | 42, 355 | RunWriter import and instantiation |
+| src/derived/compute_l2_v0_1.py | 46, 569 | RunWriter import and instantiation |
+| src/derived/compute_l3_regime_trend_v0_1.py | 86, 419 | RunWriter import and instantiation |
 | tests/test_derived_features.py | - | 24 tests (all pass) |
-| tests/test_c3_regime_trend.py | - | 20 tests (19 pass, 1 skip) |
+| tests/test_l3_regime_trend.py | - | 20 tests (19 pass, 1 skip) |
 | .github/workflows/backfill_then_validate.yml | 119-136 | Steps 3-4 call compute_c1, compute_c2 |
 
 ### B2-DerivedValidation
@@ -292,10 +292,10 @@ flowchart TD
 |------|----------|
 | sql/00_schema.sql | Base schemas |
 | sql/01_tables_min.sql | ovc.ovc_blocks_v01_1_min (LOCKED) |
-| sql/02_derived_c1_c2_tables_v0_1.sql | derived.c1_*, derived.c2_* |
+| sql/02_derived_c1_c2_tables_v0_1.sql | derived.l1_*, derived.l2_* |
 | sql/02_tables_run_reports.sql | ovc.ovc_run_reports_v01 |
 | sql/04_threshold_registry_v0_1.sql | ovc_cfg.threshold_packs |
-| sql/05_c3_regime_trend_v0_1.sql | derived.c3_* |
+| sql/05_c3_regime_trend_v0_1.sql | derived.l3_* |
 
 ---
 
@@ -311,7 +311,7 @@ flowchart TD
 3. Verify Neon database has all required tables via direct connection
 
 ### Enhancements
-1. Add C3 compute step to `backfill_then_validate.yml` workflow
+1. Add L3 compute step to `backfill_then_validate.yml` workflow
 2. ~~Add run artifact generation to Option C workflow~~ ✓ DONE - upload-artifact at lines 99, 107
 3. Consider scheduling `backfill_then_validate.yml` for weekly regression
 

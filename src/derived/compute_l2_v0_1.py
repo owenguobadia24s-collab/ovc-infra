@@ -1,20 +1,20 @@
 """
-OVC Option B.1: C2 Feature Pack Compute Script (v0.1)
+OVC Option B.1: L2 Feature Pack Compute Script (v0.1)
 
-Purpose: Compute multi-bar structure/context features (C2 tier) from B-layer facts + C1 outputs.
+Purpose: Compute multi-bar structure/context features (L2 tier) from B-layer facts + L1 outputs.
 
 Tier Boundary (per c_layer_boundary_spec_v0.1.md):
-    C2 = Multi-bar structure & context. Requires explicit window_spec.
-    Inputs: B-layer OHLC sequence + C1 outputs.
+    L2 = Multi-bar structure & context. Requires explicit window_spec.
+    Inputs: B-layer OHLC sequence + L1 outputs.
 
-C2 KEEP Set (per mapping_validation_report_v0.1.md Section 1.1 and 1.2):
+L2 KEEP Set (per mapping_validation_report_v0.1.md Section 1.1 and 1.2):
     N=1:           gap, took_prev_high, took_prev_low
     session=date_ny: sess_high, sess_low, dist_sess_high, dist_sess_low
     N=12:          roll_avg_range_12, roll_std_logret_12, range_z_12, hh_12, ll_12
     parameterized=rd_len: rd_hi, rd_lo, rd_mid
 
 Usage:
-    python src/derived/compute_c2_v0_1.py [--dry-run] [--limit N] [--symbol SYM] [--rd-len N]
+    python src/derived/compute_l2_v0_1.py [--dry-run] [--limit N] [--symbol SYM] [--rd-len N]
 
 Environment:
     NEON_DSN or DATABASE_URL: PostgreSQL connection string
@@ -62,7 +62,7 @@ load_env()
 
 # ---------- Constants ----------
 VERSION = "v0.1"
-RUN_TYPE = "c2"
+RUN_TYPE = "l2"
 PIPELINE_ID = "B1-DerivedC2"
 PIPELINE_VERSION = "0.1.0"
 REQUIRED_ENV_VARS = ["NEON_DSN"]
@@ -141,7 +141,7 @@ def resolve_dsn() -> str:
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(
-        description="Compute C2 (multi-bar structure) features from B-layer + C1."
+        description="Compute L2 (multi-bar structure) features from B-layer + L1."
     )
     parser.add_argument(
         "--dry-run",
@@ -174,21 +174,21 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# ---------- C2 Computation Functions ----------
+# ---------- L2 Computation Functions ----------
 
-def compute_c2_features_for_block(
+def compute_l2_features_for_block(
     block: dict,
     prev_block: Optional[dict],
     session_blocks: list,
     roll_12_blocks: list,
     rd_blocks: list,
-    c1_features: dict,
+    l1_features: dict,
     rd_len: int,
 ) -> dict:
     """
-    Compute C2 multi-bar features for a single block.
+    Compute L2 multi-bar features for a single block.
     
-    Per c_layer_boundary_spec_v0.1.md Section A (C2 — Multi-Bar Structure):
+    Per c_layer_boundary_spec_v0.1.md Section A (L2 — Multi-Bar Structure):
         "Features requiring lookback to prior blocks, rolling aggregations,
         or session context. Window specification must be explicit and versioned."
     
@@ -198,10 +198,10 @@ def compute_c2_features_for_block(
         session_blocks: All blocks in current session up to current block (for session features)
         roll_12_blocks: Last 12 blocks including current (for N=12 features)
         rd_blocks: Last rd_len blocks including current (for RD features)
-        c1_features: C1 computed features for current block {range, logret, ...}
+        l1_features: L1 computed features for current block {range, logret, ...}
         rd_len: Range detector lookback parameter
     
-    Returns dict with all C2 features.
+    Returns dict with all L2 features.
     """
     result = {
         "block_id": block["block_id"],
@@ -263,7 +263,7 @@ def compute_c2_features_for_block(
             result["roll_std_logret_12"] = None
         
         # range_z_12 = (range - avg) / std
-        current_range = c1_features.get("range", block["h"] - block["l"])
+        current_range = l1_features.get("range", block["h"] - block["l"])
         if std_range > 0:
             result["range_z_12"] = (current_range - avg_range) / std_range
         else:
@@ -324,7 +324,7 @@ def create_run_record(conn, run_id: uuid.UUID, formula_hash: str, window_spec: s
             VERSION,
             formula_hash,
             window_spec,
-            None,  # C2 has no threshold_version
+            None,  # L2 has no threshold_version
             datetime.now(timezone.utc),
             "running",
             psycopg2.extras.Json(config),
@@ -351,7 +351,7 @@ def complete_run_record(conn, run_id: uuid.UUID, block_count: int, status: str, 
 
 def fetch_blocks_with_context(conn, symbol: str = None, limit: int = None, recompute: bool = False) -> list:
     """
-    Fetch B-layer blocks with ordering for C2 computation.
+    Fetch B-layer blocks with ordering for L2 computation.
     
     Returns list of dicts with block data, ordered by symbol then bar_close_ms.
     """
@@ -370,7 +370,7 @@ def fetch_blocks_with_context(conn, symbol: str = None, limit: int = None, recom
                 b.block_id, b.sym, b.date_ny, b.bar_close_ms,
                 b.o, b.h, b.l, b.c
             FROM ovc.ovc_blocks_v01_1_min b
-            LEFT JOIN derived.ovc_c2_features_v0_1 c2 ON b.block_id = c2.block_id
+            LEFT JOIN derived.ovc_l2_features_v0_1 c2 ON b.block_id = c2.block_id
         """
         conditions.append("c2.block_id IS NULL")
     
@@ -393,14 +393,14 @@ def fetch_blocks_with_context(conn, symbol: str = None, limit: int = None, recom
 
 
 def fetch_c1_features(conn, block_ids: list) -> dict:
-    """Fetch C1 features for given block_ids."""
+    """Fetch L1 features for given block_ids."""
     if not block_ids:
         return {}
     
     with conn.cursor() as cur:
         cur.execute("""
             SELECT block_id, range, logret
-            FROM derived.ovc_c1_features_v0_1
+            FROM derived.ovc_l1_features_v0_1
             WHERE block_id = ANY(%s)
         """, (block_ids,))
         return {row[0]: {"range": row[1], "logret": row[2]} for row in cur.fetchall()}
@@ -408,7 +408,7 @@ def fetch_c1_features(conn, block_ids: list) -> dict:
 
 def upsert_c2_features(conn, run_id: uuid.UUID, formula_hash: str, window_spec: str, features_batch: list) -> int:
     """
-    Upsert computed C2 features to derived.ovc_c2_features_v0_1.
+    Upsert computed L2 features to derived.ovc_l2_features_v0_1.
     
     Uses ON CONFLICT DO UPDATE for idempotency.
     Returns count of rows upserted.
@@ -417,7 +417,7 @@ def upsert_c2_features(conn, run_id: uuid.UUID, formula_hash: str, window_spec: 
         return 0
     
     sql = """
-        INSERT INTO derived.ovc_c2_features_v0_1 (
+        INSERT INTO derived.ovc_l2_features_v0_1 (
             block_id, run_id, computed_at, formula_hash, derived_version, window_spec,
             gap, took_prev_high, took_prev_low,
             sess_high, sess_low, dist_sess_high, dist_sess_low,
@@ -495,9 +495,9 @@ def upsert_c2_features(conn, run_id: uuid.UUID, formula_hash: str, window_spec: 
 
 # ---------- Main Computation Logic ----------
 
-def compute_all_c2_features(blocks: list, c1_features: dict, rd_len: int) -> list:
+def compute_all_c2_features(blocks: list, l1_features: dict, rd_len: int) -> list:
     """
-    Compute C2 features for all blocks with proper context windows.
+    Compute L2 features for all blocks with proper context windows.
     
     Processes blocks in order, maintaining rolling windows per symbol.
     """
@@ -540,17 +540,17 @@ def compute_all_c2_features(blocks: list, c1_features: dict, rd_len: int) -> lis
             # RD blocks (including current)
             rd_blocks = all_blocks_history[-(rd_len + 1):] if len(all_blocks_history) > 1 else all_blocks_history
             
-            # Get C1 features for current block
-            c1 = c1_features.get(block["block_id"], {})
+            # Get L1 features for current block
+            c1 = l1_features.get(block["block_id"], {})
             
-            # Compute C2 features
-            features = compute_c2_features_for_block(
+            # Compute L2 features
+            features = compute_l2_features_for_block(
                 block=block,
                 prev_block=prev_block,
                 session_blocks=session_blocks,
                 roll_12_blocks=roll_12_blocks,
                 rd_blocks=rd_blocks,
-                c1_features=c1,
+                l1_features=c1,
                 rd_len=rd_len,
             )
             
@@ -576,7 +576,7 @@ def main() -> None:
         formula_hash = compute_formula_hash(C2_FORMULA_DEFINITION, rd_len)
         window_spec = build_aggregated_window_spec(rd_len)
         
-        writer.log(f"OVC C2 Feature Compute v{VERSION}")
+        writer.log(f"OVC L2 Feature Compute v{VERSION}")
         writer.log(f"Formula hash: {formula_hash}")
         writer.log(f"Window spec: {window_spec}")
         writer.log(f"RD length: {rd_len}")
@@ -621,10 +621,10 @@ def main() -> None:
                 writer.finish("success")
                 return
             
-            # Fetch C1 features for these blocks
+            # Fetch L1 features for these blocks
             block_ids = [b["block_id"] for b in blocks]
-            c1_features = fetch_c1_features(conn, block_ids)
-            writer.log(f"C1 features loaded: {len(c1_features)}")
+            l1_features = fetch_c1_features(conn, block_ids)
+            writer.log(f"L1 features loaded: {len(l1_features)}")
             
             # For complete context, we need ALL blocks for the symbol (for rolling windows)
             # Fetch full history for symbols in our block set
@@ -644,12 +644,12 @@ def main() -> None:
             
             writer.log(f"Total blocks with history: {len(all_blocks)}")
             
-            # Fetch C1 features for all blocks (needed for rolling calcs)
+            # Fetch L1 features for all blocks (needed for rolling calcs)
             all_block_ids = [b["block_id"] for b in all_blocks]
-            c1_features = fetch_c1_features(conn, all_block_ids)
+            l1_features = fetch_c1_features(conn, all_block_ids)
             
-            # Compute C2 features
-            all_c2_features = compute_all_c2_features(all_blocks, c1_features, rd_len)
+            # Compute L2 features
+            all_c2_features = compute_all_c2_features(all_blocks, l1_features, rd_len)
             
             # Filter to only blocks we want to upsert
             target_block_ids = set(block_ids)
@@ -681,7 +681,7 @@ def main() -> None:
             writer.log(f"\nCompleted. Total rows upserted: {total_upserted}")
             
             writer.add_output(type="neon_table", ref="derived.ovc_block_features_c2_v0_1", rows_written=total_upserted)
-            writer.check("features_computed", "C2 features computed", "pass", ["run.json:$.outputs[0].rows_written"])
+            writer.check("features_computed", "L2 features computed", "pass", ["run.json:$.outputs[0].rows_written"])
             writer.finish("success")
             
         except Exception as e:

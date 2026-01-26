@@ -52,14 +52,14 @@ volume            -- Volume if available
 ### 4.2 PROHIBITED in Canonical Tables
 
 ```
-state_tag         -- VIOLATION: C2/C3 derived
-trend_tag         -- VIOLATION: C2/C3 derived
-pred_dir          -- VIOLATION: C3 derived
-bias_dir          -- VIOLATION: C3 derived
-struct_state      -- VIOLATION: C2 derived
-event             -- VIOLATION: C2 derived
-value_tag         -- VIOLATION: C2 derived
-state_key         -- VIOLATION: C2 derived
+state_tag         -- VIOLATION: L2/L3 derived
+trend_tag         -- VIOLATION: L2/L3 derived
+pred_dir          -- VIOLATION: L3 derived
+bias_dir          -- VIOLATION: L3 derived
+struct_state      -- VIOLATION: L2 derived
+event             -- VIOLATION: L2 derived
+value_tag         -- VIOLATION: L2 derived
+state_key         -- VIOLATION: L2 derived
 ```
 
 **v1 Resolution**: These fields currently exist in `ovc.ovc_blocks_v01_1_min`. They are **DEPRECATED** and MUST NOT be written by new ingest code. Future migration will move them to derived tables.

@@ -13,7 +13,7 @@ without changing any canonical views or scores.
 
 Example spine pointers:
 
-- Features: `derived.v_ovc_c1_features_v0_1`, `derived.v_ovc_c2_features_v0_1`, `derived.v_ovc_c3_features_v0_1`
+- Features: `derived.v_ovc_l1_features_v0_1`, `derived.v_ovc_l2_features_v0_1`, `derived.v_ovc_l3_features_v0_1`
 - Outcomes: `derived.v_ovc_c_outcomes_v0_1`
 
 ## Dataset Spec

@@ -15,9 +15,9 @@ A deterministic catalog of anchors by Option and Room. Same repo state => same o
 - `docs/contracts/PATH2_CONTRACT_v1_0.md`
 - `docs/contracts/c_layer_boundary_spec_v0.1.md`
 - `docs/contracts/qa_validation_contract_v1.md`
-- `docs/specs/OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/specs/OPTION_C_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/ingest_boundary.md`
@@ -28,11 +28,11 @@ A deterministic catalog of anchors by Option and Room. Same repo state => same o
 - `docs/contracts/outcomes_definitions_v0.1.md`
 - `docs/architecture/metric_trial_log_noncanonical_v0.md`
 - `docs/contracts/A_TO_D_CONTRACT_v1.md`
-- `docs/contracts/c3_semantic_contract_v0_1.md`
+- `docs/contracts/l3_semantic_contract_v0_1.md`
 - `docs/contracts/min_contract_alignment.md`
 - `docs/contracts/option_c_boundary.md`
 - `docs/contracts/option_d_ops_boundary.md`
-- `docs/specs/OPTION_B_C1_FEATURES_v0.1.md`
+- `docs/specs/OPTION_B_L1_FEATURES_v0.1.md`
 - `docs/validation/pine_export_consistency.md`
 - `docs/architecture/OVC_DATA_FLOW_CANON_v0.1.md`
 
@@ -41,13 +41,13 @@ A deterministic catalog of anchors by Option and Room. Same repo state => same o
 - `sql/qa_schema.sql`
 - `sql/schema_v01.sql`
 - `sql/02_derived_c1_c2_tables_v0_1.sql`
-- `sql/derived/v_ovc_c1_features_v0_1.sql`
+- `sql/derived/v_ovc_l1_features_v0_1.sql`
 - `sql/path1/db_patches/patch_align_c1_tf_column_20260120.sql`
 - `sql/path1/db_patches/patch_m15_raw_20260122.sql`
 
 ### REPORTS
 - `reports/validation/C1_v0_1_validation.md`
-- `reports/verification/2026-01-19/outputs/c1_neon_schema_verification.txt`
+- `reports/verification/2026-01-19/outputs/l1_neon_schema_verification.txt`
 - `reports/path1/trajectory_families/v0.1/fingerprints/GBPUSD/2026/fp_GBPUSD_20260117_03c0d079.json`
 
 ### ARTIFACTS
@@ -139,25 +139,25 @@ A deterministic catalog of anchors by Option and Room. Same repo state => same o
 ### DOCS
 - `docs/architecture/derived_metric_registry_v0.1.md`
 - `docs/contracts/c_layer_boundary_spec_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/ingest_boundary.md`
 - `docs/contracts/option_b_derived_contract_v1.md`
 - `docs/option_d/MODEL_REGISTRY_SPEC.md`
 - `docs/architecture/metric_trial_log_noncanonical_v0.md`
 - `docs/runbooks/option_threshold_registry_runbook.md`
-- `docs/contracts/c3_semantic_contract_v0_1.md`
+- `docs/contracts/l3_semantic_contract_v0_1.md`
 - `docs/contracts/option_c_boundary.md`
 - `docs/contracts/option_d_ops_boundary.md`
-- `docs/specs/OPTION_B_C1_FEATURES_v0.1.md`
-- `docs/specs/OPTION_B_C2_CHARTER_v0.1.md`
-- `docs/specs/OPTION_B_C2_FEATURES_v0.1.md`
-- `docs/specs/OPTION_B_C3_CHARTER_v0.1.md`
-- `docs/specs/OPTION_B_C3_FEATURES_v0.1.md`
+- `docs/specs/OPTION_B_L1_FEATURES_v0.1.md`
+- `docs/specs/OPTION_B_L2_CHARTER_v0.1.md`
+- `docs/specs/OPTION_B_L2_FEATURES_v0.1.md`
+- `docs/specs/OPTION_B_L3_CHARTER_v0.1.md`
+- `docs/specs/OPTION_B_L3_FEATURES_v0.1.md`
 - `docs/architecture/metric_map_pine_to_c_layers.md`
 - `docs/architecture/ovc_metric_architecture.md`
-- `docs/runbooks/c3_entry_checklist.md`
+- `docs/runbooks/l3_entry_checklist.md`
 
 ### SQL
 - `sql/03_qa_derived_validation_v0_1.sql`
@@ -167,9 +167,9 @@ A deterministic catalog of anchors by Option and Room. Same repo state => same o
 - `sql/02_derived_c1_c2_tables_v0_1.sql`
 - `sql/derived_v0_1.sql`
 - `sql/06_state_plane_threshold_pack_v0_2.sql`
-- `sql/derived/v_ovc_c1_features_v0_1.sql`
-- `sql/derived/v_ovc_c2_features_v0_1.sql`
-- `sql/derived/v_ovc_c3_features_v0_1.sql`
+- `sql/derived/v_ovc_l1_features_v0_1.sql`
+- `sql/derived/v_ovc_l2_features_v0_1.sql`
+- `sql/derived/v_ovc_l3_features_v0_1.sql`
 - `sql/derived/v_ovc_state_plane_daypath_v0_2.sql`
 - `sql/derived/v_ovc_state_plane_v0_2.sql`
 - `sql/05_c3_regime_trend_v0_1.sql`
@@ -251,9 +251,9 @@ A deterministic catalog of anchors by Option and Room. Same repo state => same o
 - `docs/contracts/PATH2_CONTRACT_v1_0.md`
 - `docs/contracts/c_layer_boundary_spec_v0.1.md`
 - `docs/contracts/qa_validation_contract_v1.md`
-- `docs/specs/OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/specs/OPTION_C_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/ingest_boundary.md`
@@ -264,7 +264,7 @@ A deterministic catalog of anchors by Option and Room. Same repo state => same o
 - `docs/contracts/outcomes_definitions_v0.1.md`
 - `docs/specs/system/parsing_validation_rules_v0.1.md`
 - `docs/contracts/A_TO_D_CONTRACT_v1.md`
-- `docs/contracts/c3_semantic_contract_v0_1.md`
+- `docs/contracts/l3_semantic_contract_v0_1.md`
 - `docs/contracts/min_contract_alignment.md`
 - `docs/contracts/option_c_boundary.md`
 - `docs/contracts/option_d_ops_boundary.md`

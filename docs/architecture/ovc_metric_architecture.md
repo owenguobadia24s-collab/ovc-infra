@@ -25,7 +25,7 @@ OVC processes trading signal data through a layered architecture:
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                  DERIVED METRICS (C LAYER)                       │
-│  C1: OHLC Primitives  │  C2: Structure  │  C3: Market Model      │
+│  L1: OHLC Primitives  │  L2: Structure  │  L3: Market Model      │
 │  derived.ovc_block_features_v0_1  │  derived.tv_reference_*     │
 └───────────────────────────┬─────────────────────────────────────┘
                             ▼
@@ -97,12 +97,12 @@ The following field categories are **architecturally C-layer** and do NOT belong
 
 | Category | Examples | Correct Layer |
 |----------|----------|---------------|
-| State/Structure Tags | `state_tag`, `value_tag`, `struct_state` | C2/C3 |
-| Regime/Context Tags | `regime_tag`, `trend_tag`, `rd_state` | C3 |
-| Transition/Risk Tags | `trans_risk`, `cp_tag` | C3 |
-| Decision/Prediction | `bias_mode`, `bias_dir`, `play`, `pred_dir` | C3 |
-| Derived OHLC Metrics | `rng`, `body`, `dir`, `ret` | C1 |
-| TradingView Interpretations | `tt`, `tis`, `htf_stack`, `with_htf` | C2/C3 |
+| State/Structure Tags | `state_tag`, `value_tag`, `struct_state` | L2/L3 |
+| Regime/Context Tags | `regime_tag`, `trend_tag`, `rd_state` | L3 |
+| Transition/Risk Tags | `trans_risk`, `cp_tag` | L3 |
+| Decision/Prediction | `bias_mode`, `bias_dir`, `play`, `pred_dir` | L3 |
+| Derived OHLC Metrics | `rng`, `body`, `dir`, `ret` | L1 |
+| TradingView Interpretations | `tt`, `tis`, `htf_stack`, `with_htf` | L2/L3 |
 
 These fields are TradingView-computed interpretations and belong in `derived.*` schemas.
 
@@ -139,10 +139,10 @@ These fields are TradingView-computed interpretations and belong in `derived.*` 
 
 | Tier | Name | Input Dependencies | Status |
 |------|------|-------------------|--------|
-| **C1** | OHLC Primitives | B-layer OHLC only | **IMPLEMENTED** |
-| **C2** | Structure & Block Memory | B-layer + rolling context | **PARTIAL** |
-| **C3** | Market Model & Regime | C1 + C2 evidence | **PARTIAL** (TV reference) |
-| **C4** | Dual-Engine Parity | TV vs Python comparison | **PLANNED** |
+| **L1** | OHLC Primitives | B-layer OHLC only | **IMPLEMENTED** |
+| **L2** | Structure & Block Memory | B-layer + rolling context | **PARTIAL** |
+| **L3** | Market Model & Regime | L1 + L2 evidence | **PARTIAL** (TV reference) |
+| **L4** | Dual-Engine Parity | TV vs Python comparison | **PLANNED** |
 | **C5** | True L3 / Orderflow | Tick data, volume profile | **FUTURE** |
 
 ### 3.2 TradingView Reference Tables (C-Layer)
@@ -151,8 +151,8 @@ TradingView-derived tags are stored in dedicated C-layer reference tables:
 
 | Table | Content | Purpose |
 |-------|---------|--------|
-| `derived.tv_reference_c2_v0_1` | Structure & state tags (`state_tag`, `value_tag`, `struct_state`, `rrc`, `vrc`, `trend_tag`, `space_tag`, `htf_stack`, `with_htf`) | C2 reference for parity testing |
-| `derived.tv_reference_c3_v0_1` | Market model & regime tags (`regime_tag`, `rd_state`, `trans_risk`, `bias_mode`, `bias_dir`, `perm_state`, `play`, `pred_dir`, `pred_target`, `tradeable`, `conf_l3`, `timebox`, `invalidation`) | C3 reference for parity testing |
+| `derived.tv_reference_c2_v0_1` | Structure & state tags (`state_tag`, `value_tag`, `struct_state`, `rrc`, `vrc`, `trend_tag`, `space_tag`, `htf_stack`, `with_htf`) | L2 reference for parity testing |
+| `derived.tv_reference_c3_v0_1` | Market model & regime tags (`regime_tag`, `rd_state`, `trans_risk`, `bias_mode`, `bias_dir`, `perm_state`, `play`, `pred_dir`, `pred_target`, `tradeable`, `conf_l3`, `timebox`, `invalidation`) | L3 reference for parity testing |
 
 **These tables hold TradingView outputs as a reference engine—derived, versioned, and non-canonical.** They are used for parity benchmarking and QA, not as ground truth.
 
@@ -160,19 +160,19 @@ TradingView-derived tags are stored in dedicated C-layer reference tables:
 
 | Tier | Feasible from OHLC? | Notes |
 |------|---------------------|-------|
-| C1 | ✅ YES | Pure OHLC arithmetic |
-| C2 | ✅ YES | Rolling windows over OHLC |
-| C3 | ⚠️ PARTIAL | Tags derivable; some heuristics require calibration |
-| C4 | ✅ YES | QA comparison layer |
+| L1 | ✅ YES | Pure OHLC arithmetic |
+| L2 | ✅ YES | Rolling windows over OHLC |
+| L3 | ⚠️ PARTIAL | Tags derivable; some heuristics require calibration |
+| L4 | ✅ YES | QA comparison layer |
 | C5 | ❌ NO | Requires tick-level data |
 
 ---
 
-## 4. C1 — OHLC PRIMITIVES (L1)
+## 4. L1 — OHLC PRIMITIVES (L1)
 
 ### 4.1 Definition
 
-C1 metrics are purely derivable from B-layer OHLC facts (`o`, `h`, `l`, `c`) without external state or interpretation. They are deterministic, source-agnostic, and form the foundation for higher tiers.
+L1 metrics are purely derivable from B-layer OHLC facts (`o`, `h`, `l`, `c`) without external state or interpretation. They are deterministic, source-agnostic, and form the foundation for higher tiers.
 
 **Inputs**: B-layer facts only (`ovc.ovc_blocks_v01_1_min` OHLC columns)  
 **Outputs**: `derived.ovc_block_features_v0_1`
@@ -232,7 +232,7 @@ C1 metrics are purely derivable from B-layer OHLC facts (`o`, `h`, `l`, `c`) wit
 | `ret_extreme_flag` | `abs(ret) >= 0.05` | QAF | IMPLEMENTED |
 | `range_extreme_flag` | `abs(range_z_12) >= 3.0` | QAF | IMPLEMENTED |
 
-### 4.3 C1 Guarantees
+### 4.3 L1 Guarantees
 
 - **Deterministic**: Same OHLC input → same output
 - **Source-agnostic**: Works identically on TradingView and OANDA data
@@ -241,13 +241,13 @@ C1 metrics are purely derivable from B-layer OHLC facts (`o`, `h`, `l`, `c`) wit
 
 ---
 
-## 5. C2 — STRUCTURE & BLOCK MEMORY (L2)
+## 5. L2 — STRUCTURE & BLOCK MEMORY (L2)
 
 ### 5.1 Definition
 
-C2 metrics track structural patterns, swing relationships, and rolling memory over blocks. They require lookback windows beyond the current bar.
+L2 metrics track structural patterns, swing relationships, and rolling memory over blocks. They require lookback windows beyond the current bar.
 
-**Inputs**: B-layer facts + C1 derived features + rolling context  
+**Inputs**: B-layer facts + L1 derived features + rolling context  
 **Outputs**: `derived.ovc_block_structure_v0_1` (planned), `derived.tv_reference_c2_v0_1` (TV reference)
 
 ### 5.2 Metric Groups
@@ -339,13 +339,13 @@ C2 metrics track structural patterns, swing relationships, and rolling memory ov
 
 ---
 
-## 6. C3 — MARKET MODEL & REGIME TAGS (L2–L2.5)
+## 6. L3 — MARKET MODEL & REGIME TAGS (L2–L2.5)
 
 ### 6.1 Definition
 
-C3 metrics synthesize C1/C2 evidence into higher-order classifications: regime states, function tags, and tradability assessments.
+L3 metrics synthesize L1/L2 evidence into higher-order classifications: regime states, function tags, and tradability assessments.
 
-**Inputs**: C1 + C2 derived features  
+**Inputs**: L1 + L2 derived features  
 **Outputs**: `derived.ovc_market_model_v0_1` (planned), `derived.tv_reference_c3_v0_1` (TV reference)
 
 ### 6.2 Composite Tags
@@ -402,8 +402,8 @@ All L3 decision fields are TradingView-derived interpretations stored in `derive
 
 ### 6.4 Explainability Principle
 
-All C3 tags are **evidence-backed**:
-- Each tag can be traced to specific C1/C2 inputs
+All L3 tags are **evidence-backed**:
+- Each tag can be traced to specific L1/L2 inputs
 - Thresholds and weights are explicit (Pine script parameters)
 - No black-box heuristics
 
@@ -432,12 +432,12 @@ All TradingView-derived metrics belong in C-layer tables, not B-layer facts:
 | Category | Metrics | C-Tier | Target Table |
 |----------|---------|--------|--------------|
 | OHLC (raw) | `o`, `h`, `l`, `c` | B-layer | `ovc.ovc_blocks_v01_1_min` |
-| OHLC (derived) | `rng`, `body`, `dir`, `ret` | C1 | `derived.ovc_block_features_v0_1` |
-| L1 Tags | `state_tag`, `value_tag`, `event`, `tt`, `cp_tag`, `tis` | C2/C3 | `derived.tv_reference_c2_v0_1` |
-| L2 Context | `rrc`, `vrc`, `trend_tag`, `struct_state`, `space_tag` | C2 | `derived.tv_reference_c2_v0_1` |
-| L2 HTF | `htf_stack`, `with_htf` | C2 | `derived.tv_reference_c2_v0_1` |
-| Regime | `rd_state`, `regime_tag`, `trans_risk` | C3 | `derived.tv_reference_c3_v0_1` |
-| L3 Decision | `bias_mode`, `bias_dir`, `perm_state`, `rail_loc`, `tradeable`, `conf_l3`, `play`, `pred_dir`, `pred_target`, `timebox`, `invalidation` | C3 | `derived.tv_reference_c3_v0_1` |
+| OHLC (derived) | `rng`, `body`, `dir`, `ret` | L1 | `derived.ovc_block_features_v0_1` |
+| L1 Tags | `state_tag`, `value_tag`, `event`, `tt`, `cp_tag`, `tis` | L2/L3 | `derived.tv_reference_c2_v0_1` |
+| L2 Context | `rrc`, `vrc`, `trend_tag`, `struct_state`, `space_tag` | L2 | `derived.tv_reference_c2_v0_1` |
+| L2 HTF | `htf_stack`, `with_htf` | L2 | `derived.tv_reference_c2_v0_1` |
+| Regime | `rd_state`, `regime_tag`, `trans_risk` | L3 | `derived.tv_reference_c3_v0_1` |
+| L3 Decision | `bias_mode`, `bias_dir`, `perm_state`, `rail_loc`, `tradeable`, `conf_l3`, `play`, `pred_dir`, `pred_target`, `timebox`, `invalidation` | L3 | `derived.tv_reference_c3_v0_1` |
 
 ### 7.3 TradingView Limitations
 
@@ -456,26 +456,26 @@ All TradingView-derived metrics belong in C-layer tables, not B-layer facts:
 
 | Metric | Pine Module | C-Tier | Priority |
 |--------|-------------|--------|----------|
-| `rr`, `rm`, `q1`, `q3`, `band` | L1_REF | C2 | HIGH |
-| `rer`, `or`, `bodyrr` | L1_STATE | C2 | HIGH |
-| `sd`, `oa`, `mc`, `mc3`, `vflip`, `vf3` | L1_VALUE | C2 | HIGH |
-| `swhi`, `swlo`, `took_hi`, `took_lo`, `hi_ran`, `hi_rev`, `lo_ran`, `lo_rev` | L1_LIQ | C2 | MEDIUM |
-| `d2rm`, `d2q1`, `d2q3`, `d2rrh`, `d2rrl` | L1_D2K | C2 | LOW |
-| `out_ready`, `rtrm`, `nxtext`, `nxtsd`, `hint1`, `hint2` | L1_OUT | C2 | LOW |
-| KLS metrics (`near_lvl`, `near_dr`, `conf_l1`, `kscore_l1`, etc.) | L1_KLS, L2_KLS | C2 | LOW |
-| `lastpivot`, `swingdir`, `phidr`, `plodr`, `struct`, `ss` | L2_STRUCT | C2 | MEDIUM |
-| `rmdrift`, `dirrun` | L2_TREND | C2 | MEDIUM |
-| `space_up`, `space_dn`, `up_src`, `dn_src`, `up_lvl`, `dn_lvl` | L2_SPACE | C2 | MEDIUM |
-| `sd4`, `sdd`, `htf4`, `htfd`, `mdir` | L2_HTF | C2 | LOW |
-| RD metrics (`rd_brkdir`, `rd_w_rrc`, `rd_hi`, `rd_lo`, `rd_mid`, `rd_why`) | RD | C3 | MEDIUM |
-| BlockStack fractions (`p_campaign`, `p_rdrange`, `p_confmove`, etc.) | BLOCKSTACK | C3 | LOW |
-| L3 rationale (`bias_why`, `blocker`, `reasons`) | L3 | C3 | LOW |
+| `rr`, `rm`, `q1`, `q3`, `band` | L1_REF | L2 | HIGH |
+| `rer`, `or`, `bodyrr` | L1_STATE | L2 | HIGH |
+| `sd`, `oa`, `mc`, `mc3`, `vflip`, `vf3` | L1_VALUE | L2 | HIGH |
+| `swhi`, `swlo`, `took_hi`, `took_lo`, `hi_ran`, `hi_rev`, `lo_ran`, `lo_rev` | L1_LIQ | L2 | MEDIUM |
+| `d2rm`, `d2q1`, `d2q3`, `d2rrh`, `d2rrl` | L1_D2K | L2 | LOW |
+| `out_ready`, `rtrm`, `nxtext`, `nxtsd`, `hint1`, `hint2` | L1_OUT | L2 | LOW |
+| KLS metrics (`near_lvl`, `near_dr`, `conf_l1`, `kscore_l1`, etc.) | L1_KLS, L2_KLS | L2 | LOW |
+| `lastpivot`, `swingdir`, `phidr`, `plodr`, `struct`, `ss` | L2_STRUCT | L2 | MEDIUM |
+| `rmdrift`, `dirrun` | L2_TREND | L2 | MEDIUM |
+| `space_up`, `space_dn`, `up_src`, `dn_src`, `up_lvl`, `dn_lvl` | L2_SPACE | L2 | MEDIUM |
+| `sd4`, `sdd`, `htf4`, `htfd`, `mdir` | L2_HTF | L2 | LOW |
+| RD metrics (`rd_brkdir`, `rd_w_rrc`, `rd_hi`, `rd_lo`, `rd_mid`, `rd_why`) | RD | L3 | MEDIUM |
+| BlockStack fractions (`p_campaign`, `p_rdrange`, `p_confmove`, etc.) | BLOCKSTACK | L3 | LOW |
+| L3 rationale (`bias_why`, `blocker`, `reasons`) | L3 | L3 | LOW |
 
 ### 8.2 Metrics Computable from OHLC but NOT Yet Implemented
 
 | Metric | Formula | Priority | Reason for Gap |
 |--------|---------|----------|----------------|
-| `rr` (micro range) | `max(h[1..2]) - min(l[1..2])` | HIGH | Foundation for C2 |
+| `rr` (micro range) | `max(h[1..2]) - min(l[1..2])` | HIGH | Foundation for L2 |
 | `rm` (micro midpoint) | `(rr_high + rr_low) / 2` | HIGH | Foundation for SD |
 | `sd` (signed distance) | `(c - rm) / rr` | HIGH | Core L1 metric |
 | `rer` (range expansion) | `range / rr` | HIGH | State classification |
@@ -496,7 +496,7 @@ All TradingView-derived metrics belong in C-layer tables, not B-layer facts:
 
 ## 9. IMPLEMENTATION ROADMAP
 
-### Stage 1: C1 Feature Pack v0.1 ✅ COMPLETE
+### Stage 1: L1 Feature Pack v0.1 ✅ COMPLETE
 
 **Scope**: OHLC-derived primitives  
 **Inputs**: `ovc.ovc_blocks_v01_1_min` (OHLC only)  
@@ -515,7 +515,7 @@ All TradingView-derived metrics belong in C-layer tables, not B-layer facts:
 
 ---
 
-### Stage 2: C2 Structure & Memory 🔜 NEXT
+### Stage 2: L2 Structure & Memory 🔜 NEXT
 
 **Scope**: Micro reference, value metrics, structure tracking  
 **Inputs**: `derived.ovc_block_features_v0_1` + rolling windows  
@@ -534,9 +534,9 @@ All TradingView-derived metrics belong in C-layer tables, not B-layer facts:
 
 ---
 
-### Stage 3: C3 Market Model 📋 PLANNED
+### Stage 3: L3 Market Model 📋 PLANNED
 
-**Scope**: Tag derivation from C1/C2 evidence  
+**Scope**: Tag derivation from L1/L2 evidence  
 **Inputs**: `derived.ovc_block_structure_v0_1`  
 **Outputs**: `derived.ovc_market_model_v0_1` (planned)
 
@@ -604,9 +604,9 @@ All TradingView-derived metrics belong in C-layer tables, not B-layer facts:
 | Component | Path |
 |-----------|------|
 | B-layer canonical table DDL | `sql/01_tables_min.sql` |
-| C1 derived features SQL | `sql/derived_v0_1.sql` |
-| C2 TV reference SQL | `sql/tv_reference_c2_v0_1.sql` (planned) |
-| C3 TV reference SQL | `sql/tv_reference_c3_v0_1.sql` (planned) |
+| L1 derived features SQL | `sql/derived_v0_1.sql` |
+| L2 TV reference SQL | `sql/tv_reference_c2_v0_1.sql` (planned) |
+| L3 TV reference SQL | `sql/tv_reference_c3_v0_1.sql` (planned) |
 | Option C outcomes SQL | `sql/option_c_v0_1.sql` |
 | Research views SQL | `sql/10_views_research_v0.1.sql` |
 | OANDA backfill script | `src/backfill_oanda_2h_checkpointed.py` |

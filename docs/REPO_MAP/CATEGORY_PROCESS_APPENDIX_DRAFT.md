@@ -14,7 +14,7 @@ Orchestrated sequences of code execution that transform data from one state to a
 ### PROCESSES INSIDE THIS CATEGORY
 - **Ingest**: External data → canonical tables
 - **Backfill**: Historical gap-fill from OANDA API → canonical tables
-- **Compute**: Canonical facts → derived features (C1, C2, C3)
+- **Compute**: Canonical facts → derived features (L1, L2, L3)
 - **Outcomes**: Derived features → forward-looking outcomes
 - **Sync**: Internal data → external systems (Notion)
 
@@ -55,9 +55,9 @@ Based on repo evidence:
  OANDA API  ────────┤        │  (backfill) │                    │
                     │        └─────────────┘                    │
                                                                 v
-                             ┌─────────────┐           derived.c1_features
-                             │   COMPUTE   │           derived.c2_features
-                             │  Pipelines  │<──────────derived.c3_features
+                             ┌─────────────┐           derived.l1_features
+                             │   COMPUTE   │           derived.l2_features
+                             │  Pipelines  │<──────────derived.l3_features
                              └──────┬──────┘                    │
                                     │                           v
                              ┌──────v──────┐           derived.v_ovc_c_outcomes
@@ -78,7 +78,7 @@ Based on repo evidence:
 | `ovc_option_c_schedule.yml` references `scripts/run_option_c.sh` which exists at `scripts/run/run_option_c.sh` | CONTRADICTORY PATH (documented in CURRENT_STATE) |
 | `ovc_full_ingest.yml` is workflow_dispatch only with no schedule | DORMANT PIPELINE |
 | `backfill_then_validate.yml` has no schedule (manual only) | DORMANT PIPELINE |
-| C3 compute (`compute_c3_regime_trend_v0_1.py`) exists but no workflow invokes it | IMPLIED BUT NOT IMPLEMENTED |
+| L3 compute (`compute_l3_regime_trend_v0_1.py`) exists but no workflow invokes it | IMPLIED BUT NOT IMPLEMENTED |
 | No CI workflow runs pytest suite on push/PR | EXPECTED BUT MISSING |
 
 ---
@@ -168,7 +168,7 @@ Computational logic that produces classifications, scores, or predictions. Model
 
 ### PROCESSES INSIDE THIS CATEGORY
 - **Score Computation**: DIS, LID, RES descriptive scores
-- **Regime Trend**: C3 regime classification
+- **Regime Trend**: L3 regime classification
 - **State Plane**: Multi-dimensional path analysis
 
 ### EXPECTED FILE TYPES
@@ -181,10 +181,10 @@ Based on repo evidence:
 
 | Path | Description |
 |------|-------------|
-| `src/derived/compute_c1_v0_1.py` | C1 feature computation |
-| `src/derived/compute_c2_v0_1.py` | C2 feature computation |
-| `src/derived/compute_c3_regime_trend_v0_1.py` | C3 regime trend model |
-| `src/derived/compute_c3_stub_v0_1.py` | C3 stub/placeholder |
+| `src/derived/compute_l1_v0_1.py` | L1 feature computation |
+| `src/derived/compute_l2_v0_1.py` | L2 feature computation |
+| `src/derived/compute_l3_regime_trend_v0_1.py` | L3 regime trend model |
+| `src/derived/compute_l3_stub_v0_1.py` | L3 stub/placeholder |
 | `sql/path1/scores/score_dis_v1_1.sql` | DIS score SQL |
 | `sql/path1/scores/score_lid_v1_0.sql` | LID score SQL |
 | `sql/path1/scores/score_res_v1_0.sql` | RES score SQL |
@@ -196,17 +196,17 @@ Based on repo evidence:
  CANONICAL FACTS                 MODELS                    DERIVED OUTPUTS
  ===============           ==================            =================
 
- ovc.ovc_blocks_v01_1_min                               derived.ovc_c1_features
+ ovc.ovc_blocks_v01_1_min                               derived.ovc_l1_features
            │               ┌──────────────┐                      │
-           ├──────────────>│  C1 Compute  │──────────────────────┤
+           ├──────────────>│  L1 Compute  │──────────────────────┤
            │               └──────────────┘                      │
-           │                                             derived.ovc_c2_features
+           │                                             derived.ovc_l2_features
            │               ┌──────────────┐                      │
-           ├──────────────>│  C2 Compute  │──────────────────────┤
+           ├──────────────>│  L2 Compute  │──────────────────────┤
            │               └──────────────┘                      │
-           │                                             derived.ovc_c3_features
+           │                                             derived.ovc_l3_features
            │               ┌──────────────┐                      │
-           └──────────────>│  C3 Regime   │──────────────────────┘
+           └──────────────>│  L3 Regime   │──────────────────────┘
                            │  Trend Model │
                            └──────────────┘
                                   │
@@ -221,9 +221,9 @@ Based on repo evidence:
 
 | Issue | Classification |
 |-------|----------------|
-| `compute_c3_regime_trend_v0_1.py` exists but is not invoked by any workflow | IMPLIED BUT NOT IMPLEMENTED |
-| `compute_c3_stub_v0_1.py` purpose unclear vs full C3 compute | UNKNOWN RELATIONSHIP |
-| Legacy `derived.ovc_block_features_v0_1` coexists with split C1/C2/C3 | CONTRADICTORY OWNERSHIP |
+| `compute_l3_regime_trend_v0_1.py` exists but is not invoked by any workflow | IMPLIED BUT NOT IMPLEMENTED |
+| `compute_l3_stub_v0_1.py` purpose unclear vs full L3 compute | UNKNOWN RELATIONSHIP |
+| Legacy `derived.ovc_block_features_v0_1` coexists with split L1/L2/L3 | CONTRADICTORY OWNERSHIP |
 
 ---
 
@@ -325,7 +325,7 @@ Based on repo evidence:
 |------|-------------|
 | `sql/04_threshold_registry_v0_1.sql` | Threshold registry table definition |
 | `configs/threshold_packs/` | Threshold pack JSON files |
-| `configs/threshold_packs/c3_regime_trend_v1.json` | C3 regime trend thresholds |
+| `configs/threshold_packs/l3_regime_trend_v1.json` | L3 regime trend thresholds |
 | `configs/threshold_packs/state_plane_v0_2_default_v1.json` | State plane defaults |
 | `schema/applied_migrations.json` | Migration tracking ledger |
 | `schema/required_objects.txt` | Required database objects list |
@@ -631,7 +631,7 @@ Based on repo evidence:
  │                    TEST SUITE                             │
  │                                                           │
  │  tests/test_derived_features.py    (24 tests)             │
- │  tests/test_c3_regime_trend.py     (20 tests)             │
+ │  tests/test_l3_regime_trend.py     (20 tests)             │
  │  tests/test_validate_derived.py    (50 tests)             │
  │  tests/test_fingerprint.py                                │
  │  tests/test_contract_equivalence.py                       │
@@ -834,7 +834,7 @@ All 12 categories have at least some representation in the repository.
 - QA & Governance (134 tests, validation harness)
 
 ### Categories with Partial Implementation
-- Models (C1/C2 complete, C3 incomplete)
+- Models (L1/L2 complete, L3 incomplete)
 - Sub-systems (Worker functional, trajectory_families partial)
 - Registries (threshold registry complete, migration ledger unverified)
 

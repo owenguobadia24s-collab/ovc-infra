@@ -12,10 +12,10 @@ Commands:
     validate    Check registry integrity
 
 Usage:
-    python -m src.config.threshold_registry_cli create --pack-id c3_reversal --version 1 --scope GLOBAL --config '{"min_body_bp": 5}'
-    python -m src.config.threshold_registry_cli activate --pack-id c3_reversal --version 1 --scope GLOBAL
-    python -m src.config.threshold_registry_cli show --pack-id c3_reversal --version 1
-    python -m src.config.threshold_registry_cli show --pack-id c3_reversal --scope GLOBAL --active
+    python -m src.config.threshold_registry_cli create --pack-id l3_reversal --version 1 --scope GLOBAL --config '{"min_body_bp": 5}'
+    python -m src.config.threshold_registry_cli activate --pack-id l3_reversal --version 1 --scope GLOBAL
+    python -m src.config.threshold_registry_cli show --pack-id l3_reversal --version 1
+    python -m src.config.threshold_registry_cli show --pack-id l3_reversal --scope GLOBAL --active
     python -m src.config.threshold_registry_cli list
     python -m src.config.threshold_registry_cli validate
 
@@ -252,7 +252,7 @@ def main() -> None:
     create_parser.add_argument(
         "--pack-id",
         required=True,
-        help="Pack identifier (e.g., c3_reversal_thresholds)",
+        help="Pack identifier (e.g., l3_reversal_thresholds)",
     )
     create_parser.add_argument(
         "--version",

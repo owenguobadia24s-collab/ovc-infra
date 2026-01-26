@@ -55,9 +55,9 @@ flowchart LR
   end
 
   subgraph SCRIPTS_B[Scripts: Option B]
-    S_C1[S_C1: compute_c1_v0_1.py]
-    S_C2[S_C2: compute_c2_v0_1.py]
-    S_C3[S_C3: compute_c3_regime_trend]
+    S_C1[S_C1: compute_l1_v0_1.py]
+    S_C2[S_C2: compute_l2_v0_1.py]
+    S_C3[S_C3: compute_l3_regime_trend]
   end
 
   subgraph SCRIPTS_C[Scripts: Option C]
@@ -135,9 +135,9 @@ flowchart LR
 | WF_SANITY | .github/workflows/ci_workflow_sanity.yml | CI (on push/PR) |
 | S_BACKFILL_2H | src/backfill_oanda_2h_checkpointed.py | Active |
 | S_BACKFILL_M15 | src/backfill_oanda_m15_checkpointed.py | Active |
-| S_C1 | src/derived/compute_c1_v0_1.py | Active |
-| S_C2 | src/derived/compute_c2_v0_1.py | Active |
-| S_C3 | src/derived/compute_c3_regime_trend_v0_1.py | NOT INVOKED |
+| S_C1 | src/derived/compute_l1_v0_1.py | Active |
+| S_C2 | src/derived/compute_l2_v0_1.py | Active |
+| S_C3 | src/derived/compute_l3_regime_trend_v0_1.py | NOT INVOKED |
 | S_OPTC | scripts/run/run_option_c.sh | Active |
 | S_PACK | scripts/path1/build_evidence_pack_v0_2.py | Active |
 | S_QUEUE | scripts/path1/run_evidence_queue.py | Active |

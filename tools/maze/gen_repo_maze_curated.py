@@ -54,19 +54,19 @@ OPTION_SPINE = [
 
 OPTION_DEFS = {
     "OPT_A__CANONICAL_INGEST": (
-        "Canonical ingest: raw -> canonical facts (C0/R + C1).",
+        "Canonical ingest: raw -> canonical facts (L0/R + L1).",
         [
             r"ingest",
             r"canonical",
             r"canon",
-            r"c0",
-            r"c1",
+            r"l0",
+            r"l1",
             r"export",
             r"raw",
             r"contract",
             r"schema",
         ],
-        [r"ingest", r"canon", r"export", r"c0", r"c1"],
+        [r"ingest", r"canon", r"export", r"l0", r"l1"],
     ),
     "OPT_D__PATHS_BRIDGE": (
         "Path1 evidence runner + Path2 determinism mechanics + evidence pack orchestration.",
@@ -82,10 +82,10 @@ OPTION_DEFS = {
         [r"path1", r"path2", r"evidence", r"runner", r"pack"],
     ),
     "OPT_B__DERIVED_LAYERS": (
-        "Derived layers: C2/C3 features, registries, semantics, metrics.",
+        "Derived layers: L2/L3 features, registries, semantics, metrics.",
         [
-            r"c2",
-            r"c3",
+            r"l2",
+            r"l3",
             r"derived",
             r"feature",
             r"registry",
@@ -94,7 +94,7 @@ OPTION_DEFS = {
             r"boundary",
             r"semantic",
         ],
-        [r"c2", r"c3", r"derived", r"feature", r"registry"],
+        [r"l2", r"l3", r"derived", r"feature", r"registry"],
     ),
     "OPT_C__OUTCOMES_EVAL": (
         "Outcomes & evaluation: labels, eval reports, regressions.",
@@ -110,8 +110,8 @@ OPTION_DEFS = {
     ),
 }
 
-INPUT_KEYWORDS = ["raw", "ingest", "c0", "c1", "source", "contract", "schema", "spec"]
-OUTPUT_KEYWORDS = ["export", "derived", "c2", "c3", "report", "artifact", "outcome", "eval", "label"]
+INPUT_KEYWORDS = ["raw", "ingest", "l0", "l1", "source", "contract", "schema", "spec"]
+OUTPUT_KEYWORDS = ["export", "derived", "l2", "l3", "report", "artifact", "outcome", "eval", "label"]
 
 QA_KEYWORDS = [
     "determin",

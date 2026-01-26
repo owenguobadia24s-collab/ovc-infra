@@ -1,7 +1,7 @@
 # Pine Metrics → OVC C-Layer Mapping
 
 > Generated: 2026-01-18
-> Purpose: Map Pine script metrics to OVC tiered architecture (B/C1/C2/C3/Decision)
+> Purpose: Map Pine script metrics to OVC tiered architecture (B/L1/L2/L3/Decision)
 
 ---
 
@@ -14,8 +14,8 @@
 | [contracts/export_contract_v0.1.1_min.json](../contracts/export_contract_v0.1.1_min.json) | MIN v0.1.1 contract (50 fields) |
 | [contracts/export_contract_v0.1_full.json](../contracts/export_contract_v0.1_full.json) | FULL profile field order (174 fields, 20 groups) |
 | [docs/derived_metric_registry_v0.1.md](../docs/derived_metric_registry_v0.1.md) | Metric class definitions (DBF/WDF/CIX/EVO/QAF/PMETA) |
-| [docs/ovc_metric_architecture.md](../docs/ovc_metric_architecture.md) | Architecture reference for B/C1/C2/C3 tiers |
-| [sql/derived_v0_1.sql](../sql/derived_v0_1.sql) | Implemented C1 SQL view |
+| [docs/ovc_metric_architecture.md](../docs/ovc_metric_architecture.md) | Architecture reference for B/L1/L2/L3 tiers |
+| [sql/derived_v0_1.sql](../sql/derived_v0_1.sql) | Implemented L1 SQL view |
 | [sql/option_c_v0_1.sql](../sql/option_c_v0_1.sql) | Outcomes/evaluation SQL view |
 
 ---
@@ -113,9 +113,9 @@ Extracted from `OVC_v0_1.pine` exportFull string construction:
 | Tier | Definition |
 |------|------------|
 | **B** | Identity/time keys + OHLC + ingest metadata. Source-agnostic raw facts. |
-| **C1** | Single-bar OHLC math primitives. No history window required. |
-| **C2** | Multi-bar structure/context/memory. Rolling windows over OHLC. |
-| **C3** | Higher-order regime/model tags synthesized from C2 evidence. |
+| **L1** | Single-bar OHLC math primitives. No history window required. |
+| **L2** | Multi-bar structure/context/memory. Rolling windows over OHLC. |
+| **L3** | Higher-order regime/model tags synthesized from L2 evidence. |
 | **Decision** | Bias/play/prediction/permission objects. Trade-action outputs. |
 
 ### 3.1 B-Layer (Canonical Facts)
@@ -145,211 +145,211 @@ Extracted from `OVC_v0_1.pine` exportFull string construction:
 | `note` | FOOTER | B | N/A | NO | Optional annotation |
 | `ready` | FOOTER | B | N/A | NO | Export readiness flag |
 
-### 3.2 C1-Layer (OHLC Primitives)
+### 3.2 L1-Layer (OHLC Primitives)
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `rng` | BAR (FULL) | C1 | YES | NO | `h - l` |
-| `body` | BAR (FULL) | C1 | YES | NO | `abs(c - o)` |
-| `dir` | BAR | C1 | YES | NO | `sign(c - o)` → UP/DN/0 |
-| `ret` | (contract v0.1.1) | C1 | YES | NO | `(c - o) / o` |
-| `clv` | L1_STATE | C1 | YES | NO | `2*(c-l)/(h-l) - 1` (signed CLV) |
-| `brb` | L1_STATE | C1 | YES | NO | `body / range` |
+| `rng` | BAR (FULL) | L1 | YES | NO | `h - l` |
+| `body` | BAR (FULL) | L1 | YES | NO | `abs(c - o)` |
+| `dir` | BAR | L1 | YES | NO | `sign(c - o)` → UP/DN/0 |
+| `ret` | (contract v0.1.1) | L1 | YES | NO | `(c - o) / o` |
+| `clv` | L1_STATE | L1 | YES | NO | `2*(c-l)/(h-l) - 1` (signed CLV) |
+| `brb` | L1_STATE | L1 | YES | NO | `body / range` |
 
-### 3.3 C2-Layer (Structure & Memory)
+### 3.3 L2-Layer (Structure & Memory)
 
 #### C2a — Micro Reference (2-bar lookback)
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `rr` | L1_REF | C2 | YES | YES (2) | `max(h[1..2]) - min(l[1..2])` |
-| `rm` | L1_REF | C2 | YES | YES (2) | `(rr_high + rr_low) / 2` |
-| `q1` | L1_REF | C2 | YES | YES (2) | `rr_low + 0.25 * rr` |
-| `q3` | L1_REF | C2 | YES | YES (2) | `rr_low + 0.75 * rr` |
-| `band` | L1_REF | C2 | YES | YES (2) | Close quartile 0-3 within rr |
+| `rr` | L1_REF | L2 | YES | YES (2) | `max(h[1..2]) - min(l[1..2])` |
+| `rm` | L1_REF | L2 | YES | YES (2) | `(rr_high + rr_low) / 2` |
+| `q1` | L1_REF | L2 | YES | YES (2) | `rr_low + 0.25 * rr` |
+| `q3` | L1_REF | L2 | YES | YES (2) | `rr_low + 0.75 * rr` |
+| `band` | L1_REF | L2 | YES | YES (2) | Close quartile 0-3 within rr |
 
 #### C2b — State Metrics (rr-normalized)
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `rer` | L1_STATE | C2 | YES | YES (2) | Range expansion: `range / rr` |
-| `or` | L1_STATE | C2 | YES | YES (2) | Overlap ratio vs micro range |
-| `bodyrr` | L1_STATE | C2 | YES | YES (2) | `body / rr` |
+| `rer` | L1_STATE | L2 | YES | YES (2) | Range expansion: `range / rr` |
+| `or` | L1_STATE | L2 | YES | YES (2) | Overlap ratio vs micro range |
+| `bodyrr` | L1_STATE | L2 | YES | YES (2) | `body / rr` |
 
 #### C2c — Value Metrics
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `sd` | L1_VALUE | C2 | YES | YES (2) | Signed distance to rm in rr units |
-| `oa` | L1_VALUE | C2 | YES | YES (2) | Outside acceptance (signed) |
-| `out` | L1_VALUE | C2 | YES | YES (2) | OutsideTag from OA sign |
-| `mc` | L1_VALUE | C2 | YES | YES (2) | Midcross flag: `l <= rm <= h` |
-| `mc3` | L1_VALUE | C2 | YES | YES (3) | 3-bar rolling sum of mc |
-| `vflip` | L1_VALUE | C2 | YES | YES (2) | Value flip: sd sign change |
-| `vf3` | L1_VALUE | C2 | YES | YES (3) | 3-bar rolling sum of vflip |
+| `sd` | L1_VALUE | L2 | YES | YES (2) | Signed distance to rm in rr units |
+| `oa` | L1_VALUE | L2 | YES | YES (2) | Outside acceptance (signed) |
+| `out` | L1_VALUE | L2 | YES | YES (2) | OutsideTag from OA sign |
+| `mc` | L1_VALUE | L2 | YES | YES (2) | Midcross flag: `l <= rm <= h` |
+| `mc3` | L1_VALUE | L2 | YES | YES (3) | 3-bar rolling sum of mc |
+| `vflip` | L1_VALUE | L2 | YES | YES (2) | Value flip: sd sign change |
+| `vf3` | L1_VALUE | L2 | YES | YES (3) | 3-bar rolling sum of vflip |
 
 #### C2d — Liquidity Sweeps
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `swhi` | L1_LIQ | C2 | YES | YES (2) | SweepHigh magnitude in rr units |
-| `swlo` | L1_LIQ | C2 | YES | YES (2) | SweepLow magnitude in rr units |
-| `took_hi` | L1_LIQ | C2 | YES | YES (2) | Flag: `swhi > 0` |
-| `took_lo` | L1_LIQ | C2 | YES | YES (2) | Flag: `swlo > 0` |
-| `hi_ran` | L1_LIQ | C2 | YES | YES (2) | High ran: took_hi AND c >= rr_high |
-| `hi_rev` | L1_LIQ | C2 | YES | YES (2) | High rev: took_hi AND c < rr_high |
-| `lo_ran` | L1_LIQ | C2 | YES | YES (2) | Low ran: took_lo AND c <= rr_low |
-| `lo_rev` | L1_LIQ | C2 | YES | YES (2) | Low rev: took_lo AND c > rr_low |
+| `swhi` | L1_LIQ | L2 | YES | YES (2) | SweepHigh magnitude in rr units |
+| `swlo` | L1_LIQ | L2 | YES | YES (2) | SweepLow magnitude in rr units |
+| `took_hi` | L1_LIQ | L2 | YES | YES (2) | Flag: `swhi > 0` |
+| `took_lo` | L1_LIQ | L2 | YES | YES (2) | Flag: `swlo > 0` |
+| `hi_ran` | L1_LIQ | L2 | YES | YES (2) | High ran: took_hi AND c >= rr_high |
+| `hi_rev` | L1_LIQ | L2 | YES | YES (2) | High rev: took_hi AND c < rr_high |
+| `lo_ran` | L1_LIQ | L2 | YES | YES (2) | Low ran: took_lo AND c <= rr_low |
+| `lo_rev` | L1_LIQ | L2 | YES | YES (2) | Low rev: took_lo AND c > rr_low |
 
 #### C2e — Distance-to-Key
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `d2rm` | L1_D2K | C2 | YES | YES (2) | Distance to rm (same as sd) |
-| `d2q1` | L1_D2K | C2 | YES | YES (2) | Distance to q1 in rr units |
-| `d2q3` | L1_D2K | C2 | YES | YES (2) | Distance to q3 in rr units |
-| `d2rrh` | L1_D2K | C2 | YES | YES (2) | Distance to rr_high in rr units |
-| `d2rrl` | L1_D2K | C2 | YES | YES (2) | Distance to rr_low in rr units |
+| `d2rm` | L1_D2K | L2 | YES | YES (2) | Distance to rm (same as sd) |
+| `d2q1` | L1_D2K | L2 | YES | YES (2) | Distance to q1 in rr units |
+| `d2q3` | L1_D2K | L2 | YES | YES (2) | Distance to q3 in rr units |
+| `d2rrh` | L1_D2K | L2 | YES | YES (2) | Distance to rr_high in rr units |
+| `d2rrl` | L1_D2K | L2 | YES | YES (2) | Distance to rr_low in rr units |
 
 #### C2f — Outcome Lookback (X-1)
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `out_ready` | L1_OUT | C2 | YES | YES (1) | Has prior rr/rm/sd |
-| `rtrm` | L1_OUT | C2 | YES | YES (1) | Return-to-prev-rm flag |
-| `nxtext` | L1_OUT | C2 | YES | YES (1) | Next extension from sd_prev |
-| `nxtsd` | L1_OUT | C2 | YES | YES (1) | Next SD vs previous rm/rr |
-| `hint1` | L1_OUT | C2 | YES | YES (1) | Outcome hint from rtrm |
-| `hint2` | L1_OUT | C2 | YES | YES (1) | Outcome hint from nxtext |
+| `out_ready` | L1_OUT | L2 | YES | YES (1) | Has prior rr/rm/sd |
+| `rtrm` | L1_OUT | L2 | YES | YES (1) | Return-to-prev-rm flag |
+| `nxtext` | L1_OUT | L2 | YES | YES (1) | Next extension from sd_prev |
+| `nxtsd` | L1_OUT | L2 | YES | YES (1) | Next SD vs previous rm/rr |
+| `hint1` | L1_OUT | L2 | YES | YES (1) | Outcome hint from rtrm |
+| `hint2` | L1_OUT | L2 | YES | YES (1) | Outcome hint from nxtext |
 
 #### C2g — Context Unit (Rolling RR)
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `rrc` | L2_CTX | C2 | YES | YES (rrcLen) | Context range: SMA(rr) |
-| `vrc` | L2_CTX | C2 | YES | YES (rrcLen) | Volatility ratio: `rr / rrc` |
-| `vr` | L1_MAIN | C2 | YES | YES (20) | Volatility ratio: `rr / SMA(rr, 20)` |
+| `rrc` | L2_CTX | L2 | YES | YES (rrcLen) | Context range: SMA(rr) |
+| `vrc` | L2_CTX | L2 | YES | YES (rrcLen) | Volatility ratio: `rr / rrc` |
+| `vr` | L1_MAIN | L2 | YES | YES (20) | Volatility ratio: `rr / SMA(rr, 20)` |
 
 #### C2h — Structure State
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `lastpivot` | L2_STRUCT | C2 | YES | YES (pivotL/R) | Last pivot label Hi/Lo |
-| `swingdir` | L2_STRUCT | C2 | YES | YES (pivotL/R) | Swing direction from pivot |
-| `phidr` | L2_STRUCT | C2 | YES | YES (pivotL/R) | Distance to pivot high in RRc |
-| `plodr` | L2_STRUCT | C2 | YES | YES (pivotL/R) | Distance to pivot low in RRc |
-| `struct` | L2_STRUCT | C2 | YES | YES (pivotL/R) | Raw structure HH/HL/LH/LL |
-| `ss` | L2_STRUCT | C2 | YES | YES (pivotL/R) | Simplified: UP/DN/MIX |
+| `lastpivot` | L2_STRUCT | L2 | YES | YES (pivotL/R) | Last pivot label Hi/Lo |
+| `swingdir` | L2_STRUCT | L2 | YES | YES (pivotL/R) | Swing direction from pivot |
+| `phidr` | L2_STRUCT | L2 | YES | YES (pivotL/R) | Distance to pivot high in RRc |
+| `plodr` | L2_STRUCT | L2 | YES | YES (pivotL/R) | Distance to pivot low in RRc |
+| `struct` | L2_STRUCT | L2 | YES | YES (pivotL/R) | Raw structure HH/HL/LH/LL |
+| `ss` | L2_STRUCT | L2 | YES | YES (pivotL/R) | Simplified: UP/DN/MIX |
 
 #### C2i — Trend Tracking
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `rmdrift` | L2_TREND | C2 | YES | YES (driftN) | Drift of dayRM in RRc units |
-| `dirrun` | L2_TREND | C2 | YES | YES (var) | Length of micro direction run |
+| `rmdrift` | L2_TREND | L2 | YES | YES (driftN) | Drift of dayRM in RRc units |
+| `dirrun` | L2_TREND | L2 | YES | YES (var) | Length of micro direction run |
 
 #### C2j — Space to Targets
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `space_up` | L2_SPACE | C2 | YES | YES (session/day) | Nearest upward target in RRc |
-| `space_dn` | L2_SPACE | C2 | YES | YES (session/day) | Nearest downward target in RRc |
-| `space_min` | L2_SPACE | C2 | YES | YES | `min(space_up, space_dn)` |
-| `up_src` | L2_SPACE | C2 | YES | YES | Source label for up target |
-| `dn_src` | L2_SPACE | C2 | YES | YES | Source label for down target |
-| `up_lvl` | L2_SPACE | C2 | YES | YES | Price level for up target |
-| `dn_lvl` | L2_SPACE | C2 | YES | YES | Price level for down target |
+| `space_up` | L2_SPACE | L2 | YES | YES (session/day) | Nearest upward target in RRc |
+| `space_dn` | L2_SPACE | L2 | YES | YES (session/day) | Nearest downward target in RRc |
+| `space_min` | L2_SPACE | L2 | YES | YES | `min(space_up, space_dn)` |
+| `up_src` | L2_SPACE | L2 | YES | YES | Source label for up target |
+| `dn_src` | L2_SPACE | L2 | YES | YES | Source label for down target |
+| `up_lvl` | L2_SPACE | L2 | YES | YES | Price level for up target |
+| `dn_lvl` | L2_SPACE | L2 | YES | YES | Price level for down target |
 
 #### C2k — HTF Context
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `sd4` | L2_HTF | C2 | YES | YES (HTF) | 4H timeframe SD |
-| `sdd` | L2_HTF | C2 | YES | YES (HTF) | Daily timeframe SD |
-| `htf4` | L2_HTF | C2 | YES | YES (HTF) | HTF4 direction tag |
-| `htfd` | L2_HTF | C2 | YES | YES (HTF) | HTFD direction tag |
-| `mdir` | L2_HTF | C2 | YES | YES (2) | Micro direction from sd |
+| `sd4` | L2_HTF | L2 | YES | YES (HTF) | 4H timeframe SD |
+| `sdd` | L2_HTF | L2 | YES | YES (HTF) | Daily timeframe SD |
+| `htf4` | L2_HTF | L2 | YES | YES (HTF) | HTF4 direction tag |
+| `htfd` | L2_HTF | L2 | YES | YES (HTF) | HTFD direction tag |
+| `mdir` | L2_HTF | L2 | YES | YES (2) | Micro direction from sd |
 
 #### C2l — KLS Levels (L1 + L2)
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `kls_mode_l1` | L1_KLS | C2 | N/A | NO | Config input |
-| `pooln_l1` | L1_KLS | C2 | YES | YES (var) | Pool size for KLS |
-| `near_lvl` | L1_KLS | C2 | YES | YES (var) | Nearest KLS level |
-| `near_src` | L1_KLS | C2 | YES | YES (var) | Source label for near_lvl |
-| `near_dr` | L1_KLS | C2 | YES | YES (var) | Distance to near_lvl in rr |
-| `conf_l1` | L1_KLS | C2 | YES | YES (var) | Confluence count |
-| `age_l1` | L1_KLS | C2 | YES | YES (var) | Bars since touch |
-| `hitsn_l1` | L1_KLS | C2 | YES | YES (var) | Rolling hit count |
-| `decay_l1` | L1_KLS | C2 | YES | YES (var) | Age decay |
-| `width_l1` | L1_KLS | C2 | N/A | NO | Config input |
-| `kscore_l1` | L1_KLS | C2 | YES | YES (var) | Weighted KLS score |
-| `ktag_l1` | L1_KLS | C2 | YES | YES (var) | KLS tag HIGH/MID/LOW |
-| `kt` | L2_KLS | C2 | YES | YES (var) | KTag2 classification |
-| `kscore2` | L2_KLS | C2 | YES | YES (var) | KLS-lite score |
-| `kup_dr` | L2_KLS | C2 | YES | YES (var) | Distance to above level |
-| `kdn_dr` | L2_KLS | C2 | YES | YES (var) | Distance to below level |
-| `conf2` | L2_KLS | C2 | YES | YES (var) | L2 confluence count |
-| `age2` | L2_KLS | C2 | YES | YES (var) | L2 age |
-| `hits2` | L2_KLS | C2 | YES | YES (var) | L2 hit count |
-| `decay2` | L2_KLS | C2 | YES | YES (var) | L2 decay |
-| `width2` | L2_KLS | C2 | N/A | NO | Config input |
+| `kls_mode_l1` | L1_KLS | L2 | N/A | NO | Config input |
+| `pooln_l1` | L1_KLS | L2 | YES | YES (var) | Pool size for KLS |
+| `near_lvl` | L1_KLS | L2 | YES | YES (var) | Nearest KLS level |
+| `near_src` | L1_KLS | L2 | YES | YES (var) | Source label for near_lvl |
+| `near_dr` | L1_KLS | L2 | YES | YES (var) | Distance to near_lvl in rr |
+| `conf_l1` | L1_KLS | L2 | YES | YES (var) | Confluence count |
+| `age_l1` | L1_KLS | L2 | YES | YES (var) | Bars since touch |
+| `hitsn_l1` | L1_KLS | L2 | YES | YES (var) | Rolling hit count |
+| `decay_l1` | L1_KLS | L2 | YES | YES (var) | Age decay |
+| `width_l1` | L1_KLS | L2 | N/A | NO | Config input |
+| `kscore_l1` | L1_KLS | L2 | YES | YES (var) | Weighted KLS score |
+| `ktag_l1` | L1_KLS | L2 | YES | YES (var) | KLS tag HIGH/MID/LOW |
+| `kt` | L2_KLS | L2 | YES | YES (var) | KTag2 classification |
+| `kscore2` | L2_KLS | L2 | YES | YES (var) | KLS-lite score |
+| `kup_dr` | L2_KLS | L2 | YES | YES (var) | Distance to above level |
+| `kdn_dr` | L2_KLS | L2 | YES | YES (var) | Distance to below level |
+| `conf2` | L2_KLS | L2 | YES | YES (var) | L2 confluence count |
+| `age2` | L2_KLS | L2 | YES | YES (var) | L2 age |
+| `hits2` | L2_KLS | L2 | YES | YES (var) | L2 hit count |
+| `decay2` | L2_KLS | L2 | YES | YES (var) | L2 decay |
+| `width2` | L2_KLS | L2 | N/A | NO | Config input |
 
-### 3.4 C3-Layer (Market Model & Regime)
+### 3.4 L3-Layer (Market Model & Regime)
 
 #### C3a — L1 Composite Tags
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `state_tag` | L1_MAIN | C3 | YES | YES (2) | MOVE/ROTATE from OR, RER, CLV + thresholds |
-| `value_tag` | L1_MAIN | C3 | YES | YES (2) | ACCEPT+/ACCEPT-/NEUTRAL from SD |
-| `event` | L1_MAIN | C3 | YES | YES (2) | Dominant event from sweeps + OA |
-| `ts` | L1_MAIN | C3 | YES | YES (2) | Trend strength composite |
-| `cp` | L1_MAIN | C3 | YES | YES (3) | Chop score from OR, mc3, vf3, wicks |
-| `cp_tag` | L1_MAIN | C3 | YES | YES (3) | Chop tag HIGH/MID/LOW |
-| `tt` | L1_MAIN | C3 | YES | YES (2) | Trigger flag composite |
-| `tis` | L1_MAIN | C3 | YES | YES (var) | Time-in-state counter |
+| `state_tag` | L1_MAIN | L3 | YES | YES (2) | MOVE/ROTATE from OR, RER, CLV + thresholds |
+| `value_tag` | L1_MAIN | L3 | YES | YES (2) | ACCEPT+/ACCEPT-/NEUTRAL from SD |
+| `event` | L1_MAIN | L3 | YES | YES (2) | Dominant event from sweeps + OA |
+| `ts` | L1_MAIN | L3 | YES | YES (2) | Trend strength composite |
+| `cp` | L1_MAIN | L3 | YES | YES (3) | Chop score from OR, mc3, vf3, wicks |
+| `cp_tag` | L1_MAIN | L3 | YES | YES (3) | Chop tag HIGH/MID/LOW |
+| `tt` | L1_MAIN | L3 | YES | YES (2) | Trigger flag composite |
+| `tis` | L1_MAIN | L3 | YES | YES (var) | Time-in-state counter |
 
 #### C3b — L2 Context Tags
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `tr` | L2_TREND | C3 | YES | YES | Trend tag from rmdrift + dirrun |
-| `sp` | L2_SPACE | C3 | YES | YES | Space tag HIGH/MID/LOW |
-| `htf_stack` | L2_HTF | C3 | YES | YES | HTF alignment string |
-| `with_htf` | L2_HTF | C3 | YES | YES | WithHTF flag Y/N |
+| `tr` | L2_TREND | L3 | YES | YES | Trend tag from rmdrift + dirrun |
+| `sp` | L2_SPACE | L3 | YES | YES | Space tag HIGH/MID/LOW |
+| `htf_stack` | L2_HTF | L3 | YES | YES | HTF alignment string |
+| `with_htf` | L2_HTF | L3 | YES | YES | WithHTF flag Y/N |
 
 #### C3c — Range Detector (RD)
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `rd_state` | RD | C3 | YES | YES (rd_len) | RANGE/SOFT_RANGE/NO_RANGE |
-| `rd_brkdir` | RD | C3 | YES | YES (rd_len) | Break direction UP/DN/0 |
-| `rd_w_rrc` | RD | C3 | YES | YES (rd_len) | RD width in RRc units |
-| `rd_hi` | RD | C3 | YES | YES (rd_len) | RD high level |
-| `rd_lo` | RD | C3 | YES | YES (rd_len) | RD low level |
-| `rd_mid` | RD | C3 | YES | YES (rd_len) | RD midpoint |
-| `rd_why` | RD | C3 | YES | YES (rd_len) | Diagnostic string |
+| `rd_state` | RD | L3 | YES | YES (rd_len) | RANGE/SOFT_RANGE/NO_RANGE |
+| `rd_brkdir` | RD | L3 | YES | YES (rd_len) | Break direction UP/DN/0 |
+| `rd_w_rrc` | RD | L3 | YES | YES (rd_len) | RD width in RRc units |
+| `rd_hi` | RD | L3 | YES | YES (rd_len) | RD high level |
+| `rd_lo` | RD | L3 | YES | YES (rd_len) | RD low level |
+| `rd_mid` | RD | L3 | YES | YES (rd_len) | RD midpoint |
+| `rd_why` | RD | L3 | YES | YES (rd_len) | Diagnostic string |
 
 #### C3d — BlockStack (Regime Memory)
 
 | Field | Origin Module | Tier | OHLC Only | History? | Notes |
 |-------|---------------|------|-----------|----------|-------|
-| `regime_tag` | BLOCKSTACK | C3 | YES | YES (bs_N) | TREND_STABLE/RANGE_STABLE/TRANSITION |
-| `regime_dir` | BLOCKSTACK | C3 | YES | YES (bs_N) | Regime direction from BiasDir counts |
-| `regime_conf` | BLOCKSTACK | C3 | YES | YES (bs_N) | Regime confidence A/B/C/D |
-| `trans_risk` | BLOCKSTACK | C3 | YES | YES (bs_flipN) | Transition risk from flip_rate |
-| `p_campaign` | BLOCKSTACK | C3 | YES | YES (bs_N) | Fraction of CAMPAIGN tags |
-| `p_rdrange` | BLOCKSTACK | C3 | YES | YES (bs_N) | Fraction of RD range states |
-| `p_confmove` | BLOCKSTACK | C3 | YES | YES (bs_N) | Fraction of confirmed MOVE |
-| `p_chop` | BLOCKSTACK | C3 | YES | YES (bs_N) | Fraction of chop states |
-| `p_split` | BLOCKSTACK | C3 | YES | YES (bs_N) | Fraction of HTF split |
-| `p_contra` | BLOCKSTACK | C3 | YES | YES (bs_N) | Fraction of HTF contra |
-| `p_spacelow` | BLOCKSTACK | C3 | YES | YES (bs_N) | Fraction of space low |
-| `avg_drift` | BLOCKSTACK | C3 | YES | YES (bs_N) | Average RMdrift |
-| `avg_space` | BLOCKSTACK | C3 | YES | YES (bs_N) | Average SpaceMin |
-| `flip_rate` | BLOCKSTACK | C3 | YES | YES (bs_flipN) | BiasMode change rate |
+| `regime_tag` | BLOCKSTACK | L3 | YES | YES (bs_N) | TREND_STABLE/RANGE_STABLE/TRANSITION |
+| `regime_dir` | BLOCKSTACK | L3 | YES | YES (bs_N) | Regime direction from BiasDir counts |
+| `regime_conf` | BLOCKSTACK | L3 | YES | YES (bs_N) | Regime confidence A/B/C/D |
+| `trans_risk` | BLOCKSTACK | L3 | YES | YES (bs_flipN) | Transition risk from flip_rate |
+| `p_campaign` | BLOCKSTACK | L3 | YES | YES (bs_N) | Fraction of CAMPAIGN tags |
+| `p_rdrange` | BLOCKSTACK | L3 | YES | YES (bs_N) | Fraction of RD range states |
+| `p_confmove` | BLOCKSTACK | L3 | YES | YES (bs_N) | Fraction of confirmed MOVE |
+| `p_chop` | BLOCKSTACK | L3 | YES | YES (bs_N) | Fraction of chop states |
+| `p_split` | BLOCKSTACK | L3 | YES | YES (bs_N) | Fraction of HTF split |
+| `p_contra` | BLOCKSTACK | L3 | YES | YES (bs_N) | Fraction of HTF contra |
+| `p_spacelow` | BLOCKSTACK | L3 | YES | YES (bs_N) | Fraction of space low |
+| `avg_drift` | BLOCKSTACK | L3 | YES | YES (bs_N) | Average RMdrift |
+| `avg_space` | BLOCKSTACK | L3 | YES | YES (bs_N) | Average SpaceMin |
+| `flip_rate` | BLOCKSTACK | L3 | YES | YES (bs_flipN) | BiasMode change rate |
 
 ### 3.5 Decision Layer
 
@@ -381,7 +381,7 @@ Extracted from `OVC_v0_1.pine` exportFull string construction:
 ```
 B (OHLC + schedule)
     │
-    ├──► C1 (single-bar math: rng, body, dir, clv, brb)
+    ├──► L1 (single-bar math: rng, body, dir, clv, brb)
     │        │
     │        ▼
     ├──► C2a (micro reference: rr, rm, q1, q3, band)
@@ -409,7 +409,7 @@ B (OHLC + schedule)
     └──► C2l (KLS levels: pooln, near_lvl, near_dr, conf, kscore)
              │
              ▼
-        C3 (market model tags)
+        L3 (market model tags)
              │
              ├──► C3a (L1 tags: state_tag, value_tag, event, cp_tag, tt, tis)
              │
@@ -432,7 +432,7 @@ B (OHLC + schedule)
 ### 4.2 Simplified Chain
 
 ```
-B → C1 → C2(micro rr/rm) → C2(state/value) → C2(structure/trend/space) → C3(tags) → Decision
+B → L1 → L2(micro rr/rm) → L2(state/value) → L2(structure/trend/space) → L3(tags) → Decision
 ```
 
 ### 4.3 Critical Path for Tag Derivation
@@ -441,9 +441,9 @@ B → C1 → C2(micro rr/rm) → C2(state/value) → C2(structure/trend/space) �
 [state_tag]  ←  or, rer, clv  ←  rr, rm  ←  h[1..2], l[1..2]
 [value_tag]  ←  sd  ←  rm, rr  ←  h[1..2], l[1..2]
 [trend_tag]  ←  rmdrift, dirrun  ←  rm, sd, rrc  ←  rr  ←  OHLC
-[regime_tag] ←  p_campaign, p_rdrange, avgDrift  ←  trend_tag, rd_state, rmdrift  ←  C2
-[bias_mode]  ←  trend_tag, htf_stack, ss, state_tag, cp_tag, tt, rd_state  ←  C2/C3
-[bias_dir]   ←  bias_mode, trend_tag, ss, htf_stack, with_htf, mdir, rmdrift  ←  C2/C3
+[regime_tag] ←  p_campaign, p_rdrange, avgDrift  ←  trend_tag, rd_state, rmdrift  ←  L2
+[bias_mode]  ←  trend_tag, htf_stack, ss, state_tag, cp_tag, tt, rd_state  ←  L2/L3
+[bias_dir]   ←  bias_mode, trend_tag, ss, htf_stack, with_htf, mdir, rmdrift  ←  L2/L3
 ```
 
 ---
@@ -467,7 +467,7 @@ B → C1 → C2(micro rr/rm) → C2(state/value) → C2(structure/trend/space) �
 | Gap | Impact | Recommendation |
 |-----|--------|----------------|
 | **Threshold parameters not logged** | Cannot reproduce tag derivation | Store `th_move_OR`, `th_move_RER`, `th_move_CLV`, `th_accept_SD`, `cp_hi`, `cp_lo`, etc. in derived tables |
-| **Intermediate scores not persisted** | Cannot debug composite tags | Store `ts` (trend strength), `cp` (chop score) in C3 tables |
+| **Intermediate scores not persisted** | Cannot debug composite tags | Store `ts` (trend strength), `cp` (chop score) in L3 tables |
 | **KLS pool contents not exported** | Cannot validate level selection | Store `pooln_l1`, `pooln_l2`, `near_lvl`, `near_src` |
 | **State change timestamps missing** | Cannot trace `tis` derivation | Store `state_tag_changed_at_ms` |
 | **Pivot coordinates not persisted** | Cannot validate structure | Store `lastPH_price`, `lastPL_price`, `lastPH_bar`, `lastPL_bar` |
@@ -490,7 +490,7 @@ B → C1 → C2(micro rr/rm) → C2(state/value) → C2(structure/trend/space) �
 
 ## 6. IMPLEMENTATION STAGES
 
-### Stage C1 — OHLC Primitives
+### Stage L1 — OHLC Primitives
 
 **Status**: ✅ IMPLEMENTED in `sql/derived_v0_1.sql`
 
@@ -503,103 +503,103 @@ B → C1 → C2(micro rr/rm) → C2(state/value) → C2(structure/trend/space) �
 
 ---
 
-### Stage C2 — Structure & Memory
+### Stage L2 — Structure & Memory
 
 **Status**: 🔜 NOT STARTED
 
-#### C2 Phase 1: Micro Reference (Priority HIGH)
+#### L2 Phase 1: Micro Reference (Priority HIGH)
 
 | Item | Value |
 |------|-------|
 | **Inputs** | `derived.ovc_block_features_v0_1` (o, h, l, c with lag) |
-| **Outputs** | `derived.ovc_c2_micro_v0_1` |
+| **Outputs** | `derived.ovc_l2_micro_v0_1` |
 | **Metrics** | `rr`, `rm`, `q1`, `q3`, `band`, `rr_high`, `rr_low` |
 | **Definition of Done** | Python/SQL output matches Pine ±0.01% for validation dataset |
 
-#### C2 Phase 2: State + Value (Priority HIGH)
+#### L2 Phase 2: State + Value (Priority HIGH)
 
 | Item | Value |
 |------|-------|
-| **Inputs** | `derived.ovc_c2_micro_v0_1` + C1 features |
-| **Outputs** | `derived.ovc_c2_state_v0_1` |
+| **Inputs** | `derived.ovc_l2_micro_v0_1` + L1 features |
+| **Outputs** | `derived.ovc_l2_state_v0_1` |
 | **Metrics** | `rer`, `or`, `clv`, `brb`, `bodyrr`, `sd`, `oa`, `out`, `mc`, `mc3`, `vflip`, `vf3` |
 | **Definition of Done** | Match Pine output; `clv` and `sd` within ±0.001 |
 
-#### C2 Phase 3: Sweeps + D2K (Priority MEDIUM)
+#### L2 Phase 3: Sweeps + D2K (Priority MEDIUM)
 
 | Item | Value |
 |------|-------|
-| **Inputs** | `derived.ovc_c2_micro_v0_1` |
-| **Outputs** | `derived.ovc_c2_liq_v0_1` |
+| **Inputs** | `derived.ovc_l2_micro_v0_1` |
+| **Outputs** | `derived.ovc_l2_liq_v0_1` |
 | **Metrics** | `swhi`, `swlo`, `took_hi`, `took_lo`, `hi_ran`, `hi_rev`, `lo_ran`, `lo_rev`, `d2rm`, `d2q1`, `d2q3`, `d2rrh`, `d2rrl` |
 | **Definition of Done** | Boolean flags match 100%; distances within ±0.01 |
 
-#### C2 Phase 4: Context Unit (Priority HIGH)
+#### L2 Phase 4: Context Unit (Priority HIGH)
 
 | Item | Value |
 |------|-------|
-| **Inputs** | `derived.ovc_c2_micro_v0_1` (rr series) |
-| **Outputs** | `derived.ovc_c2_context_v0_1` |
+| **Inputs** | `derived.ovc_l2_micro_v0_1` (rr series) |
+| **Outputs** | `derived.ovc_l2_context_v0_1` |
 | **Metrics** | `rrc` (SMA of rr), `vrc` (rr/rrc), `vr` |
 | **Definition of Done** | Match Pine rrc/vrc within ±0.001 for blocks with sufficient history |
 
-#### C2 Phase 5: Structure (Priority MEDIUM)
+#### L2 Phase 5: Structure (Priority MEDIUM)
 
 | Item | Value |
 |------|-------|
 | **Inputs** | `derived.ovc_block_features_v0_1` + pivotL/pivotR params |
-| **Outputs** | `derived.ovc_c2_structure_v0_1` |
+| **Outputs** | `derived.ovc_l2_structure_v0_1` |
 | **Metrics** | `lastpivot`, `swingdir`, `phidr`, `plodr`, `struct`, `ss` |
 | **Definition of Done** | Pivot detection matches Pine logic; struct tags match ≥95% |
 
-#### C2 Phase 6: Trend + Space (Priority MEDIUM)
+#### L2 Phase 6: Trend + Space (Priority MEDIUM)
 
 | Item | Value |
 |------|-------|
-| **Inputs** | `derived.ovc_c2_context_v0_1` + session/day levels |
-| **Outputs** | `derived.ovc_c2_trend_v0_1`, `derived.ovc_c2_space_v0_1` |
+| **Inputs** | `derived.ovc_l2_context_v0_1` + session/day levels |
+| **Outputs** | `derived.ovc_l2_trend_v0_1`, `derived.ovc_l2_space_v0_1` |
 | **Metrics** | `rmdrift`, `dirrun`, `space_up`, `space_dn`, `space_min`, `up_src`, `dn_src`, `up_lvl`, `dn_lvl` |
 | **Definition of Done** | Space distances within ±0.05 RRc; trend direction matches |
 
-#### C2 Phase 7: HTF + KLS (Priority LOW)
+#### L2 Phase 7: HTF + KLS (Priority LOW)
 
 | Item | Value |
 |------|-------|
-| **Inputs** | Aggregated 4H/D OHLC, C2 features |
-| **Outputs** | `derived.ovc_c2_htf_v0_1`, `derived.ovc_c2_kls_v0_1` |
+| **Inputs** | Aggregated 4H/D OHLC, L2 features |
+| **Outputs** | `derived.ovc_l2_htf_v0_1`, `derived.ovc_l2_kls_v0_1` |
 | **Metrics** | `sd4`, `sdd`, `htf4`, `htfd`, `mdir`, KLS pool metrics |
 | **Definition of Done** | HTF sd within ±0.01; KLS scores within ±0.1 |
 
 ---
 
-### Stage C3 — Market Model Tags
+### Stage L3 — Market Model Tags
 
 **Status**: 📋 PLANNED (TV reference exists)
 
-#### C3 Phase 1: L1 Tags (Priority HIGH)
+#### L3 Phase 1: L1 Tags (Priority HIGH)
 
 | Item | Value |
 |------|-------|
-| **Inputs** | `derived.ovc_c2_state_v0_1` + thresholds |
-| **Outputs** | `derived.ovc_c3_l1_tags_v0_1` |
+| **Inputs** | `derived.ovc_l2_state_v0_1` + thresholds |
+| **Outputs** | `derived.ovc_l3_l1_tags_v0_1` |
 | **Metrics** | `state_tag`, `value_tag`, `event`, `ts`, `cp`, `cp_tag`, `tt`, `tis` |
 | **Definition of Done** | Tag agreement ≥95% vs TV reference; threshold params documented |
 
-#### C3 Phase 2: L2 Context Tags (Priority MEDIUM)
+#### L3 Phase 2: L2 Context Tags (Priority MEDIUM)
 
 | Item | Value |
 |------|-------|
-| **Inputs** | `derived.ovc_c2_trend_v0_1`, `derived.ovc_c2_space_v0_1`, `derived.ovc_c2_htf_v0_1` |
-| **Outputs** | `derived.ovc_c3_l2_tags_v0_1` |
+| **Inputs** | `derived.ovc_l2_trend_v0_1`, `derived.ovc_l2_space_v0_1`, `derived.ovc_l2_htf_v0_1` |
+| **Outputs** | `derived.ovc_l3_l2_tags_v0_1` |
 | **Metrics** | `tr` (trend_tag), `sp` (space_tag), `htf_stack`, `with_htf` |
 | **Definition of Done** | Tag agreement ≥95% vs TV reference |
 
-#### C3 Phase 3: RD + Regime (Priority MEDIUM)
+#### L3 Phase 3: RD + Regime (Priority MEDIUM)
 
 | Item | Value |
 |------|-------|
-| **Inputs** | `derived.ovc_c2_*` + `derived.ovc_c3_l1_tags_v0_1` |
-| **Outputs** | `derived.ovc_c3_regime_v0_1` |
+| **Inputs** | `derived.ovc_l2_*` + `derived.ovc_l3_l1_tags_v0_1` |
+| **Outputs** | `derived.ovc_l3_regime_v0_1` |
 | **Metrics** | `rd_state`, `rd_brkdir`, `rd_hi/lo/mid`, `regime_tag`, `regime_dir`, `regime_conf`, `trans_risk`, `p_*`, `avg_drift`, `avg_space`, `flip_rate` |
 | **Definition of Done** | Regime tag agreement ≥90%; RD state matches |
 
@@ -642,42 +642,42 @@ This section documents a critical review of potential tier misclassifications id
 
 ---
 
-### Issue A: L1 Composite Tags May Be Misclassified as C3
+### Issue A: L1 Composite Tags May Be Misclassified as L3
 
-**Observation**: The fields `state_tag`, `value_tag`, `event`, `cp_tag`, `tt`, and `tis` are currently classified as C3 (Section 3.4, "C3a — L1 Composite Tags"). However, these tags are derived directly from C2 numeric features (e.g., `or`, `rer`, `clv`, `sd`, `swhi`, `swlo`, `mc3`, `vf3`) via threshold comparisons—not from higher-order regime synthesis.
+**Observation**: The fields `state_tag`, `value_tag`, `event`, `cp_tag`, `tt`, and `tis` are currently classified as L3 (Section 3.4, "C3a — L1 Composite Tags"). However, these tags are derived directly from L2 numeric features (e.g., `or`, `rer`, `clv`, `sd`, `swhi`, `swlo`, `mc3`, `vf3`) via threshold comparisons—not from higher-order regime synthesis.
 
 **Analysis**:
 
-The stated C3 definition is: *"Higher-order regime/model tags synthesized from C2 evidence."*
+The stated L3 definition is: *"Higher-order regime/model tags synthesized from L2 evidence."*
 
 Examining the derivation chains:
-- `state_tag` ← `or`, `rer`, `clv` + thresholds (all C2 inputs)
-- `value_tag` ← `sd` + threshold (C2 input)
-- `event` ← `took_hi`, `took_lo`, `oa` (all C2 inputs)
-- `cp_tag` ← `or`, `mc3`, `vf3`, wicks (all C2 inputs)
-- `tt` ← `sd`, `or`, `rer`, `clv`, `oa`, sweeps, flip (all C2 inputs)
+- `state_tag` ← `or`, `rer`, `clv` + thresholds (all L2 inputs)
+- `value_tag` ← `sd` + threshold (L2 input)
+- `event` ← `took_hi`, `took_lo`, `oa` (all L2 inputs)
+- `cp_tag` ← `or`, `mc3`, `vf3`, wicks (all L2 inputs)
+- `tt` ← `sd`, `or`, `rer`, `clv`, `oa`, sweeps, flip (all L2 inputs)
 - `tis` ← barssince(`state_tag` change) (depends on state_tag)
 
-These are **immediate categorical interpretations of C2 numeric features**, not multi-block regime patterns. They operate at the same temporal granularity as their inputs (single bar, with 2-3 bar lookback for some).
+These are **immediate categorical interpretations of L2 numeric features**, not multi-block regime patterns. They operate at the same temporal granularity as their inputs (single bar, with 2-3 bar lookback for some).
 
 **Assessment**:
 
-A reasonable interpretation is that these constitute a **sub-tier between C2 and C3**—call it "C2 tags" or "C2.5"—representing:
-- C2: Raw computed features (numeric/boolean)
-- C2-tags: Immediate categorical interpretations via thresholds
-- C3: Multi-block regime patterns with memory/persistence
+A reasonable interpretation is that these constitute a **sub-tier between L2 and L3**—call it "L2 tags" or "L2.5"—representing:
+- L2: Raw computed features (numeric/boolean)
+- L2-tags: Immediate categorical interpretations via thresholds
+- L3: Multi-block regime patterns with memory/persistence
 
-An alternative interpretation is that **any categorical synthesis** qualifies as C3, regardless of temporal scope. This would retain the current classification but dilute the "regime" semantic.
+An alternative interpretation is that **any categorical synthesis** qualifies as L3, regardless of temporal scope. This would retain the current classification but dilute the "regime" semantic.
 
 The Pine script groups these under "L1_MAIN" (g2), suggesting the original implementation treats them as L1-level (local bar context), not regime-level.
 
-**Verdict**: The proposed reclassification has merit. These tags are closer to C2 in both derivation chain and temporal scope. However, this requires an explicit design decision on whether C3 means "any categorical synthesis" or specifically "regime-level multi-block synthesis."
+**Verdict**: The proposed reclassification has merit. These tags are closer to L2 in both derivation chain and temporal scope. However, this requires an explicit design decision on whether L3 means "any categorical synthesis" or specifically "regime-level multi-block synthesis."
 
 ---
 
-### Issue B: Range Detector Outputs May Span C2 and C3
+### Issue B: Range Detector Outputs May Span L2 and L3
 
-**Observation**: All RD fields (`rd_state`, `rd_brkdir`, `rd_w_rrc`, `rd_hi`, `rd_lo`, `rd_mid`, `rd_why`) are classified as C3 (Section 3.4, "C3c — Range Detector"). However, some RD outputs are raw rolling-window computations that resemble C2, while others are categorical interpretations.
+**Observation**: All RD fields (`rd_state`, `rd_brkdir`, `rd_w_rrc`, `rd_hi`, `rd_lo`, `rd_mid`, `rd_why`) are classified as L3 (Section 3.4, "C3c — Range Detector"). However, some RD outputs are raw rolling-window computations that resemble L2, while others are categorical interpretations.
 
 **Analysis**:
 
@@ -690,17 +690,17 @@ Examining RD field types:
 - `rd_brkdir`: Categorical tag (UP/DN/0) from close vs rails + TT + StateTag
 - `rd_why`: Diagnostic string combining multiple signals
 
-The first four fields (`rd_hi`, `rd_lo`, `rd_mid`, `rd_w_rrc`) are structurally identical to session-based features like `sess_high`/`sess_low`, which are considered C2 in other contexts. They are **numeric rolling-window outputs**, not categorical interpretations.
+The first four fields (`rd_hi`, `rd_lo`, `rd_mid`, `rd_w_rrc`) are structurally identical to session-based features like `sess_high`/`sess_low`, which are considered L2 in other contexts. They are **numeric rolling-window outputs**, not categorical interpretations.
 
-The latter three fields (`rd_state`, `rd_brkdir`, `rd_why`) involve **categorical synthesis** from multiple evidence sources, which aligns with C3 semantics.
+The latter three fields (`rd_state`, `rd_brkdir`, `rd_why`) involve **categorical synthesis** from multiple evidence sources, which aligns with L3 semantics.
 
 **Assessment**:
 
 A reasonable interpretation is to split RD:
-- **C2**: `rd_hi`, `rd_lo`, `rd_mid`, `rd_w_rrc` (raw rolling outputs)
-- **C3**: `rd_state`, `rd_brkdir`, `rd_why` (categorical regime interpretation)
+- **L2**: `rd_hi`, `rd_lo`, `rd_mid`, `rd_w_rrc` (raw rolling outputs)
+- **L3**: `rd_state`, `rd_brkdir`, `rd_why` (categorical regime interpretation)
 
-An alternative would be to treat RD as a **cohesive module** where all outputs are grouped together for implementation simplicity, accepting that C3 contains some numeric evidence alongside tags.
+An alternative would be to treat RD as a **cohesive module** where all outputs are grouped together for implementation simplicity, accepting that L3 contains some numeric evidence alongside tags.
 
 The Pine script groups all RD fields under "g16=RD" without distinguishing evidence from interpretation.
 
@@ -708,9 +708,9 @@ The Pine script groups all RD fields under "g16=RD" without distinguishing evide
 
 ---
 
-### Issue C: Rolling/Session Features May Be Misclassified as C1
+### Issue C: Rolling/Session Features May Be Misclassified as L1
 
-**Observation**: The C1 definition is "single-bar OHLC math primitives. No history window required." However, the Stage C1 implementation (`derived.ovc_block_features_v0_1`) includes features that require history windows:
+**Observation**: The L1 definition is "single-bar OHLC math primitives. No history window required." However, the Stage L1 implementation (`derived.ovc_block_features_v0_1`) includes features that require history windows:
 - `sess_high`, `sess_low` (session running max/min)
 - `roll_avg_range_12`, `roll_std_logret_12` (12-bar rolling stats)
 - `range_z_12` (z-score requiring rolling mean/std)
@@ -719,20 +719,20 @@ The Pine script groups all RD fields under "g16=RD" without distinguishing evide
 
 **Analysis**:
 
-Strictly speaking, these violate the C1 definition. They should be classified as C2 ("multi-bar structure/context/memory").
+Strictly speaking, these violate the L1 definition. They should be classified as L2 ("multi-bar structure/context/memory").
 
 However, there may be a pragmatic distinction:
-- **Pure C1**: `range`, `body`, `direction`, `ret`, `body_ratio`, `close_pos`, `clv`, `brb` (single-bar)
-- **Simple C2**: `gap`, `sess_high`, `sess_low`, rolling stats (windowed but trivial computation)
-- **Complex C2**: `rr`, `rm`, `sd`, pivot detection (windowed with non-trivial logic)
+- **Pure L1**: `range`, `body`, `direction`, `ret`, `body_ratio`, `close_pos`, `clv`, `brb` (single-bar)
+- **Simple L2**: `gap`, `sess_high`, `sess_low`, rolling stats (windowed but trivial computation)
+- **Complex L2**: `rr`, `rm`, `sd`, pivot detection (windowed with non-trivial logic)
 
-The current SQL view conflates pure C1 and simple C2 for implementation convenience—a single view is easier to maintain than splitting into `derived.ovc_c1_v0_1` and `derived.ovc_c2_simple_v0_1`.
+The current SQL view conflates pure L1 and simple L2 for implementation convenience—a single view is easier to maintain than splitting into `derived.ovc_l1_v0_1` and `derived.ovc_l2_simple_v0_1`.
 
 **Assessment**:
 
-The proposed correction is **technically correct**—rolling features are not C1 by the stated definition. However, splitting them may not yield practical benefit if the distinction between "simple C2" and "complex C2" is more meaningful than "C1 vs C2."
+The proposed correction is **technically correct**—rolling features are not L1 by the stated definition. However, splitting them may not yield practical benefit if the distinction between "simple L2" and "complex L2" is more meaningful than "L1 vs L2."
 
-An alternative would be to **amend the C1 definition** to include "single-bar primitives + trivial session/rolling context" while reserving C2 for features with non-trivial cross-bar logic (micro reference, pivots, etc.).
+An alternative would be to **amend the L1 definition** to include "single-bar primitives + trivial session/rolling context" while reserving L2 for features with non-trivial cross-bar logic (micro reference, pivots, etc.).
 
 **Verdict**: This is a definitional ambiguity. The implementation is pragmatically sound but violates the stated tier definition. Either the definition should be amended or the view should be restructured. This requires an explicit design decision.
 
@@ -753,12 +753,12 @@ This undermines the claim that C-layer metrics are "derived, versioned, and repl
 
 **Assessment**:
 
-This is **not a tier classification issue** but an **architectural gap** affecting all categorical tiers (C2-tags and C3). Options include:
+This is **not a tier classification issue** but an **architectural gap** affecting all categorical tiers (L2-tags and L3). Options include:
 1. Freeze thresholds in code and document as part of version string
 2. Store threshold snapshot in a config table linked to formula_hash
 3. Export thresholds alongside each block (increases payload)
 
-**Verdict**: Valid concern requiring resolution before C3 implementation in Python. Does not affect tier assignments but affects replay guarantees. Recommend adding a `derived.threshold_registry_v0_1` table.
+**Verdict**: Valid concern requiring resolution before L3 implementation in Python. Does not affect tier assignments but affects replay guarantees. Recommend adding a `derived.threshold_registry_v0_1` table.
 
 ---
 
@@ -795,10 +795,10 @@ An alternative is to require an **external news calendar table** (`ovc.news_cale
 
 | Issue | Proposed Change | Assessment | Requires Decision? |
 |-------|-----------------|------------|-------------------|
-| A | Reclassify L1 tags from C3 to C2/C2.5 | Architecturally valid; depends on C3 definition | YES |
-| B | Split RD into C2 (numeric) and C3 (tags) | Architecturally valid; trades cohesion for purity | YES |
-| C | Reclassify rolling features from C1 to C2 | Technically correct; pragmatically disruptive | YES |
-| D | Version/persist threshold parameters | Valid gap; not a tier issue | YES (before C3 impl) |
+| A | Reclassify L1 tags from L3 to L2/L2.5 | Architecturally valid; depends on L3 definition | YES |
+| B | Split RD into L2 (numeric) and L3 (tags) | Architecturally valid; trades cohesion for purity | YES |
+| C | Reclassify rolling features from L1 to L2 | Technically correct; pragmatically disruptive | YES |
+| D | Version/persist threshold parameters | Valid gap; not a tier issue | YES (before L3 impl) |
 | E | Clarify or reclassify `news_flag` | Valid concern; B-layer purity violated | YES |
 
 ---
@@ -807,13 +807,13 @@ An alternative is to require an **external news calendar table** (`ovc.news_cale
 
 The following tier changes should be explicitly approved before refactoring this document or implementing derived tables:
 
-1. **Define C2-tags vs C3 boundary**: Are immediate categorical interpretations of C2 features (state_tag, value_tag, etc.) considered C2 or C3? Recommend defining C3 as "multi-block regime patterns with persistence/memory" and creating C2-tags sub-tier.
+1. **Define L2-tags vs L3 boundary**: Are immediate categorical interpretations of L2 features (state_tag, value_tag, etc.) considered L2 or L3? Recommend defining L3 as "multi-block regime patterns with persistence/memory" and creating L2-tags sub-tier.
 
-2. **RD module cohesion**: Should RD outputs be split by type (numeric → C2, categorical → C3) or kept together? Recommend split for architectural consistency.
+2. **RD module cohesion**: Should RD outputs be split by type (numeric → L2, categorical → L3) or kept together? Recommend split for architectural consistency.
 
-3. **C1 definition scope**: Should C1 include trivial rolling features (session, 12-bar stats) or strictly single-bar? Recommend amending definition to "C1 = single-bar; C1+ = trivial rolling" or restructuring views.
+3. **L1 definition scope**: Should L1 include trivial rolling features (session, 12-bar stats) or strictly single-bar? Recommend amending definition to "L1 = single-bar; L1+ = trivial rolling" or restructuring views.
 
-4. **Threshold versioning strategy**: How will threshold parameters be versioned for replay? Must be resolved before C3 Python implementation.
+4. **Threshold versioning strategy**: How will threshold parameters be versioned for replay? Must be resolved before L3 Python implementation.
 
 5. **`news_flag` disposition**: Retain in B-layer with provenance spec, move to metadata, or require external calendar? Recommend provenance documentation or reclassification to metadata.
 
@@ -826,9 +826,9 @@ The following tier changes should be explicitly approved before refactoring this
 | Tier | Field Count | Derivable from OHLC |
 |------|-------------|---------------------|
 | B (identity + OHLC + meta) | 22 | N/A (raw inputs) |
-| C1 (single-bar math) | 6 | YES |
-| C2 (structure/memory) | ~65 | YES |
-| C3 (tags/regime) | ~30 | YES |
+| L1 (single-bar math) | 6 | YES |
+| L2 (structure/memory) | ~65 | YES |
+| L3 (tags/regime) | ~30 | YES |
 | Decision (L3) | 16 | N/A (synthesized) |
 | **Total** | ~139 | |
 

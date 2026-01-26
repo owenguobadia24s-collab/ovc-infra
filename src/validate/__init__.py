@@ -3,7 +3,7 @@
 Package for validating OVC data layers (Option B.2).
 
 Modules:
-    validate_derived_range_v0_1: Validate C1/C2 derived feature packs
+    validate_derived_range_v0_1: Validate L1/L2 derived feature packs
 
 Usage:
     python -m validate.validate_derived_range_v0_1 \\
@@ -12,10 +12,10 @@ Usage:
         --end-date 2026-01-17
 
 Validation Checks:
-    1. Coverage parity: count(B) == count(C1) == count(C2)
-    2. Key uniqueness: no duplicate block_id in C1/C2
+    1. Coverage parity: count(B) == count(L1) == count(L2)
+    2. Key uniqueness: no duplicate block_id in L1/L2
     3. Null/invalid checks: no NaN/Inf, deterministic nulls
-    4. Window_spec enforcement: C2 has required window specs
+    4. Window_spec enforcement: L2 has required window specs
     5. Determinism quickcheck: recompute sample and verify
     6. TV comparison (optional): compare against TradingView reference
 
@@ -34,7 +34,7 @@ from .validate_derived_range_v0_1 import (
     check_null_rates,
     check_window_spec,
     determinism_quickcheck,
-    compute_c1_inline,
+    compute_l1_inline,
     values_match,
     build_run_id,
 )
@@ -46,7 +46,7 @@ __all__ = [
     "check_null_rates",
     "check_window_spec",
     "determinism_quickcheck",
-    "compute_c1_inline",
+    "compute_l1_inline",
     "values_match",
     "build_run_id",
 ]

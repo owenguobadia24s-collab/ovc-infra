@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Threshold Registry provides deterministic, versioned configuration management for C3+ derived layers. It ensures that threshold packs are:
+The Threshold Registry provides deterministic, versioned configuration management for L3+ derived layers. It ensures that threshold packs are:
 
 - **Immutable**: Once created, a `(pack_id, pack_version)` never changes.
 - **Deterministic**: Same `config_json` always produces the same `config_hash`.
@@ -64,7 +64,7 @@ Create a new pack in DRAFT status:
 
 ```powershell
 python -m src.config.threshold_registry_cli create `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --version 1 `
   --scope GLOBAL `
   --config '{\"min_body_bp\": 5, \"max_wick_ratio_bp\": 250, \"lookback\": 20}'
@@ -74,10 +74,10 @@ python -m src.config.threshold_registry_cli create `
 
 ```powershell
 python -m src.config.threshold_registry_cli create `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --version 1 `
   --scope GLOBAL `
-  --config-file configs/threshold_packs/c3_example_pack_v1.json
+  --config-file configs/threshold_packs/l3_example_pack_v1.json
 ```
 
 Example output:
@@ -86,7 +86,7 @@ Example output:
   "success": true,
   "action": "create",
   "pack": {
-    "pack_id": "c3_reversal_thresholds",
+    "pack_id": "l3_reversal_thresholds",
     "pack_version": 1,
     "scope": "GLOBAL",
     "symbol": null,
@@ -103,7 +103,7 @@ Example output:
 
 ```powershell
 python -m src.config.threshold_registry_cli create `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --version 1 `
   --scope SYMBOL `
   --symbol GBPUSD `
@@ -116,7 +116,7 @@ Activate a pack version for a specific selector:
 
 ```powershell
 python -m src.config.threshold_registry_cli activate `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --version 1 `
   --scope GLOBAL
 ```
@@ -125,7 +125,7 @@ python -m src.config.threshold_registry_cli activate `
 
 ```powershell
 python -m src.config.threshold_registry_cli activate `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --version 1 `
   --scope GLOBAL `
   --expected-hash "abc123def456..."
@@ -137,7 +137,7 @@ python -m src.config.threshold_registry_cli activate `
 
 ```powershell
 python -m src.config.threshold_registry_cli show `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --version 1
 ```
 
@@ -145,7 +145,7 @@ python -m src.config.threshold_registry_cli show `
 
 ```powershell
 python -m src.config.threshold_registry_cli show `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --scope GLOBAL `
   --active
 ```
@@ -153,7 +153,7 @@ python -m src.config.threshold_registry_cli show `
 Example output:
 ```json
 {
-  "pack_id": "c3_reversal_thresholds",
+  "pack_id": "l3_reversal_thresholds",
   "pack_version": 1,
   "config_hash": "abc123...",
   "config_json": {"lookback": 20, "max_wick_ratio_bp": 250, "min_body_bp": 5},
@@ -171,7 +171,7 @@ Example output:
 python -m src.config.threshold_registry_cli list
 
 # Filter by pack_id
-python -m src.config.threshold_registry_cli list --pack-id c3_reversal_thresholds
+python -m src.config.threshold_registry_cli list --pack-id l3_reversal_thresholds
 
 # Filter by status
 python -m src.config.threshold_registry_cli list --status ACTIVE
@@ -207,16 +207,16 @@ Expected output (healthy):
 python -m pytest tests/test_threshold_registry.py -v
 ```
 
-## C3 Integration
+## L3 Integration
 
-When implementing C3 tagging, reference the active pack metadata:
+When implementing L3 tagging, reference the active pack metadata:
 
 ```python
 from src.config.threshold_registry_v0_1 import get_active_pack
 
 # Resolve active pack
 pack = get_active_pack(
-    pack_id="c3_reversal_thresholds",
+    pack_id="l3_reversal_thresholds",
     scope="GLOBAL",
 )
 
@@ -242,7 +242,7 @@ insert_c3_tag(
 
 ### Replay Certification
 
-To verify a C3 computation was deterministic:
+To verify a L3 computation was deterministic:
 
 1. Retrieve stored `pack_id`, `pack_version`, `config_hash` from tag row.
 2. Load the exact pack version: `get_pack(pack_id, version)`.
@@ -257,14 +257,14 @@ To verify a C3 computation was deterministic:
 ```powershell
 # Create v2 with updated thresholds
 python -m src.config.threshold_registry_cli create `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --version 2 `
   --scope GLOBAL `
   --config '{\"min_body_bp\": 7, \"max_wick_ratio_bp\": 300, \"lookback\": 20}'
 
 # Activate v2 (v1 remains for historical replay)
 python -m src.config.threshold_registry_cli activate `
-  --pack-id c3_reversal_thresholds `
+  --pack-id l3_reversal_thresholds `
   --version 2 `
   --scope GLOBAL
 ```
@@ -282,7 +282,7 @@ To preview the canonical hash before creating a pack:
 
 ```powershell
 python -m src.config.threshold_registry_cli hash `
-  --config-file configs/threshold_packs/c3_example_pack_v1.json
+  --config-file configs/threshold_packs/l3_example_pack_v1.json
 ```
 
 Output:
@@ -327,7 +327,7 @@ This means the pack's stored config_hash doesn't match your expected_hash:
 | `src/config/threshold_registry_cli.py` | CLI interface |
 | `tests/test_threshold_registry.py` | Test suite |
 | `configs/threshold_packs/` | Sample pack configs |
-| `src/derived/compute_c3_stub_v0_1.py` | Integration stub |
+| `src/derived/compute_l3_stub_v0_1.py` | Integration stub |
 
 ## CLI Reference
 
@@ -354,9 +354,9 @@ Global Options:
 
 ---
 
-## First Real C3 Tag: c3_regime_trend
+## First Real L3 Tag: l3_regime_trend
 
-The first fully implemented C3 classifier is **c3_regime_trend**, which classifies market regime as `TREND` or `NON_TREND` based on C1/C2 features.
+The first fully implemented L3 classifier is **l3_regime_trend**, which classifies market regime as `TREND` or `NON_TREND` based on L1/L2 features.
 
 ### Classification Logic
 
@@ -372,7 +372,7 @@ Otherwise, returns `NON_TREND`.
 
 ### Threshold Pack Config
 
-Located at `configs/threshold_packs/c3_regime_trend_v1.json`:
+Located at `configs/threshold_packs/l3_regime_trend_v1.json`:
 
 ```json
 {
@@ -393,29 +393,29 @@ Located at `configs/threshold_packs/c3_regime_trend_v1.json`:
 ### End-to-End Setup
 
 ```powershell
-# 1. Apply C3 table migration
+# 1. Apply L3 table migration
 psql $env:NEON_DSN -f sql/05_c3_regime_trend_v0_1.sql
 
 # 2. Create threshold pack in registry
 python -m src.config.threshold_registry_cli create `
-  --pack-id c3_regime_trend `
+  --pack-id l3_regime_trend `
   --version 1 `
   --scope GLOBAL `
-  --config-file configs/threshold_packs/c3_regime_trend_v1.json
+  --config-file configs/threshold_packs/l3_regime_trend_v1.json
 
 # 3. Activate the pack
 python -m src.config.threshold_registry_cli activate `
-  --pack-id c3_regime_trend `
+  --pack-id l3_regime_trend `
   --version 1 `
   --scope GLOBAL
 
-# 4. Run C3 compute for a symbol
-python src/derived/compute_c3_regime_trend_v0_1.py `
+# 4. Run L3 compute for a symbol
+python src/derived/compute_l3_regime_trend_v0_1.py `
   --symbol GBPUSD `
-  --threshold-pack c3_regime_trend `
+  --threshold-pack l3_regime_trend `
   --scope GLOBAL
 
-# 5. Validate with B.2 validator (includes C3 checks)
+# 5. Validate with B.2 validator (includes L3 checks)
 python src/validate/validate_derived_range_v0_1.py `
   --symbol GBPUSD `
   --start-date 2026-01-13 `
@@ -423,16 +423,16 @@ python src/validate/validate_derived_range_v0_1.py `
   --validate-c3
 ```
 
-### C3 Table Schema
+### L3 Table Schema
 
-Table: `derived.ovc_c3_regime_trend_v0_1`
+Table: `derived.ovc_l3_regime_trend_v0_1`
 
 | Column | Type | Description |
 |--------|------|-------------|
 | `block_id` | TEXT | FK to B-layer |
 | `symbol` | TEXT | Trading symbol |
 | `ts` | TIMESTAMPTZ | Block timestamp |
-| `c3_regime_trend` | TEXT | `TREND` or `NON_TREND` |
+| `l3_regime_trend` | TEXT | `TREND` or `NON_TREND` |
 | `threshold_pack_id` | TEXT | Pack ID from registry |
 | `threshold_pack_version` | INT | Pack version used |
 | `threshold_pack_hash` | TEXT | SHA256 hash (64 hex) |
@@ -443,9 +443,9 @@ Primary Key: `(symbol, ts)`
 
 ### Validation Checks
 
-The B.2 validator (`--validate-c3` flag) performs these C3-specific checks:
+The B.2 validator (`--validate-c3` flag) performs these L3-specific checks:
 
-1. **Table existence**: Verify C3 table exists
+1. **Table existence**: Verify L3 table exists
 2. **Provenance validation**: No NULL `threshold_pack_*` columns
 3. **Registry integrity**: All referenced packs exist in `ovc_cfg.threshold_pack`
 4. **Hash verification**: Stored hash matches registry hash
@@ -456,27 +456,27 @@ The B.2 validator (`--validate-c3` flag) performs these C3-specific checks:
 
 ```powershell
 # Run unit tests
-python -m pytest tests/test_c3_regime_trend.py -v
+python -m pytest tests/test_l3_regime_trend.py -v
 
 # Run with coverage
-python -m pytest tests/test_c3_regime_trend.py --cov=src/derived --cov-report=term-missing
+python -m pytest tests/test_l3_regime_trend.py --cov=src/derived --cov-report=term-missing
 ```
 
 ### Files Reference
 
 | File | Purpose |
 |------|---------|
-| `sql/05_c3_regime_trend_v0_1.sql` | C3 table migration |
-| `src/derived/compute_c3_regime_trend_v0_1.py` | C3 compute script |
-| `configs/threshold_packs/c3_regime_trend_v1.json` | Default threshold pack |
-| `tests/test_c3_regime_trend.py` | Test suite |
-| `src/validate/validate_derived_range_v0_1.py` | Validator with C3 support |
+| `sql/05_c3_regime_trend_v0_1.sql` | L3 table migration |
+| `src/derived/compute_l3_regime_trend_v0_1.py` | L3 compute script |
+| `configs/threshold_packs/l3_regime_trend_v1.json` | Default threshold pack |
+| `tests/test_l3_regime_trend.py` | Test suite |
+| `src/validate/validate_derived_range_v0_1.py` | Validator with L3 support |
 
 ---
 
-## C3 Lifecycle
+## L3 Lifecycle
 
-Every C3 tag follows a strict lifecycle to ensure determinism, provenance, and validation guarantees. **No shortcuts are allowed.**
+Every L3 tag follows a strict lifecycle to ensure determinism, provenance, and validation guarantees. **No shortcuts are allowed.**
 
 ### Lifecycle Stages
 
@@ -498,7 +498,7 @@ Every C3 tag follows a strict lifecycle to ensure determinism, provenance, and v
 │                                       │               ▼               │
 │                                       │         ┌──────────┐          │
 │                                       └────────▶│ Validate │          │
-│                                                 │  B.2+C3  │          │
+│                                                 │  B.2+L3  │          │
 │                                                 └────┬─────┘          │
 │                                                      │                │
 │                                                      ▼                │
@@ -512,10 +512,10 @@ Every C3 tag follows a strict lifecycle to ensure determinism, provenance, and v
 
 **Purpose**: Define classification logic and threshold parameters.
 
-- Review `docs/c3_semantic_contract_v0_1.md` for rules and invariants
-- Design classification logic using C1/C2 inputs only
+- Review `docs/l3_semantic_contract_v0_1.md` for rules and invariants
+- Design classification logic using L1/L2 inputs only
 - Define threshold parameters with integer basis points (not floats)
-- Create config file: `configs/threshold_packs/c3_<tag>_v1.json`
+- Create config file: `configs/threshold_packs/l3_<tag>_v1.json`
 
 **Exit Criteria**: Config file exists with all required thresholds.
 
@@ -526,34 +526,34 @@ Every C3 tag follows a strict lifecycle to ensure determinism, provenance, and v
 ```powershell
 # Create pack (DRAFT status)
 python -m src.config.threshold_registry_cli create \
-  --pack-id c3_<tag> --version 1 --scope GLOBAL \
-  --config-file configs/threshold_packs/c3_<tag>_v1.json
+  --pack-id l3_<tag> --version 1 --scope GLOBAL \
+  --config-file configs/threshold_packs/l3_<tag>_v1.json
 
 # Activate pack (sets active pointer)
 python -m src.config.threshold_registry_cli activate \
-  --pack-id c3_<tag> --version 1 --scope GLOBAL
+  --pack-id l3_<tag> --version 1 --scope GLOBAL
 ```
 
 **Exit Criteria**: Pack exists in `ovc_cfg.threshold_pack` with `status=ACTIVE` pointer.
 
 ### Stage 3: Compute
 
-**Purpose**: Generate C3 classifications with full provenance.
+**Purpose**: Generate L3 classifications with full provenance.
 
 ```powershell
-python src/derived/compute_c3_<tag>_v0_1.py \
+python src/derived/compute_l3_<tag>_v0_1.py \
   --symbol GBPUSD \
-  --threshold-pack c3_<tag> \
+  --threshold-pack l3_<tag> \
   --scope GLOBAL
 ```
 
 **Requirements**:
 - Resolve threshold pack ONCE at start
 - Store `pack_id`, `version`, `hash` in every row
-- Use C1/C2 data only—no B-layer OHLC
+- Use L1/L2 data only—no B-layer OHLC
 - Upsert semantics for idempotence
 
-**Exit Criteria**: Rows exist in `derived.ovc_c3_<tag>_v0_1` with non-null provenance.
+**Exit Criteria**: Rows exist in `derived.ovc_l3_<tag>_v0_1` with non-null provenance.
 
 ### Stage 4: Validate
 
@@ -565,7 +565,7 @@ python src/validate/validate_derived_range_v0_1.py \
   --start-date 2026-01-13 \
   --end-date 2026-01-17 \
   --validate-c3 \
-  --c3-classifiers c3_<tag>
+  --c3-classifiers l3_<tag>
 ```
 
 **Checks Performed**:
@@ -580,7 +580,7 @@ python src/validate/validate_derived_range_v0_1.py \
 
 ### Stage 5: Certified
 
-A C3 tag is **certified** when:
+A L3 tag is **certified** when:
 - All lifecycle stages complete
 - Validation passes for representative date range
 - Tests pass (determinism + registry integrity)
@@ -596,17 +596,17 @@ A C3 tag is **certified** when:
 | Hardcode thresholds | Cannot update thresholds without code change |
 | Skip validation | Silent data corruption goes undetected |
 | Skip provenance | Cannot replay or verify historical classifications |
-| Use B-layer directly | Breaks C1/C2 abstraction; future schema changes break C3 |
+| Use B-layer directly | Breaks L1/L2 abstraction; future schema changes break L3 |
 
-**The lifecycle exists to make C3 tags replay-certifiable.** If you can't prove a classification was computed correctly, it has no value.
+**The lifecycle exists to make L3 tags replay-certifiable.** If you can't prove a classification was computed correctly, it has no value.
 
-### Adding New C3 Tags
+### Adding New L3 Tags
 
-Before implementing a new C3 tag:
+Before implementing a new L3 tag:
 
-1. Read `docs/c3_semantic_contract_v0_1.md` (rules and invariants)
-2. Complete `docs/c3_entry_checklist.md` (all items must be checked)
-3. Use `compute_c3_regime_trend_v0_1.py` as reference implementation
+1. Read `docs/l3_semantic_contract_v0_1.md` (rules and invariants)
+2. Complete `docs/l3_entry_checklist.md` (all items must be checked)
+3. Use `compute_l3_regime_trend_v0_1.py` as reference implementation
 4. Follow the lifecycle stages in order
 
 **No exceptions without explicit approval.**

@@ -26,7 +26,7 @@
     },
     {
       "file": "sql/02_derived_c1_c2_tables_v0_1.sql",
-      "description": "Create derived feature tables for C1/C2",
+      "description": "Create derived feature tables for L1/L2",
       "applied_at": null,
       "applied_by": null,
       "status": "UNVERIFIED"
@@ -53,22 +53,22 @@
       "status": "UNVERIFIED"
     },
     {
-      "file": "sql/derived/v_ovc_c1_features_v0_1.sql",
-      "description": "Create C1 features view",
+      "file": "sql/derived/v_ovc_l1_features_v0_1.sql",
+      "description": "Create L1 features view",
       "applied_at": null,
       "applied_by": null,
       "status": "UNVERIFIED"
     },
     {
-      "file": "sql/derived/v_ovc_c2_features_v0_1.sql",
-      "description": "Create C2 features view",
+      "file": "sql/derived/v_ovc_l2_features_v0_1.sql",
+      "description": "Create L2 features view",
       "applied_at": null,
       "applied_by": null,
       "status": "UNVERIFIED"
     },
     {
-      "file": "sql/derived/v_ovc_c3_features_v0_1.sql",
-      "description": "Create C3 features view",
+      "file": "sql/derived/v_ovc_l3_features_v0_1.sql",
+      "description": "Create L3 features view",
       "applied_at": null,
       "applied_by": null,
       "status": "UNVERIFIED"

@@ -3,7 +3,7 @@
 Map canonical ingest and raw data foundations for Option A.
 
 ## Option Scope (brief)
-Raw ingest, canonical facts, resampling/time normalization, and C0/C1 foundations.
+Raw ingest, canonical facts, resampling/time normalization, and L0/L1 foundations.
 
 ## Category Index (list folders by category)
 - Data Stores & Interfaces: data, data/raw, data/raw/tradingview

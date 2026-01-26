@@ -21,40 +21,40 @@
 
 ## 1. Tier Violation Report
 
-### 1.1 — C1 Violations: Fields Requiring History Classified as C1
+### 1.1 — L1 Violations: Fields Requiring History Classified as L1
 
-The following fields are implemented in `derived.ovc_block_features_v0_1` (documented as C1) but violate the C1 rule: *"No lookback, no history, no rolling windows"*.
+The following fields are implemented in `derived.ovc_block_features_v0_1` (documented as L1) but violate the L1 rule: *"No lookback, no history, no rolling windows"*.
 
 | Field | Current Tier | Actual Inputs | Correct Tier | Violation |
 |-------|--------------|---------------|--------------|-----------|
-| `gap` | C1 (impl) | `o[0] - prev_c` | **C2** | Requires `c[-1]` |
-| `sess_high` | C1 (impl) | `max(h) over session` | **C2** | Session window |
-| `sess_low` | C1 (impl) | `min(l) over session` | **C2** | Session window |
-| `dist_sess_high` | C1 (impl) | `sess_high - c` | **C2** | Depends on sess_high |
-| `dist_sess_low` | C1 (impl) | `c - sess_low` | **C2** | Depends on sess_low |
-| `roll_avg_range_12` | C1 (impl) | `avg(range) N=12` | **C2** | 12-bar window |
-| `roll_std_logret_12` | C1 (impl) | `stddev(logret) N=12` | **C2** | 12-bar window |
-| `range_z_12` | C1 (impl) | `(range - avg) / std` | **C2** | Depends on rolling |
-| `hh_12` | C1 (impl) | `h > max(h[-12:-1])` | **C2** | 12-bar lookback |
-| `ll_12` | C1 (impl) | `l < min(l[-12:-1])` | **C2** | 12-bar lookback |
-| `took_prev_high` | C1 (impl) | `h > h[-1]` | **C2** | 1-bar lookback |
-| `took_prev_low` | C1 (impl) | `l < l[-1]` | **C2** | 1-bar lookback |
+| `gap` | L1 (impl) | `o[0] - prev_c` | **L2** | Requires `c[-1]` |
+| `sess_high` | L1 (impl) | `max(h) over session` | **L2** | Session window |
+| `sess_low` | L1 (impl) | `min(l) over session` | **L2** | Session window |
+| `dist_sess_high` | L1 (impl) | `sess_high - c` | **L2** | Depends on sess_high |
+| `dist_sess_low` | L1 (impl) | `c - sess_low` | **L2** | Depends on sess_low |
+| `roll_avg_range_12` | L1 (impl) | `avg(range) N=12` | **L2** | 12-bar window |
+| `roll_std_logret_12` | L1 (impl) | `stddev(logret) N=12` | **L2** | 12-bar window |
+| `range_z_12` | L1 (impl) | `(range - avg) / std` | **L2** | Depends on rolling |
+| `hh_12` | L1 (impl) | `h > max(h[-12:-1])` | **L2** | 12-bar lookback |
+| `ll_12` | L1 (impl) | `l < min(l[-12:-1])` | **L2** | 12-bar lookback |
+| `took_prev_high` | L1 (impl) | `h > h[-1]` | **L2** | 1-bar lookback |
+| `took_prev_low` | L1 (impl) | `l < l[-1]` | **L2** | 1-bar lookback |
 
-**Impact**: 12 fields in current "C1" view are actually C2 by spec definition.
+**Impact**: 12 fields in current "L1" view are actually L2 by spec definition.
 
 ---
 
-### 1.2 — C3 Violations: Numeric Outputs Classified as C3
+### 1.2 — L3 Violations: Numeric Outputs Classified as L3
 
-The following fields are classified as C3 in `metric_map_pine_to_c_layers.md` but are numeric rolling-window outputs, which should be C2 per spec.
+The following fields are classified as L3 in `metric_map_pine_to_c_layers.md` but are numeric rolling-window outputs, which should be L2 per spec.
 
 | Field | Current Tier | Actual Formula | Correct Tier | Violation |
 |-------|--------------|----------------|--------------|-----------|
-| `rd_hi` | C3 | `highest(h, rd_len)` | **C2** | Numeric rolling max |
-| `rd_lo` | C3 | `lowest(l, rd_len)` | **C2** | Numeric rolling min |
-| `rd_mid` | C3 | `(rd_hi + rd_lo) / 2` | **C2** | Arithmetic from rd_hi/rd_lo |
+| `rd_hi` | L3 | `highest(h, rd_len)` | **L2** | Numeric rolling max |
+| `rd_lo` | L3 | `lowest(l, rd_len)` | **L2** | Numeric rolling min |
+| `rd_mid` | L3 | `(rd_hi + rd_lo) / 2` | **L2** | Arithmetic from rd_hi/rd_lo |
 
-**Impact**: 3 RD fields should be C2, not C3. RD module spans tiers.
+**Impact**: 3 RD fields should be L2, not L3. RD module spans tiers.
 
 ---
 
@@ -70,30 +70,30 @@ The following fields are classified as C3 in `metric_map_pine_to_c_layers.md` bu
 
 ## 2. Window Specification Gaps
 
-Per spec Section E.3, all C2+ fields must have documented `window_spec`. The following fields lack explicit specification:
+Per spec Section E.3, all L2+ fields must have documented `window_spec`. The following fields lack explicit specification:
 
 | Field | Tier | Window Type | Missing Spec |
 |-------|------|-------------|--------------|
-| `rm` (RR mean) | C2 | Rolling | N=? not documented |
-| `sd` (Stddev) | C2 | Rolling | N=? not documented |
-| `or` (Open ratio) | C2 | Rolling | N=? not documented |
-| `rer` (Ret ratio) | C2 | Rolling | N=? not documented |
-| `mc3` | C2 | Rolling | N=3 implied but not explicit |
-| `vf3` | C2 | Rolling | N=3 implied but not explicit |
-| `rd_len` | C2/C3 | Parameterized | Input parameter, not versioned |
-| `kls_lookback` | C2 | Parameterized | Input parameter, not versioned |
-| `htf_*` | C2 | Multi-TF | Resolution not versioned |
-| `space_*` | C2 | Rolling | Window not documented |
-| `bs_depth` | C2 | BlockStack | Depth parameter not versioned |
-| `bar_count_*` | C2 | Rolling | Window not documented |
+| `rm` (RR mean) | L2 | Rolling | N=? not documented |
+| `sd` (Stddev) | L2 | Rolling | N=? not documented |
+| `or` (Open ratio) | L2 | Rolling | N=? not documented |
+| `rer` (Ret ratio) | L2 | Rolling | N=? not documented |
+| `mc3` | L2 | Rolling | N=3 implied but not explicit |
+| `vf3` | L2 | Rolling | N=3 implied but not explicit |
+| `rd_len` | L2/L3 | Parameterized | Input parameter, not versioned |
+| `kls_lookback` | L2 | Parameterized | Input parameter, not versioned |
+| `htf_*` | L2 | Multi-TF | Resolution not versioned |
+| `space_*` | L2 | Rolling | Window not documented |
+| `bs_depth` | L2 | BlockStack | Depth parameter not versioned |
+| `bar_count_*` | L2 | Rolling | Window not documented |
 
-**Remediation**: Add `window_spec` column to all C2+ field documentation.
+**Remediation**: Add `window_spec` column to all L2+ field documentation.
 
 ---
 
 ## 3. Threshold Parameter Gaps
 
-Per spec Section E.2, C3 requires versioned threshold parameters. The following are referenced but unversioned:
+Per spec Section E.2, L3 requires versioned threshold parameters. The following are referenced but unversioned:
 
 | Threshold | Used By | Current Status |
 |-----------|---------|----------------|
@@ -104,13 +104,13 @@ Per spec Section E.2, C3 requires versioned threshold parameters. The following 
 | `rd_width_th` | `rd_state` | Pine input, not persisted |
 | `rd_drift_th` | `rd_state` | Pine input, not persisted |
 
-**Remediation**: Implement `derived.threshold_registry_v0_1` before C3 implementation.
+**Remediation**: Implement `derived.threshold_registry_v0_1` before L3 implementation.
 
 ---
 
 ## 4. Correctly Classified Fields
 
-### 4.1 — C1 Compliant (Single-Bar Only)
+### 4.1 — L1 Compliant (Single-Bar Only)
 
 | Field | Formula | Status |
 |-------|---------|--------|
@@ -126,7 +126,7 @@ Per spec Section E.2, C3 requires versioned threshold parameters. The following 
 | `clv` | `((c-l)-(h-c))/(h-l)` | ✅ |
 | `brb` | Bar-relative-body | ✅ |
 
-### 4.2 — C3 Compliant (Categorical from C2)
+### 4.2 — L3 Compliant (Categorical from L2)
 
 | Field | Inputs | Status |
 |-------|--------|--------|
@@ -154,10 +154,10 @@ Per spec Section E.2, C3 requires versioned threshold parameters. The following 
 | Tier | Total Fields | Compliant | Violations | Compliance Rate |
 |------|--------------|-----------|------------|-----------------|
 | B | 22 | 21 | 1 (`news_flag`) | 95% |
-| C1 | 11 | 11 | 0 | 100% |
-| C1 (impl view) | 23 | 11 | 12 (should be C2) | 48% |
-| C2 | ~65 | ~62 | 3 (in C3) | 95% |
-| C3 | ~30 | ~27 | 3 (should be C2) | 90% |
+| L1 | 11 | 11 | 0 | 100% |
+| L1 (impl view) | 23 | 11 | 12 (should be L2) | 48% |
+| L2 | ~65 | ~62 | 3 (in L3) | 95% |
+| L3 | ~30 | ~27 | 3 (should be L2) | 90% |
 | Decision | 16 | 16 | 0 | 100% |
 
 ---
@@ -166,18 +166,18 @@ Per spec Section E.2, C3 requires versioned threshold parameters. The following 
 
 ### Immediate (No Code Changes)
 
-1. **Document window_spec** for all C2 fields in `metric_map_pine_to_c_layers.md`
+1. **Document window_spec** for all L2 fields in `metric_map_pine_to_c_layers.md`
 2. **Add threshold inventory** to mapping document
-3. **Mark violations** in mapping document with `[VIOLATES: C1 boundary]` annotations
+3. **Mark violations** in mapping document with `[VIOLATES: L1 boundary]` annotations
 
 ### Pending Design Decisions
 
 | ID | Decision | Blocking |
 |----|----------|----------|
-| D1 | Amend C1 definition or split view | Tier validation |
-| D2 | Create C2.5 sub-tier | Classification consistency |
-| D3 | Split RD module | C3 implementation |
-| D4 | Threshold registry design | C3 replay guarantee |
+| D1 | Amend L1 definition or split view | Tier validation |
+| D2 | Create L2.5 sub-tier | Classification consistency |
+| D3 | Split RD module | L3 implementation |
+| D4 | Threshold registry design | L3 replay guarantee |
 | D5 | `news_flag` disposition | B-layer validation |
 
 ### After Decisions Approved

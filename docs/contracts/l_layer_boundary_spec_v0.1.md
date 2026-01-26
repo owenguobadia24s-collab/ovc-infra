@@ -2,7 +2,7 @@
 
 > **Status**: DRAFT — requires approval before implementation
 > **Purpose**: LOCK tier definitions to enable validation, prevent tier drift
-> **Scope**: C1, C2, C3 boundaries; B-layer inputs; Decision outputs
+> **Scope**: L1, L2, L3 boundaries; B-layer inputs; Decision outputs
 > **Authority**: This spec is normative for all derived metric implementations
 
 ---
@@ -22,7 +22,7 @@
 
 ---
 
-### C1 — Single-Bar Primitives
+### L1 — Single-Bar Primitives
 
 **Purpose**: Compute deterministic, stateless transformations of a single block's OHLC values.
 
@@ -38,7 +38,7 @@
 
 ---
 
-### C2 — Multi-Bar Structure & Context
+### L2 — Multi-Bar Structure & Context
 
 **Purpose**: Compute features that require cross-bar relationships, rolling windows, or session context.
 
@@ -56,19 +56,19 @@
 
 ---
 
-### C3 — Categorical Tags & Regime Interpretation
+### L3 — Categorical Tags & Regime Interpretation
 
-**Purpose**: Synthesize categorical interpretations from C2 numeric evidence.
+**Purpose**: Synthesize categorical interpretations from L2 numeric evidence.
 
 **Semantic Boundary**:
-- Categorical/enum outputs derived from C2 numeric features + thresholds
+- Categorical/enum outputs derived from L2 numeric features + thresholds
 - Regime state machines (e.g., `rd_state`: RANGE/SOFT_RANGE/NO_RANGE)
 - Directional bias tags (e.g., `rd_brkdir`: UP/DN/0)
 - Composite condition tags (e.g., `state_tag`, `value_tag`, `tt`)
 - Diagnostic strings combining multiple signals (e.g., `rd_why`)
 
 **Guarantees**:
-- Deterministic given C2 inputs + versioned threshold parameters
+- Deterministic given L2 inputs + versioned threshold parameters
 - Thresholds must be documented and frozen per version
 - Categorical outputs must have defined enum domains
 
@@ -76,7 +76,7 @@
 
 ### Decision Layer (L3)
 
-**Purpose**: Produce actionable trading signals by synthesizing C2/C3 evidence into bias/play/prediction objects.
+**Purpose**: Produce actionable trading signals by synthesizing L2/L3 evidence into bias/play/prediction objects.
 
 **Semantic Boundary**:
 - Bias objects (e.g., `L3_BIAS`, `L3_BIAS_WHY`)
@@ -93,10 +93,10 @@
 | Tier | Allowed Inputs | Notes |
 |------|----------------|-------|
 | **B** | Raw external data (TradingView export, OANDA API, manual entry) | Must be parseable to OHLC + identity |
-| **C1** | B-layer OHLC of current block only: `o`, `h`, `l`, `c` | No prior blocks, no external state |
-| **C2** | B-layer OHLC sequence + C1 outputs | Explicit window spec required |
-| **C3** | C2 numeric outputs + versioned threshold parameters | No direct OHLC access |
-| **Decision** | C2/C3 outputs + versioned decision rules | Synthesis only, no raw OHLC |
+| **L1** | B-layer OHLC of current block only: `o`, `h`, `l`, `c` | No prior blocks, no external state |
+| **L2** | B-layer OHLC sequence + L1 outputs | Explicit window spec required |
+| **L3** | L2 numeric outputs + versioned threshold parameters | No direct OHLC access |
+| **Decision** | L2/L3 outputs + versioned decision rules | Synthesis only, no raw OHLC |
 
 ---
 
@@ -105,12 +105,12 @@
 | Tier | Forbidden | Rationale |
 |------|-----------|-----------|
 | **B** | Any derived value; any computed metric | B = raw facts only |
-| **C1** | Prior block data; session context; rolling stats | C1 = single-bar, no history |
-| **C2** | C3 categorical tags; Decision outputs | No reverse dependencies |
-| **C3** | Decision outputs; C3 tags from other regime domains | Categorical synthesis is terminal for that domain |
-| **Decision** | B-layer OHLC directly; C1 outputs directly | Must flow through C2/C3 evidence |
+| **L1** | Prior block data; session context; rolling stats | L1 = single-bar, no history |
+| **L2** | L3 categorical tags; Decision outputs | No reverse dependencies |
+| **L3** | Decision outputs; L3 tags from other regime domains | Categorical synthesis is terminal for that domain |
+| **Decision** | B-layer OHLC directly; L1 outputs directly | Must flow through L2/L3 evidence |
 
-**Critical Rule**: No tier may depend on outputs from a higher tier. Dependencies flow strictly upward: B → C1 → C2 → C3 → Decision.
+**Critical Rule**: No tier may depend on outputs from a higher tier. Dependencies flow strictly upward: B → L1 → L2 → L3 → Decision.
 
 ---
 
@@ -119,10 +119,10 @@
 | Tier | Time Horizon | Window Spec |
 |------|--------------|-------------|
 | **B** | Single block (2H) | N/A — raw capture timestamp |
-| **C1** | Single block (2H) | N/A — stateless |
-| **C2** | 1–N blocks | Must specify: `N=<count>` or `session=<scope>` |
-| **C3** | Inherits from C2 inputs | Must document C2 window dependencies |
-| **Decision** | Current block + historical context | May reference C2/C3 from prior blocks |
+| **L1** | Single block (2H) | N/A — stateless |
+| **L2** | 1–N blocks | Must specify: `N=<count>` or `session=<scope>` |
+| **L3** | Inherits from L2 inputs | Must document L2 window dependencies |
+| **Decision** | Current block + historical context | May reference L2/L3 from prior blocks |
 
 **Window Specification Format**:
 ```
@@ -143,17 +143,17 @@ Examples:
 | Tier | Determinism Constraint |
 |------|------------------------|
 | **B** | N/A (raw input) |
-| **C1** | `f(o, h, l, c) → output` — no external state |
-| **C2** | `f(ohlc_sequence, window_spec) → output` — ordered input |
-| **C3** | `f(c2_outputs, threshold_params) → output` — versioned params |
-| **Decision** | `f(c2_c3_evidence, decision_rules) → output` — versioned rules |
+| **L1** | `f(o, h, l, c) → output` — no external state |
+| **L2** | `f(ohlc_sequence, window_spec) → output` — ordered input |
+| **L3** | `f(l2_outputs, threshold_params) → output` — versioned params |
+| **Decision** | `f(l2_c3_evidence, decision_rules) → output` — versioned rules |
 
 ### E.2 — Replay Requirements
 
 For any block to be **replay-certified**, the following must be true:
 
 1. **B-layer facts exist**: The block has OHLC + identity in `ovc.ovc_blocks_v01_1_min`
-2. **Prior context exists**: All blocks in the lookback window exist (for C2+)
+2. **Prior context exists**: All blocks in the lookback window exist (for L2+)
 3. **Parameters are versioned**: All thresholds/configs have documented values
 4. **Formula hash matches**: The computation formula matches the versioned specification
 
@@ -163,7 +163,7 @@ For any block to be **replay-certified**, the following must be true:
 derived_version     TEXT     -- e.g., 'v0.1'
 formula_hash        TEXT     -- MD5 of formula definition string
 window_spec         TEXT     -- e.g., 'N=12;session=date_ny'
-threshold_version   TEXT     -- e.g., 'th_v0.1' (for C3)
+threshold_version   TEXT     -- e.g., 'th_v0.1' (for L3)
 computed_at         TIMESTAMPTZ
 ```
 
@@ -186,7 +186,7 @@ computed_at         TIMESTAMPTZ
 | 9 | `bar_close_ms` | Close timestamp (epoch ms) | Export payload |
 | 10 | `source` | Data source: `tv`, `oanda`, `manual` | Ingest metadata |
 
-### F.2 — C1 Examples (Single-Bar Primitives)
+### F.2 — L1 Examples (Single-Bar Primitives)
 
 | # | Metric | Formula | Inputs |
 |---|--------|---------|--------|
@@ -201,7 +201,7 @@ computed_at         TIMESTAMPTZ
 | 9 | `lower_wick` | `min(o, c) - l` | o, c, l |
 | 10 | `clv` | `((c - l) - (h - c)) / (h - l)` | c, h, l |
 
-### F.3 — C2 Examples (Multi-Bar Structure)
+### F.3 — L2 Examples (Multi-Bar Structure)
 
 | # | Metric | Window | Description |
 |---|--------|--------|-------------|
@@ -216,7 +216,7 @@ computed_at         TIMESTAMPTZ
 | 9 | `took_prev_high` | N=1 | `h > h[-1]` |
 | 10 | `took_prev_low` | N=1 | `l < l[-1]` |
 
-### F.4 — C3 Examples (Categorical Tags)
+### F.4 — L3 Examples (Categorical Tags)
 
 | # | Metric | Type | Derivation |
 |---|--------|------|------------|
@@ -254,23 +254,23 @@ The following fields have unclear tier assignment based on current definitions:
 
 | Field | Current Tier | Ambiguity | Proposed Resolution |
 |-------|--------------|-----------|---------------------|
-| `rd_hi` | C3 | Numeric rolling output (C2-like) | Split RD: numeric → C2, categorical → C3 |
-| `rd_lo` | C3 | Numeric rolling output (C2-like) | Split RD: numeric → C2, categorical → C3 |
-| `rd_mid` | C3 | Arithmetic from rd_hi/rd_lo | Move to C2 with rd_hi/rd_lo |
-| `rd_w_rrc` | C3 | Numeric normalized width | Move to C2 |
-| `state_tag` | C3 | Immediate threshold classification (no regime memory) | Consider C2.5 sub-tier |
-| `value_tag` | C3 | Single-bar threshold → category | Consider C2.5 sub-tier |
-| `event_tag` | C3 | Immediate classification, no persistence | Consider C2.5 sub-tier |
-| `roll_avg_range_12` | C1 (impl) | Requires 12-block window | Reclassify to C2 |
-| `roll_std_logret_12` | C1 (impl) | Requires 12-block window | Reclassify to C2 |
-| `range_z_12` | C1 (impl) | Depends on rolling stats | Reclassify to C2 |
-| `sess_high` | C1 (impl) | Session-scoped accumulator | Reclassify to C2 |
-| `sess_low` | C1 (impl) | Session-scoped accumulator | Reclassify to C2 |
-| `hh_12` | C1 (impl) | 12-block structural break | Reclassify to C2 |
-| `ll_12` | C1 (impl) | 12-block structural break | Reclassify to C2 |
-| `gap` | C1 (impl) | Requires prev_c | Reclassify to C2 |
+| `rd_hi` | L3 | Numeric rolling output (L2-like) | Split RD: numeric → L2, categorical → L3 |
+| `rd_lo` | L3 | Numeric rolling output (L2-like) | Split RD: numeric → L2, categorical → L3 |
+| `rd_mid` | L3 | Arithmetic from rd_hi/rd_lo | Move to L2 with rd_hi/rd_lo |
+| `rd_w_rrc` | L3 | Numeric normalized width | Move to L2 |
+| `state_tag` | L3 | Immediate threshold classification (no regime memory) | Consider L2.5 sub-tier |
+| `value_tag` | L3 | Single-bar threshold → category | Consider L2.5 sub-tier |
+| `event_tag` | L3 | Immediate classification, no persistence | Consider L2.5 sub-tier |
+| `roll_avg_range_12` | L1 (impl) | Requires 12-block window | Reclassify to L2 |
+| `roll_std_logret_12` | L1 (impl) | Requires 12-block window | Reclassify to L2 |
+| `range_z_12` | L1 (impl) | Depends on rolling stats | Reclassify to L2 |
+| `sess_high` | L1 (impl) | Session-scoped accumulator | Reclassify to L2 |
+| `sess_low` | L1 (impl) | Session-scoped accumulator | Reclassify to L2 |
+| `hh_12` | L1 (impl) | 12-block structural break | Reclassify to L2 |
+| `ll_12` | L1 (impl) | 12-block structural break | Reclassify to L2 |
+| `gap` | L1 (impl) | Requires prev_c | Reclassify to L2 |
 | `news_flag` | B | External input, not derivable | Reclassify to metadata or external table |
-| `brb` | C1 | Bar-relative-body, uses body_ratio | Confirm C1 (depends only on current bar) |
+| `brb` | L1 | Bar-relative-body, uses body_ratio | Confirm L1 (depends only on current bar) |
 
 ---
 
@@ -280,9 +280,9 @@ The following fields have unclear tier assignment based on current definitions:
 
 | ID | Question | Options | Impact |
 |----|----------|---------|--------|
-| D1 | Should C1 include trivial rolling features? | (a) Yes, amend C1 def; (b) No, split view | View structure |
-| D2 | Should immediate categorical tags be C2.5 or C3? | (a) C3 (status quo); (b) New C2.5 tier | Tier model complexity |
-| D3 | Should RD module be split by output type? | (a) Yes, C2/C3 split; (b) No, keep cohesive | Module organization |
+| D1 | Should L1 include trivial rolling features? | (a) Yes, amend L1 def; (b) No, split view | View structure |
+| D2 | Should immediate categorical tags be L2.5 or L3? | (a) L3 (status quo); (b) New L2.5 tier | Tier model complexity |
+| D3 | Should RD module be split by output type? | (a) Yes, L2/L3 split; (b) No, keep cohesive | Module organization |
 | D4 | How to version threshold parameters? | (a) Code freeze; (b) Config table; (c) Export with block | Replay architecture |
 | D5 | Where does `news_flag` belong? | (a) B-layer + provenance; (b) Metadata; (c) External table | Schema design |
 
@@ -291,15 +291,15 @@ The following fields have unclear tier assignment based on current definitions:
 | Decision | Blocks Implementation Of |
 |----------|--------------------------|
 | D1 | `derived.ovc_block_features_v0_1` restructuring |
-| D2 | C3 Python implementation, tier validation |
+| D2 | L3 Python implementation, tier validation |
 | D3 | RD module implementation location |
-| D4 | All C3 implementations (replay guarantee) |
+| D4 | All L3 implementations (replay guarantee) |
 | D5 | B-layer validation rules |
 
 ### H.3 — Recommended Resolution Path
 
-1. **D1**: Amend C1 definition to "C1 = single-bar; C1+ = trivial session/rolling" OR split into `derived.ovc_c1_pure_v0_1` and `derived.ovc_c2_simple_v0_1`
-2. **D2**: Adopt C2.5 sub-tier for "immediate categorical interpretations" to preserve C3 for regime patterns
+1. **D1**: Amend L1 definition to "L1 = single-bar; L1+ = trivial session/rolling" OR split into `derived.ovc_l1_pure_v0_1` and `derived.ovc_l2_simple_v0_1`
+2. **D2**: Adopt L2.5 sub-tier for "immediate categorical interpretations" to preserve L3 for regime patterns
 3. **D3**: Split RD — architectural purity > module cohesion
 4. **D4**: Implement `derived.threshold_registry_v0_1` table with threshold snapshots per version
 5. **D5**: Move `news_flag` to ingest metadata or create `ovc.news_calendar` external table
@@ -313,10 +313,10 @@ The following fields have unclear tier assignment based on current definitions:
 For any field `F` assigned to tier `T`:
 
 ```
-VALID(F, C1) ⟺ inputs(F) ⊆ {o, h, l, c} of current block
-VALID(F, C2) ⟺ inputs(F) ⊆ {B-fields, C1-fields} ∧ window_spec defined
-VALID(F, C3) ⟺ inputs(F) ⊆ {C2-fields} ∧ threshold_params versioned
-VALID(F, Decision) ⟺ inputs(F) ⊆ {C2-fields, C3-fields} ∧ rules versioned
+VALID(F, L1) ⟺ inputs(F) ⊆ {o, h, l, c} of current block
+VALID(F, L2) ⟺ inputs(F) ⊆ {B-fields, L1-fields} ∧ window_spec defined
+VALID(F, L3) ⟺ inputs(F) ⊆ {L2-fields} ∧ threshold_params versioned
+VALID(F, Decision) ⟺ inputs(F) ⊆ {L2-fields, L3-fields} ∧ rules versioned
 ```
 
 ### Replay Certification
@@ -327,7 +327,7 @@ A block `B` with derived metrics is **replay-certified** iff:
 2. All blocks in lookback window exist (count ≥ window_spec.N - 1)
 3. `derived_version` matches known version
 4. `formula_hash` matches versioned formula
-5. `threshold_version` (if C3) matches known threshold set
+5. `threshold_version` (if L3) matches known threshold set
 
 ---
 

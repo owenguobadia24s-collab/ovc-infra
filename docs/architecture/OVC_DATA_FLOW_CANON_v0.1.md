@@ -40,7 +40,7 @@ The OVC system organizes data into four conceptual layers, each with distinct ow
 
 1. **Canonical Facts (Schema: `ovc`)** — Immutable 2H block records ingested from TradingView or backfilled from OANDA. This is the single source of truth for market observations and is LOCKED (Option A). No human-facing dashboards should ever read directly from this layer.
 
-2. **Derived Features (Schema: `derived`)** — Computed features (C1 single-bar, C2 multi-bar, C3 semantic tags) and forward-looking outcomes derived exclusively from canonical facts. These are replayable, versioned, and never contain interpretive human decisions.
+2. **Derived Features (Schema: `derived`)** — Computed features (L1 single-bar, L2 multi-bar, L3 semantic tags) and forward-looking outcomes derived exclusively from canonical facts. These are replayable, versioned, and never contain interpretive human decisions.
 
 3. **Evaluation / Outcomes (Schema: `derived`)** — Scoring views and outcome tracking that measure prediction accuracy against realized price action. This layer exists for quantitative evaluation, not human browsing.
 
@@ -77,10 +77,10 @@ The `derived` schema holds Option B (features) and Option C (outcomes) outputs. 
 | `derived_runs` | table | sql/derived_v0_1.sql | Run metadata for derived feature computations (v0.1) | Evaluation logic | **NO** | Pipeline provenance, not human-actionable | Active |
 | `derived_runs_v0_1` | table | sql/02_derived_c1_c2_tables_v0_1.sql | Extended run metadata with run_type, window_spec, threshold_version | Evaluation logic | **NO** | Pipeline provenance | Active |
 | `eval_runs` | table | sql/option_c_v0_1.sql | Run metadata for Option C evaluation runs | Notion sync (eval_runs) | **YES** (limited) | Only `run_id`, `eval_version`, `computed_at` are synced | Active |
-| `ovc_block_features_v0_1` | view | sql/derived_v0_1.sql | C1+C2 derived features (range, body, gaps, rolling stats) | Evaluation logic | **NO** | Feature vectors are intermediate calculations | Active |
-| `ovc_c1_features_v0_1` | table | sql/02_derived_c1_c2_tables_v0_1.sql | Materialized C1 single-bar features | Evaluation logic | **NO** | Intermediate computation | Active |
-| `ovc_c2_features_v0_1` | table | sql/02_derived_c1_c2_tables_v0_1.sql | Materialized C2 multi-bar features | Evaluation logic | **NO** | Intermediate computation | Active |
-| `ovc_c3_regime_trend_v0_1` | table | sql/05_c3_regime_trend_v0_1.sql | C3 semantic regime tags (TREND/NON_TREND) with threshold provenance | Evaluation logic | **NO** | Semantic classification, not outcome | Active |
+| `ovc_block_features_v0_1` | view | sql/derived_v0_1.sql | L1+L2 derived features (range, body, gaps, rolling stats) | Evaluation logic | **NO** | Feature vectors are intermediate calculations | Active |
+| `ovc_l1_features_v0_1` | table | sql/02_derived_c1_c2_tables_v0_1.sql | Materialized L1 single-bar features | Evaluation logic | **NO** | Intermediate computation | Active |
+| `ovc_l2_features_v0_1` | table | sql/02_derived_c1_c2_tables_v0_1.sql | Materialized L2 multi-bar features | Evaluation logic | **NO** | Intermediate computation | Active |
+| `ovc_l3_regime_trend_v0_1` | table | sql/05_c3_regime_trend_v0_1.sql | L3 semantic regime tags (TREND/NON_TREND) with threshold provenance | Evaluation logic | **NO** | Semantic classification, not outcome | Active |
 | `ovc_outcomes_v0_1` | view | sql/option_c_v0_1.sql | Row-level forward returns, MFE/MAE, hit flags at horizons 1,2,6,12 | Notion sync (outcomes) | **YES** (limited) | Only evaluative fields synced (hit rates, fwd_ret) | Active |
 | `ovc_scores_v0_1` | view | sql/option_c_v0_1.sql | Aggregated scoring by bucket (range_pct, abs_ret) | Research / dashboards | **NO** | Aggregate research view, not per-block | Active |
 | `v_pattern_outcomes_v01` | view | sql/option_c_v0_1.sql | Pattern outcome aggregates by state_key | Research queries | **NO** | Research aggregation | Active |
@@ -97,16 +97,16 @@ The `ovc_qa` schema holds validation artifacts used for governance, audit trails
 | `expected_blocks` | table | sql/qa_schema.sql | Expected block letters for validation date range | QA / validation | **NO** | Validation scaffold | Active |
 | `tv_ohlc_2h` | table | sql/qa_schema.sql | TradingView OHLC reference data for comparison | QA / validation | **NO** | Tape comparison reference | Active |
 | `ohlc_mismatch` | table | sql/qa_schema.sql | Records of OHLC differences between OVC and TV | QA / validation | **NO** | Mismatch artifacts | Active |
-| `derived_validation_run` | table | sql/03_qa_derived_validation_v0_1.sql | Validation results for C1/C2 derived features | QA / validation | **NO** | Derived layer QA | Active |
+| `derived_validation_run` | table | sql/03_qa_derived_validation_v0_1.sql | Validation results for L1/L2 derived features | QA / validation | **NO** | Derived layer QA | Active |
 
 ### Schema: `ovc_cfg`
 
-The `ovc_cfg` schema holds versioned configuration for threshold packs used in C3+ computations.
+The `ovc_cfg` schema holds versioned configuration for threshold packs used in L3+ computations.
 
 | Object Name | Type | Created By | Purpose | Primary Consumer | Should Flow to Notion? | If NO, Why Not | Status |
 |-------------|------|------------|---------|------------------|------------------------|----------------|--------|
-| `threshold_pack` | table | sql/04_threshold_registry_v0_1.sql | Immutable threshold pack versions (JSONB config + hash) | C3 compute scripts | **NO** | Configuration registry, not insight | Active |
-| `threshold_pack_active` | table | sql/04_threshold_registry_v0_1.sql | Mutable pointers to currently active threshold versions | C3 compute scripts | **NO** | Activation pointers | Active |
+| `threshold_pack` | table | sql/04_threshold_registry_v0_1.sql | Immutable threshold pack versions (JSONB config + hash) | L3 compute scripts | **NO** | Configuration registry, not insight | Active |
+| `threshold_pack_active` | table | sql/04_threshold_registry_v0_1.sql | Mutable pointers to currently active threshold versions | L3 compute scripts | **NO** | Activation pointers | Active |
 
 ### Schema: `ops`
 
@@ -147,7 +147,7 @@ The following categories **must never** flow to Notion:
 
 1. **Raw OHLC values** — Prices are canonical facts, not decisions. (`o`, `h`, `l`, `c` from any table)
 2. **Derived features** — Features like `body_ratio`, `range_z_12`, `clv` are intermediate math, not actionable.
-3. **C3 semantic tags** — Tags like `c3_regime_trend` are classifier outputs, not human labels.
+3. **L3 semantic tags** — Tags like `l3_regime_trend` are classifier outputs, not human labels.
 4. **QA artifacts** — Validation results exist for audit, not dashboards.
 5. **Configuration** — Threshold packs and sync cursors are infrastructure.
 
@@ -309,9 +309,9 @@ All instrumented pipelines emit standardized run artifacts to `reports/runs/<pip
 | Pipeline | Script | RunWriter Location |
 |----------|--------|-------------------|
 | P2-Backfill | `src/backfill_oanda_2h_checkpointed.py` | Lines 18, 49, 529 |
-| B1-DerivedC1 | `src/derived/compute_c1_v0_1.py` | Lines 42, 355 |
-| B1-DerivedC2 | `src/derived/compute_c2_v0_1.py` | Lines 46, 569 |
-| B1-DerivedC3 | `src/derived/compute_c3_regime_trend_v0_1.py` | Lines 86, 419 |
+| B1-DerivedC1 | `src/derived/compute_l1_v0_1.py` | Lines 42, 355 |
+| B1-DerivedC2 | `src/derived/compute_l2_v0_1.py` | Lines 46, 569 |
+| B1-DerivedC3 | `src/derived/compute_l3_regime_trend_v0_1.py` | Lines 86, 419 |
 | B2-DerivedValidation | `src/validate/validate_derived_range_v0_1.py` | Lines 55, 1072 |
 | D-NotionSync | `scripts/notion_sync.py` | Lines 15-16 |
 | D-ValidationHarness | `src/validate_day.py`, `src/validate_range.py` | Various |

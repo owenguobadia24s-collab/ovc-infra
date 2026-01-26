@@ -1,4 +1,4 @@
-# C2 Feature Validation Report v0.1
+# L2 Feature Validation Report v0.1
 
 **Validation Date:** 2026-01-20  
 **Status:** ✅ **ALL TESTS PASS**
@@ -9,10 +9,10 @@
 
 | Document | Path |
 |----------|------|
-| Feature Specification | [OPTION_B_C2_FEATURES_v0.1.md](../../docs/ops/OPTION_B_C2_FEATURES_v0.1.md) |
-| Implementation Contract | [OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md](../../docs/ops/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md) |
-| SQL View Implementation | [v_ovc_c2_features_v0_1.sql](../../sql/derived/v_ovc_c2_features_v0_1.sql) |
-| Charter | [OPTION_B_C2_CHARTER_v0.1.md](../../docs/ops/OPTION_B_C2_CHARTER_v0.1.md) |
+| Feature Specification | [OPTION_B_L2_FEATURES_v0.1.md](../../docs/ops/OPTION_B_L2_FEATURES_v0.1.md) |
+| Implementation Contract | [OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md](../../docs/ops/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md) |
+| SQL View Implementation | [v_ovc_l2_features_v0_1.sql](../../sql/derived/v_ovc_l2_features_v0_1.sql) |
+| Charter | [OPTION_B_L2_CHARTER_v0.1.md](../../docs/ops/OPTION_B_L2_CHARTER_v0.1.md) |
 
 ---
 
@@ -133,20 +133,20 @@
 
 | Feature ID | Feature Name | Spec Section | Status |
 |------------|--------------|--------------|--------|
-| C2-01 | rng_avg_3 | §4.2 | ✅ PASS |
-| C2-02 | rng_avg_6 | §4.2 | ✅ PASS |
-| C2-03 | dir_streak | §4.2 | ✅ PASS |
-| C2-04 | session_block_idx | §4.2 | ✅ PASS |
-| C2-05 | session_rng_cum | §4.2 | ✅ PASS |
-| C2-06 | session_dir_net | §4.2 | ✅ PASS |
-| C2-07 | rng_rank_6 | §4.2 | ✅ PASS |
-| C2-08 | body_rng_pct_avg_3 | §4.2 | ✅ PASS |
+| L2-01 | rng_avg_3 | §4.2 | ✅ PASS |
+| L2-02 | rng_avg_6 | §4.2 | ✅ PASS |
+| L2-03 | dir_streak | §4.2 | ✅ PASS |
+| L2-04 | session_block_idx | §4.2 | ✅ PASS |
+| L2-05 | session_rng_cum | §4.2 | ✅ PASS |
+| L2-06 | session_dir_net | §4.2 | ✅ PASS |
+| L2-07 | rng_rank_6 | §4.2 | ✅ PASS |
+| L2-08 | body_rng_pct_avg_3 | §4.2 | ✅ PASS |
 
 ---
 
 ## Compliance Statement
 
-> **All C2 features conform exactly to OPTION_B_C2_FEATURES_v0.1.md and OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md. No deviations detected.**
+> **All L2 features conform exactly to OPTION_B_L2_FEATURES_v0.1.md and OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md. No deviations detected.**
 
 ---
 

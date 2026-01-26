@@ -18,9 +18,9 @@ QA validates correctness, coverage, and determinism across all pipeline layers. 
 |--------|---------|
 | `ovc.ovc_blocks_v01_1_min` | Canonical facts validation |
 | `ovc.ovc_candles_m15_raw` | M15 coverage validation |
-| `derived.v_ovc_c1_features_v0_1` | Derived C1 validation |
-| `derived.v_ovc_c2_features_v0_1` | Derived C2 validation |
-| `derived.v_ovc_c3_features_v0_1` | Derived C3 validation |
+| `derived.v_ovc_l1_features_v0_1` | Derived L1 validation |
+| `derived.v_ovc_l2_features_v0_1` | Derived L2 validation |
+| `derived.v_ovc_l3_features_v0_1` | Derived L3 validation |
 | `derived.v_ovc_c_outcomes_v0_1` | Outcomes validation |
 | Evidence packs | Path1 integrity validation |
 
@@ -73,7 +73,7 @@ QA validates correctness, coverage, and determinism across all pipeline layers. 
 
 | Script | Purpose |
 |--------|---------|
-| `src/validate/validate_derived_range_v0_1.py` | C1/C2 coverage parity |
+| `src/validate/validate_derived_range_v0_1.py` | L1/L2 coverage parity |
 | `sql/03_qa_derived_validation_v0_1.sql` | SQL coverage checks |
 
 ### 5.3 Evidence Validation
@@ -129,9 +129,9 @@ SELECT 1 FROM ovc_cfg.threshold_pack LIMIT 0;
 SELECT 1 FROM ovc_cfg.threshold_pack_active LIMIT 0;
 
 -- Derived views
-SELECT 1 FROM derived.v_ovc_c1_features_v0_1 LIMIT 0;
-SELECT 1 FROM derived.v_ovc_c2_features_v0_1 LIMIT 0;
-SELECT 1 FROM derived.v_ovc_c3_features_v0_1 LIMIT 0;
+SELECT 1 FROM derived.v_ovc_l1_features_v0_1 LIMIT 0;
+SELECT 1 FROM derived.v_ovc_l2_features_v0_1 LIMIT 0;
+SELECT 1 FROM derived.v_ovc_l3_features_v0_1 LIMIT 0;
 SELECT 1 FROM derived.v_ovc_c_outcomes_v0_1 LIMIT 0;
 
 -- Evidence views

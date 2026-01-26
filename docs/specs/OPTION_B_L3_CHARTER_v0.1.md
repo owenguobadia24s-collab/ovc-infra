@@ -1,4 +1,4 @@
-# Option B – C3 Charter v0.1
+# Option B – L3 Charter v0.1
 
 **[STATUS: ACTIVE]**
 
@@ -7,42 +7,42 @@
 | Version | 0.1 |
 | Created | 2026-01-20 |
 | Author | OVC Infrastructure Team |
-| Governs | Option B – Semantic Aggregation Layer (C3) |
+| Governs | Option B – Semantic Aggregation Layer (L3) |
 | Parent Charter | OPTION_B_CHARTER_v0.1.md |
 | Governance | GOVERNANCE_RULES_v0.1.md |
 
 ---
 
-## 1. Purpose of C3
+## 1. Purpose of L3
 
-### 1.1 What C3 Represents
+### 1.1 What L3 Represents
 
-C3 is the **Semantic Aggregation Layer** within Option B. It synthesizes outputs from C1 (Atomic Facts) and C2 (Temporal Context) into higher-order structural descriptions that capture **meaning** rather than motion.
+L3 is the **Semantic Aggregation Layer** within Option B. It synthesizes outputs from L1 (Atomic Facts) and L2 (Temporal Context) into higher-order structural descriptions that capture **meaning** rather than motion.
 
-C3 answers questions like:
+L3 answers questions like:
 - What structural pattern does this sequence represent?
 - What regime or context classification applies?
 - What semantic state label describes this configuration?
 
-### 1.2 How C3 Differs from C2
+### 1.2 How L3 Differs from L2
 
-| Aspect | C2 (Temporal Context) | C3 (Semantic Aggregation) |
+| Aspect | L2 (Temporal Context) | L3 (Semantic Aggregation) |
 |--------|----------------------|---------------------------|
 | Focus | Motion and change | Meaning and classification |
-| Inputs | C1 atomic facts | C1 + C2 outputs |
+| Inputs | L1 atomic facts | L1 + L2 outputs |
 | Outputs | Directional context, momentum, sequences | Pattern labels, regime states, structural summaries |
 | Granularity | Per-block temporal relationships | Multi-block semantic synthesis |
 | Question answered | "What changed?" | "What does it mean?" |
 
-### 1.3 Why C3 Does NOT Produce Decisions or Outcomes
+### 1.3 Why L3 Does NOT Produce Decisions or Outcomes
 
-C3 exists to **describe** semantic structure, not to **prescribe** action.
+L3 exists to **describe** semantic structure, not to **prescribe** action.
 
-- C3 outputs are **labels**, not **signals**
-- C3 provides **context**, not **conclusions**
-- C3 enables downstream interpretation but does not perform it
+- L3 outputs are **labels**, not **signals**
+- L3 provides **context**, not **conclusions**
+- L3 enables downstream interpretation but does not perform it
 
-The boundary between description and decision belongs to Option C (Evaluation/Outcomes). C3 must remain on the descriptive side of that boundary.
+The boundary between description and decision belongs to Option C (Evaluation/Outcomes). L3 must remain on the descriptive side of that boundary.
 
 ---
 
@@ -50,16 +50,16 @@ The boundary between description and decision belongs to Option C (Evaluation/Ou
 
 ### 2.1 Explicitly Allowed Sources
 
-C3 computations MAY read from:
+L3 computations MAY read from:
 
 | Source | Schema | Status |
 |--------|--------|--------|
-| C1 Atomic Facts | `derived.ovc_c1_*` | CANONICAL |
-| C2 Temporal Context | `derived.ovc_c2_*` | CANONICAL |
+| L1 Atomic Facts | `derived.ovc_l1_*` | CANONICAL |
+| L2 Temporal Context | `derived.ovc_l2_*` | CANONICAL |
 
 ### 2.2 Explicit Prohibitions on Inputs
 
-C3 computations MUST NOT:
+L3 computations MUST NOT:
 
 - Access `ovc.ovc_blocks_v01_1_min` directly (raw block table)
 - Access any table outside the `derived` schema
@@ -69,22 +69,22 @@ C3 computations MUST NOT:
 
 ### 2.3 Lookback-Only Rule
 
-All C3 computations MUST be **lookback-only**:
+All L3 computations MUST be **lookback-only**:
 
 - A row at time T may reference only data from times ≤ T
 - No forward-looking window functions
 - No future joins or lookahead bias
-- Violation of this rule invalidates the entire C3 output
+- Violation of this rule invalidates the entire L3 output
 
 ---
 
 ## 3. Allowed Computations
 
-C3 MAY perform the following computation types:
+L3 MAY perform the following computation types:
 
 ### 3.1 Pattern Aggregation
 
-- Sequence-based pattern recognition over C2 outputs
+- Sequence-based pattern recognition over L2 outputs
 - Multi-block structural summarization
 - Compositional pattern building from atomic elements
 
@@ -104,7 +104,7 @@ C3 MAY perform the following computation types:
 
 ### 3.4 Multi-Feature Synthesis
 
-- Combining multiple C1/C2 features into composite descriptors
+- Combining multiple L1/L2 features into composite descriptors
 - Cross-feature relationship encoding
 - Dimensional reduction for semantic summarization
 
@@ -112,7 +112,7 @@ C3 MAY perform the following computation types:
 
 ## 4. Explicit Prohibitions
 
-C3 MUST NOT:
+L3 MUST NOT:
 
 ### 4.1 Outcomes or PnL
 
@@ -143,7 +143,7 @@ C3 MUST NOT:
 
 ### 4.5 Writes Outside `derived.*`
 
-- All C3 outputs MUST write to `derived.ovc_c3_*` tables/views only
+- All L3 outputs MUST write to `derived.ovc_l3_*` tables/views only
 - No writes to `ovc.*` schema (LOCKED)
 - No writes to `ovc_qa.*` schema (Option D only)
 - No external writes (files, APIs, etc.)
@@ -152,7 +152,7 @@ C3 MUST NOT:
 
 ## 5. Guarantees to Downstream Layers
 
-C3 provides the following guarantees to Option C and other consumers:
+L3 provides the following guarantees to Option C and other consumers:
 
 ### 5.1 Semantic Stability Guarantees
 
@@ -171,32 +171,32 @@ C3 provides the following guarantees to Option C and other consumers:
 
 ### 5.3 Deterministic Replay Guarantees
 
-- Given identical C1 + C2 inputs, C3 MUST produce identical outputs
+- Given identical L1 + L2 inputs, L3 MUST produce identical outputs
 - No randomness in computations
 - No external state dependencies
 - Full reproducibility from canonical inputs
 
 ---
 
-## 6. Relationship to C1 and C2
+## 6. Relationship to L1 and L2
 
-### 6.1 C1 and C2 Are Immutable Inputs
+### 6.1 L1 and L2 Are Immutable Inputs
 
-- C3 receives C1 and C2 as read-only inputs
-- C3 MUST NOT modify C1 or C2 tables
-- C3 MUST NOT request changes to C1 or C2 definitions
+- L3 receives L1 and L2 as read-only inputs
+- L3 MUST NOT modify L1 or L2 tables
+- L3 MUST NOT request changes to L1 or L2 definitions
 
-### 6.2 C3 May Not Reinterpret C1/C2 Meanings
+### 6.2 L3 May Not Reinterpret L1/L2 Meanings
 
-- If C1 defines `dir` as close vs open direction, C3 must use that meaning
-- C3 may not create alternate interpretations of upstream fields
+- If L1 defines `dir` as close vs open direction, L3 must use that meaning
+- L3 may not create alternate interpretations of upstream fields
 - Semantic disagreements must be resolved at the source layer
 
-### 6.3 C3 Failures Must Not Invalidate C1 or C2
+### 6.3 L3 Failures Must Not Invalidate L1 or L2
 
-- C3 computation failures are isolated to C3
-- C1 and C2 remain valid regardless of C3 state
-- Downstream layers may fall back to C2 if C3 is unavailable
+- L3 computation failures are isolated to L3
+- L1 and L2 remain valid regardless of L3 state
+- Downstream layers may fall back to L2 if L3 is unavailable
 
 ---
 
@@ -216,22 +216,22 @@ DRAFT → ACTIVE → CANONICAL
 
 ### 7.2 Audit Triggers
 
-C3 outputs require re-validation when:
+L3 outputs require re-validation when:
 
-- C1 or C2 definitions change (MAJOR bump upstream)
-- C3 computation logic is modified
+- L1 or L2 definitions change (MAJOR bump upstream)
+- L3 computation logic is modified
 - Downstream consumers report semantic inconsistencies
 - Periodic audit schedule (quarterly minimum)
 
 ### 7.3 Validation Evidence Requirements
 
-Before CANONICAL promotion, C3 must demonstrate:
+Before CANONICAL promotion, L3 must demonstrate:
 
 | Evidence | Description |
 |----------|-------------|
 | Replay determinism | Same inputs → same outputs across 3+ runs |
 | Lookback compliance | No future data leakage verified |
-| Schema compliance | All outputs in `derived.ovc_c3_*` |
+| Schema compliance | All outputs in `derived.ovc_l3_*` |
 | Prohibition compliance | No outcomes, signals, or actions encoded |
 | Downstream compatibility | Option C can consume without errors |
 
@@ -241,7 +241,7 @@ Before CANONICAL promotion, C3 must demonstrate:
 
 ### 8.1 Design Authorization
 
-This charter **authorizes** the design phase of C3:
+This charter **authorizes** the design phase of L3:
 
 - Defining semantic features (in separate design documents)
 - Specifying column schemas and label vocabularies
@@ -265,17 +265,17 @@ Implementation approval requires:
 
 ## 9. Summary
 
-C3 is the Semantic Aggregation Layer that transforms C1 (atomic facts) and C2 (temporal context) into higher-order structural descriptions. It provides **meaning without action**, enabling downstream layers to interpret market structure without C3 itself making decisions.
+L3 is the Semantic Aggregation Layer that transforms L1 (atomic facts) and L2 (temporal context) into higher-order structural descriptions. It provides **meaning without action**, enabling downstream layers to interpret market structure without L3 itself making decisions.
 
-### C3 Boundaries at a Glance
+### L3 Boundaries at a Glance
 
 | Allowed | Prohibited |
 |---------|------------|
-| Read C1, C2 | Read raw blocks |
+| Read L1, L2 | Read raw blocks |
 | Pattern aggregation | Outcome calculation |
 | Regime classification | Action thresholds |
 | Structural labeling | Buy/sell/hold signals |
-| Write to `derived.ovc_c3_*` | Write elsewhere |
+| Write to `derived.ovc_l3_*` | Write elsewhere |
 | Lookback computations | Forward-looking logic |
 
 ---

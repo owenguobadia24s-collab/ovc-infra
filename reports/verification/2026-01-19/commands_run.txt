@@ -31,8 +31,8 @@
 3. mcp_neon_run_sql: SELECT table_schema, table_name FROM information_schema.tables
 4. mcp_neon_run_sql: SELECT schemaname, viewname FROM pg_views
 5. mcp_neon_run_sql: Existence checks for required tables/views
-6. mcp_neon_run_sql: Row counts for ovc_blocks, c1_features, c2_features
-   -> Output: c1_neon_schema_verification.txt
+6. mcp_neon_run_sql: Row counts for ovc_blocks, l1_features, l2_features
+   -> Output: l1_neon_schema_verification.txt
 
 === SECTION B: GitHub Actions Verification (2026-01-19) ===
 Command sequence executed:

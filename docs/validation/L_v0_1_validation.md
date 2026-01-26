@@ -17,7 +17,7 @@
 | Category              | Status   | Notes                                      |
 |-----------------------|----------|--------------------------------------------|
 | Schema Compliance     | PASS     | All columns match contract specification   |
-| Input Compliance      | PASS     | Reads only from C1/C2/C3 views             |
+| Input Compliance      | PASS     | Reads only from L1/L2/L3 views             |
 | Outcome Formulas      | PASS     | All ACTIVE outcomes implemented correctly  |
 | NULL Handling         | PASS     | NULL propagation per contract §4           |
 | Determinism           | PASS     | Repeated queries return identical results  |
@@ -162,7 +162,7 @@ LIMIT 5;
 ```sql
 SELECT block_id, sym, fwd_ret_1, mfe_3, mae_3
 FROM derived.v_ovc_c_outcomes_v0_1
-WHERE block_id IN (SELECT block_id FROM derived.v_ovc_c1_features_v0_1 WHERE c IS NULL)
+WHERE block_id IN (SELECT block_id FROM derived.v_ovc_l1_features_v0_1 WHERE c IS NULL)
 LIMIT 5;
 ```
 
@@ -211,9 +211,9 @@ LIMIT 10;
 ```sql
 SELECT 
     (SELECT COUNT(*) FROM derived.v_ovc_c_outcomes_v0_1) AS outcome_rows,
-    (SELECT COUNT(*) FROM derived.v_ovc_c1_features_v0_1 c1
-     INNER JOIN derived.v_ovc_c2_features_v0_1 c2 ON c1.block_id = c2.block_id
-     INNER JOIN derived.v_ovc_c3_features_v0_1 c3 ON c1.block_id = c3.block_id
+    (SELECT COUNT(*) FROM derived.v_ovc_l1_features_v0_1 c1
+     INNER JOIN derived.v_ovc_l2_features_v0_1 c2 ON c1.block_id = c2.block_id
+     INNER JOIN derived.v_ovc_l3_features_v0_1 c3 ON c1.block_id = c3.block_id
      WHERE c1.c IS NOT NULL) AS expected_rows;
 ```
 
@@ -231,7 +231,7 @@ SELECT
 
 | Requirement                                | Contract Ref | Status |
 |--------------------------------------------|--------------|--------|
-| Reads only from C1/C2/C3 views             | Charter §2.1 | ✓      |
+| Reads only from L1/L2/L3 views             | Charter §2.1 | ✓      |
 | No raw block access                        | Charter §2.2 | ✓      |
 | Anchor bar excluded from forward window    | Contract §2.2| ✓      |
 | Lookahead only in Option C                 | Contract §2.4| ✓      |

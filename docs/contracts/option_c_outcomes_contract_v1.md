@@ -16,9 +16,9 @@ Option C computes forward-looking outcomes from Option B derived features. It is
 
 | Source | View | Description |
 |--------|------|-------------|
-| C1 features | `derived.v_ovc_c1_features_v0_1` | Block physics |
-| C2 features | `derived.v_ovc_c2_features_v0_1` | Structural features |
-| C3 features | `derived.v_ovc_c3_features_v0_1` | Regime/trend |
+| L1 features | `derived.v_ovc_l1_features_v0_1` | Block physics |
+| L2 features | `derived.v_ovc_l2_features_v0_1` | Structural features |
+| L3 features | `derived.v_ovc_l3_features_v0_1` | Regime/trend |
 
 ---
 
@@ -37,7 +37,7 @@ Option C computes forward-looking outcomes from Option B derived features. It is
 | `derived.ovc_outcomes_v0_1` | View | **DEPRECATED** — Reads from canonical table directly |
 | `derived.ovc_scores_v0_1` | View | **DEPRECATED** — Built on deprecated outcomes |
 
-**v1 Resolution**: `derived.v_ovc_c_outcomes_v0_1` is the authoritative outcomes view. It reads from C1/C2/C3 views per contract. The legacy `derived.ovc_outcomes_v0_1` is deprecated because it reads directly from the canonical table.
+**v1 Resolution**: `derived.v_ovc_c_outcomes_v0_1` is the authoritative outcomes view. It reads from L1/L2/L3 views per contract. The legacy `derived.ovc_outcomes_v0_1` is deprecated because it reads directly from the canonical table.
 
 ---
 
@@ -68,7 +68,7 @@ Option C computes forward-looking outcomes from Option B derived features. It is
 
 ### 5.1 Option C MUST
 
-- Read ONLY from Option B views (`v_ovc_c1_features_v0_1`, etc.)
+- Read ONLY from Option B views (`v_ovc_l1_features_v0_1`, etc.)
 - Use lookahead ONLY for outcome computation
 - Produce deterministic results for same input
 
@@ -115,11 +115,11 @@ run_id format: c_{GITHUB_RUN_ID}_{ATTEMPT}_{SHA_SHORT}_{RUN_NUMBER}
 
 | Dependency | Allowed |
 |------------|---------|
-| `derived.v_ovc_c1_features_v0_1` | ✅ |
-| `derived.v_ovc_c2_features_v0_1` | ✅ |
-| `derived.v_ovc_c3_features_v0_1` | ✅ |
+| `derived.v_ovc_l1_features_v0_1` | ✅ |
+| `derived.v_ovc_l2_features_v0_1` | ✅ |
+| `derived.v_ovc_l3_features_v0_1` | ✅ |
 | `ovc.ovc_blocks_v01_1_min` | ❌ (PROHIBITED) |
-| Threshold config | ❌ (use C3 view passthrough) |
+| Threshold config | ❌ (use L3 view passthrough) |
 
 ---
 

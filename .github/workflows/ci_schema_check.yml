@@ -88,8 +88,8 @@ jobs:
           echo "- ovc.ovc_candles_m15_raw" >> $GITHUB_STEP_SUMMARY
           echo "- ovc_cfg.threshold_pack" >> $GITHUB_STEP_SUMMARY
           echo "- ovc_cfg.threshold_pack_active" >> $GITHUB_STEP_SUMMARY
-          echo "- derived.v_ovc_c1_features_v0_1" >> $GITHUB_STEP_SUMMARY
-          echo "- derived.v_ovc_c2_features_v0_1" >> $GITHUB_STEP_SUMMARY
-          echo "- derived.v_ovc_c3_features_v0_1" >> $GITHUB_STEP_SUMMARY
+          echo "- derived.v_ovc_l1_features_v0_1" >> $GITHUB_STEP_SUMMARY
+          echo "- derived.v_ovc_l2_features_v0_1" >> $GITHUB_STEP_SUMMARY
+          echo "- derived.v_ovc_l3_features_v0_1" >> $GITHUB_STEP_SUMMARY
           echo "- derived.v_ovc_c_outcomes_v0_1" >> $GITHUB_STEP_SUMMARY
           echo "- derived.v_path1_evidence_dis_v1_1" >> $GITHUB_STEP_SUMMARY

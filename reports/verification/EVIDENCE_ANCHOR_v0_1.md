@@ -14,8 +14,8 @@
   - contracts/eval_contract_v0.1.json
   - contracts/run_artifact_spec_v0.1.json
 - Threshold packs:
-  - configs/threshold_packs/c3_example_pack_v1.json
-  - configs/threshold_packs/c3_regime_trend_v1.json
+  - configs/threshold_packs/l3_example_pack_v1.json
+  - configs/threshold_packs/l3_regime_trend_v1.json
   - configs/threshold_packs/state_plane_v0_2_default_v1.json
 
 ## Exact Commands

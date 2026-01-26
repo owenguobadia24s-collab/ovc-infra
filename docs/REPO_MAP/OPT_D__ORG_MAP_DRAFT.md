@@ -378,15 +378,15 @@ FOLDER: reports/validation
 PRIMARY CATEGORY: QA & Governance
 OPTION OWNER: QA
 AUTHORITY: SUPPORTING
-ROLE (1 line): Validation reports for C1/C2/C3 and promotion decisions.
+ROLE (1 line): Validation reports for L1/L2/L3 and promotion decisions.
 
 INPUTS (contracts/interfaces): docs/validation/C_v0_1_validation.md
 OUTPUTS (artifacts/data): validation reports and summary CSV/JSON
 
 CONTAINS (high-signal items):
-- C1_v0_1_validation.md -> QA/QA/SUPPORTING -> C1 validation
-- C2_v0_1_validation.md -> QA/QA/SUPPORTING -> C2 validation
-- C3_v0_1_validation.md -> QA/QA/SUPPORTING -> C3 validation
+- C1_v0_1_validation.md -> QA/QA/SUPPORTING -> L1 validation
+- C2_v0_1_validation.md -> QA/QA/SUPPORTING -> L2 validation
+- C3_v0_1_validation.md -> QA/QA/SUPPORTING -> L3 validation
 - validate_range_* -> QA/QA/SUPPORTING -> range validation outputs
 
 CROSS-REFERENCES:

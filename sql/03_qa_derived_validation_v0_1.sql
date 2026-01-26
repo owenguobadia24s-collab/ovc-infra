@@ -2,7 +2,7 @@
 -- Migration: 03_qa_derived_validation_v0_1.sql
 -- Version: v0.1
 -- 
--- This migration adds the derived_validation_run table to track C1/C2
+-- This migration adds the derived_validation_run table to track L1/L2
 -- validation results, complementing the existing ovc_qa.validation_run
 -- table used for B-layer OHLC validation.
 
@@ -19,14 +19,14 @@ CREATE TABLE IF NOT EXISTS ovc_qa.derived_validation_run (
     
     -- Coverage counts
     b_block_count INTEGER,
-    c1_row_count INTEGER,
-    c2_row_count INTEGER,
+    l1_row_count INTEGER,
+    l2_row_count INTEGER,
     
     -- Integrity check results
     coverage_parity BOOLEAN,
-    c1_duplicates INTEGER DEFAULT 0,
-    c2_duplicates INTEGER DEFAULT 0,
-    c2_window_spec_valid BOOLEAN,
+    l1_duplicates INTEGER DEFAULT 0,
+    l2_duplicates INTEGER DEFAULT 0,
+    l2_window_spec_valid BOOLEAN,
     
     -- Determinism check
     determinism_sample_size INTEGER,
@@ -52,13 +52,13 @@ CREATE INDEX IF NOT EXISTS idx_derived_validation_status
 ON ovc_qa.derived_validation_run (status);
 
 COMMENT ON TABLE ovc_qa.derived_validation_run IS 
-'Tracks validation results for C1/C2 derived feature packs (Option B.2)';
+'Tracks validation results for L1/L2 derived feature packs (Option B.2)';
 
 COMMENT ON COLUMN ovc_qa.derived_validation_run.coverage_parity IS 
-'TRUE if B-layer block count equals C1 and C2 row counts';
+'TRUE if B-layer block count equals L1 and L2 row counts';
 
-COMMENT ON COLUMN ovc_qa.derived_validation_run.c2_window_spec_valid IS 
-'TRUE if all C2 rows have valid window_spec with required components';
+COMMENT ON COLUMN ovc_qa.derived_validation_run.l2_window_spec_valid IS 
+'TRUE if all L2 rows have valid window_spec with required components';
 
 COMMENT ON COLUMN ovc_qa.derived_validation_run.determinism_mismatches IS 
-'Number of blocks where recomputed C1 values differ from stored values';
+'Number of blocks where recomputed L1 values differ from stored values';

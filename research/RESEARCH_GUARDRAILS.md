@@ -7,7 +7,7 @@
 
 | Term | Definition |
 |------|------------|
-| **CANONICAL** | Option B (C1/C2/C3 features) and Option C (outcomes) as frozen in `ovc-v0.1-spine`. Immutable source of truth. |
+| **CANONICAL** | Option B (L1/L2/L3 features) and Option C (outcomes) as frozen in `ovc-v0.1-spine`. Immutable source of truth. |
 | **NON-CANONICAL** | Everything under `research/`. Downstream, exploratory, disposable. No authority over canonical semantics. |
 | **Score** | A descriptive compression of canonical data. NOT a trading signal. |
 | **Study** | A documented, reproducible analysis with explicit inputs, methods, and conclusions. |

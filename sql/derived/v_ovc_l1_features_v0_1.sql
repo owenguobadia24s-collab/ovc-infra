@@ -1,12 +1,12 @@
 -- =============================================================================
--- VIEW: derived.v_ovc_c1_features_v0_1
+-- VIEW: derived.v_ovc_l1_features_v0_1
 -- =============================================================================
--- This view implements OPTION_B_C1_FEATURES_v0.1.md and is governed by
--- OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md
+-- This view implements OPTION_B_L1_FEATURES_v0.1.md and is governed by
+-- OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md
 --
 -- Source of Truth:
---   - Feature Definitions: docs/ops/OPTION_B_C1_FEATURES_v0.1.md
---   - Implementation Contract: docs/ops/OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md
+--   - Feature Definitions: docs/ops/OPTION_B_L1_FEATURES_v0.1.md
+--   - Implementation Contract: docs/ops/OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md
 --   - Governance: docs/ops/GOVERNANCE_RULES_v0.1.md
 --
 -- Compliance:
@@ -27,9 +27,9 @@
 CREATE SCHEMA IF NOT EXISTS derived;
 
 -- Drop existing view if present (for idempotent deployment)
-DROP VIEW IF EXISTS derived.v_ovc_c1_features_v0_1;
+DROP VIEW IF EXISTS derived.v_ovc_l1_features_v0_1;
 
-CREATE VIEW derived.v_ovc_c1_features_v0_1 AS
+CREATE VIEW derived.v_ovc_l1_features_v0_1 AS
 SELECT
     -- =========================================================================
     -- PASSTHROUGH COLUMNS (identity from canonical source)
@@ -46,8 +46,8 @@ SELECT
     dir,
 
     -- =========================================================================
-    -- C1 FEATURE: body_ratio
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.1
+    -- L1 FEATURE: body_ratio
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.1
     -- Contract Reference: §2.2 (zero-range → NULL), §2.3 (flat-bar → 0)
     -- Definition: |close - open| / (high - low)
     -- Domain: [0, 1]
@@ -62,8 +62,8 @@ SELECT
     END AS body_ratio,
 
     -- =========================================================================
-    -- C1 FEATURE: upper_wick_ratio
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.2
+    -- L1 FEATURE: upper_wick_ratio
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.2
     -- Contract Reference: §2.2 (zero-range → NULL)
     -- Definition: (high - max(open, close)) / (high - low)
     -- Domain: [0, 1]
@@ -78,8 +78,8 @@ SELECT
     END AS upper_wick_ratio,
 
     -- =========================================================================
-    -- C1 FEATURE: lower_wick_ratio
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.3
+    -- L1 FEATURE: lower_wick_ratio
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.3
     -- Contract Reference: §2.2 (zero-range → NULL)
     -- Definition: (min(open, close) - low) / (high - low)
     -- Domain: [0, 1]
@@ -94,8 +94,8 @@ SELECT
     END AS lower_wick_ratio,
 
     -- =========================================================================
-    -- C1 FEATURE: wick_symmetry
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.4
+    -- L1 FEATURE: wick_symmetry
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.4
     -- Contract Reference: §2.2 (zero-range → NULL)
     -- Definition: (upper_wick - lower_wick) / (high - low)
     --           = ((h - max(o,c)) - (min(o,c) - l)) / (h - l)
@@ -111,8 +111,8 @@ SELECT
     END AS wick_symmetry,
 
     -- =========================================================================
-    -- C1 FEATURE: body_position
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.5
+    -- L1 FEATURE: body_position
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.5
     -- Contract Reference: §2.2 (zero-range → NULL)
     -- Definition: ((open + close) / 2 - low) / (high - low)
     -- Domain: [0, 1]
@@ -127,8 +127,8 @@ SELECT
     END AS body_position,
 
     -- =========================================================================
-    -- C1 FEATURE: close_position
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.6
+    -- L1 FEATURE: close_position
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.6
     -- Contract Reference: §2.2 (zero-range → NULL)
     -- Definition: (close - low) / (high - low)
     -- Domain: [0, 1]
@@ -143,8 +143,8 @@ SELECT
     END AS close_position,
 
     -- =========================================================================
-    -- C1 FEATURE: open_position
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.7
+    -- L1 FEATURE: open_position
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.7
     -- Contract Reference: §2.2 (zero-range → NULL)
     -- Definition: (open - low) / (high - low)
     -- Domain: [0, 1]
@@ -159,8 +159,8 @@ SELECT
     END AS open_position,
 
     -- =========================================================================
-    -- C1 FEATURE: is_doji
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.8
+    -- L1 FEATURE: is_doji
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.8
     -- Contract Reference: §2.2 (zero-range → FALSE), §2.3 (flat-bar → TRUE)
     -- Definition: body_ratio <= 0.1
     -- Domain: {TRUE, FALSE}
@@ -176,8 +176,8 @@ SELECT
     END AS is_doji,
 
     -- =========================================================================
-    -- C1 FEATURE: is_full_body
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.9
+    -- L1 FEATURE: is_full_body
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.9
     -- Contract Reference: §2.2 (zero-range → FALSE)
     -- Definition: body_ratio >= 0.8
     -- Domain: {TRUE, FALSE}
@@ -193,8 +193,8 @@ SELECT
     END AS is_full_body,
 
     -- =========================================================================
-    -- C1 FEATURE: is_hammer_shape
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.10
+    -- L1 FEATURE: is_hammer_shape
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.10
     -- Contract Reference: §2.2 (zero-range → FALSE)
     -- Definition: lower_wick_ratio >= 0.6 AND upper_wick_ratio <= 0.1 AND body_ratio <= 0.3
     -- Domain: {TRUE, FALSE}
@@ -219,8 +219,8 @@ SELECT
     END AS is_hammer_shape,
 
     -- =========================================================================
-    -- C1 FEATURE: is_inverted_hammer_shape
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.11
+    -- L1 FEATURE: is_inverted_hammer_shape
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.11
     -- Contract Reference: §2.2 (zero-range → FALSE)
     -- Definition: upper_wick_ratio >= 0.6 AND lower_wick_ratio <= 0.1 AND body_ratio <= 0.3
     -- Domain: {TRUE, FALSE}
@@ -245,8 +245,8 @@ SELECT
     END AS is_inverted_hammer_shape,
 
     -- =========================================================================
-    -- C1 FEATURE: directional_efficiency
-    -- Spec Reference: OPTION_B_C1_FEATURES_v0.1.md §3.12
+    -- L1 FEATURE: directional_efficiency
+    -- Spec Reference: OPTION_B_L1_FEATURES_v0.1.md §3.12
     -- Contract Reference: §2.2 (zero-range → NULL), §2.3 (flat-bar → 0)
     -- Definition: (close - open) / (high - low)
     -- Domain: [-1, 1]
@@ -267,7 +267,7 @@ FROM ovc.ovc_blocks_v01_1_min;
 -- VALIDATION QUERIES (for fixture testing)
 -- =============================================================================
 -- Uncomment and run these queries to validate against mandatory fixtures
--- per OPTION_B_C1_IMPLEMENTATION_CONTRACT_v0.1.md §5.2
+-- per OPTION_B_L1_IMPLEMENTATION_CONTRACT_v0.1.md §5.2
 --
 -- -----------------------------------------------------------------------------
 -- FIXTURE: ZERO_RANGE_001 - Synthetic test (h = l = o = c)
@@ -318,7 +318,7 @@ FROM ovc.ovc_blocks_v01_1_min;
 --     is_doji,                       -- Expected: FALSE
 --     upper_wick_ratio,              -- Expected: 0.0
 --     lower_wick_ratio               -- Expected: 0.0
--- FROM derived.v_ovc_c1_features_v0_1
+-- FROM derived.v_ovc_l1_features_v0_1
 -- WHERE block_id = '<INSERT_PURE_BULL_BLOCK_ID>';
 --
 -- -----------------------------------------------------------------------------
@@ -333,19 +333,19 @@ FROM ovc.ovc_blocks_v01_1_min;
 --     is_doji,                       -- Expected: FALSE
 --     upper_wick_ratio,              -- Expected: 0.0
 --     lower_wick_ratio               -- Expected: 0.0
--- FROM derived.v_ovc_c1_features_v0_1
+-- FROM derived.v_ovc_l1_features_v0_1
 -- WHERE block_id = '<INSERT_PURE_BEAR_BLOCK_ID>';
 --
 -- -----------------------------------------------------------------------------
--- SAMPLE: View first 10 rows with all C1 features
+-- SAMPLE: View first 10 rows with all L1 features
 -- -----------------------------------------------------------------------------
--- SELECT * FROM derived.v_ovc_c1_features_v0_1 LIMIT 10;
+-- SELECT * FROM derived.v_ovc_l1_features_v0_1 LIMIT 10;
 --
 -- -----------------------------------------------------------------------------
 -- SAMPLE: Count of doji bars
 -- -----------------------------------------------------------------------------
 -- SELECT COUNT(*) AS doji_count
--- FROM derived.v_ovc_c1_features_v0_1
+-- FROM derived.v_ovc_l1_features_v0_1
 -- WHERE is_doji = TRUE;
 --
 -- =============================================================================

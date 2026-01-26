@@ -21,17 +21,17 @@ flowchart TB
 
   %% Compute Scripts
   subgraph COMPUTE[src/derived/ compute]
-    S_C1[S_C1: compute_c1_v0_1.py]
-    S_C2[S_C2: compute_c2_v0_1.py]
-    S_C3[S_C3: compute_c3_regime_trend_v0_1.py<br/>NOT INVOKED]
-    S_STUB[S_STUB: compute_c3_stub_v0_1.py]
+    S_C1[S_C1: compute_l1_v0_1.py]
+    S_C2[S_C2: compute_l2_v0_1.py]
+    S_C3[S_C3: compute_l3_regime_trend_v0_1.py<br/>NOT INVOKED]
+    S_STUB[S_STUB: compute_l3_stub_v0_1.py]
   end
 
   %% SQL Views
   subgraph VIEWS[sql/derived/ views]
-    V_C1[V_C1: v_ovc_c1_features_v0_1.sql]
-    V_C2[V_C2: v_ovc_c2_features_v0_1.sql]
-    V_C3[V_C3: v_ovc_c3_features_v0_1.sql]
+    V_C1[V_C1: v_ovc_l1_features_v0_1.sql]
+    V_C2[V_C2: v_ovc_l2_features_v0_1.sql]
+    V_C3[V_C3: v_ovc_l3_features_v0_1.sql]
     V_SP[V_SP: v_ovc_state_plane_v0_2.sql]
   end
 
@@ -59,9 +59,9 @@ flowchart TB
 
   %% Outputs
   subgraph OUT[Derived Outputs]
-    O_C1[O_C1: derived.ovc_c1_features]
-    O_C2[O_C2: derived.ovc_c2_features]
-    O_C3[O_C3: derived.ovc_c3_features]
+    O_C1[O_C1: derived.ovc_l1_features]
+    O_C2[O_C2: derived.ovc_l2_features]
+    O_C3[O_C3: derived.ovc_l3_features]
   end
 
   %% Workflow → Compute
@@ -120,13 +120,13 @@ flowchart TB
 |---------|-----------|----------|
 | WF_VALIDATE | .github/workflows/backfill_then_validate.yml | Orchestration (DORMANT) |
 | I_BLOCKS | ovc.ovc_blocks_v01_1_min | Input (Option A) |
-| S_C1 | src/derived/compute_c1_v0_1.py | Pipelines |
-| S_C2 | src/derived/compute_c2_v0_1.py | Pipelines |
-| S_C3 | src/derived/compute_c3_regime_trend_v0_1.py | Pipelines (NOT INVOKED) |
-| S_STUB | src/derived/compute_c3_stub_v0_1.py | Pipelines |
-| V_C1 | sql/derived/v_ovc_c1_features_v0_1.sql | Data Stores |
-| V_C2 | sql/derived/v_ovc_c2_features_v0_1.sql | Data Stores |
-| V_C3 | sql/derived/v_ovc_c3_features_v0_1.sql | Data Stores |
+| S_C1 | src/derived/compute_l1_v0_1.py | Pipelines |
+| S_C2 | src/derived/compute_l2_v0_1.py | Pipelines |
+| S_C3 | src/derived/compute_l3_regime_trend_v0_1.py | Pipelines (NOT INVOKED) |
+| S_STUB | src/derived/compute_l3_stub_v0_1.py | Pipelines |
+| V_C1 | sql/derived/v_ovc_l1_features_v0_1.sql | Data Stores |
+| V_C2 | sql/derived/v_ovc_l2_features_v0_1.sql | Data Stores |
+| V_C3 | sql/derived/v_ovc_l3_features_v0_1.sql | Data Stores |
 | V_SP | sql/derived/v_ovc_state_plane_v0_2.sql | Data Stores |
 | TF_FP | trajectory_families/fingerprint.py | Models |
 | TF_CLUSTER | trajectory_families/clustering.py | Models |
@@ -138,6 +138,6 @@ flowchart TB
 | SQL_C3 | sql/05_c3_regime_trend_v0_1.sql | Data Stores |
 | SQL_REG | sql/04_threshold_registry_v0_1.sql | Registries |
 | SQL_SP | sql/06_state_plane_threshold_pack_v0_2.sql | Data Stores |
-| O_C1 | derived.ovc_c1_features | Data Stores (CANONICAL) |
-| O_C2 | derived.ovc_c2_features | Data Stores (CANONICAL) |
-| O_C3 | derived.ovc_c3_features | Data Stores (CANONICAL) |
+| O_C1 | derived.ovc_l1_features | Data Stores (CANONICAL) |
+| O_C2 | derived.ovc_l2_features | Data Stores (CANONICAL) |
+| O_C3 | derived.ovc_l3_features | Data Stores (CANONICAL) |

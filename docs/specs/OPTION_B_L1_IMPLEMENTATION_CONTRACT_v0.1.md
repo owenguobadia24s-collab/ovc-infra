@@ -1,8 +1,8 @@
-# Option B – C1 Implementation Contract v0.1
+# Option B – L1 Implementation Contract v0.1
 
 [CHANGE][CHANGED] [STATUS: CANONICAL]
 
-> **Binding Statement:** This document governs HOW C1 features must be implemented.
+> **Binding Statement:** This document governs HOW L1 features must be implemented.
 > All code (SQL, Python, or other) must comply with these rules.
 
 > **Enforcement (2026-01-20):**  
@@ -17,7 +17,7 @@
 
 | Property | Value |
 |----------|-------|
-| Feature Definitions | [OPTION_B_C1_FEATURES_v0.1.md](OPTION_B_C1_FEATURES_v0.1.md) |
+| Feature Definitions | [OPTION_B_L1_FEATURES_v0.1.md](OPTION_B_L1_FEATURES_v0.1.md) |
 | Implementation Rules | This document |
 | Governance | [GOVERNANCE_RULES_v0.1.md](GOVERNANCE_RULES_v0.1.md) |
 
@@ -169,7 +169,7 @@ If ANY required input field is NULL, the derived feature MUST be NULL.
 | SQL type | INTEGER or BIGINT |
 | Python type | `int` or `None` |
 
-**Note:** C1 v0.1 defines no integer output features; this section reserves rules for future additions.
+**Note:** L1 v0.1 defines no integer output features; this section reserves rules for future additions.
 
 ### 3.4 Prohibited Implicit Casts
 
@@ -214,8 +214,8 @@ Implementations MUST NOT rely on implicit type conversion:
 Implementations MUST satisfy:
 
 ```
-DELETE FROM derived.ovc_c1_features_v0_1;
-INSERT INTO derived.ovc_c1_features_v0_1 (SELECT ...);
+DELETE FROM derived.ovc_l1_features_v0_1;
+INSERT INTO derived.ovc_l1_features_v0_1 (SELECT ...);
 -- Result MUST be identical to previous state
 ```
 
@@ -223,7 +223,7 @@ If recomputing from the same canonical source produces different results, the im
 
 ### 4.4 Idempotency Requirement
 
-Running the C1 computation multiple times MUST:
+Running the L1 computation multiple times MUST:
 - Produce identical output each time
 - Not accumulate side effects
 - Not depend on prior computation state
@@ -269,7 +269,7 @@ Test fixtures MUST include:
 | `fixture_id` | Unique identifier |
 | `description` | Human-readable purpose |
 | `input` | Complete row from canonical schema |
-| `expected` | All 12 C1 feature outputs |
+| `expected` | All 12 L1 feature outputs |
 | `rationale` | Why this output is correct |
 
 ### 5.4 Test Failure Protocol
@@ -286,7 +286,7 @@ Test fixtures MUST include:
 
 - All fixtures MUST be version-controlled
 - Fixture changes require review
-- CI MUST run all C1 tests on every PR touching derived schema
+- CI MUST run all L1 tests on every PR touching derived schema
 
 ---
 
@@ -306,7 +306,7 @@ Test fixtures MUST include:
 
 ### 6.2 Prerequisites for CANONICAL Status
 
-Before C1 implementation can be marked CANONICAL, ALL of the following must be true:
+Before L1 implementation can be marked CANONICAL, ALL of the following must be true:
 
 | Requirement | Verification |
 |-------------|--------------|
@@ -354,7 +354,7 @@ Once CANONICAL:
 
 ## 7. Compliance Checklist
 
-Before submitting C1 implementation for review, verify:
+Before submitting L1 implementation for review, verify:
 
 ### 7.1 Code Compliance
 
@@ -415,6 +415,6 @@ Is (high - low) = 0?
 ---
 
 *Document created: 2026-01-20*
-*Feature definitions: [OPTION_B_C1_FEATURES_v0.1.md](OPTION_B_C1_FEATURES_v0.1.md)*
+*Feature definitions: [OPTION_B_L1_FEATURES_v0.1.md](OPTION_B_L1_FEATURES_v0.1.md)*
 *Charter: [OPTION_B_CHARTER_v0.1.md](OPTION_B_CHARTER_v0.1.md)*
 *Governance: [GOVERNANCE_RULES_v0.1.md](GOVERNANCE_RULES_v0.1.md)*

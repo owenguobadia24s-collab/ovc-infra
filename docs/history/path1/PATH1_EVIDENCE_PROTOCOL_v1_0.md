@@ -61,7 +61,7 @@ Follow `docs/path1/EVIDENCE_RUNS_HOWTO.md` exactly.
 
 If (and only if) required due to schema drift / fresh environment:
 1) Apply DB patches
-2) Deploy canonical C1/C2/C3 feature views
+2) Deploy canonical L1/L2/L3 feature views
 3) Deploy Option C outcomes view
 4) Deploy Path 1 score views (frozen)
 5) Deploy evidence join views (read-only)

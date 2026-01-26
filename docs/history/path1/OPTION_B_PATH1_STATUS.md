@@ -47,9 +47,9 @@ All frozen scores in this library adhere to the following invariants:
 ### 3.2 Canonical-Input-Only
 
 - All inputs come from canonical views:
-  - `derived.v_ovc_c1_features_v0_1`
-  - `derived.v_ovc_c2_features_v0_1`
-  - `derived.v_ovc_c3_features_v0_1`
+  - `derived.v_ovc_l1_features_v0_1`
+  - `derived.v_ovc_l2_features_v0_1`
+  - `derived.v_ovc_l3_features_v0_1`
 - Outcome views (`derived.v_ovc_c_outcomes_v0_1`) are used in studies only, not in score construction
 
 ### 3.3 Association ≠ Predictability

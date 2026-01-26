@@ -96,7 +96,7 @@ Derived data is:
 
 Examples:
 - `ovc.ovc_blocks_v01_1_min` (canonical)
-- `derived.ovc_c1_features_v0_1` (derived table)
+- `derived.ovc_l1_features_v0_1` (derived table)
 - `derived.v_ovc_c_outcomes_v0_1` (derived view, prefix `v_`)
 
 ### 5.2 Script Naming
@@ -106,7 +106,7 @@ Examples:
 ```
 
 Examples:
-- `compute_c1_v0_1.py`
+- `compute_l1_v0_1.py`
 - `build_evidence_pack_v0_2.py`
 
 ### 5.3 Version Bumping
@@ -156,7 +156,7 @@ The output MUST be bit-for-bit identical (within defined tolerance for floats).
 |-------|---------------|
 | Option A | External sources only |
 | Option B | `ovc.ovc_blocks_v01_1_min`, `ovc_cfg.threshold_*` |
-| Option C | `derived.v_ovc_c1_features_v0_1`, `derived.v_ovc_c2_features_v0_1`, `derived.v_ovc_c3_features_v0_1` |
+| Option C | `derived.v_ovc_l1_features_v0_1`, `derived.v_ovc_l2_features_v0_1`, `derived.v_ovc_l3_features_v0_1` |
 | QA | All layers (read-only validation) |
 | Option D (Path1) | `derived.v_ovc_c_outcomes_v0_1`, `ovc.ovc_blocks_v01_1_min` (spine), `ovc.ovc_candles_m15_raw` (overlay) |
 

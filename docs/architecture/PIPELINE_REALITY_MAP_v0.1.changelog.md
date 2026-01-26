@@ -87,9 +87,9 @@ Additionally, all scripts are instrumented with `RunWriter`:
 | Script | Import Line | Instantiation |
 |--------|-------------|---------------|
 | `backfill_oanda_2h_checkpointed.py` | 18 | 49, 529 |
-| `compute_c1_v0_1.py` | 42 | 355 |
-| `compute_c2_v0_1.py` | 46 | 569 |
-| `compute_c3_regime_trend_v0_1.py` | 86 | 419 |
+| `compute_l1_v0_1.py` | 42 | 355 |
+| `compute_l2_v0_1.py` | 46 | 569 |
+| `compute_l3_regime_trend_v0_1.py` | 86 | 419 |
 | `validate_derived_range_v0_1.py` | 55 | 1072 |
 | `validate_day.py` | 16 | 408 |
 | `validate_range.py` | 23 | 677 |
@@ -105,7 +105,7 @@ Additionally, all scripts are instrumented with `RunWriter`:
 | G4 | UNKNOWN | Open | Worker secrets status unverifiable without Cloudflare dashboard |
 | G5 | DORMANT | Open | `backfill_then_validate.yml` has no schedule (manual only) |
 | G6 | DORMANT | Open | `ovc_full_ingest.yml` has no schedule (stub workflow) |
-| G7 | PARTIAL | Open | C3 not integrated into any workflow |
+| G7 | PARTIAL | Open | L3 not integrated into any workflow |
 
 ---
 

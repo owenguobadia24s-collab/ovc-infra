@@ -4,7 +4,7 @@
 > **NO FEEDBACK INTO CANONICAL** — Findings do not alter Option B/C definitions.
 
 > ⚠️ **DISCLAIMER:** Results below are **descriptive only**. No predictive claims are made.
-> C3 trend bias categories are for **reporting purposes only** — not trade filters or state recommendations.
+> L3 trend bias categories are for **reporting purposes only** — not trade filters or state recommendations.
 
 ## Summary Statistics
 
@@ -21,15 +21,15 @@
 
 | Field | Source |
 |-------|--------|
-| `c3_trend_bias` | `derived.ovc_block_features_v0_1` (canonical C3) |
+| `l3_trend_bias` | `derived.ovc_block_features_v0_1` (canonical L3) |
 
-**Note:** This study uses `c3_trend_bias` as-is from the canonical C3 layer. No definition or computation of trend bias is performed here.
+**Note:** This study uses `l3_trend_bias` as-is from the canonical L3 layer. No definition or computation of trend bias is performed here.
 
 ---
 
-## Category Counts (c3_trend_bias)
+## Category Counts (l3_trend_bias)
 
-| c3_trend_bias | N Blocks | % of Total |
+| l3_trend_bias | N Blocks | % of Total |
 |---------------|----------|------------|
 | _[CATEGORY_1]_ | _[PENDING]_ | _[PENDING]_ |
 | _[CATEGORY_2]_ | _[PENDING]_ | _[PENDING]_ |
@@ -44,9 +44,9 @@
 
 ## Primary Results
 
-### Correlations per c3_trend_bias (Score vs Outcome)
+### Correlations per l3_trend_bias (Score vs Outcome)
 
-| c3_trend_bias | N | corr(score, fwd_ret_3) | corr(score, mfe_3) | corr(score, mae_3) |
+| l3_trend_bias | N | corr(score, fwd_ret_3) | corr(score, mfe_3) | corr(score, mae_3) |
 |---------------|---|------------------------|--------------------|--------------------|
 | _[CATEGORY_1]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
 | _[CATEGORY_2]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
@@ -61,7 +61,7 @@
 
 ---
 
-## Bucket Summaries per c3_trend_bias
+## Bucket Summaries per l3_trend_bias
 
 ### _[CATEGORY_1]_
 
@@ -98,15 +98,15 @@
 
 _[Additional category tables to be added at execution time based on observed categories]_
 
-**Note:** Score bucket edges are computed over the **full sample** and applied identically across all c3_trend_bias categories.
+**Note:** Score bucket edges are computed over the **full sample** and applied identically across all l3_trend_bias categories.
 
 ---
 
-## Tail Comparison per c3_trend_bias
+## Tail Comparison per l3_trend_bias
 
 ### Top Decile (Score Bucket 90-100) vs Bottom Decile (Score Bucket 0-10)
 
-| c3_trend_bias | Tail | N | mean(fwd_ret_3) | mean(mfe_3) | mean(mae_3) |
+| l3_trend_bias | Tail | N | mean(fwd_ret_3) | mean(mfe_3) | mean(mae_3) |
 |---------------|------|---|-----------------|-------------|-------------|
 | _[CATEGORY_1]_ | Bottom (0-10) | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
 | _[CATEGORY_1]_ | Top (90-100) | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
@@ -122,9 +122,9 @@ _[Additional category tables to be added at execution time based on observed cat
 
 ---
 
-## Score Distribution by c3_trend_bias
+## Score Distribution by l3_trend_bias
 
-| c3_trend_bias | N | mean(score) | std(score) | min | P25 | P50 | P75 | max |
+| l3_trend_bias | N | mean(score) | std(score) | min | P25 | P50 | P75 | max |
 |---------------|---|-------------|------------|-----|-----|-----|-----|-----|
 | _[CATEGORY_1]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
 | _[CATEGORY_2]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
@@ -132,11 +132,11 @@ _[Additional category tables to be added at execution time based on observed cat
 
 ---
 
-## Outcome Distribution by c3_trend_bias
+## Outcome Distribution by l3_trend_bias
 
 ### fwd_ret_3
 
-| c3_trend_bias | N | mean | std | min | P25 | P50 | P75 | max |
+| l3_trend_bias | N | mean | std | min | P25 | P50 | P75 | max |
 |---------------|---|------|-----|-----|-----|-----|-----|-----|
 | _[CATEGORY_1]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
 | _[CATEGORY_2]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
@@ -144,7 +144,7 @@ _[Additional category tables to be added at execution time based on observed cat
 
 ### mfe_3
 
-| c3_trend_bias | N | mean | std | min | P25 | P50 | P75 | max |
+| l3_trend_bias | N | mean | std | min | P25 | P50 | P75 | max |
 |---------------|---|------|-----|-----|-----|-----|-----|-----|
 | _[CATEGORY_1]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
 | _[CATEGORY_2]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
@@ -152,7 +152,7 @@ _[Additional category tables to be added at execution time based on observed cat
 
 ### mae_3
 
-| c3_trend_bias | N | mean | std | min | P25 | P50 | P75 | max |
+| l3_trend_bias | N | mean | std | min | P25 | P50 | P75 | max |
 |---------------|---|------|-----|-----|-----|-----|-----|-----|
 | _[CATEGORY_1]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
 | _[CATEGORY_2]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ | _[PENDING]_ |
@@ -164,14 +164,14 @@ _[Additional category tables to be added at execution time based on observed cat
 
 1. **No Predictive Claim:** These results describe historical associations. They do NOT predict future outcomes.
 
-2. **Categories Are Reporting Only:** C3 trend bias categories are descriptive partitions for organizing results. They are NOT trade filters, entry conditions, or state recommendations.
+2. **Categories Are Reporting Only:** L3 trend bias categories are descriptive partitions for organizing results. They are NOT trade filters, entry conditions, or state recommendations.
 
-3. **No Category Ranking:** Results do NOT identify any c3_trend_bias state as "better" or "worse" for trading. Differences are descriptive, not prescriptive.
+3. **No Category Ranking:** Results do NOT identify any l3_trend_bias state as "better" or "worse" for trading. Differences are descriptive, not prescriptive.
 
 4. **Association ≠ Predictability:** Observing different correlations across categories does NOT imply the score predicts outcomes in any category.
 
 5. **Conditioning ≠ Tradability:** Conditioning analysis describes statistical patterns; it does NOT imply actionable opportunity.
 
-6. **No C3 Definition Work:** This study uses `c3_trend_bias` as-is from canonical C3. No definition, computation, or modification of trend bias logic is performed.
+6. **No L3 Definition Work:** This study uses `l3_trend_bias` as-is from canonical L3. No definition, computation, or modification of trend bias logic is performed.
 
 7. **Non-Canonical:** This study is a downstream research artifact. Results do NOT modify canonical Option B/C definitions.

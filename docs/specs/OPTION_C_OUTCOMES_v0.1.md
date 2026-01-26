@@ -33,7 +33,7 @@ Outcomes are **facts about the future relative to a past moment**, computed only
 
 | Concept      | Definition                                          | Layer           |
 |--------------|-----------------------------------------------------|-----------------|
-| **Signal**   | A descriptive condition or pattern at time T        | Option B (C2/C3)|
+| **Signal**   | A descriptive condition or pattern at time T        | Option B (L2/L3)|
 | **Outcome**  | What happened after time T                          | Option C        |
 | **Decision** | An action taken based on signals and/or outcomes    | NOT IN SCOPE    |
 
@@ -66,9 +66,9 @@ Option C outcomes MAY be computed using:
 
 | Source | Layer | Description                              |
 |--------|-------|------------------------------------------|
-| C1     | B     | Canonical block-level facts              |
-| C2     | B     | Canonical derived features               |
-| C3     | B     | Canonical semantic labels and regime     |
+| L1     | B     | Canonical block-level facts              |
+| L2     | B     | Canonical derived features               |
+| L3     | B     | Canonical semantic labels and regime     |
 
 Outcomes reference **Option B outputs** to establish the "anchor point" from which forward measurement begins.
 
@@ -76,7 +76,7 @@ Outcomes reference **Option B outputs** to establish the "anchor point" from whi
 
 Option C outcomes **SHALL NOT**:
 
-- Modify any C1, C2, or C3 output
+- Modify any L1, L2, or L3 output
 - Write to any Option B schema
 - Influence Option B computation in any way
 - Be consumed by Option B layers
@@ -84,7 +84,7 @@ Option C outcomes **SHALL NOT**:
 The relationship is strictly **one-directional**:
 
 ```
-Option B (C1 → C2 → C3) → Option C Outcomes
+Option B (L1 → L2 → L3) → Option C Outcomes
                               ↓
                          (terminal, no feedback)
 ```
@@ -257,7 +257,7 @@ where ret[i] = (close[i] - close[i-1]) / close[i-1]
 
 **What It Does NOT Mean**:
 - Does NOT predict future volatility
-- Does NOT indicate regime (that is C3's domain)
+- Does NOT indicate regime (that is L3's domain)
 - Does NOT account for intrabar volatility (only close-to-close)
 
 **Edge Cases**:

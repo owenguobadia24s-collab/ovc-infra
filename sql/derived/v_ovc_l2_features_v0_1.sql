@@ -1,27 +1,27 @@
 -- =============================================================================
--- VIEW: derived.v_ovc_c2_features_v0_1
+-- VIEW: derived.v_ovc_l2_features_v0_1
 -- =============================================================================
--- This view implements OPTION_B_C2_FEATURES_v0.1.md and is governed by
--- OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md
+-- This view implements OPTION_B_L2_FEATURES_v0.1.md and is governed by
+-- OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md
 --
 -- Source of Truth:
---   - Feature Definitions: docs/ops/OPTION_B_C2_FEATURES_v0.1.md
---   - Implementation Contract: docs/ops/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md
---   - Charter: docs/ops/OPTION_B_C2_CHARTER_v0.1.md
+--   - Feature Definitions: docs/ops/OPTION_B_L2_FEATURES_v0.1.md
+--   - Implementation Contract: docs/ops/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md
+--   - Charter: docs/ops/OPTION_B_L2_CHARTER_v0.1.md
 --   - Governance: docs/ops/GOVERNANCE_RULES_v0.1.md
 --
--- C2 Feature Set (per OPTION_B_C2_FEATURES_v0.1.md §4.1):
---   C2-01: rng_avg_3         - Rolling mean of rng (3-bar)
---   C2-02: rng_avg_6         - Rolling mean of rng (6-bar)
---   C2-03: dir_streak        - Consecutive same-direction count (signed)
---   C2-04: session_block_idx - Session position (1-12 from block letter)
---   C2-05: session_rng_cum   - Cumulative session range
---   C2-06: session_dir_net   - Net directional count in session
---   C2-07: rng_rank_6        - Percentile rank of rng (6-bar)
---   C2-08: body_rng_pct_avg_3 - Rolling mean of body/rng % (3-bar)
+-- L2 Feature Set (per OPTION_B_L2_FEATURES_v0.1.md §4.1):
+--   L2-01: rng_avg_3         - Rolling mean of rng (3-bar)
+--   L2-02: rng_avg_6         - Rolling mean of rng (6-bar)
+--   L2-03: dir_streak        - Consecutive same-direction count (signed)
+--   L2-04: session_block_idx - Session position (1-12 from block letter)
+--   L2-05: session_rng_cum   - Cumulative session range
+--   L2-06: session_dir_net   - Net directional count in session
+--   L2-07: rng_rank_6        - Percentile rank of rng (6-bar)
+--   L2-08: body_rng_pct_avg_3 - Rolling mean of body/rng % (3-bar)
 --
 -- Compliance:
---   - Reads from CANONICAL C1 view + canonical blocks (per Charter §2.1)
+--   - Reads from CANONICAL L1 view + canonical blocks (per Charter §2.1)
 --   - Current bar INCLUDED in all windows (per Contract §2.1)
 --   - Lookback-only computation (per Charter §2.3)
 --   - Fixed N-bar windows may cross sessions (per Contract §2.2.2)
@@ -35,20 +35,20 @@
 --
 -- Created: 2026-01-20
 -- Validated: 2026-01-20 (reports/validation/C2_v0_1_validation.md)
--- Status: [CANONICAL] - All fixtures pass; C2 features frozen
+-- Status: [CANONICAL] - All fixtures pass; L2 features frozen
 -- =============================================================================
 
 -- Ensure schema exists
 CREATE SCHEMA IF NOT EXISTS derived;
 
 -- Drop existing view if present (for idempotent deployment)
-DROP VIEW IF EXISTS derived.v_ovc_c2_features_v0_1;
+DROP VIEW IF EXISTS derived.v_ovc_l2_features_v0_1;
 
-CREATE VIEW derived.v_ovc_c2_features_v0_1 AS
+CREATE VIEW derived.v_ovc_l2_features_v0_1 AS
 WITH 
 -- =============================================================================
 -- CTE: base_data
--- Join canonical blocks with C1 features and extract session info
+-- Join canonical blocks with L1 features and extract session info
 -- =============================================================================
 base_data AS (
     SELECT
@@ -61,11 +61,11 @@ base_data AS (
         b.h,
         b.l,
         b.c,
-        -- C1 passthrough fields (prefer canonical block values per spec)
+        -- L1 passthrough fields (prefer canonical block values per spec)
         b.rng,
         b.dir,
         -- Compute body_rng_pct from canonical fields
-        -- Per OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-08): requires C1 body_rng_pct
+        -- Per OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-08): requires L1 body_rng_pct
         -- Derivation: body / rng * 100 (percentage)
         CASE 
             WHEN b.rng IS NULL OR b.rng = 0 THEN NULL
@@ -74,8 +74,8 @@ base_data AS (
         END AS body_rng_pct,
         
         -- =================================================================
-        -- C2-04: session_block_idx
-        -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-04)
+        -- L2-04: session_block_idx
+        -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-04)
         -- Contract Reference: §4 (justification for canonical block access)
         -- Definition: Map block letter (from block_id) to index 1-12
         --   block_id format: YYYYMMDD-{A-L}-{SYM}
@@ -134,8 +134,8 @@ windowed_data AS (
         ) AS window_6_count,
         
         -- =================================================================
-        -- C2-01: rng_avg_3 (intermediate: sum of rng in 3-bar window)
-        -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-01)
+        -- L2-01: rng_avg_3 (intermediate: sum of rng in 3-bar window)
+        -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-01)
         -- Contract Reference: §2.1 (current bar included), §2.3 (partial → NULL)
         -- Window: Fixed 3-bar (current + 2 prior)
         -- =================================================================
@@ -153,8 +153,8 @@ windowed_data AS (
         ) AS rng_count_3,
         
         -- =================================================================
-        -- C2-02: rng_avg_6 (intermediate: sum of rng in 6-bar window)
-        -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-02)
+        -- L2-02: rng_avg_6 (intermediate: sum of rng in 6-bar window)
+        -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-02)
         -- Contract Reference: §2.1 (current bar included), §2.3 (partial → NULL)
         -- Window: Fixed 6-bar (current + 5 prior)
         -- =================================================================
@@ -172,8 +172,8 @@ windowed_data AS (
         ) AS rng_count_6,
         
         -- =================================================================
-        -- C2-08: body_rng_pct_avg_3 (intermediate: sum of body_rng_pct)
-        -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-08)
+        -- L2-08: body_rng_pct_avg_3 (intermediate: sum of body_rng_pct)
+        -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-08)
         -- Contract Reference: §2.1 (current bar included), §3.1 (NULL propagation)
         -- Window: Fixed 3-bar (current + 2 prior)
         -- =================================================================
@@ -191,8 +191,8 @@ windowed_data AS (
         ) AS body_rng_pct_count_3,
         
         -- =================================================================
-        -- C2-07: rng_rank_6 (intermediate: count of prior bars with rng < current)
-        -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-07)
+        -- L2-07: rng_rank_6 (intermediate: count of prior bars with rng < current)
+        -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-07)
         -- Contract Reference: §4.2.1 (strict less-than), §4.2.3 (ties excluded)
         -- Definition: count(rng[t-5:t-1] where rng[k] < rng[t]) / 5
         -- Window: Fixed 6-bar, rank against 5 prior bars
@@ -208,8 +208,8 @@ windowed_data AS (
         LAG(rng, 5) OVER (PARTITION BY sym ORDER BY bar_close_ms) AS rng_lag_5,
         
         -- =================================================================
-        -- C2-03: dir_streak (intermediate: prior direction and streak)
-        -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-03)
+        -- L2-03: dir_streak (intermediate: prior direction and streak)
+        -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-03)
         -- Contract Reference: §4.1 (signed direction, reset conditions)
         -- =================================================================
         LAG(dir, 1) OVER (PARTITION BY sym ORDER BY bar_close_ms) AS prev_dir,
@@ -219,8 +219,8 @@ windowed_data AS (
         -- Contract §2.2.3: STD windows reset at session start (block A)
         -- =================================================================
         
-        -- C2-05: session_rng_cum
-        -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-05)
+        -- L2-05: session_rng_cum
+        -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-05)
         -- Definition: sum(rng[session_start:t])
         SUM(CAST(rng AS DOUBLE PRECISION)) OVER (
             PARTITION BY sym, session_date
@@ -235,8 +235,8 @@ windowed_data AS (
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
         ) AS session_rng_count,
         
-        -- C2-06: session_dir_net
-        -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-06)
+        -- L2-06: session_dir_net
+        -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-06)
         -- Definition: sum(dir[session_start:t])
         SUM(dir) OVER (
             PARTITION BY sym, session_date
@@ -270,7 +270,7 @@ streak_calc AS (
         wd.*,
         
         -- =================================================================
-        -- C2-03: dir_streak calculation
+        -- L2-03: dir_streak calculation
         -- Contract §4.1.2 Algorithm:
         --   if dir[t] == 0: streak = 0
         --   else if dir[t] == dir[t-1] and streak[t-1] != 0: increment
@@ -302,7 +302,7 @@ streak_final AS (
         sc.*,
         
         -- =================================================================
-        -- C2-03: dir_streak final calculation
+        -- L2-03: dir_streak final calculation
         -- Contract §4.1.1: Sign matches dir[t]
         -- Contract §4.1.3: Reset to ±1 when direction changes
         -- Contract §4.1.4: Capped at ±12
@@ -326,7 +326,7 @@ streak_final AS (
 )
 
 -- =============================================================================
--- FINAL SELECT: Compute all C2 features
+-- FINAL SELECT: Compute all L2 features
 -- =============================================================================
 SELECT
     -- Identity columns
@@ -345,8 +345,8 @@ SELECT
     sf.dir,
     
     -- =========================================================================
-    -- C2-01: rng_avg_3
-    -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-01)
+    -- L2-01: rng_avg_3
+    -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-01)
     -- Contract Reference: §2.3 (partial window → NULL), §3.1 (NULL propagation)
     -- Definition: Rolling arithmetic mean of rng over last 3 bars
     -- Formula: (rng[t] + rng[t-1] + rng[t-2]) / 3
@@ -362,8 +362,8 @@ SELECT
     END AS rng_avg_3,
     
     -- =========================================================================
-    -- C2-02: rng_avg_6
-    -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-02)
+    -- L2-02: rng_avg_6
+    -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-02)
     -- Contract Reference: §2.3 (partial window → NULL), §3.1 (NULL propagation)
     -- Definition: Rolling arithmetic mean of rng over last 6 bars
     -- Formula: sum(rng[t-5:t]) / 6
@@ -379,8 +379,8 @@ SELECT
     END AS rng_avg_6,
     
     -- =========================================================================
-    -- C2-03: dir_streak
-    -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-03)
+    -- L2-03: dir_streak
+    -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-03)
     -- Contract Reference: §4.1 (full algorithm specification)
     -- Definition: Count of consecutive bars with same direction, signed
     -- Domain: [-12, +12], Units: bars (signed)
@@ -388,8 +388,8 @@ SELECT
     sf.dir_streak,
     
     -- =========================================================================
-    -- C2-04: session_block_idx
-    -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-04)
+    -- L2-04: session_block_idx
+    -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-04)
     -- Contract Reference: §3.2 (NULL handling for invalid block_id)
     -- Definition: Position of current bar within session (1-indexed)
     -- Formula: Map block letter to index: A→1, B→2, ..., L→12
@@ -398,8 +398,8 @@ SELECT
     sf.session_block_idx,
     
     -- =========================================================================
-    -- C2-05: session_rng_cum
-    -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-05)
+    -- L2-05: session_rng_cum
+    -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-05)
     -- Contract Reference: §2.2.3 (STD window reset at block A), §3.3.3 (session start)
     -- Definition: Cumulative sum of bar ranges within current session
     -- Formula: sum(rng[session_start:t])
@@ -417,8 +417,8 @@ SELECT
     END AS session_rng_cum,
     
     -- =========================================================================
-    -- C2-06: session_dir_net
-    -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-06)
+    -- L2-06: session_dir_net
+    -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-06)
     -- Contract Reference: §2.2.3 (STD window reset), §3.3.3 (session start)
     -- Definition: Net directional count within current session
     -- Formula: sum(dir[session_start:t])
@@ -435,8 +435,8 @@ SELECT
     END AS session_dir_net,
     
     -- =========================================================================
-    -- C2-07: rng_rank_6
-    -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-07)
+    -- L2-07: rng_rank_6
+    -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-07)
     -- Contract Reference: §4.2.1 (strict less-than), §4.2.3 (ties excluded)
     -- Definition: Percentile rank of current bar's range within last 6 bars
     -- Formula: count(rng[t-5:t-1] where rng[k] < rng[t]) / 5
@@ -462,8 +462,8 @@ SELECT
     END AS rng_rank_6,
     
     -- =========================================================================
-    -- C2-08: body_rng_pct_avg_3
-    -- Spec Reference: OPTION_B_C2_FEATURES_v0.1.md §4.2 (C2-08)
+    -- L2-08: body_rng_pct_avg_3
+    -- Spec Reference: OPTION_B_L2_FEATURES_v0.1.md §4.2 (L2-08)
     -- Contract Reference: §2.3 (partial window → NULL), §3.1 (NULL propagation)
     -- Definition: Rolling mean of body-to-range percentage over last 3 bars
     -- Formula: sum(body_rng_pct[t-2:t]) / 3
@@ -492,32 +492,32 @@ ORDER BY sf.sym, sf.bar_close_ms;
 -- =============================================================================
 -- VIEW COMMENTS
 -- =============================================================================
-COMMENT ON VIEW derived.v_ovc_c2_features_v0_1 IS 
-'C2 multi-bar features per OPTION_B_C2_FEATURES_v0.1.md. Status: ACTIVE (not CANONICAL).';
+COMMENT ON VIEW derived.v_ovc_l2_features_v0_1 IS 
+'L2 multi-bar features per OPTION_B_L2_FEATURES_v0.1.md. Status: ACTIVE (not CANONICAL).';
 
-COMMENT ON COLUMN derived.v_ovc_c2_features_v0_1.rng_avg_3 IS 
-'C2-01: Rolling mean of rng over 3 bars. Contract §2.3: partial→NULL.';
+COMMENT ON COLUMN derived.v_ovc_l2_features_v0_1.rng_avg_3 IS 
+'L2-01: Rolling mean of rng over 3 bars. Contract §2.3: partial→NULL.';
 
-COMMENT ON COLUMN derived.v_ovc_c2_features_v0_1.rng_avg_6 IS 
-'C2-02: Rolling mean of rng over 6 bars. Contract §2.3: partial→NULL.';
+COMMENT ON COLUMN derived.v_ovc_l2_features_v0_1.rng_avg_6 IS 
+'L2-02: Rolling mean of rng over 6 bars. Contract §2.3: partial→NULL.';
 
-COMMENT ON COLUMN derived.v_ovc_c2_features_v0_1.dir_streak IS 
-'C2-03: Consecutive same-direction bars, signed. Contract §4.1: flat→0, cap ±12.';
+COMMENT ON COLUMN derived.v_ovc_l2_features_v0_1.dir_streak IS 
+'L2-03: Consecutive same-direction bars, signed. Contract §4.1: flat→0, cap ±12.';
 
-COMMENT ON COLUMN derived.v_ovc_c2_features_v0_1.session_block_idx IS 
-'C2-04: Position in session 1-12 (A→1, L→12). Contract §3.2: invalid→NULL.';
+COMMENT ON COLUMN derived.v_ovc_l2_features_v0_1.session_block_idx IS 
+'L2-04: Position in session 1-12 (A→1, L→12). Contract §3.2: invalid→NULL.';
 
-COMMENT ON COLUMN derived.v_ovc_c2_features_v0_1.session_rng_cum IS 
-'C2-05: Cumulative session range. Contract §2.2.3: resets at block A.';
+COMMENT ON COLUMN derived.v_ovc_l2_features_v0_1.session_rng_cum IS 
+'L2-05: Cumulative session range. Contract §2.2.3: resets at block A.';
 
-COMMENT ON COLUMN derived.v_ovc_c2_features_v0_1.session_dir_net IS 
-'C2-06: Net directional count in session. Contract §2.2.3: resets at block A.';
+COMMENT ON COLUMN derived.v_ovc_l2_features_v0_1.session_dir_net IS 
+'L2-06: Net directional count in session. Contract §2.2.3: resets at block A.';
 
-COMMENT ON COLUMN derived.v_ovc_c2_features_v0_1.rng_rank_6 IS 
-'C2-07: Percentile rank of rng in 6-bar window. Contract §4.2: strict <, ties excluded.';
+COMMENT ON COLUMN derived.v_ovc_l2_features_v0_1.rng_rank_6 IS 
+'L2-07: Percentile rank of rng in 6-bar window. Contract §4.2: strict <, ties excluded.';
 
-COMMENT ON COLUMN derived.v_ovc_c2_features_v0_1.body_rng_pct_avg_3 IS 
-'C2-08: Rolling mean of body/rng % over 3 bars. Contract §3.1: NULL propagation.';
+COMMENT ON COLUMN derived.v_ovc_l2_features_v0_1.body_rng_pct_avg_3 IS 
+'L2-08: Rolling mean of body/rng % over 3 bars. Contract §3.1: NULL propagation.';
 
 
 -- =============================================================================
@@ -535,7 +535,7 @@ SELECT
     window_3_count, rng_avg_3,      -- Should be NULL when window_3_count < 3
     window_6_count, rng_avg_6,      -- Should be NULL when window_6_count < 6
     rng_rank_6                       -- Should be NULL when window_6_count < 6
-FROM derived.v_ovc_c2_features_v0_1
+FROM derived.v_ovc_l2_features_v0_1
 WHERE sym = 'GBPUSD'
 ORDER BY bar_close_ms
 LIMIT 10;
@@ -551,7 +551,7 @@ SELECT
     rng_avg_3,           -- Should span across session boundary
     session_rng_cum,     -- Should reset at session_block_idx = 1
     session_dir_net      -- Should reset at session_block_idx = 1
-FROM derived.v_ovc_c2_features_v0_1
+FROM derived.v_ovc_l2_features_v0_1
 WHERE sym = 'GBPUSD'
   AND session_block_idx IN (11, 12, 1, 2)  -- Around session boundary
 ORDER BY bar_close_ms
@@ -567,7 +567,7 @@ SELECT
     dir_streak,
     LAG(dir) OVER (PARTITION BY sym ORDER BY bar_close_ms) AS prev_dir,
     LAG(dir_streak) OVER (PARTITION BY sym ORDER BY bar_close_ms) AS prev_streak
-FROM derived.v_ovc_c2_features_v0_1
+FROM derived.v_ovc_l2_features_v0_1
 WHERE sym = 'GBPUSD'
 ORDER BY bar_close_ms
 LIMIT 50;
@@ -581,7 +581,7 @@ LIMIT 50;
 SELECT 
     block_id, sym, dir, dir_streak,
     session_dir_net      -- Flat bars contribute 0 to sum
-FROM derived.v_ovc_c2_features_v0_1
+FROM derived.v_ovc_l2_features_v0_1
 WHERE sym = 'GBPUSD'
   AND dir = 0            -- Find flat bars
 ORDER BY bar_close_ms
@@ -596,7 +596,7 @@ SELECT
     block_id, sym, rng,
     rng_avg_3,           -- Should include 0 values, not skip them
     body_rng_pct_avg_3   -- body_rng_pct is NULL when rng=0, so avg may be NULL
-FROM derived.v_ovc_c2_features_v0_1
+FROM derived.v_ovc_l2_features_v0_1
 WHERE sym = 'GBPUSD'
   AND rng = 0
 LIMIT 10;
@@ -610,7 +610,7 @@ SELECT
     block_id,
     rng_avg_3, rng_avg_6, dir_streak, session_block_idx,
     session_rng_cum, session_dir_net, rng_rank_6, body_rng_pct_avg_3
-FROM derived.v_ovc_c2_features_v0_1
+FROM derived.v_ovc_l2_features_v0_1
 WHERE sym = 'GBPUSD'
 ORDER BY bar_close_ms
 LIMIT 100;

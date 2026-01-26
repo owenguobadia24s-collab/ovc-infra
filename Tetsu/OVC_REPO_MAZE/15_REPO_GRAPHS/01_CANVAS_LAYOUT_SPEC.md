@@ -49,7 +49,7 @@ Graphs embedded: None (sources are entry points)
 
 Contents:
 - Index card: "OPTION A — Canonical Ingest"
-- Scope: Raw ingest, C0/C1 foundations, canonical tables
+- Scope: Raw ingest, L0/L1 foundations, canonical tables
 
 Graphs embedded:
 1. `10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md` (shared)
@@ -63,7 +63,7 @@ Graphs embedded:
 
 Contents:
 - Index card: "OPTION B — Derived Features"
-- Scope: C1/C2/C3 computations, registries, trajectory families
+- Scope: L1/L2/L3 computations, registries, trajectory families
 
 Graphs embedded:
 1. `20_INTERNAL_PIPELINES/GRAPH_21__OPT_B__PIPELINE.md`

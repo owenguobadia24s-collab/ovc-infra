@@ -1,7 +1,7 @@
 -- =============================================================================
 -- VIEW: derived.v_ovc_state_plane_v0_2
 -- =============================================================================
--- Deterministic state plane coordinates derived from canonical C1/C2/C3 features.
+-- Deterministic state plane coordinates derived from canonical L1/L2/L3 features.
 -- Uses threshold pack config (ovc_cfg.threshold_pack) for all thresholds/weights.
 -- =============================================================================
 
@@ -57,12 +57,12 @@ base AS (
         c2.rng_rank_6,
         c1.body_ratio,
         c1.directional_efficiency,
-        c3.c3_trend_bias,
-        c3.c3_momentum_state
-    FROM derived.v_ovc_c1_features_v0_1 c1
-    INNER JOIN derived.v_ovc_c2_features_v0_1 c2
+        c3.l3_trend_bias,
+        c3.l3_momentum_state
+    FROM derived.v_ovc_l1_features_v0_1 c1
+    INNER JOIN derived.v_ovc_l2_features_v0_1 c2
         ON c1.block_id = c2.block_id
-    LEFT JOIN derived.v_ovc_c3_features_v0_1 c3
+    LEFT JOIN derived.v_ovc_l3_features_v0_1 c3
         ON c1.block_id = c3.block_id
 ),
 scored AS (
@@ -79,19 +79,19 @@ scored AS (
         cfg.w_trend,
         cfg.w_momentum,
         CASE
-            WHEN b.c3_trend_bias IS NULL THEN NULL
-            WHEN b.c3_trend_bias = 'sustained' THEN cfg.tb_sustained
-            WHEN b.c3_trend_bias = 'nascent' THEN cfg.tb_nascent
-            WHEN b.c3_trend_bias = 'neutral' THEN cfg.tb_neutral
-            WHEN b.c3_trend_bias = 'fading' THEN cfg.tb_fading
+            WHEN b.l3_trend_bias IS NULL THEN NULL
+            WHEN b.l3_trend_bias = 'sustained' THEN cfg.tb_sustained
+            WHEN b.l3_trend_bias = 'nascent' THEN cfg.tb_nascent
+            WHEN b.l3_trend_bias = 'neutral' THEN cfg.tb_neutral
+            WHEN b.l3_trend_bias = 'fading' THEN cfg.tb_fading
             ELSE NULL
         END AS trend_bias_score,
         CASE
-            WHEN b.c3_momentum_state IS NULL THEN NULL
-            WHEN b.c3_momentum_state = 'accelerating' THEN cfg.ms_accelerating
-            WHEN b.c3_momentum_state = 'steady' THEN cfg.ms_steady
-            WHEN b.c3_momentum_state = 'decelerating' THEN cfg.ms_decelerating
-            WHEN b.c3_momentum_state = 'reversing' THEN cfg.ms_reversing
+            WHEN b.l3_momentum_state IS NULL THEN NULL
+            WHEN b.l3_momentum_state = 'accelerating' THEN cfg.ms_accelerating
+            WHEN b.l3_momentum_state = 'steady' THEN cfg.ms_steady
+            WHEN b.l3_momentum_state = 'decelerating' THEN cfg.ms_decelerating
+            WHEN b.l3_momentum_state = 'reversing' THEN cfg.ms_reversing
             ELSE NULL
         END AS momentum_score,
         CASE
@@ -164,9 +164,9 @@ SELECT
     jsonb_build_object(
         'threshold_pack_id', ws.threshold_pack_id,
         'source_view_names', jsonb_build_array(
-            'derived.v_ovc_c1_features_v0_1',
-            'derived.v_ovc_c2_features_v0_1',
-            'derived.v_ovc_c3_features_v0_1'
+            'derived.v_ovc_l1_features_v0_1',
+            'derived.v_ovc_l2_features_v0_1',
+            'derived.v_ovc_l3_features_v0_1'
         )
     ) AS state_plane_meta
 FROM with_shift ws;

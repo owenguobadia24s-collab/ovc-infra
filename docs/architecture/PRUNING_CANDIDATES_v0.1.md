@@ -33,9 +33,9 @@
 | `ovc_blocks_detail_v01` | `public` | **ORPHANED** | FULL JSONB table; never integrated |
 | `derived_runs` | `derived` | **DEPRECATED** | Coexists with `derived_runs_v0_1`; confirm authoritative before removal |
 | `derived_runs_v0_1` | `derived` | **ACTIVE** | Extended run metadata with run_type, window_spec |
-| `ovc_c1_features_v0_1` | `derived` | **ACTIVE** | Materialized C1 features |
-| `ovc_c2_features_v0_1` | `derived` | **ACTIVE** | Materialized C2 features |
-| `ovc_c3_regime_trend_v0_1` | `derived` | **ACTIVE** | C3 semantic tags |
+| `ovc_l1_features_v0_1` | `derived` | **ACTIVE** | Materialized L1 features |
+| `ovc_l2_features_v0_1` | `derived` | **ACTIVE** | Materialized L2 features |
+| `ovc_l3_regime_trend_v0_1` | `derived` | **ACTIVE** | L3 semantic tags |
 | `eval_runs` | `derived` | **ACTIVE** | Option C evaluation runs |
 | `validation_run` | `ovc_qa` | **ACTIVE** | Tape validation metadata |
 | `expected_blocks` | `ovc_qa` | **ACTIVE** | Validation scaffold |
@@ -59,10 +59,10 @@
 | `ingest_history_day.py` | **ORPHANED** | History ingest; no workflow references it |
 | `test_insert.py` | **DEPRECATED** | Test utility; not part of any pipeline |
 | `ovc_artifacts.py` | **ACTIVE** | Artifact utilities |
-| `derived/compute_c1_v0_1.py` | **ACTIVE** | B1 C1 features |
-| `derived/compute_c2_v0_1.py` | **ACTIVE** | B1 C2 features |
-| `derived/compute_c3_regime_trend_v0_1.py` | **ACTIVE** | B1 C3 regime tags |
-| `derived/compute_c3_stub_v0_1.py` | **DEPRECATED** | Test stub for C3 |
+| `derived/compute_l1_v0_1.py` | **ACTIVE** | B1 L1 features |
+| `derived/compute_l2_v0_1.py` | **ACTIVE** | B1 L2 features |
+| `derived/compute_l3_regime_trend_v0_1.py` | **ACTIVE** | B1 L3 regime tags |
+| `derived/compute_l3_stub_v0_1.py` | **DEPRECATED** | Test stub for L3 |
 | `validate/validate_derived_range_v0_1.py` | **ACTIVE** | B2 derived validation |
 | `ovc_ops/run_artifact.py` | **CANONICAL** | RunWriter class |
 | `ovc_ops/run_artifact_cli.py` | **ACTIVE** | CLI wrapper |
@@ -104,8 +104,8 @@
 | `03_qa_derived_validation_v0_1.sql` | **ACTIVE** | B2 QA tables |
 | `03_tables_outcomes.sql` | **ORPHANED** | Legacy outcomes; FK error |
 | `04_ops_notion_sync.sql` | **ACTIVE** | D-Ops sync state |
-| `04_threshold_registry_v0_1.sql` | **ACTIVE** | C3 thresholds |
-| `05_c3_regime_trend_v0_1.sql` | **ACTIVE** | C3 regime tables |
+| `04_threshold_registry_v0_1.sql` | **ACTIVE** | L3 thresholds |
+| `05_c3_regime_trend_v0_1.sql` | **ACTIVE** | L3 regime tables |
 | `10_views_research_v0.1.sql` | **ACTIVE** | Research views |
 | `derived_v0_1.sql` | **ACTIVE** | Feature views |
 | `option_c_v0_1.sql` | **ACTIVE** | Outcome views |
@@ -152,7 +152,7 @@ These items are superseded but may have historical value:
 | `src/backfill_day.py` | File | DEPRECATED | **MAYBE** | Single-day variant; verify no manual use |
 | `src/full_ingest_stub.py` | File | DEPRECATED | **NO** | Keep as reference for future FULL implementation |
 | `src/test_insert.py` | File | DEPRECATED | **MAYBE** | Test utility; verify not in test suite |
-| `src/derived/compute_c3_stub_v0_1.py` | File | DEPRECATED | **NO** | Keep for C3 development/testing reference |
+| `src/derived/compute_l3_stub_v0_1.py` | File | DEPRECATED | **NO** | Keep for L3 development/testing reference |
 | `.github/workflows/ovc_full_ingest.yml` | Workflow | DEPRECATED | **NO** | Keep for future FULL ingest |
 | `derived.derived_runs` | Table | DEPRECATED | **MAYBE** | Confirm `derived_runs_v0_1` is authoritative |
 | `docs/ovc_current_workflow.md` | File | DEPRECATED | **NO** | Keep for historical reference |
@@ -167,7 +167,7 @@ These items must be kept:
 | All `CANONICAL` items | Authoritative; production-critical |
 | All `ACTIVE` items | Currently in use |
 | `backfill_then_validate.yml` | Manual but functional; used for range validation |
-| Config/threshold files | Required for C3 compute |
+| Config/threshold files | Required for L3 compute |
 
 ---
 
@@ -253,7 +253,7 @@ When pruning is approved:
 | Category | Items |
 |----------|-------|
 | Tables | `derived.derived_runs` (pending confirmation) |
-| Scripts | `backfill_oanda_2h.py`, `full_ingest_stub.py`, `compute_c3_stub_v0_1.py` |
+| Scripts | `backfill_oanda_2h.py`, `full_ingest_stub.py`, `compute_l3_stub_v0_1.py` |
 | Workflows | `ovc_full_ingest.yml` |
 | Docs | `ovc_current_workflow.md`, `step8_readiness.md` |
 

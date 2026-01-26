@@ -1,9 +1,9 @@
-# OVC Option B.1 Runbook: C1 & C2 Feature Packs
+# OVC Option B.1 Runbook: L1 & L2 Feature Packs
 
 > **Version**: v0.1
 > **Created**: 2026-01-18
 > **Status**: ACTIVE
-> **Scope**: Running C1 (single-bar) and C2 (multi-bar) derived feature computation
+> **Scope**: Running L1 (single-bar) and L2 (multi-bar) derived feature computation
 
 ---
 
@@ -13,8 +13,8 @@ Option B.1 implements replayable, deterministic derived features computed from B
 
 | Tier | Scope | Window_spec | Script |
 |------|-------|-------------|--------|
-| **C1** | Single-bar OHLC primitives | None (no history) | `src/derived/compute_c1_v0_1.py` |
-| **C2** | Multi-bar structure/context | Required per feature | `src/derived/compute_c2_v0_1.py` |
+| **L1** | Single-bar OHLC primitives | None (no history) | `src/derived/compute_l1_v0_1.py` |
+| **L2** | Multi-bar structure/context | Required per feature | `src/derived/compute_l2_v0_1.py` |
 
 **Key Guarantees**:
 - **Determinism**: Same inputs → same outputs, always
@@ -46,12 +46,12 @@ psql $env:NEON_DSN -f sql/02_derived_c1_c2_tables_v0_1.sql
 
 This creates:
 - `derived.derived_runs_v0_1` — Run metadata for provenance
-- `derived.ovc_c1_features_v0_1` — C1 single-bar features
-- `derived.ovc_c2_features_v0_1` — C2 multi-bar features
+- `derived.ovc_l1_features_v0_1` — L1 single-bar features
+- `derived.ovc_l2_features_v0_1` — L2 multi-bar features
 
 ---
 
-## 3. Running C1 Feature Computation
+## 3. Running L1 Feature Computation
 
 ### 3.1 Basic Usage
 
@@ -59,32 +59,32 @@ This creates:
 # From repo root
 cd c:\Users\Owner\projects\ovc-infra
 
-# Compute C1 for all new blocks (skip already computed)
-python src/derived/compute_c1_v0_1.py
+# Compute L1 for all new blocks (skip already computed)
+python src/derived/compute_l1_v0_1.py
 
 # Dry run (preview without writing)
-python src/derived/compute_c1_v0_1.py --dry-run
+python src/derived/compute_l1_v0_1.py --dry-run
 
 # Filter by symbol
-python src/derived/compute_c1_v0_1.py --symbol GBPUSD
+python src/derived/compute_l1_v0_1.py --symbol GBPUSD
 
 # Limit blocks (for testing)
-python src/derived/compute_c1_v0_1.py --limit 100
+python src/derived/compute_l1_v0_1.py --limit 100
 
 # Recompute all (overwrite existing)
-python src/derived/compute_c1_v0_1.py --recompute
+python src/derived/compute_l1_v0_1.py --recompute
 ```
 
-### 3.2 C1 Output
+### 3.2 L1 Output
 
-**Table**: `derived.ovc_c1_features_v0_1`
+**Table**: `derived.ovc_l1_features_v0_1`
 
 | Column | Type | Description |
 |--------|------|-------------|
 | `block_id` | TEXT PK | Foreign key to B-layer |
 | `run_id` | UUID | References derived_runs_v0_1 |
 | `computed_at` | TIMESTAMPTZ | Computation timestamp |
-| `formula_hash` | TEXT | MD5 of C1 formula definition |
+| `formula_hash` | TEXT | MD5 of L1 formula definition |
 | `range` | DOUBLE | h - l |
 | `body` | DOUBLE | abs(c - o) |
 | `direction` | INT | sign(c - o): 1, -1, 0 |
@@ -96,36 +96,36 @@ python src/derived/compute_c1_v0_1.py --recompute
 | `lower_wick` | DOUBLE | min(o, c) - l |
 | `clv` | DOUBLE | Close location value |
 
-### 3.3 C1 Features (per c_layer_boundary_spec_v0.1.md)
+### 3.3 L1 Features (per c_layer_boundary_spec_v0.1.md)
 
-All C1 features use **only** current block's {o, h, l, c}. No lookback.
+All L1 features use **only** current block's {o, h, l, c}. No lookback.
 
 ---
 
-## 4. Running C2 Feature Computation
+## 4. Running L2 Feature Computation
 
 ### 4.1 Basic Usage
 
 ```powershell
-# Compute C2 for all new blocks (requires C1 to exist)
-python src/derived/compute_c2_v0_1.py
+# Compute L2 for all new blocks (requires L1 to exist)
+python src/derived/compute_l2_v0_1.py
 
 # Dry run
-python src/derived/compute_c2_v0_1.py --dry-run
+python src/derived/compute_l2_v0_1.py --dry-run
 
 # Custom rd_len parameter (default: 12)
-python src/derived/compute_c2_v0_1.py --rd-len 24
+python src/derived/compute_l2_v0_1.py --rd-len 24
 
 # Filter and limit
-python src/derived/compute_c2_v0_1.py --symbol GBPUSD --limit 100
+python src/derived/compute_l2_v0_1.py --symbol GBPUSD --limit 100
 
 # Recompute all
-python src/derived/compute_c2_v0_1.py --recompute
+python src/derived/compute_l2_v0_1.py --recompute
 ```
 
-### 4.2 C2 Output
+### 4.2 L2 Output
 
-**Table**: `derived.ovc_c2_features_v0_1`
+**Table**: `derived.ovc_l2_features_v0_1`
 
 | Column | Type | Window_spec | Description |
 |--------|------|-------------|-------------|
@@ -150,12 +150,12 @@ python src/derived/compute_c2_v0_1.py --recompute
 
 ### 4.3 Dependency Order
 
-**C2 depends on C1**. Always run C1 first:
+**L2 depends on L1**. Always run L1 first:
 
 ```powershell
 # Correct order
-python src/derived/compute_c1_v0_1.py
-python src/derived/compute_c2_v0_1.py
+python src/derived/compute_l1_v0_1.py
+python src/derived/compute_l2_v0_1.py
 ```
 
 ---
@@ -173,7 +173,7 @@ run_id = uuid.uuid4()
 
 The run_id is recorded in:
 - `derived.derived_runs_v0_1` (master record)
-- Each feature row in C1/C2 tables (foreign key)
+- Each feature row in L1/L2 tables (foreign key)
 
 ### 5.2 Formula Hash Computation
 
@@ -192,7 +192,7 @@ body = abs(c - o)
 formula_hash = hashlib.md5(C1_FORMULA_DEFINITION.strip().encode()).hexdigest()
 ```
 
-For C2, the hash includes parameters:
+For L2, the hash includes parameters:
 
 ```python
 formula_hash = hashlib.md5(f"{C2_FORMULA_DEFINITION}\nrd_len={rd_len}".encode()).hexdigest()
@@ -211,7 +211,7 @@ LIMIT 10;
 
 -- Blocks computed in a specific run
 SELECT block_id, computed_at
-FROM derived.ovc_c1_features_v0_1
+FROM derived.ovc_l1_features_v0_1
 WHERE run_id = 'your-run-id-here';
 ```
 
@@ -235,23 +235,23 @@ pytest tests/test_derived_features.py -v
 | `TestC1FormulaHash` | Hash stability |
 | `TestC2WindowSpec` | All features have window_spec |
 | `TestC2Determinism` | Multi-bar determinism |
-| `TestC2Correctness` | C2 formula accuracy |
+| `TestC2Correctness` | L2 formula accuracy |
 
 ### 6.3 Manual Verification
 
 ```sql
--- Verify C1 computed correctly
+-- Verify L1 computed correctly
 SELECT 
     b.block_id, b.o, b.h, b.l, b.c,
     c1.range, c1.body, c1.direction
 FROM ovc.ovc_blocks_v01_1_min b
-JOIN derived.ovc_c1_features_v0_1 c1 ON b.block_id = c1.block_id
+JOIN derived.ovc_l1_features_v0_1 c1 ON b.block_id = c1.block_id
 LIMIT 5;
 
--- Verify C2 with context
+-- Verify L2 with context
 SELECT 
     c2.block_id, c2.gap, c2.sess_high, c2.roll_avg_range_12, c2.rd_hi
-FROM derived.ovc_c2_features_v0_1 c2
+FROM derived.ovc_l2_features_v0_1 c2
 LIMIT 5;
 ```
 
@@ -263,14 +263,14 @@ Reruns should produce identical results:
 
 ```powershell
 # First run
-python src/derived/compute_c1_v0_1.py --recompute
+python src/derived/compute_l1_v0_1.py --recompute
 
 # Second run (should produce same feature values)
-python src/derived/compute_c1_v0_1.py --recompute
+python src/derived/compute_l1_v0_1.py --recompute
 
 # Verify no changes
 psql $env:NEON_DSN -c "
-SELECT COUNT(*) FROM derived.ovc_c1_features_v0_1;
+SELECT COUNT(*) FROM derived.ovc_l1_features_v0_1;
 "
 ```
 
@@ -287,7 +287,7 @@ The `ON CONFLICT DO UPDATE` ensures:
 |-------|-------|-----|
 | "Missing NEON_DSN" | Env var not set | `$env:NEON_DSN = '...'` |
 | "relation does not exist" | Schema not created | Run `sql/02_derived_c1_c2_tables_v0_1.sql` |
-| C2 produces NULL values | Insufficient history | Need 12+ blocks for N=12 features |
+| L2 produces NULL values | Insufficient history | Need 12+ blocks for N=12 features |
 | Different formula_hash | Formula definition changed | Version bump required |
 
 ---
@@ -296,7 +296,7 @@ The `ON CONFLICT DO UPDATE` ensures:
 
 | Version | Date | Changes |
 |---------|------|---------|
-| v0.1 | 2026-01-18 | Initial C1/C2 feature packs |
+| v0.1 | 2026-01-18 | Initial L1/L2 feature packs |
 
 ---
 

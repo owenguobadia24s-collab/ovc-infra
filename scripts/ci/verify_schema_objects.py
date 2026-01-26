@@ -25,9 +25,9 @@ REQUIRED_OBJECTS = [
     ("table", "ovc_cfg", "threshold_pack_active"),
 
     # Derived feature views
-    ("view", "derived", "v_ovc_c1_features_v0_1"),
-    ("view", "derived", "v_ovc_c2_features_v0_1"),
-    ("view", "derived", "v_ovc_c3_features_v0_1"),
+    ("view", "derived", "v_ovc_l1_features_v0_1"),
+    ("view", "derived", "v_ovc_l2_features_v0_1"),
+    ("view", "derived", "v_ovc_l3_features_v0_1"),
 
     # Option C outcomes view (authoritative)
     ("view", "derived", "v_ovc_c_outcomes_v0_1"),

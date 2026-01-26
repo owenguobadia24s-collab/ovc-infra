@@ -1,4 +1,4 @@
-# Option B – C2 Implementation Contract v0.1
+# Option B – L2 Implementation Contract v0.1
 
 [CHANGE][CHANGED] **[STATUS: CANONICAL]**
 
@@ -10,8 +10,8 @@
 |--------------------|------------------------------------------|
 | Version            | 0.1                                      |
 | Effective Date     | 2026-01-20                               |
-| Feature Spec       | OPTION_B_C2_FEATURES_v0.1.md             |
-| Governing Charter  | OPTION_B_C2_CHARTER_v0.1.md              |
+| Feature Spec       | OPTION_B_L2_FEATURES_v0.1.md             |
+| Governing Charter  | OPTION_B_L2_CHARTER_v0.1.md              |
 | Governance         | GOVERNANCE_RULES_v0.1.md                 |
 
 ---
@@ -20,10 +20,10 @@
 
 ### 1.1 Specification Authority
 
-The **sole source of truth** for C2 feature meanings is:
+The **sole source of truth** for L2 feature meanings is:
 
 ```
-docs/ops/OPTION_B_C2_FEATURES_v0.1.md
+docs/ops/OPTION_B_L2_FEATURES_v0.1.md
 ```
 
 ### 1.2 Conflict Resolution
@@ -38,7 +38,7 @@ docs/ops/OPTION_B_C2_FEATURES_v0.1.md
 ### 1.3 Binding Hierarchy
 
 ```
-OPTION_B_C2_FEATURES_v0.1.md     (WHAT)
+OPTION_B_L2_FEATURES_v0.1.md     (WHAT)
          │
          ▼
 This Document                    (HOW)
@@ -123,7 +123,7 @@ When a window cannot be fully populated:
 
 **If any required input within a window is NULL, the output is NULL.**
 
-This applies to all C2 features unless explicitly overridden in the feature spec.
+This applies to all L2 features unless explicitly overridden in the feature spec.
 
 #### 3.1.2 Propagation Table
 
@@ -138,11 +138,11 @@ This applies to all C2 features unless explicitly overridden in the feature spec
 | `rng_rank_6`          | NULL                    |
 | `body_rng_pct_avg_3`  | NULL                    |
 
-### 3.2 C1 Input NULL Handling
+### 3.2 L1 Input NULL Handling
 
-When a C1 input field is NULL:
+When a L1 input field is NULL:
 
-| C1 Field          | C2 Features Affected           | Behavior              |
+| L1 Field          | L2 Features Affected           | Behavior              |
 |-------------------|--------------------------------|-----------------------|
 | `rng` is NULL     | `rng_avg_*`, `rng_rank_6`, `session_rng_cum` | Output NULL |
 | `dir` is NULL     | `dir_streak`, `session_dir_net`| Output NULL           |
@@ -286,7 +286,7 @@ If fewer than 6 bars are available, `rng_rank_6` is NULL.
 
 ### 5.3 Boolean Strictness
 
-C2 does not define boolean features. If future versions add booleans:
+L2 does not define boolean features. If future versions add booleans:
 
 | Requirement          | Specification                             |
 |----------------------|-------------------------------------------|
@@ -322,8 +322,8 @@ C2 does not define boolean features. If future versions add booleans:
 
 ### 6.2 Replayability Guarantee
 
-C2 outputs must be **fully reproducible** from:
-1. C1 outputs (or canonical blocks where specified)
+L2 outputs must be **fully reproducible** from:
+1. L1 outputs (or canonical blocks where specified)
 2. This implementation contract
 3. The feature specification
 
@@ -331,12 +331,12 @@ No external state, configuration, or runtime context may influence results.
 
 ### 6.3 Idempotency
 
-Running C2 computation multiple times on the same input must produce identical output. Implementations must not accumulate state across runs.
+Running L2 computation multiple times on the same input must produce identical output. Implementations must not accumulate state across runs.
 
 ### 6.4 Historical Backfill Consistency
 
 When backfilling historical data:
-- C2 outputs for historical bars must match what would have been computed in real-time
+- L2 outputs for historical bars must match what would have been computed in real-time
 - No "future" information may leak into historical computations
 - Lookback windows must use only bars that existed at computation time
 
@@ -346,7 +346,7 @@ When backfilling historical data:
 
 ### 7.1 Minimum Test Cases Per Feature
 
-Each C2 feature requires **at minimum** the following test cases:
+Each L2 feature requires **at minimum** the following test cases:
 
 | Test Category                 | Required Count |
 |-------------------------------|----------------|
@@ -359,7 +359,7 @@ Each C2 feature requires **at minimum** the following test cases:
 
 ### 7.2 Mandatory Sequence Fixtures
 
-Every C2 feature must be tested against these scenarios:
+Every L2 feature must be tested against these scenarios:
 
 #### 7.2.1 Short History (< Window)
 
@@ -405,9 +405,9 @@ Test fixtures must include:
 |--------------------|-------------------------------------------|
 | `fixture_id`       | Unique identifier                         |
 | `description`      | What scenario is being tested             |
-| `input_sequence`   | Ordered C1 values                         |
-| `target_bar`       | Which bar's C2 output is under test       |
-| `expected_output`  | Expected C2 value (or NULL)               |
+| `input_sequence`   | Ordered L1 values                         |
+| `target_bar`       | Which bar's L2 output is under test       |
+| `expected_output`  | Expected L2 value (or NULL)               |
 | `rationale`        | Why this is the expected result           |
 
 ### 7.4 Failure Protocol
@@ -429,14 +429,14 @@ If a test reveals divergence between implementation and spec:
 
 ### 8.1 Preconditions for CANONICAL Status
 
-C2 features may be promoted from ACTIVE to CANONICAL when:
+L2 features may be promoted from ACTIVE to CANONICAL when:
 
 | Precondition                         | Evidence Required                       |
 |--------------------------------------|-----------------------------------------|
 | Implementation matches spec          | All tests pass                          |
 | 30-day stability period              | No spec changes in 30 days              |
-| No open defects                      | Bug tracker shows zero C2 issues        |
-| Downstream consumption               | At least one downstream layer uses C2   |
+| No open defects                      | Bug tracker shows zero L2 issues        |
+| Downstream consumption               | At least one downstream layer uses L2   |
 | Performance acceptable               | Query time < 5s for full history        |
 
 ### 8.2 Required Validation Artifacts
@@ -446,8 +446,8 @@ Before promotion, the following artifacts must exist:
 | Artifact                             | Location                                |
 |--------------------------------------|-----------------------------------------|
 | Test suite (all passing)             | `tests/option_b/c2/`                    |
-| Test coverage report                 | `artifacts/c2_coverage.json`            |
-| Sample output validation             | `artifacts/c2_sample_outputs.csv`       |
+| Test coverage report                 | `artifacts/l2_coverage.json`            |
+| Sample output validation             | `artifacts/l2_sample_outputs.csv`       |
 | Spec compliance checklist            | `docs/ops/C2_COMPLIANCE_CHECKLIST.md`   |
 
 ### 8.3 Required Reviewers
@@ -475,13 +475,13 @@ Promotion to CANONICAL requires sign-off from:
 ### 9.1 What This Contract Authorizes
 
 Upon approval of this contract, implementation may begin for:
-- SQL views implementing C2 features
+- SQL views implementing L2 features
 - Python computation modules
 - Test fixtures and validation scripts
 
 ### 9.2 What This Contract Does NOT Authorize
 
-- Changes to C1 outputs or schema
+- Changes to L1 outputs or schema
 - Writes to `ovc.*` schema
 - Threshold logic or decision rules
 - Outcome computation
@@ -490,8 +490,8 @@ Upon approval of this contract, implementation may begin for:
 
 All implementation code must include a header comment referencing:
 ```
-Spec: OPTION_B_C2_FEATURES_v0.1.md
-Contract: OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md
+Spec: OPTION_B_L2_FEATURES_v0.1.md
+Contract: OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md
 ```
 
 ---

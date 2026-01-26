@@ -17,11 +17,11 @@ OPTION_B_PATH1_STATUS
 
 Must be derived only from canonical inputs:
 
-derived.v_ovc_c1_features_v0_1
+derived.v_ovc_l1_features_v0_1
 
-derived.v_ovc_c2_features_v0_1
+derived.v_ovc_l2_features_v0_1
 
-derived.v_ovc_c3_features_v0_1 (optional; only for contextual labeling)
+derived.v_ovc_l3_features_v0_1 (optional; only for contextual labeling)
 
 Option C outcomes view is allowed for studies, not for constructing x/y. 
 
@@ -46,26 +46,26 @@ OVC_DATA_FLOW_CANON_v0.1
 
 Goal: measure “how much initiative/impulse is present” (trend impulse vs rotational quiet).
 
-Design constraints: only use existing C1/C2 columns; deterministic; scale 0–1.
+Design constraints: only use existing L1/L2 columns; deterministic; scale 0–1.
 
 Recommended definition (robust + simple):
 Compute a weighted blend of three normalized components:
 
 Range intensity (bigger-than-usual movement)
 
-rng_z = z-score of block range vs rolling baseline (use an existing range_z_* if present; otherwise approximate from C2 rolling stats)
+rng_z = z-score of block range vs rolling baseline (use an existing range_z_* if present; otherwise approximate from L2 rolling stats)
 
 rng_comp = clamp01(sigmoid(rng_z))
 
 Body participation (commitment vs wicks)
 
-body_ratio (body / range) already common in C1 primitives
+body_ratio (body / range) already common in L1 primitives
 
 body_comp = clamp01(body_ratio)
 
 Directional efficiency (clean travel vs chop)
 
-If you already have a directional efficiency / displacement proxy in C2: use it
+If you already have a directional efficiency / displacement proxy in L2: use it
 
 If not, approximate with something like abs(close-open)/range aggregated to block (but prefer existing feature columns)
 
@@ -144,7 +144,7 @@ Goal: measure “continuation vs structural shift” (are we flipping or staying
 Recommended definition:
 Blend:
 
-Direction flip indicator from C2/C3 (preferred)
+Direction flip indicator from L2/L3 (preferred)
 
 e.g., dir_change / CHoCH proxy / trend flip flag if it exists
 
@@ -283,7 +283,7 @@ OPERATING_BASE
 
 Inputs:
 
-join C1/C2/C3 feature views on block_id
+join L1/L2/L3 feature views on block_id
 
 do not join outcomes inside the state plane view (keep it pure). Outcomes are for studies.
 
@@ -325,7 +325,7 @@ Frozen manifold:
 ×
 𝐶
 3
-X=C1×C2×C3, 
+X=L1×L2×L3, 
 𝑌
 =
 Y= Option C outcomes (canonical) 

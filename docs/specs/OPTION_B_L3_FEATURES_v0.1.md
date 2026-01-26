@@ -1,9 +1,9 @@
-# Option B – C3 Features v0.1
+# Option B – L3 Features v0.1
 
 **[STATUS: CANONICAL]**
 
 > **[CHANGE][CHANGED] Canonical Lock (2026-01-20)**
-> Semantic meanings for all C3 features are now FROZEN.
+> Semantic meanings for all L3 features are now FROZEN.
 > Any changes to label definitions or vocabularies require a MAJOR version bump.
 > Validation evidence: [C3_v0_1_validation.md](../../reports/validation/C3_v0_1_validation.md)
 
@@ -13,43 +13,43 @@
 | Created | 2026-01-20 |
 | Promoted | 2026-01-20 |
 | Author | OVC Infrastructure Team |
-| Governs | C3 Semantic Feature Definitions |
-| Parent Charter | OPTION_B_C3_CHARTER_v0.1.md |
+| Governs | L3 Semantic Feature Definitions |
+| Parent Charter | OPTION_B_L3_CHARTER_v0.1.md |
 | Governance | GOVERNANCE_RULES_v0.1.md |
 
 ---
 
-## 1. Purpose of C3 Features
+## 1. Purpose of L3 Features
 
 ### 1.1 What Semantic States Represent
 
-C3 features encode **semantic states** – higher-order descriptions that capture the structural meaning of market behavior. Unlike C1 (atomic facts) and C2 (temporal context), C3 features answer: **"What does this configuration mean?"**
+L3 features encode **semantic states** – higher-order descriptions that capture the structural meaning of market behavior. Unlike L1 (atomic facts) and L2 (temporal context), L3 features answer: **"What does this configuration mean?"**
 
 Semantic states are:
-- Derived from canonical C1 and C2 outputs only
+- Derived from canonical L1 and L2 outputs only
 - Descriptive labels, not predictive signals
 - Stable interpretations of structural patterns
 
-### 1.2 How C3 Differs from C2
+### 1.2 How L3 Differs from L2
 
 | Layer | Focus | Example Output |
 |-------|-------|----------------|
-| C1 | Atomic facts | `dir = 1` (close > open) |
-| C2 | Temporal context | `dir_streak = 3` (three consecutive bullish blocks) |
-| C3 | Semantic meaning | `trend_bias = 'sustained'` (streak indicates directional persistence) |
+| L1 | Atomic facts | `dir = 1` (close > open) |
+| L2 | Temporal context | `dir_streak = 3` (three consecutive bullish blocks) |
+| L3 | Semantic meaning | `trend_bias = 'sustained'` (streak indicates directional persistence) |
 
-C2 measures **motion** (what changed, how much, how long).
-C3 assigns **meaning** (what the motion pattern represents structurally).
+L2 measures **motion** (what changed, how much, how long).
+L3 assigns **meaning** (what the motion pattern represents structurally).
 
-### 1.3 Why C3 Features Remain Descriptive
+### 1.3 Why L3 Features Remain Descriptive
 
-C3 features MUST NOT:
+L3 features MUST NOT:
 - Imply actions (buy, sell, hold)
 - Encode outcomes (profit, loss)
 - Suggest entries or exits
 - Predict future behavior
 
-C3 features describe **what is**, not **what to do about it**.
+L3 features describe **what is**, not **what to do about it**.
 
 ---
 
@@ -57,16 +57,16 @@ C3 features describe **what is**, not **what to do about it**.
 
 ### 2.1 Explicitly Allowed Inputs
 
-C3 features MAY read from:
+L3 features MAY read from:
 
 | Source | Schema | Examples |
 |--------|--------|----------|
-| C1 Atomic Facts | `derived.ovc_c1_*` | `dir`, `rng`, `body`, `wick_top`, `wick_bot` |
-| C2 Temporal Context | `derived.ovc_c2_*` | `dir_streak`, `rng_streak`, `prev_dir`, `dir_change` |
+| L1 Atomic Facts | `derived.ovc_l1_*` | `dir`, `rng`, `body`, `wick_top`, `wick_bot` |
+| L2 Temporal Context | `derived.ovc_l2_*` | `dir_streak`, `rng_streak`, `prev_dir`, `dir_change` |
 
 ### 2.2 Explicit Prohibitions
 
-C3 computations MUST NOT:
+L3 computations MUST NOT:
 - Access `ovc.ovc_blocks_v01_1_min` (raw block table)
 - Access Option C outputs (no circular dependency)
 - Access external data sources
@@ -74,8 +74,8 @@ C3 computations MUST NOT:
 
 ### 2.3 Lookback-Only Rule
 
-All C3 features MUST be computed using only:
-- The current row's C1/C2 values
+All L3 features MUST be computed using only:
+- The current row's L1/L2 values
 - Historical rows (time < current)
 
 Prohibited:
@@ -87,7 +87,7 @@ Prohibited:
 
 ## 3. Semantic Axes
 
-C3 features are organized along the following semantic axes. These axes define **what dimensions of meaning** C3 captures.
+L3 features are organized along the following semantic axes. These axes define **what dimensions of meaning** L3 captures.
 
 ### 3.1 Directional Bias Axis
 
@@ -125,13 +125,13 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ## 4. Feature Definitions
 
-### 4.1 `c3_trend_bias`
+### 4.1 `l3_trend_bias`
 
 | Property | Value |
 |----------|-------|
-| **Name** | `c3_trend_bias` |
+| **Name** | `l3_trend_bias` |
 | **Type** | `enum` |
-| **Required Inputs** | C2: `dir_streak`, `dir_change` |
+| **Required Inputs** | L2: `dir_streak`, `dir_change` |
 | **Allowed Values** | `'sustained'`, `'nascent'`, `'neutral'`, `'fading'` |
 
 **Semantic Meaning:**
@@ -146,13 +146,13 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ---
 
-### 4.2 `c3_volatility_regime`
+### 4.2 `l3_volatility_regime`
 
 | Property | Value |
 |----------|-------|
-| **Name** | `c3_volatility_regime` |
+| **Name** | `l3_volatility_regime` |
 | **Type** | `enum` |
-| **Required Inputs** | C2: `rng_streak`, `rng_vs_prev` (or equivalent) |
+| **Required Inputs** | L2: `rng_streak`, `rng_vs_prev` (or equivalent) |
 | **Allowed Values** | `'compressed'`, `'normal'`, `'expanded'` |
 
 **Semantic Meaning:**
@@ -166,13 +166,13 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ---
 
-### 4.3 `c3_structure_type`
+### 4.3 `l3_structure_type`
 
 | Property | Value |
 |----------|-------|
-| **Name** | `c3_structure_type` |
+| **Name** | `l3_structure_type` |
 | **Type** | `enum` |
-| **Required Inputs** | C1: `body`, `rng` |
+| **Required Inputs** | L1: `body`, `rng` |
 | **Allowed Values** | `'decisive'`, `'balanced'`, `'indecisive'` |
 
 **Semantic Meaning:**
@@ -186,13 +186,13 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ---
 
-### 4.4 `c3_momentum_state`
+### 4.4 `l3_momentum_state`
 
 | Property | Value |
 |----------|-------|
-| **Name** | `c3_momentum_state` |
+| **Name** | `l3_momentum_state` |
 | **Type** | `enum` |
-| **Required Inputs** | C2: `dir_streak`, `dir_change`; C1: `body` (current vs prior) |
+| **Required Inputs** | L2: `dir_streak`, `dir_change`; L1: `body` (current vs prior) |
 | **Allowed Values** | `'accelerating'`, `'steady'`, `'decelerating'`, `'reversing'` |
 
 **Semantic Meaning:**
@@ -207,11 +207,11 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ---
 
-### 4.5 `c3_session_position`
+### 4.5 `l3_session_position`
 
 | Property | Value |
 |----------|-------|
-| **Name** | `c3_session_position` |
+| **Name** | `l3_session_position` |
 | **Type** | `enum` |
 | **Required Inputs** | Block letter (A–L from `block_id`) |
 | **Allowed Values** | `'early'`, `'mid'`, `'late'` |
@@ -227,13 +227,13 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ---
 
-### 4.6 `c3_wick_dominance`
+### 4.6 `l3_wick_dominance`
 
 | Property | Value |
 |----------|-------|
-| **Name** | `c3_wick_dominance` |
+| **Name** | `l3_wick_dominance` |
 | **Type** | `enum` |
-| **Required Inputs** | C1: `wick_top`, `wick_bot`, `rng` |
+| **Required Inputs** | L1: `wick_top`, `wick_bot`, `rng` |
 | **Allowed Values** | `'top_heavy'`, `'balanced'`, `'bottom_heavy'`, `'no_wicks'` |
 
 **Semantic Meaning:**
@@ -248,13 +248,13 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ---
 
-### 4.7 `c3_range_context`
+### 4.7 `l3_range_context`
 
 | Property | Value |
 |----------|-------|
-| **Name** | `c3_range_context` |
+| **Name** | `l3_range_context` |
 | **Type** | `enum` |
-| **Required Inputs** | C1: `rng`; C2: `rng_avg_5` (or lookback average) |
+| **Required Inputs** | L1: `rng`; L2: `rng_avg_5` (or lookback average) |
 | **Allowed Values** | `'narrow'`, `'typical'`, `'wide'` |
 
 **Semantic Meaning:**
@@ -270,7 +270,7 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ## 5. Explicit Exclusions
 
-### 5.1 What C3 Will NOT Express
+### 5.1 What L3 Will NOT Express
 
 | Excluded Concept | Reason |
 |------------------|--------|
@@ -283,33 +283,33 @@ Describes whether recent motion shows continuation or exhaustion patterns.
 
 ### 5.2 Boundary with Option C
 
-C3 outputs **describe** the current semantic state.
+L3 outputs **describe** the current semantic state.
 Option C **evaluates** what those states meant for outcomes.
 
-C3: "The trend bias is 'sustained' and volatility is 'expanded'."
+L3: "The trend bias is 'sustained' and volatility is 'expanded'."
 Option C: "When trend_bias='sustained' AND volatility='expanded', historical win rate was X%."
 
-C3 does not know or care about win rates.
+L3 does not know or care about win rates.
 
 ---
 
 ## 6. Output Schema (Declarative)
 
-The C3 feature view will expose:
+The L3 feature view will expose:
 
 | Column | Type | Source |
 |--------|------|--------|
-| `block_id` | `text` | Passthrough from C1 |
-| `ts` | `timestamptz` | Passthrough from C1 |
-| `c3_trend_bias` | `text` | Computed |
-| `c3_volatility_regime` | `text` | Computed |
-| `c3_structure_type` | `text` | Computed |
-| `c3_momentum_state` | `text` | Computed |
-| `c3_session_position` | `text` | Computed |
-| `c3_wick_dominance` | `text` | Computed |
-| `c3_range_context` | `text` | Computed |
+| `block_id` | `text` | Passthrough from L1 |
+| `ts` | `timestamptz` | Passthrough from L1 |
+| `l3_trend_bias` | `text` | Computed |
+| `l3_volatility_regime` | `text` | Computed |
+| `l3_structure_type` | `text` | Computed |
+| `l3_momentum_state` | `text` | Computed |
+| `l3_session_position` | `text` | Computed |
+| `l3_wick_dominance` | `text` | Computed |
+| `l3_range_context` | `text` | Computed |
 
-Target object: `derived.ovc_c3_semantic_states_v0_1`
+Target object: `derived.ovc_l3_semantic_states_v0_1`
 
 ---
 
@@ -319,7 +319,7 @@ Before promotion to CANONICAL:
 
 | Check | Requirement |
 |-------|-------------|
-| Input compliance | All inputs from C1/C2 only |
+| Input compliance | All inputs from L1/L2 only |
 | Lookback compliance | No future data access |
 | Determinism | Same inputs → same outputs |
 | Completeness | No NULL outputs for valid inputs |
@@ -344,11 +344,11 @@ DRAFT → ACTIVE → CANONICAL
 
 ### 9.1 Design Status
 
-This document defines C3 features **declaratively**.
+This document defines L3 features **declaratively**.
 
 - Feature semantics: CANONICAL (frozen)
 - Threshold values: Defined in Implementation Contract §6.1
-- SQL implementation: `derived.v_ovc_c3_features_v0_1`
+- SQL implementation: `derived.v_ovc_l3_features_v0_1`
 
 ### 9.2 Canonical Status
 
@@ -357,7 +357,7 @@ This document defines C3 features **declaratively**.
 - All semantic meanings are frozen
 - Label vocabularies may not change without MAJOR bump
 - Implementation validated: [C3_v0_1_validation.md](../../reports/validation/C3_v0_1_validation.md)
-- Option C is now authorized to consume C3 features
+- Option C is now authorized to consume L3 features
 
 ---
 

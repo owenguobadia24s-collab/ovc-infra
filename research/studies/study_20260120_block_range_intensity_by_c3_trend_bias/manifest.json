@@ -7,8 +7,8 @@
   "status": "draft",
 
   "metadata": {
-    "title": "Block Range Intensity by C3 Trend Bias",
-    "description": "Describes how score-outcome associations vary across canonical C3 trend bias states (c3_trend_bias)",
+    "title": "Block Range Intensity by L3 Trend Bias",
+    "description": "Describes how score-outcome associations vary across canonical L3 trend bias states (l3_trend_bias)",
     "author": "@ovc-research",
     "created_at": "2026-01-20T00:00:00Z",
     "updated_at": "2026-01-20T00:00:00Z"
@@ -29,7 +29,7 @@
   "inputs": {
     "instruments": ["GBPUSD"],
     "columns": {
-      "features": ["block_id", "ts", "instrument", "rng", "c3_trend_bias"],
+      "features": ["block_id", "ts", "instrument", "rng", "l3_trend_bias"],
       "outcomes": ["fwd_ret_3", "mfe_3", "mae_3"]
     },
     "filters": {
@@ -40,9 +40,9 @@
 
   "parameters": {
     "_comment": "All numeric/categorical parameters used in analysis",
-    "conditioning_field": "c3_trend_bias",
-    "conditioning_source": "derived.ovc_block_features_v0_1 (canonical C3)",
-    "conditioning_note": "Field taken as-is from canonical C3; no definition or computation here",
+    "conditioning_field": "l3_trend_bias",
+    "conditioning_source": "derived.ovc_block_features_v0_1 (canonical L3)",
+    "conditioning_note": "Field taken as-is from canonical L3; no definition or computation here",
     "score_buckets": [0, 10, 25, 50, 75, 90, 100],
     "normalization": "full-sample",
     "null_handling": "excluded from per-category analysis; NULL rate documented"
@@ -54,7 +54,7 @@
     "output_schema": {
       "columns": [
         "block_id",
-        "c3_trend_bias",
+        "l3_trend_bias",
         "score_value",
         "score_bucket",
         "fwd_ret_3",

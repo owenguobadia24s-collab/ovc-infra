@@ -16,7 +16,7 @@
 | `.github/workflows/` | CI/CD automation (5 workflows) |
 | `infra/ovc-webhook/` | Cloudflare Worker (P1 ingest) |
 | `src/` | Python scripts (backfill, validation, derived compute) |
-| `src/derived/` | C1/C2/C3 feature compute scripts |
+| `src/derived/` | L1/L2/L3 feature compute scripts |
 | `src/ovc_ops/` | Run artifact system (`run_artifact.py`) |
 | `src/validate/` | Derived validation (`validate_derived_range_v0_1.py`) |
 | `sql/` | Neon schema DDL (19 files) |
@@ -25,7 +25,7 @@
 | `tests/` | pytest tests + sample exports |
 | `tools/` | Validation utilities |
 | `pine/` | TradingView Pine scripts |
-| `configs/threshold_packs/` | C3 threshold configuration |
+| `configs/threshold_packs/` | L3 threshold configuration |
 | `reports/` | Run artifacts output directory |
 | `docs/` | Documentation (35+ files) |
 
@@ -48,9 +48,9 @@
 | `validate_day.py` | P4 | Single-day validation |
 | `validate_range.py` | P4 | Range validation |
 | `full_ingest_stub.py` | - | FULL ingest stub (manual) |
-| `derived/compute_c1_v0_1.py` | B1 | C1 single-bar features |
-| `derived/compute_c2_v0_1.py` | B1 | C2 multi-bar features |
-| `derived/compute_c3_regime_trend_v0_1.py` | B1 | C3 regime tags |
+| `derived/compute_l1_v0_1.py` | B1 | L1 single-bar features |
+| `derived/compute_l2_v0_1.py` | B1 | L2 multi-bar features |
+| `derived/compute_l3_regime_trend_v0_1.py` | B1 | L3 regime tags |
 | `validate/validate_derived_range_v0_1.py` | B2 | Derived feature validation |
 | `ovc_ops/run_artifact.py` | All | RunWriter class for artifacts |
 
@@ -60,13 +60,13 @@
 |------|--------|---------|
 | `00_schema.sql` | (base) | Schema creation |
 | `01_tables_min.sql` | `ovc` | Canonical facts table (LOCKED) |
-| `02_derived_c1_c2_tables_v0_1.sql` | `derived` | C1/C2 feature tables |
+| `02_derived_c1_c2_tables_v0_1.sql` | `derived` | L1/L2 feature tables |
 | `02_tables_run_reports.sql` | `ovc` | Run report metadata |
 | `03_qa_derived_validation_v0_1.sql` | `ovc_qa` | Derived validation artifacts |
 | `03_tables_outcomes.sql` | `ovc` | Legacy outcomes table |
 | `04_ops_notion_sync.sql` | `ops` | Notion sync state |
 | `04_threshold_registry_v0_1.sql` | `ovc_cfg` | Threshold packs |
-| `05_c3_regime_trend_v0_1.sql` | `derived` | C3 regime tables |
+| `05_c3_regime_trend_v0_1.sql` | `derived` | L3 regime tables |
 | `10_views_research_v0.1.sql` | `ovc` | Research views |
 | `derived_v0_1.sql` | `derived` | Feature views |
 | `option_c_v0_1.sql` | `derived` | Outcome views |
@@ -80,7 +80,7 @@
 | `infra/ovc-webhook/wrangler.jsonc` | Worker config (R2 binding: `RAW_EVENTS`) |
 | `contracts/export_contract_v0.1.1_min.json` | MIN export contract |
 | `contracts/run_artifact_spec_v0.1.json` | Run artifact schema |
-| `configs/threshold_packs/c3_regime_trend_v1.json` | C3 thresholds |
+| `configs/threshold_packs/l3_regime_trend_v1.json` | L3 thresholds |
 
 ### Operator Scripts (`scripts/`)
 
@@ -150,8 +150,8 @@
 | `run_option_c_wrapper.py` | `scripts/` | Undocumented script | Add to operator docs |
 | `run_migration.py` | `scripts/` | Schema migration tool | Add to docs |
 | `oanda_export_2h_day.py` | `scripts/` | OANDA CSV export | Add to docs |
-| `compute_c3_stub_v0_1.py` | `src/derived/` | C3 stub (testing) | Note as test stub |
-| C3 threshold packs | `configs/threshold_packs/` | Config files | Document in workflow |
+| `compute_l3_stub_v0_1.py` | `src/derived/` | L3 stub (testing) | Note as test stub |
+| L3 threshold packs | `configs/threshold_packs/` | Config files | Document in workflow |
 | `backfill_day.py` | `src/` | Single-day backfill | Document or mark deprecated |
 | `ingest_history_day.py` | `src/` | History ingest | Document or mark deprecated |
 | `ovc_artifacts.py` | `src/` | Artifact utilities | Document |

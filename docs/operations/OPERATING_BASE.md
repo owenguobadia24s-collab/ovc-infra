@@ -15,7 +15,7 @@ OVC (Option Validation Chain) is a TradingView-driven market observation pipelin
 **What problems it solves:**
 1. Reliable ingestion of TradingView alert payloads via Cloudflare Worker
 2. Historical backfill from OANDA API for complete coverage
-3. Deterministic computation of derived features (C1/C2/C3 layers)
+3. Deterministic computation of derived features (L1/L2/L3 layers)
 4. Forward-looking outcome measurement (Option C) with hit rate tracking
 5. Immutable, versioned truth layers that prevent self-deception in trading research
 
@@ -57,7 +57,7 @@ OVC (Option Validation Chain) is a TradingView-driven market observation pipelin
       ▼               ▼
 ┌───────────┐   ┌───────────────────────┐
 │  Option B │   │  Option C             │
-│  C1/C2/C3 │   │  derived.ovc_outcomes │
+│  L1/L2/L3 │   │  derived.ovc_outcomes │
 │  Features │   │  Forward returns, MFE │
 └───────────┘   │  MAE, hit rates       │
                 └───────────────────────┘
@@ -83,7 +83,7 @@ Parallel ingest path:
 |----------|------------------|-----------|
 | **P1: Webhook Ingest** | Cloudflare Worker, /tv and /tv_secure endpoints | Live TradingView alerts |
 | **P2: Backfill** | `src/backfill_oanda_2h_checkpointed.py` | Historical OANDA data |
-| **Option B** | C1 (single-bar), C2 (multi-bar), C3 (semantic tags) | Derived features |
+| **Option B** | L1 (single-bar), L2 (multi-bar), L3 (semantic tags) | Derived features |
 | **Option C** | `derived.ovc_outcomes_v0_1` view | Forward outcomes |
 | **D: Validation** | `src/validate_day.py`, `src/validate_range.py` | Facts-vs-tape checks |
 
@@ -91,7 +91,7 @@ Parallel ingest path:
 
 1. **Ingest** → TradingView emits pipe-delimited export string at 2H bar close
 2. **Canonical Storage** → Worker validates against MIN contract, upserts to `ovc.ovc_blocks_v01_1_min`
-3. **Derived Layers** → C1/C2/C3 features computed from canonical facts
+3. **Derived Layers** → L1/L2/L3 features computed from canonical facts
 4. **Validation** → SQL pack compares OVC facts against TradingView/OANDA tape
 5. **Reports** → Run artifacts written to `reports/runs/<run_id>/`
 
@@ -120,7 +120,7 @@ The architecture enforces strict epistemic boundaries (`docs/OVC_DOCTRINE.md:L1-
 | `scripts/` | CLI entry points | `run_option_c.sh`, `pipeline_status.py`, `verify_local.ps1` |
 | `sql/` | Database schema and migrations | `01_tables_min.sql`, `option_c_v0_1.sql`, `02_derived_c1_c2_tables_v0_1.sql` |
 | `src/` | Python source code | `backfill_oanda_2h_checkpointed.py`, `validate_day.py`, `validate_range.py` |
-| `src/derived/` | C1/C2/C3 compute scripts | `compute_c1_v0_1.py`, `compute_c2_v0_1.py` |
+| `src/derived/` | L1/L2/L3 compute scripts | `compute_l1_v0_1.py`, `compute_l2_v0_1.py` |
 | `src/ovc_ops/` | Run artifact utilities | `run_artifact.py` |
 | `tests/` | Test suite | `test_contract_equivalence.py`, `test_min_contract_validation.py` |
 | `tools/` | Validation utilities | `validate_contract.py`, `validate_contract.ps1` |
@@ -140,7 +140,7 @@ The architecture enforces strict epistemic boundaries (`docs/OVC_DOCTRINE.md:L1-
 | Zone | Schema | Mutability | Example Objects |
 |------|--------|------------|-----------------|
 | **Canonical Facts** | `ovc` | LOCKED (Option A) | `ovc_blocks_v01_1_min` |
-| **Derived Features** | `derived` | Versioned, replayable | `ovc_c1_features_v0_1`, `ovc_outcomes_v0_1` |
+| **Derived Features** | `derived` | Versioned, replayable | `ovc_l1_features_v0_1`, `ovc_outcomes_v0_1` |
 | **QA/Governance** | `ovc_qa`, `ovc_cfg` | Operational | `validation_run`, `threshold_pack` |
 | **Research** | `public` (legacy) | Orphaned | `ovc_blocks_v01` (superseded) |
 
@@ -171,7 +171,7 @@ The architecture enforces strict epistemic boundaries (`docs/OVC_DOCTRINE.md:L1-
 | **MIN** | Minimal webhook-safe export profile (live ingestion) |
 | **FULL** | Complete debug export (not currently in production) |
 | **Option A** | Logging foundations — canonical facts layer (LOCKED) |
-| **Option B** | Feature layers — C1 (single-bar), C2 (multi-bar), C3 (semantic) |
+| **Option B** | Feature layers — L1 (single-bar), L2 (multi-bar), L3 (semantic) |
 | **Option C** | Outcome evaluation — forward returns, MFE/MAE, hit rates |
 | **state_key** | Pipe-joined tuple of semantic state fields |
 | **bar_close_ms** | Unix epoch milliseconds at 2H bar close (UTC) |
@@ -512,7 +512,7 @@ python -m tools.validate_contract contracts/export_contract_v0.1.1_min.json test
 | Document | Purpose |
 |----------|---------|
 | `docs/WORKFLOW_STATUS.md` | Quick-reference status snapshot |
-| `docs/c_layer_boundary_spec_v0.1.md` | C1/C2/C3 tier definitions |
+| `docs/c_layer_boundary_spec_v0.1.md` | L1/L2/L3 tier definitions |
 | `docs/ops/GOVERNANCE_RULES_v0.1.md` | Change control process |
 | `docs/secrets_and_env.md` | Environment variable guide |
 | `contracts/run_artifact_spec_v0.1.json` | Run artifact schema |

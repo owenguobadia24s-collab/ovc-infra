@@ -1,12 +1,12 @@
 """
 OVC Option C.3 Stub (v0.1)
 
-Purpose: Demonstrate threshold registry plumbing for C3 tags.
-This stub DOES NOT implement full C3 tagging logic - it only proves
+Purpose: Demonstrate threshold registry plumbing for L3 tags.
+This stub DOES NOT implement full L3 tagging logic - it only proves
 that pack resolution works and produces deterministic metadata.
 
 Usage:
-    python src/derived/compute_c3_stub_v0_1.py --pack-id c3_example --scope GLOBAL
+    python src/derived/compute_l3_stub_v0_1.py --pack-id l3_example --scope GLOBAL
 
 Environment:
     NEON_DSN or DATABASE_URL: PostgreSQL connection string
@@ -15,8 +15,8 @@ Output:
     Prints resolved pack metadata (pack_id, version, hash, config)
     to demonstrate that the plumbing works.
 
-When Full C3 is Implemented:
-    - Replace stub logic with actual C3 tagging computations.
+When Full L3 is Implemented:
+    - Replace stub logic with actual L3 tagging computations.
     - Store pack_id/version/hash with each tag row for replay certification.
 """
 
@@ -58,7 +58,7 @@ load_env()
 
 # ---------- Constants ----------
 VERSION = "v0.1"
-RUN_TYPE = "c3_stub"
+RUN_TYPE = "l3_stub"
 
 
 def json_serializer(obj):
@@ -71,7 +71,7 @@ def json_serializer(obj):
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(
-        description="C3 Stub: Demonstrate threshold registry plumbing"
+        description="L3 Stub: Demonstrate threshold registry plumbing"
     )
     parser.add_argument(
         "--pack-id",
@@ -129,7 +129,7 @@ def main() -> None:
     """Main entry point."""
     args = parse_args()
     
-    print(f"[C3 Stub v0.1] Resolving threshold pack...")
+    print(f"[L3 Stub v0.1] Resolving threshold pack...")
     print(f"  pack_id: {args.pack_id}")
     print(f"  scope: {args.scope}")
     if args.symbol:
@@ -149,7 +149,7 @@ def main() -> None:
         print(f"ERROR: {e}", file=sys.stderr)
         print(file=sys.stderr)
         print("To create and activate a pack, run:", file=sys.stderr)
-        print(f'  python -m src.config.threshold_registry_cli create --pack-id {args.pack_id} --version 1 --scope {args.scope} --config-file configs/threshold_packs/c3_example_pack_v1.json', file=sys.stderr)
+        print(f'  python -m src.config.threshold_registry_cli create --pack-id {args.pack_id} --version 1 --scope {args.scope} --config-file configs/threshold_packs/l3_example_pack_v1.json', file=sys.stderr)
         print(f'  python -m src.config.threshold_registry_cli activate --pack-id {args.pack_id} --version 1 --scope {args.scope}', file=sys.stderr)
         sys.exit(1)
     except ScopeValidationError as e:
@@ -162,7 +162,7 @@ def main() -> None:
     print(json.dumps(pack, indent=2, default=json_serializer))
     print()
     
-    # Extract provenance metadata that would be stored with C3 tags
+    # Extract provenance metadata that would be stored with L3 tags
     provenance = {
         "pack_id": pack["pack_id"],
         "pack_version": pack["pack_version"],
@@ -171,26 +171,26 @@ def main() -> None:
     }
     
     print("=" * 60)
-    print("PROVENANCE METADATA (store with each C3 tag row)")
+    print("PROVENANCE METADATA (store with each L3 tag row)")
     print("=" * 60)
     print(json.dumps(provenance, indent=2))
     print()
     
     if args.dry_run:
-        print("[DRY-RUN] Would apply thresholds to C1/C2 data here.")
+        print("[DRY-RUN] Would apply thresholds to L1/L2 data here.")
         print("[DRY-RUN] No actual processing performed.")
     else:
-        print("[STUB] Full C3 tagging logic not implemented.")
+        print("[STUB] Full L3 tagging logic not implemented.")
         print("[STUB] This demonstrates that pack resolution works.")
         print()
-        print("To implement full C3:")
-        print("  1. Read C1/C2 data from derived tables")
+        print("To implement full L3:")
+        print("  1. Read L1/L2 data from derived tables")
         print("  2. Apply threshold logic using pack['config_json']")
         print("  3. Store tags with provenance (pack_id, version, hash)")
         print("  4. Ensure determinism: same pack + same data = same tags")
     
     print()
-    print("[C3 Stub] Done.")
+    print("[L3 Stub] Done.")
 
 
 if __name__ == "__main__":

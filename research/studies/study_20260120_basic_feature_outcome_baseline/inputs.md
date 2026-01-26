@@ -17,7 +17,7 @@ ovc-v0.1-spine
 
 | Object | Schema | Description |
 |--------|--------|-------------|
-| `derived.ovc_block_features_v0_1` | `derived` | Option B block features (C1/C2/C3) |
+| `derived.ovc_block_features_v0_1` | `derived` | Option B block features (L1/L2/L3) |
 
 **Columns Used:**
 

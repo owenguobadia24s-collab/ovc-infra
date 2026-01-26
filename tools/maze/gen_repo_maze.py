@@ -80,7 +80,7 @@ PREFERRED_EXTS = {".md", ".sql", ".py", ".ts", ".js", ".yml", ".yaml", ".json", 
 PREFERRED_NAME_HINTS = [
     "readme", "contract", "spec", "boundary", "registry", "metric", "map",
     "path1", "path2", "evidence", "validate", "validation", "determin", "fingerprint",
-    "ingest", "canonical", "export", "c0", "c1", "c2", "c3",
+    "ingest", "canonical", "export", "l0", "l1", "l2", "l3",
     "outcome", "eval", "evaluation", "label",
     "main.yml", "workflow",
 ]
@@ -110,9 +110,9 @@ OPTION_DEFS = [
     OptionDef(
         key="A",
         title="OPT_A__CANONICAL_INGEST",
-        definition="Canonical ingest: raw/source → canonical facts (C0/R) and early primitives (C1).",
-        keywords=("ingest", "canonical", "canon", "export", "c0", "c1", "worker", "wrangler", "neon", "oanda", "tradingview"),
-        dir_prefixes=("ingest", "canonical", "c0", "c1", "export", "workers"),
+        definition="Canonical ingest: raw/source → canonical facts (L0/R) and early primitives (L1).",
+        keywords=("ingest", "canonical", "canon", "export", "l0", "l1", "worker", "wrangler", "neon", "oanda", "tradingview"),
+        dir_prefixes=("ingest", "canonical", "l0", "l1", "export", "workers"),
     ),
     OptionDef(
         key="D",
@@ -124,9 +124,9 @@ OPTION_DEFS = [
     OptionDef(
         key="B",
         title="OPT_B__DERIVED_LAYERS",
-        definition="Derived layers: compute C2/C3 features, registries, thresholds, and semantic tags from canonical facts.",
-        keywords=("derived", "features", "feature", "registry", "threshold", "c2", "c3", "compute_c2", "compute_c3", "tag", "metric"),
-        dir_prefixes=("c2", "c3", "derived", "features", "registry", "registries"),
+        definition="Derived layers: compute L2/L3 features, registries, thresholds, and semantic tags from canonical facts.",
+        keywords=("derived", "features", "feature", "registry", "threshold", "l2", "l3", "compute_c2", "compute_c3", "tag", "metric"),
+        dir_prefixes=("l2", "l3", "derived", "features", "registry", "registries"),
     ),
     OptionDef(
         key="C",
@@ -357,9 +357,9 @@ def render_option(opt: OptionDef, opt_anchors: List[str], workflows: List[str], 
 
     # input/output “best effort” based on key
     io = {
-        "A": ("Raw/source events → canonical facts (C0/R) (+ maybe C1 primitives).", "Canonical dataset + export contract outputs."),
+        "A": ("Raw/source events → canonical facts (L0/R) (+ maybe L1 primitives).", "Canonical dataset + export contract outputs."),
         "D": ("Option A outputs + run config → evidence packs + determinism checks.", "PASS/FAIL evidence, hashes, run-ledger artifacts."),
-        "B": ("Canonical facts + verified evidence → C2/C3 derived packs, registries, semantic tags.", "Derived tables/features, registry-driven tags."),
+        "B": ("Canonical facts + verified evidence → L2/L3 derived packs, registries, semantic tags.", "Derived tables/features, registry-driven tags."),
         "C": ("Verified structure + derived evidence → outcomes/eval/regression outputs.", "Outcome labels + evaluation reports."),
     }[key]
 

@@ -36,7 +36,7 @@
 **Workflow**: `backfill_then_validate.yml` (Step 2-5)
 
 - Compares database facts against tape (OANDA CSV)
-- Computes derived features (C1, C2)
+- Computes derived features (L1, L2)
 - Validates derived features against expectations
 - **Output**: Validation reports (artifacts only)
 - **Persistence**: Artifacts-only (ephemeral diagnostics)

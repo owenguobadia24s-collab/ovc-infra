@@ -30,10 +30,10 @@ Where:
 
 | Column | Source View | Description |
 |--------|-------------|-------------|
-| `block_id` | `derived.v_ovc_c1_features_v0_1` | Block identifier |
-| `sym` | `derived.v_ovc_c1_features_v0_1` | Symbol |
-| `body_ratio` | `derived.v_ovc_c1_features_v0_1` | Body as fraction of range |
-| `bar_close_ms` | `derived.v_ovc_c2_features_v0_1` | Timestamp for ordering |
+| `block_id` | `derived.v_ovc_l1_features_v0_1` | Block identifier |
+| `sym` | `derived.v_ovc_l1_features_v0_1` | Symbol |
+| `body_ratio` | `derived.v_ovc_l1_features_v0_1` | Body as fraction of range |
+| `bar_close_ms` | `derived.v_ovc_l2_features_v0_1` | Timestamp for ordering |
 
 ### 1.4 Z-Score Normalization
 
@@ -144,7 +144,7 @@ Run the following SQL against your Neon database:
 | Condition | Result |
 |-----------|--------|
 | `body_ratio IS NULL` | `raw_score = NULL` |
-| Zero-range bar | `raw_score = NULL` (inherited from C1) |
+| Zero-range bar | `raw_score = NULL` (inherited from L1) |
 
 ### 6.2 Expected NULL Rate
 

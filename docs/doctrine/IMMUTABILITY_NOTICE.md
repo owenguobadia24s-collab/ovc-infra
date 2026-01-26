@@ -10,7 +10,7 @@
 
 **Canonical layers must not be modified in place.**
 
-The OVC epistemic spine—comprising Option B (C1/C2/C3) and Option C (Outcomes)—represents frozen truth. These layers define *what happened* and *what followed*, not *what to do about it*.
+The OVC epistemic spine—comprising Option B (L1/L2/L3) and Option C (Outcomes)—represents frozen truth. These layers define *what happened* and *what followed*, not *what to do about it*.
 
 ---
 
@@ -22,9 +22,9 @@ Canonical specifications, implementations, and meanings are **FROZEN**:
 
 | Layer | Frozen Artifacts |
 |-------|------------------|
-| Option B – C1 | `OPTION_B_C1_*.md`, `derived.v_ovc_c1_*` |
-| Option B – C2 | `OPTION_B_C2_*.md`, `derived.v_ovc_c2_*` |
-| Option B – C3 | `OPTION_B_C3_*.md`, `derived.v_ovc_c3_*` |
+| Option B – L1 | `OPTION_B_L1_*.md`, `derived.v_ovc_l1_*` |
+| Option B – L2 | `OPTION_B_L2_*.md`, `derived.v_ovc_l2_*` |
+| Option B – L3 | `OPTION_B_L3_*.md`, `derived.v_ovc_l3_*` |
 | Option C | `OPTION_C_*.md`, `derived.v_ovc_c_outcomes_*` |
 
 **Prohibited actions:**
@@ -42,7 +42,7 @@ Any modification to a canonical layer requires:
 3. **Migration documentation** — How downstream consumers should adapt
 4. **Governance approval** — Per `GOVERNANCE_RULES_v0.1.md`
 
-Example: To change C1 feature definitions, create `OPTION_B_C1_FEATURES_v0.2.md` and `derived.v_ovc_c1_features_v0_2`.
+Example: To change L1 feature definitions, create `OPTION_B_L1_FEATURES_v0.2.md` and `derived.v_ovc_l1_features_v0_2`.
 
 ### 3. Downstream Experimentation Must Not Alter Truth Layers
 

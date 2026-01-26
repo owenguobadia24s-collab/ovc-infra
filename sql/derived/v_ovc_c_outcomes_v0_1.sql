@@ -28,9 +28,9 @@
 --
 -- Compliance:
 --   - Reads ONLY from CANONICAL Option B views (per Charter §2.1):
---       - derived.v_ovc_c1_features_v0_1
---       - derived.v_ovc_c2_features_v0_1
---       - derived.v_ovc_c3_features_v0_1
+--       - derived.v_ovc_l1_features_v0_1
+--       - derived.v_ovc_l2_features_v0_1
+--       - derived.v_ovc_l3_features_v0_1
 --   - NO raw block access (per Charter §2.2)
 --   - Anchor bar EXCLUDED from forward windows (per Contract §2.2)
 --   - Lookahead ONLY in Option C (per Contract §2.4)
@@ -54,27 +54,27 @@ CREATE VIEW derived.v_ovc_c_outcomes_v0_1 AS
 WITH
 -- =============================================================================
 -- CTE: base_joined
--- Join CANONICAL C1, C2, C3 views to establish anchor blocks
+-- Join CANONICAL L1, L2, L3 views to establish anchor blocks
 -- Per Charter §2.1: ONLY Option B views are allowed inputs
 -- =============================================================================
 base_joined AS (
     SELECT
-        -- Identity columns from C1
+        -- Identity columns from L1
         c1.block_id,
         c1.sym,
         c1.c AS anchor_close,
         
-        -- Ordering column from C2 (bar_close_ms for deterministic sequencing)
+        -- Ordering column from L2 (bar_close_ms for deterministic sequencing)
         c2.bar_close_ms,
         
-        -- C3 passthrough for optional regime conditioning (future use)
-        c3.c3_volatility_regime,
-        c3.c3_trend_bias
+        -- L3 passthrough for optional regime conditioning (future use)
+        c3.l3_volatility_regime,
+        c3.l3_trend_bias
         
-    FROM derived.v_ovc_c1_features_v0_1 c1
-    INNER JOIN derived.v_ovc_c2_features_v0_1 c2
+    FROM derived.v_ovc_l1_features_v0_1 c1
+    INNER JOIN derived.v_ovc_l2_features_v0_1 c2
         ON c1.block_id = c2.block_id
-    INNER JOIN derived.v_ovc_c3_features_v0_1 c3
+    INNER JOIN derived.v_ovc_l3_features_v0_1 c3
         ON c1.block_id = c3.block_id
     WHERE c1.block_id IS NOT NULL
       AND c1.c IS NOT NULL
@@ -121,8 +121,8 @@ with_forward_prices AS (
         LEAD(c1.l, 6) OVER w_sym_time AS low_t6
         
     FROM base_joined bj
-    -- Re-join C1 to get forward OHLC (we need h, l, c from forward bars)
-    INNER JOIN derived.v_ovc_c1_features_v0_1 c1
+    -- Re-join L1 to get forward OHLC (we need h, l, c from forward bars)
+    INNER JOIN derived.v_ovc_l1_features_v0_1 c1
         ON bj.block_id = c1.block_id
     WINDOW w_sym_time AS (
         PARTITION BY bj.sym
@@ -202,10 +202,10 @@ SELECT
     bar_close_ms,
     
     -- =========================================================================
-    -- C3 regime context (passthrough for analysis convenience)
+    -- L3 regime context (passthrough for analysis convenience)
     -- =========================================================================
-    c3_volatility_regime,
-    c3_trend_bias,
+    l3_volatility_regime,
+    l3_trend_bias,
 
     -- =========================================================================
     -- OUTCOME: fwd_ret_1
@@ -422,7 +422,7 @@ ORDER BY sym, bar_close_ms;  -- Contract §5.1: Deterministic ordering
 -- -----------------------------------------------------------------------------
 -- SELECT block_id, sym, fwd_ret_1, mfe_3, mae_3
 -- FROM derived.v_ovc_c_outcomes_v0_1
--- WHERE block_id IN (SELECT block_id FROM derived.v_ovc_c1_features_v0_1 WHERE c IS NULL)
+-- WHERE block_id IN (SELECT block_id FROM derived.v_ovc_l1_features_v0_1 WHERE c IS NULL)
 -- LIMIT 5;
 
 -- -----------------------------------------------------------------------------
@@ -435,13 +435,13 @@ ORDER BY sym, bar_close_ms;  -- Contract §5.1: Deterministic ordering
 
 -- -----------------------------------------------------------------------------
 -- ROW COUNT VALIDATION
--- Verify: Total rows match C1/C2/C3 join (minus NULL anchor closes)
+-- Verify: Total rows match L1/L2/L3 join (minus NULL anchor closes)
 -- -----------------------------------------------------------------------------
 -- SELECT 
 --     (SELECT COUNT(*) FROM derived.v_ovc_c_outcomes_v0_1) AS outcome_rows,
---     (SELECT COUNT(*) FROM derived.v_ovc_c1_features_v0_1 c1
---      INNER JOIN derived.v_ovc_c2_features_v0_1 c2 ON c1.block_id = c2.block_id
---      INNER JOIN derived.v_ovc_c3_features_v0_1 c3 ON c1.block_id = c3.block_id
+--     (SELECT COUNT(*) FROM derived.v_ovc_l1_features_v0_1 c1
+--      INNER JOIN derived.v_ovc_l2_features_v0_1 c2 ON c1.block_id = c2.block_id
+--      INNER JOIN derived.v_ovc_l3_features_v0_1 c3 ON c1.block_id = c3.block_id
 --      WHERE c1.c IS NOT NULL) AS expected_rows;
 
 -- =============================================================================

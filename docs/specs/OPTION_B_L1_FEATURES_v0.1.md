@@ -1,4 +1,4 @@
-# Option B – C1 Feature Definitions v0.1
+# Option B – L1 Feature Definitions v0.1
 
 [CHANGE][CHANGED] [STATUS: CANONICAL]
 
@@ -8,11 +8,11 @@
 
 ---
 
-## 1. Purpose of C1 Features
+## 1. Purpose of L1 Features
 
-### 1.1 What C1 Represents
+### 1.1 What L1 Represents
 
-C1 features are **single-bar facts** derived exclusively from one 2H block record. Each C1 feature:
+L1 features are **single-bar facts** derived exclusively from one 2H block record. Each L1 feature:
 
 - Is computed from fields within a **single row** of `ovc.ovc_blocks_v01_1_min`
 - Contains **no lookahead** — uses only information available at bar close
@@ -20,17 +20,17 @@ C1 features are **single-bar facts** derived exclusively from one 2H block recor
 - Is **deterministic** — same input always produces same output
 - Is **replayable** — can be recomputed from canonical facts at any time
 
-### 1.2 What C1 Is NOT
+### 1.2 What L1 Is NOT
 
-C1 features explicitly **do not** include:
+L1 features explicitly **do not** include:
 
 | Excluded Concept | Reason |
 |------------------|--------|
-| Multi-bar patterns | Requires sequence context (C2 domain) |
-| Rolling statistics | Requires window > 1 bar (C2 domain) |
-| Session aggregates | Requires grouping across bars (C2 domain) |
+| Multi-bar patterns | Requires sequence context (L2 domain) |
+| Rolling statistics | Requires window > 1 bar (L2 domain) |
+| Session aggregates | Requires grouping across bars (L2 domain) |
 | Trend classification | Requires interpretation or context |
-| Signal generation | Requires thresholds or decision logic (C3 domain) |
+| Signal generation | Requires thresholds or decision logic (L3 domain) |
 | Time-of-day bias | Requires external reference data |
 
 ---
@@ -47,7 +47,7 @@ C1 features explicitly **do not** include:
 
 ### 2.2 Required Input Fields
 
-The following fields from MIN v0.1.1 are required for C1 computation:
+The following fields from MIN v0.1.1 are required for L1 computation:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -234,7 +234,7 @@ The following fields from MIN v0.1.1 are required for C1 computation:
 | **Edge Cases** | |
 | — Zero range | FALSE |
 | **Semantic** | Long lower wick, small body at top — shape only, not signal |
-| **Note** | Shape classification only; trend context required for signal meaning (C3) |
+| **Note** | Shape classification only; trend context required for signal meaning (L3) |
 
 ---
 
@@ -250,7 +250,7 @@ The following fields from MIN v0.1.1 are required for C1 computation:
 | **Edge Cases** | |
 | — Zero range | FALSE |
 | **Semantic** | Long upper wick, small body at bottom — shape only, not signal |
-| **Note** | Shape classification only; trend context required for signal meaning (C3) |
+| **Note** | Shape classification only; trend context required for signal meaning (L3) |
 
 ---
 
@@ -272,17 +272,17 @@ The following fields from MIN v0.1.1 are required for C1 computation:
 
 ## 4. Explicit Exclusions
 
-The following concepts are **explicitly excluded** from C1 and belong to later layers:
+The following concepts are **explicitly excluded** from L1 and belong to later layers:
 
 | Excluded | Belongs To | Reason |
 |----------|------------|--------|
-| Session statistics (daily high/low) | C2 | Requires aggregation across multiple bars |
-| Rolling z-scores | C2 | Requires window of N previous bars |
-| ATR-normalized values | C2 | Requires rolling average |
-| Trend context (uptrend/downtrend) | C2/C3 | Requires sequence analysis |
-| Support/resistance levels | C2/C3 | Requires historical reference |
-| Signal labels (buy/sell/hold) | C3 | Requires interpretation + thresholds |
-| Entry/exit timing | C3 | Requires decision logic |
+| Session statistics (daily high/low) | L2 | Requires aggregation across multiple bars |
+| Rolling z-scores | L2 | Requires window of N previous bars |
+| ATR-normalized values | L2 | Requires rolling average |
+| Trend context (uptrend/downtrend) | L2/L3 | Requires sequence analysis |
+| Support/resistance levels | L2/L3 | Requires historical reference |
+| Signal labels (buy/sell/hold) | L3 | Requires interpretation + thresholds |
+| Entry/exit timing | L3 | Requires decision logic |
 | Win/loss outcomes | Option C | Requires forward-looking data |
 | External indicators (news, vol) | Out of scope | Requires non-canonical sources |
 
@@ -292,7 +292,7 @@ The following concepts are **explicitly excluded** from C1 and belong to later l
 
 ### 5.1 Version Scheme
 
-Format: `OPTION_B_C1_FEATURES_v{MAJOR}.{MINOR}.md`
+Format: `OPTION_B_L1_FEATURES_v{MAJOR}.{MINOR}.md`
 
 | Change Type | Version Impact | Example |
 |-------------|----------------|---------|
@@ -338,7 +338,7 @@ Breaking changes require:
 
 When this document reaches `[STATUS: CANONICAL]`, implementers should:
 
-1. Create `derived.ovc_c1_features_v0_1` view
+1. Create `derived.ovc_l1_features_v0_1` view
 2. Implement each feature exactly as defined
 3. Handle edge cases as specified (UNDEFINED → NULL)
 4. Add validation tests against known fixtures

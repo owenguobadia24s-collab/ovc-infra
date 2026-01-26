@@ -86,14 +86,14 @@ CANONICAL INPUT
     │                        │                          │
     ▼                        ▼                          ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌────────────────────────┐
-│ v_ovc_c1_       │  │ v_ovc_c2_       │  │ v_ovc_c3_features_     │
+│ v_ovc_l1_       │  │ v_ovc_l2_       │  │ v_ovc_l3_features_     │
 │ features_v0_1   │  │ features_v0_1   │  │ v0_1                   │
 │ (sql/derived/)  │  │ (sql/derived/)  │  │ (sql/derived/)         │
 └────────┬────────┘  └────────┬────────┘  └────────────┬───────────┘
          │                    │                        │
          ▼                    ▼                        ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌────────────────────────┐
-│ compute_c1_     │  │ compute_c2_     │  │ compute_c3_regime_     │
+│ compute_l1_     │  │ compute_l2_     │  │ compute_l3_regime_     │
 │ v0_1.py         │  │ v0_1.py         │  │ trend_v0_1.py          │
 │ (INVOKED)       │  │ (INVOKED)       │  │ (UNUSED BY WORKFLOW)   │
 └────────┬────────┘  └────────┬────────┘  └────────────────────────┘
@@ -101,7 +101,7 @@ CANONICAL INPUT
          ▼                    ▼
 ┌─────────────────┐  ┌─────────────────┐
 │ derived.        │  │ derived.        │
-│ ovc_c1_         │  │ ovc_c2_         │
+│ ovc_l1_         │  │ ovc_l2_         │
 │ features_v0_1   │  │ features_v0_1   │
 │ (materialized)  │  │ (materialized)  │
 └─────────────────┘  └─────────────────┘
@@ -112,7 +112,7 @@ CANONICAL INPUT
          ┌──────────────────────┐
          │ backfill_then_       │
          │ validate.yml         │
-         │ (invokes C1, C2 only)│
+         │ (invokes L1, L2 only)│
          └──────────────────────┘
 ```
 
@@ -164,9 +164,9 @@ PATH A: Option C Runner
 PATH B: Feature-Based Outcomes View
 -----------------------------------
 ┌────────────────────────────────┐
-│ derived.v_ovc_c1_features_v0_1 │
-│ derived.v_ovc_c2_features_v0_1 │
-│ derived.v_ovc_c3_features_v0_1 │
+│ derived.v_ovc_l1_features_v0_1 │
+│ derived.v_ovc_l2_features_v0_1 │
+│ derived.v_ovc_l3_features_v0_1 │
 └───────────────┬────────────────┘
                 │
                 ▼
@@ -174,7 +174,7 @@ PATH B: Feature-Based Outcomes View
 │ sql/derived/                   │
 │ v_ovc_c_outcomes_v0_1.sql      │
 │                                │
-│ (reads from C1/C2/C3 views,    │
+│ (reads from L1/L2/L3 views,    │
 │  NOT canonical table)          │
 └───────────────┬────────────────┘
                 │
@@ -317,7 +317,7 @@ TESTS (NOT IN CI)
 │     determinism.py             │
 │   test_overlays_v0_3_          │
 │     determinism.py             │
-│   test_c3_regime_trend.py      │
+│   test_l3_regime_trend.py      │
 │   test_derived_features.py     │
 │   test_dst_audit.py            │
 │   test_evidence_pack_          │
@@ -337,16 +337,16 @@ TESTS (NOT IN CI)
 | `ovc.ovc_candles_m15_raw` | Table | Neon DB | Path1 evidence pack builder |
 | `ovc.ovc_run_reports_v01` | Table | Neon DB | Worker telemetry (schema drift) |
 | `derived.ovc_block_features_v0_1` | View | `sql/derived_v0_1.sql` | Legacy derived features |
-| `derived.ovc_c1_features_v0_1` | Table | Python compute | Split C1 features |
-| `derived.ovc_c2_features_v0_1` | Table | Python compute | Split C2 features |
-| `derived.ovc_c3_regime_trend_v0_1` | Table | (Unused compute) | Split C3 features |
-| `derived.v_ovc_c1_features_v0_1` | View | `sql/derived/` | C1 view definition |
-| `derived.v_ovc_c2_features_v0_1` | View | `sql/derived/` | C2 view definition |
-| `derived.v_ovc_c3_features_v0_1` | View | `sql/derived/` | C3 view definition |
+| `derived.ovc_l1_features_v0_1` | Table | Python compute | Split L1 features |
+| `derived.ovc_l2_features_v0_1` | Table | Python compute | Split L2 features |
+| `derived.ovc_l3_regime_trend_v0_1` | Table | (Unused compute) | Split L3 features |
+| `derived.v_ovc_l1_features_v0_1` | View | `sql/derived/` | L1 view definition |
+| `derived.v_ovc_l2_features_v0_1` | View | `sql/derived/` | L2 view definition |
+| `derived.v_ovc_l3_features_v0_1` | View | `sql/derived/` | L3 view definition |
 | `derived.ovc_outcomes_v0_1` | View | `sql/option_c_v0_1.sql` | Option C runner output |
 | `derived.ovc_scores_v0_1` | View | `sql/option_c_v0_1.sql` | Option C runner output |
 | `derived.v_ovc_c_outcomes_v0_1` | View | `sql/derived/v_ovc_c_outcomes_v0_1.sql` | Path1 evidence (via evidence views) |
 | `derived.v_path1_evidence_dis_v1_1` | View | `sql/path1/evidence/` | Path1 evidence pack builder |
 | `derived.eval_runs` | Table | `sql/option_c_v0_1.sql` | Option C run metadata |
-| `ovc_cfg.threshold_pack` | Table | `sql/04_threshold_registry_v0_1.sql` | C3 regime classification |
+| `ovc_cfg.threshold_pack` | Table | `sql/04_threshold_registry_v0_1.sql` | L3 regime classification |
 | `ovc_cfg.threshold_pack_active` | Table | `sql/04_threshold_registry_v0_1.sql` | Active threshold selection |

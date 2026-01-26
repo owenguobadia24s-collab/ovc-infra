@@ -14,8 +14,8 @@
 | Layer | Count |
 |-------|-------|
 | B-layer blocks | 1 |
-| C1 rows | 1 |
-| C2 rows | 1 |
+| L1 rows | 1 |
+| L2 rows | 1 |
 
 **Parity**: ✅ PASS
 
@@ -23,10 +23,10 @@
 
 | Table | Duplicates |
 |-------|------------|
-| C1 | 0 |
-| C2 | 0 |
+| L1 | 0 |
+| L2 | 0 |
 
-## 3. Null Rates (C1)
+## 3. Null Rates (L1)
 
 | Column | Null Rate |
 |--------|-----------|
@@ -41,7 +41,7 @@
 | lower_wick | 0.00% |
 | clv | 0.00% |
 
-## 4. Null Rates (C2)
+## 4. Null Rates (L2)
 
 | Column | Null Rate |
 |--------|-----------|
@@ -56,7 +56,7 @@
 | roll_std_logret_12 | 0.00% |
 | range_z_12 | 0.00% |
 
-## 5. Window Spec Enforcement (C2)
+## 5. Window Spec Enforcement (L2)
 
 **Valid**: ✅ PASS
 

@@ -26,9 +26,9 @@ flowchart LR
 
   %% Option B
   subgraph OPTB[Option B: Derived Features]
-    B_C1[B_C1: C1 compute]
-    B_C2[B_C2: C2 compute]
-    B_C3[B_C3: C3 compute]
+    B_C1[B_C1: L1 compute]
+    B_C2[B_C2: L2 compute]
+    B_C3[B_C3: L3 compute]
     B_VIEWS[B_VIEWS: derived views]
     B_TF[B_TF: trajectory families]
   end
@@ -123,9 +123,9 @@ See `../90_LEGENDS/LEGEND_MASTER.md` for full path mappings.
 | A_BLOCKS | ovc.ovc_blocks_v01_1_min |
 | A_M15 | ovc.ovc_candles_m15_raw |
 | A_R2 | R2 bucket archive |
-| B_C1 | src/derived/compute_c1_v0_1.py |
-| B_C2 | src/derived/compute_c2_v0_1.py |
-| B_C3 | src/derived/compute_c3_regime_trend_v0_1.py (NOT INVOKED) |
+| B_C1 | src/derived/compute_l1_v0_1.py |
+| B_C2 | src/derived/compute_l2_v0_1.py |
+| B_C3 | src/derived/compute_l3_regime_trend_v0_1.py (NOT INVOKED) |
 | B_VIEWS | sql/derived/v_ovc_c*_features*.sql |
 | B_TF | trajectory_families/ |
 | C_RUNNER | scripts/run/run_option_c.sh |

@@ -1,7 +1,7 @@
 -- =============================================================================
--- DB PATCH: Align C1 view with actual MIN table schema
+-- DB PATCH: Align L1 view with actual MIN table schema
 -- =============================================================================
--- Issue: v_ovc_c1_features_v0_1.sql references column 'tf' which does not exist
+-- Issue: v_ovc_l1_features_v0_1.sql references column 'tf' which does not exist
 --        in ovc.ovc_blocks_v01_1_min table. Table has 'tz' and 'tt' columns.
 --
 -- Root Cause: Schema drift between view definition and canonical table.
@@ -60,6 +60,6 @@ COMMIT;
 --    SELECT block_id, tz, tf FROM ovc.ovc_blocks_v01_1_min LIMIT 5;
 --    (tf should equal tz for all rows)
 --
--- 3. Verify C1 view can now be created:
---    psql $DATABASE_URL -f sql/derived/v_ovc_c1_features_v0_1.sql
+-- 3. Verify L1 view can now be created:
+--    psql $DATABASE_URL -f sql/derived/v_ovc_l1_features_v0_1.sql
 -- =============================================================================

@@ -19,7 +19,7 @@
 ## Invariants Reminder
 
 1. Observational only (no outcomes or decision surfaces).
-2. Canonical inputs only (C1/C2/C3 views).
+2. Canonical inputs only (L1/L2/L3 views).
 3. Thresholds and weights are versioned in the registry.
 
 ---
@@ -27,7 +27,7 @@
 ## Source
 
 - View: `derived.v_ovc_state_plane_v0_2`
-- Canonical views: derived.v_ovc_c1_features_v0_1, derived.v_ovc_c2_features_v0_1, derived.v_ovc_c3_features_v0_1
+- Canonical views: derived.v_ovc_l1_features_v0_1, derived.v_ovc_l2_features_v0_1, derived.v_ovc_l3_features_v0_1
 
 ---
 

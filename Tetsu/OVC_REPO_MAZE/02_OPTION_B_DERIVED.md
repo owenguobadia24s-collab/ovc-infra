@@ -6,13 +6,13 @@ tags: [ovc, repo, maze, option]
 # OPT_B__DERIVED_LAYERS
 
 ## Definition
-Derived layers: C2/C3 features, registries, semantics, metrics.
+Derived layers: L2/L3 features, registries, semantics, metrics.
 
 ## Anchors (real repo paths)
 - `docs/architecture/derived_metric_registry_v0.1.md`
 - `docs/contracts/c_layer_boundary_spec_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/ingest_boundary.md`
 - `docs/contracts/option_b_derived_contract_v1.md`
@@ -33,15 +33,15 @@ Derived layers: C2/C3 features, registries, semantics, metrics.
 
 ## Inputs
 - `docs/contracts/c_layer_boundary_spec_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/ingest_boundary.md`
 
 ## Outputs
 - `docs/architecture/derived_metric_registry_v0.1.md`
-- `docs/specs/OPTION_B_C2_IMPLEMENTATION_CONTRACT_v0.1.md`
-- `docs/specs/OPTION_B_C3_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L2_IMPLEMENTATION_CONTRACT_v0.1.md`
+- `docs/specs/OPTION_B_L3_IMPLEMENTATION_CONTRACT_v0.1.md`
 - `docs/contracts/derived_layer_boundary.md`
 - `docs/contracts/option_b_derived_contract_v1.md`
 

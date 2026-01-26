@@ -7,12 +7,12 @@
   "mode": "fail",
   "compare_tv": false,
   "b_block_count": 1,
-  "c1_row_count": 1,
-  "c2_row_count": 1,
+  "l1_row_count": 1,
+  "l2_row_count": 1,
   "coverage_parity": true,
-  "c1_duplicates": 0,
-  "c2_duplicates": 0,
-  "c1_null_rates": {
+  "l1_duplicates": 0,
+  "l2_duplicates": 0,
+  "l1_null_rates": {
     "range": 0.0,
     "body": 0.0,
     "direction": 0.0,
@@ -26,7 +26,7 @@
     "range_zero": 0.0,
     "inputs_valid": 0.0
   },
-  "c2_null_rates": {
+  "l2_null_rates": {
     "gap": 0.0,
     "took_prev_high": 0.0,
     "took_prev_low": 0.0,
@@ -47,8 +47,8 @@
     "roll_12_count": 0.0,
     "rd_count": 0.0
   },
-  "c2_window_spec_valid": true,
-  "c2_window_spec_errors": [],
+  "l2_window_spec_valid": true,
+  "l2_window_spec_errors": [],
   "determinism_sample_size": 1,
   "determinism_mismatches": 0,
   "determinism_details": [],

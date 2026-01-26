@@ -116,24 +116,24 @@ jobs:
             $STRICT_FLAG \
             2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/validate.log
 
-      - name: Step 3 - Compute C1 Features (Option B.1)
+      - name: Step 3 - Compute L1 Features (Option B.1)
         run: |
-          echo "=== COMPUTE C1: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
-          python src/derived/compute_c1_v0_1.py \
+          echo "=== COMPUTE L1: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
+          python src/derived/compute_l1_v0_1.py \
             --symbol GBPUSD \
             2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c1.log
 
-      - name: Step 4 - Compute C2 Features (Option B.1)
+      - name: Step 4 - Compute L2 Features (Option B.1)
         run: |
-          echo "=== COMPUTE C2: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
-          python src/derived/compute_c2_v0_1.py \
+          echo "=== COMPUTE L2: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
+          python src/derived/compute_l2_v0_1.py \
             --symbol GBPUSD \
             2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c2.log
 
-      - name: Step 4.5 - Compute C3 Features (Option B.1)
+      - name: Step 4.5 - Compute L3 Features (Option B.1)
         run: |
-          echo "=== COMPUTE C3: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
-          python src/derived/compute_c3_regime_trend_v0_1.py \
+          echo "=== COMPUTE L3: ${{ inputs.start_date }} to ${{ inputs.end_date }} ==="
+          python src/derived/compute_l3_regime_trend_v0_1.py \
             --symbol GBPUSD \
             2>&1 | tee artifacts/runs/${{ steps.run_id.outputs.run_id }}/compute_c3.log
 
@@ -210,9 +210,9 @@ jobs:
           echo "### Pipeline Steps" >> $GITHUB_STEP_SUMMARY
           echo "1. ✅ Backfill (OANDA → Neon)" >> $GITHUB_STEP_SUMMARY
           echo "2. ✅ Validate Facts (B-layer vs Tape)" >> $GITHUB_STEP_SUMMARY
-          echo "3. ✅ Compute C1 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
-          echo "4. ✅ Compute C2 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
-          echo "4.5. ✅ Compute C3 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
+          echo "3. ✅ Compute L1 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
+          echo "4. ✅ Compute L2 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
+          echo "4.5. ✅ Compute L3 Features (Option B.1)" >> $GITHUB_STEP_SUMMARY
           echo "5. ✅ Validate Derived (Option B.2)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Artifacts uploaded to: \`ovc-run-${{ steps.run_id.outputs.run_id }}\`" >> $GITHUB_STEP_SUMMARY

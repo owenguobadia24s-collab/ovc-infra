@@ -6,8 +6,8 @@
 ## Overview
 
 This study describes how the association between `block_range_intensity` score and forward outcomes
-varies across canonical C3 trend bias states (`c3_trend_bias`). The conditioning variable is taken
-as-is from the canonical C3 layer; this study does not define or modify trend bias logic.
+varies across canonical L3 trend bias states (`l3_trend_bias`). The conditioning variable is taken
+as-is from the canonical L3 layer; this study does not define or modify trend bias logic.
 
 ---
 
@@ -15,11 +15,11 @@ as-is from the canonical C3 layer; this study does not define or modify trend bi
 
 ### Step A: Extract Base Sample
 
-**Purpose:** Retrieve GBPUSD blocks within the study window with non-null `rng`, including `c3_trend_bias`.
+**Purpose:** Retrieve GBPUSD blocks within the study window with non-null `rng`, including `l3_trend_bias`.
 
 **Input:** `derived.ovc_block_features_v0_1`
 
-**Output:** `block_id`, `ts`, `instrument`, `rng`, `c3_trend_bias`
+**Output:** `block_id`, `ts`, `instrument`, `rng`, `l3_trend_bias`
 
 ```sql
 WITH base AS (
@@ -28,7 +28,7 @@ WITH base AS (
         ts,
         instrument,
         rng,
-        c3_trend_bias
+        l3_trend_bias
     FROM derived.ovc_block_features_v0_1
     WHERE instrument = 'GBPUSD'
       AND ts >= '2025-01-01T00:00:00Z'
@@ -37,7 +37,7 @@ WITH base AS (
 )
 ```
 
-**Note:** `c3_trend_bias` may contain NULL values; these are documented but excluded from per-category analysis.
+**Note:** `l3_trend_bias` may contain NULL values; these are documented but excluded from per-category analysis.
 
 ### Step B: Compute block_range_intensity Score
 
@@ -63,7 +63,7 @@ score_calc AS (
         b.ts,
         b.instrument,
         b.rng,
-        b.c3_trend_bias,
+        b.l3_trend_bias,
         CASE
             WHEN g.std_rng IS NULL OR g.std_rng = 0 THEN NULL
             ELSE (b.rng - g.mean_rng) / g.std_rng
@@ -81,7 +81,7 @@ score_calc AS (
 
 **Input:** `score_calc`, `derived.ovc_outcomes_v0_1`
 
-**Output:** `block_id`, `c3_trend_bias`, `score_value`, `fwd_ret_3`, `mfe_3`, `mae_3`
+**Output:** `block_id`, `l3_trend_bias`, `score_value`, `fwd_ret_3`, `mfe_3`, `mae_3`
 
 ```sql
 joined_outcomes AS (
@@ -90,7 +90,7 @@ joined_outcomes AS (
         sc.ts,
         sc.instrument,
         sc.rng,
-        sc.c3_trend_bias,
+        sc.l3_trend_bias,
         sc.score_value,
         o.fwd_ret_3,
         o.mfe_3,
@@ -102,9 +102,9 @@ joined_outcomes AS (
 )
 ```
 
-### Step D: Compute Summaries by c3_trend_bias
+### Step D: Compute Summaries by l3_trend_bias
 
-**Purpose:** Within each c3_trend_bias category, compute:
+**Purpose:** Within each l3_trend_bias category, compute:
 - N count
 - Correlation between score_value and each outcome
 - Bucket summaries using fixed global score percentile edges
@@ -121,9 +121,9 @@ joined_outcomes AS (
 
 | Method | Purpose | Implementation |
 |--------|---------|----------------|
-| Category counts | Report N per c3_trend_bias (including NULL) | `COUNT(*)` grouped by `c3_trend_bias` |
-| Pearson correlation | Measure linear association between score and outcomes | `CORR(score_value, outcome)` grouped by `c3_trend_bias` |
-| Bucket summaries | Describe outcome distributions within score buckets | `GROUP BY c3_trend_bias, score_bucket` |
+| Category counts | Report N per l3_trend_bias (including NULL) | `COUNT(*)` grouped by `l3_trend_bias` |
+| Pearson correlation | Measure linear association between score and outcomes | `CORR(score_value, outcome)` grouped by `l3_trend_bias` |
+| Bucket summaries | Describe outcome distributions within score buckets | `GROUP BY l3_trend_bias, score_bucket` |
 
 ### Bucket Definition
 
@@ -138,7 +138,7 @@ Score buckets are defined by **fixed percentile edges applied to the full sample
 | `75-90` | 75th to 90th percentile |
 | `90-100` | 90th to 100th percentile |
 
-**Important:** Bucket edges are computed over the full sample once, then applied identically across all c3_trend_bias categories. Buckets are NOT recomputed per-category.
+**Important:** Bucket edges are computed over the full sample once, then applied identically across all l3_trend_bias categories. Buckets are NOT recomputed per-category.
 
 ### Tail Comparison
 
@@ -146,7 +146,7 @@ Compare outcomes for:
 - **Top decile:** score_value in 90-100 bucket
 - **Bottom decile:** score_value in 0-10 bucket
 
-Report mean outcomes for each tail, by c3_trend_bias category.
+Report mean outcomes for each tail, by l3_trend_bias category.
 
 ---
 
@@ -154,14 +154,14 @@ Report mean outcomes for each tail, by c3_trend_bias category.
 
 ```sql
 -- ============================================================================
--- C3 TREND-BIAS CONDITIONED SCORE-OUTCOME ANALYSIS
--- Study: block_range_intensity by c3_trend_bias
+-- L3 TREND-BIAS CONDITIONED SCORE-OUTCOME ANALYSIS
+-- Study: block_range_intensity by l3_trend_bias
 -- ============================================================================
 
 WITH
 
 -- ----------------------------------------------------------------------------
--- BASE: Extract GBPUSD blocks in study window with c3_trend_bias
+-- BASE: Extract GBPUSD blocks in study window with l3_trend_bias
 -- ----------------------------------------------------------------------------
 base AS (
     SELECT
@@ -169,7 +169,7 @@ base AS (
         ts,
         instrument,
         rng,
-        c3_trend_bias
+        l3_trend_bias
     FROM derived.ovc_block_features_v0_1
     WHERE instrument = 'GBPUSD'
       AND ts >= '2025-01-01T00:00:00Z'
@@ -198,7 +198,7 @@ score_calc AS (
         b.ts,
         b.instrument,
         b.rng,
-        b.c3_trend_bias,
+        b.l3_trend_bias,
         CASE
             WHEN g.std_rng IS NULL OR g.std_rng = 0 THEN NULL
             ELSE (b.rng - g.mean_rng) / g.std_rng
@@ -230,7 +230,7 @@ joined_outcomes AS (
         sc.ts,
         sc.instrument,
         sc.rng,
-        sc.c3_trend_bias,
+        sc.l3_trend_bias,
         sc.score_value,
         o.fwd_ret_3,
         o.mfe_3,
@@ -250,22 +250,22 @@ joined_outcomes AS (
 ),
 
 -- ----------------------------------------------------------------------------
--- CATEGORY_COUNTS: Count blocks per c3_trend_bias (including NULL)
+-- CATEGORY_COUNTS: Count blocks per l3_trend_bias (including NULL)
 -- ----------------------------------------------------------------------------
 category_counts AS (
     SELECT
-        COALESCE(c3_trend_bias, '__NULL__') AS c3_trend_bias_label,
+        COALESCE(l3_trend_bias, '__NULL__') AS l3_trend_bias_label,
         COUNT(*) AS n_blocks
     FROM joined_outcomes
-    GROUP BY COALESCE(c3_trend_bias, '__NULL__')
+    GROUP BY COALESCE(l3_trend_bias, '__NULL__')
 ),
 
 -- ----------------------------------------------------------------------------
--- BY_TREND_BIAS_SUMMARIES: Correlations and counts per c3_trend_bias
+-- BY_TREND_BIAS_SUMMARIES: Correlations and counts per l3_trend_bias
 -- ----------------------------------------------------------------------------
 by_trend_bias_summaries AS (
     SELECT
-        c3_trend_bias,
+        l3_trend_bias,
         COUNT(*) AS n_blocks,
         CORR(score_value, fwd_ret_3) AS corr_fwd_ret_3,
         CORR(score_value, mfe_3) AS corr_mfe_3,
@@ -274,16 +274,16 @@ by_trend_bias_summaries AS (
         AVG(mfe_3) AS mean_mfe_3,
         AVG(mae_3) AS mean_mae_3
     FROM joined_outcomes
-    WHERE c3_trend_bias IS NOT NULL
-    GROUP BY c3_trend_bias
+    WHERE l3_trend_bias IS NOT NULL
+    GROUP BY l3_trend_bias
 ),
 
 -- ----------------------------------------------------------------------------
--- BUCKET_SUMMARIES: Outcome stats per c3_trend_bias × score bucket
+-- BUCKET_SUMMARIES: Outcome stats per l3_trend_bias × score bucket
 -- ----------------------------------------------------------------------------
 bucket_summaries AS (
     SELECT
-        c3_trend_bias,
+        l3_trend_bias,
         score_bucket,
         COUNT(*) AS n,
         AVG(fwd_ret_3) AS mean_fwd_ret_3,
@@ -293,19 +293,19 @@ bucket_summaries AS (
         STDDEV(mfe_3) AS std_mfe_3,
         STDDEV(mae_3) AS std_mae_3
     FROM joined_outcomes
-    WHERE c3_trend_bias IS NOT NULL
-    GROUP BY c3_trend_bias, score_bucket
+    WHERE l3_trend_bias IS NOT NULL
+    GROUP BY l3_trend_bias, score_bucket
 )
 
 -- Output: Select which summary to display
 -- Option 1: Category counts (including NULL)
--- SELECT * FROM category_counts ORDER BY c3_trend_bias_label;
+-- SELECT * FROM category_counts ORDER BY l3_trend_bias_label;
 
--- Option 2: Correlations per c3_trend_bias
--- SELECT * FROM by_trend_bias_summaries ORDER BY c3_trend_bias;
+-- Option 2: Correlations per l3_trend_bias
+-- SELECT * FROM by_trend_bias_summaries ORDER BY l3_trend_bias;
 
 -- Option 3: Bucket summaries
-SELECT * FROM bucket_summaries ORDER BY c3_trend_bias, score_bucket;
+SELECT * FROM bucket_summaries ORDER BY l3_trend_bias, score_bucket;
 ```
 
 ---
@@ -316,7 +316,7 @@ SELECT * FROM bucket_summaries ORDER BY c3_trend_bias, score_bucket;
 - ❌ Position sizing logic
 - ❌ PnL optimization
 - ❌ Parameter search for trading performance
-- ❌ Definition or computation of c3_trend_bias (uses canonical field only)
+- ❌ Definition or computation of l3_trend_bias (uses canonical field only)
 - ❌ Category ranking or recommendations
 - ❌ Per-category score bucket re-fitting
 - ❌ Statistical significance testing (descriptive only)

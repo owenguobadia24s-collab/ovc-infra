@@ -29,12 +29,12 @@ Where:
 
 | Column | Source View | Description |
 |--------|-------------|-------------|
-| `block_id` | `derived.v_ovc_c1_features_v0_1` | Block identifier |
-| `sym` | `derived.v_ovc_c1_features_v0_1` | Symbol |
-| `rng` | `derived.v_ovc_c1_features_v0_1` | Current bar range |
-| `body_ratio` | `derived.v_ovc_c1_features_v0_1` | Body as fraction of range |
-| `rng_avg_6` | `derived.v_ovc_c2_features_v0_1` | 6-bar rolling average range |
-| `bar_close_ms` | `derived.v_ovc_c2_features_v0_1` | Timestamp for ordering |
+| `block_id` | `derived.v_ovc_l1_features_v0_1` | Block identifier |
+| `sym` | `derived.v_ovc_l1_features_v0_1` | Symbol |
+| `rng` | `derived.v_ovc_l1_features_v0_1` | Current bar range |
+| `body_ratio` | `derived.v_ovc_l1_features_v0_1` | Body as fraction of range |
+| `rng_avg_6` | `derived.v_ovc_l2_features_v0_1` | 6-bar rolling average range |
+| `bar_close_ms` | `derived.v_ovc_l2_features_v0_1` | Timestamp for ordering |
 
 ### 1.4 Z-Score Normalization
 

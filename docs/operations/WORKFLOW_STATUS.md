@@ -17,7 +17,7 @@
 | **Immutability Notice** | [docs/IMMUTABILITY_NOTICE.md](IMMUTABILITY_NOTICE.md) |
 
 **Frozen Scope:**
-- Option B (C1/C2/C3): CANONICAL
+- Option B (L1/L2/L3): CANONICAL
 - Option C (Outcomes): CANONICAL
 
 **All future work must be downstream-only.**
@@ -47,9 +47,9 @@ Breaking changes to frozen layers require new versions + governance approval per
 ## [CHANGE][ADDED] Option B Layer Status
 | Layer | Status | Evidence | Date Promoted |
 |-------|--------|----------|---------------|
-| Option B – C1 | CANONICAL | [C1_v0_1_validation.md](../reports/validation/C1_v0_1_validation.md) | 2026-01-20 |
-| Option B – C2 | CANONICAL | [C2_v0_1_validation.md](../reports/validation/C2_v0_1_validation.md) | 2026-01-20 |
-| Option B – C3 | CANONICAL | [C3_v0_1_validation.md](../reports/validation/C3_v0_1_validation.md) | 2026-01-20 |
+| Option B – L1 | CANONICAL | [C1_v0_1_validation.md](../reports/validation/C1_v0_1_validation.md) | 2026-01-20 |
+| Option B – L2 | CANONICAL | [C2_v0_1_validation.md](../reports/validation/C2_v0_1_validation.md) | 2026-01-20 |
+| Option B – L3 | CANONICAL | [C3_v0_1_validation.md](../reports/validation/C3_v0_1_validation.md) | 2026-01-20 |
 
 ## [CHANGE][ADDED] Option C Layer Status
 | Layer | Status | Evidence | Notes |
