@@ -25,7 +25,7 @@
       "status": "UNVERIFIED"
     },
     {
-      "file": "sql/02_derived_c1_c2_tables_v0_1.sql",
+      "file": "sql/02_derived_l1_l2_tables_v0_1.sql",
       "description": "Create derived feature tables for L1/L2",
       "applied_at": null,
       "applied_by": null,
@@ -48,6 +48,13 @@
     {
       "file": "sql/derived_v0_1.sql",
       "description": "Create legacy derived view (DEPRECATED)",
+      "applied_at": null,
+      "applied_by": null,
+      "status": "UNVERIFIED"
+    },
+    {
+      "file": "sql/07_migration_c_to_l_layer_rename_v0_1.sql",
+      "description": "C-to-L layer rename migration with compatibility shims",
       "applied_at": null,
       "applied_by": null,
       "status": "UNVERIFIED"
