@@ -48,7 +48,8 @@ BEGIN
     ) INTO l1_exists;
     
     IF c1_exists AND NOT l1_exists THEN
-        -- Create L1 as wrapper over C1 (transitional shim)
+        -- Create L1 as canonical view wrapping existing C1
+        -- (C1 becomes the compatibility wrapper later if needed)
         RAISE NOTICE 'Creating L1 view as wrapper over existing C1 view';
         CREATE VIEW derived.v_ovc_l1_features_v0_1 AS 
         SELECT * FROM derived.v_ovc_c1_features_v0_1;
@@ -90,7 +91,8 @@ BEGIN
     ) INTO l2_exists;
     
     IF c2_exists AND NOT l2_exists THEN
-        -- Create L2 as wrapper over C2 (transitional shim)
+        -- Create L2 as canonical view wrapping existing C2
+        -- (C2 becomes the compatibility wrapper later if needed)
         RAISE NOTICE 'Creating L2 view as wrapper over existing C2 view';
         CREATE VIEW derived.v_ovc_l2_features_v0_1 AS 
         SELECT * FROM derived.v_ovc_c2_features_v0_1;
@@ -132,7 +134,8 @@ BEGIN
     ) INTO l3_exists;
     
     IF c3_exists AND NOT l3_exists THEN
-        -- Create L3 as wrapper over C3 (transitional shim)
+        -- Create L3 as canonical view wrapping existing C3
+        -- (C3 becomes the compatibility wrapper later if needed)
         RAISE NOTICE 'Creating L3 view as wrapper over existing C3 view';
         CREATE VIEW derived.v_ovc_l3_features_v0_1 AS 
         SELECT * FROM derived.v_ovc_c3_features_v0_1;

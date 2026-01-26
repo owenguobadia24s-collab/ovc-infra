@@ -156,8 +156,13 @@ The following items were intentionally NOT renamed to avoid breaking external in
 
 ### 1. Repository Code
 ```bash
-# Should return 0 results (except in exceptions listed above)
-grep -r "\bC[0-4]\b" --include="*.py" --include="*.sql" . | grep -v ".git/" | grep -v "CLAIMS" | grep -v ".obsidian"
+# Check for C0-C4 layer references (should be minimal, excluding known exceptions)
+# This looks for underscore-separated layer names like C1_, C2_, etc.
+grep -r '\bC[0-4]_' --include="*.py" --include="*.sql" . | grep -v ".git/" | grep -v "CLAIMS" | grep -v ".obsidian"
+
+# For thorough check, also search for C0/C1/C2/C3/C4 as standalone words
+# (May include some false positives in comments or variable names)
+grep -r '\bC[0-4]\b' --include="*.py" --include="*.sql" . | grep -v ".git/" | grep -v "CLAIMS" | grep -v ".obsidian" | grep -v "# "
 ```
 
 ### 2. Database Views

@@ -95,7 +95,11 @@ Both queries should return the same data.
 After running this migration, the CI schema check should pass:
 
 ```bash
-python scripts/ci/verify_schema_objects.py
+# Install dependencies if needed
+pip install psycopg2-binary
+
+# Run the verification
+python3 scripts/ci/verify_schema_objects.py
 ```
 
 This verifies that the required L-named views exist.

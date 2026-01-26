@@ -54,7 +54,7 @@
     },
     {
       "file": "sql/07_migration_c_to_l_layer_rename_v0_1.sql",
-      "description": "C-to-L layer rename migration with compatibility shims",
+      "description": "C-to-L layer rename migration with compatibility shims (runs before canonical L* view definitions)",
       "applied_at": null,
       "applied_by": null,
       "status": "UNVERIFIED"
