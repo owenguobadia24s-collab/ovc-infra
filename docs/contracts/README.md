@@ -23,6 +23,7 @@ Canonical contract documents governing the OVC pipeline.
 | Document | Scope |
 |----------|-------|
 | [option_b_derived_contract_v1.md](option_b_derived_contract_v1.md) | Derived features (C1/C2/C3 computation boundaries) |
+| [c_feature_registry_freeze_v0_1.md](c_feature_registry_freeze_v0_1.md) | **FROZEN registry** for C1/C2/C3 outputs (CANONICAL vs DIAGNOSTIC, fallback semantics, known limitations, Option C gate) |
 | [derived_layer_boundary.md](derived_layer_boundary.md) | Derived layer immutability rules |
 | [c3_semantic_contract_v0_1.md](c3_semantic_contract_v0_1.md) | C3 semantic definitions |
 | [c_layer_boundary_spec_v0.1.md](c_layer_boundary_spec_v0.1.md) | C-layer boundary spec |
@@ -48,3 +49,9 @@ Canonical contract documents governing the OVC pipeline.
 | Document | Scope |
 |----------|-------|
 | [qa_validation_contract_v1.md](qa_validation_contract_v1.md) | QA validation responsibilities |
+
+## Reference-Only (Non-Authoritative)
+
+| Document | Scope |
+|----------|-------|
+| [tradingview_reference_contract_v0_1.md](tradingview_reference_contract_v0_1.md) | TradingView REF-ONLY contract (parity/diagnostics/visualization; never authoritative) |
