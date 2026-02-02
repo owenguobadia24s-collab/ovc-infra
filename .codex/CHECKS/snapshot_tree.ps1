@@ -4,7 +4,8 @@
 param(
   [string]$RepoRoot = (Resolve-Path ".").Path,
   [string]$OutDir   = (Join-Path (Resolve-Path ".").Path ".codex\RUNS"),
-  [string]$Label    = ""
+  [string]$Label    = "",
+  [string]$RunDir   = ""
 )
 
 Set-StrictMode -Version Latest
@@ -16,9 +17,14 @@ function New-RunStamp {
   return $ts
 }
 
-$stamp = New-RunStamp
-$runDir = Join-Path $OutDir $stamp
-New-Item -ItemType Directory -Force -Path $runDir | Out-Null
+if ($RunDir -and $RunDir.Trim().Length -gt 0) {
+  $runDir = $RunDir
+  New-Item -ItemType Directory -Force -Path $runDir | Out-Null
+} else {
+  $stamp = New-RunStamp
+  $runDir = Join-Path $OutDir $stamp
+  New-Item -ItemType Directory -Force -Path $runDir | Out-Null
+}
 
 $outFile = Join-Path $runDir "tree_snapshot.txt"
 
