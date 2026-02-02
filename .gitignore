@@ -262,3 +262,14 @@ artifacts/path1_summary.json
 # Ignore VS Code folders anywhere (except root settings.json already unignored)
 **/.vscode/
 
+# Codex runtime (never commit)
+.codex/auth.json
+.codex/*cache*
+.codex/models_cache.json
+.codex/rollout-*
+.codex/cap_sid*
+.codex/default.rules
+.codex/rules/
+
+# Codex run artifacts (never commit)
+.codex/RUNS/
