@@ -1,0 +1,17 @@
+model = "gpt-5.2"
+model_reasoning_effort = "high"
+
+# Behavior profile
+profile = "forensic_readonly"
+temperature = 0.2
+
+# Output discipline
+output_format = "evidence_blocks"
+one_graph_per_pass = true
+require_file_paths = true
+require_grep_hits = true
+forbid_edits = true
+
+# Evidence scope preferences
+prefer = ["ripgrep", "git_diff", "tree_snapshot"]
+forbid = ["refactor_suggestions", "untested_assumptions"]
