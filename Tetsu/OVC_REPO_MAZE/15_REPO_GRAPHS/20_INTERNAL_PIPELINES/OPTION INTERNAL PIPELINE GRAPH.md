@@ -15,8 +15,8 @@ flowchart LR
       A_wf_full[.github/workflows/ovc_full_ingest.yml - DORMANT]
     end
     subgraph A_SUBS[Sub-systems]
-      A_worker[infra/ovc-webhook/src/index.ts]
-      A_r2[wrangler.jsonc - R2 bucket binding]
+      A_WORKER[infra/ovc-webhook/src/index.ts]
+      A_R2[wrangler.jsonc - R2 bucket binding]
     end
     subgraph A_SRC[src/ ingest]
       A_backfill_2h[src/backfill_oanda_2h_checkpointed.py]
@@ -38,9 +38,9 @@ flowchart LR
       B_wf_validate[.github/workflows/backfill_then_validate.yml - DORMANT]
     end
     subgraph B_SRC[src/derived/]
-      B_c1[src/derived/compute_c1_v0_1.py]
-      B_c2[src/derived/compute_c2_v0_1.py]
-      B_c3[src/derived/compute_c3_regime_trend_v0_1.py - NOT INVOKED]
+      B_C1[src/derived/compute_c1_v0_1.py]
+      B_C2[src/derived/compute_c2_v0_1.py]
+      B_C3[src/derived/compute_c3_regime_trend_v0_1.py - NOT INVOKED]
       B_stub[src/derived/compute_c3_stub_v0_1.py]
     end
     subgraph B_SQL[sql/derived/]
@@ -74,7 +74,7 @@ flowchart LR
     end
     subgraph C_SQL[sql/]
       C_sql[sql/option_c_v0_1.sql + sql/option_c_run_report.sql]
-      C_outcomes[sql/derived/v_ovc_c_outcomes_v0_1.sql]
+      C_OUTCOMES[sql/derived/v_ovc_c_outcomes_v0_1.sql]
     end
     subgraph C_ART[artifacts/option_c/]
       C_sanity[artifacts/option_c/sanity_local/]
@@ -107,7 +107,7 @@ flowchart LR
       D_artifact[src/ovc_ops/run_artifact.py]
     end
     subgraph D_EXPORT[scripts/export/]
-      D_notion[scripts/export/notion_sync.py]
+      D_NOTION[scripts/export/notion_sync.py]
     end
     subgraph D_REPORTS[reports/]
       D_runs[reports/runs/run_id/]
@@ -184,25 +184,25 @@ flowchart LR
   %% Cross-cutting connections (script -> workflow)
   A_backfill_2h --> A_wf_backfill
   A_backfill_m15 --> A_wf_m15
-  B_c1 --> B_wf_validate
-  B_c2 --> B_wf_validate
+  B_C1 --> B_wf_validate
+  B_C2 --> B_wf_validate
   C_sh --> C_wf
   D_queue --> D_wf_q
   D_pack --> D_wf_p1
   D_replay --> D_wf_replay
-  D_notion --> D_wf_notion
+  D_NOTION --> D_wf_notion
 
   %% src/ and sql/ cross references (conceptual)
   A_schema -.-> A_backfill_2h
-  B_v_c1 -.-> B_c1
-  B_v_c2 -.-> B_c2
-  C_outcomes -.-> C_sh
+  B_v_c1 -.-> B_C1
+  B_v_c2 -.-> B_C2
+  C_OUTCOMES -.-> C_sh
   D_sql_ev -.-> D_pack
 
   %% Styling
   classDef dormant fill:#ffcdd2,stroke:#c62828,stroke-width:1px,stroke-dasharray:5
   classDef qaStyle fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
 
-  class A_wf_full,B_wf_validate,B_c3 dormant
+  class A_wf_full,B_wf_validate,B_C3 dormant
   class QA_CI,QA_TESTS,QA_VAL,QA_CONTRACTS,QA_DOCS qaStyle
 ```
