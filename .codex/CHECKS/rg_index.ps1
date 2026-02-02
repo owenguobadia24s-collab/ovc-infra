@@ -1,6 +1,4 @@
-# rg_index.ps1
-# READ-ONLY. Builds a deterministic "evidence index" using ripgrep.
-# Requires: rg (ripgrep) on PATH.
+
 
 param(
   [string]$RepoRoot = (Resolve-Path ".").Path,
@@ -37,19 +35,32 @@ if ($RunDir -and $RunDir.Trim().Length -gt 0) {
 $outFile = Join-Path $runDir "rg_index.txt"
 
 # Stable rg options:
-# --no-heading: keeps output minimal
-# -n: line numbers
-# -S: smart case
-# --hidden: include dotfiles (but we exclude .git)
-# --glob: exclude noisy dirs
-$rgBase = @(
-  "rg","--no-heading","-n","-S","--hidden",
-  "--glob","!.git/**",
-  "--glob","!.venv/**","--glob","!venv/**",
-  "--glob","!node_modules/**",
-  "--glob","!dist/**","--glob","!build/**",
-  "--glob","!.pytest_cache/**","--glob","!__pycache__/**"
-)
+ # --no-heading: keeps output minimal
+ # -S: smart case
+ # --hidden: include dotfiles (but we exclude .git)
+ # --glob: exclude noisy dirs
+ $rgExe = 'rg'
+ $rgBaseArgs = @(
+   '--no-heading','-S','--hidden',
+   '--glob','!.git/**',
+   '--glob','!.venv/**','--glob','!venv/**',
+   '--glob','!node_modules/**',
+   '--glob','!dist/**','--glob','!build/**',
+   '--glob','!.pytest_cache/**','--glob','!__pycache__/**'
+ )
+
+
+# Helper: detect if a path is a glob
+function Is-GlobPath([string]$p) {
+  if (-not $p) { return $false }
+  return ($p -match "[\*\?\[]")
+}
+
+# Helper: normalize globs to forward slashes for rg
+function Normalize-Glob([string]$p) {
+  if (-not $p) { return $p }
+  return ($p -replace "\\", "/")
+}
 
 $legendScope = "Tetsu/OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS/**/*.md"
 
@@ -102,11 +113,18 @@ try {
     Add-Content -Encoding UTF8 $outFile ""
 
     # For GRAPH_TARGET we want to print the file with line numbers.
-    if ($q.name -eq "GRAPH_TARGET") {
+    if ($q.name -eq 'GRAPH_TARGET') {
       # rg "." prints every line with file:line:...
-      & $rgBase $q.pattern $q.scope | Add-Content -Encoding UTF8 $outFile
+      & $rgExe @($rgBaseArgs + @('-n', $q.pattern, $q.scope)) | Add-Content -Encoding UTF8 $outFile
     } else {
-      & $rgBase $q.pattern $q.scope | Add-Content -Encoding UTF8 $outFile
+      if (Is-GlobPath $q.scope) {
+        $glob = Normalize-Glob $q.scope
+        # IMPORTANT (Windows): glob patterns must be passed via --glob, not as PATH args.
+        # Scope is enforced by glob; search root is repo "." (still read-only; excludes in $rgBaseArgs apply).
+        & $rgExe @($rgBaseArgs + @('--glob', $glob, $q.pattern, '.')) | Add-Content -Encoding UTF8 $outFile
+      } else {
+        & $rgExe @($rgBaseArgs + @($q.pattern, $q.scope)) | Add-Content -Encoding UTF8 $outFile
+      }
     }
 
     Add-Content -Encoding UTF8 $outFile ""

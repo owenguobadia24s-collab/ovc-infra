@@ -489,7 +489,7 @@ def render_report(
     legend_paths: List[str],
     graph_file: str = "",
 ) -> str:
-    stamp = dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     lines: List[str] = []
     lines.append(f"# COVERAGE AUDIT — Repo ↔ Legend ↔ Graphs")
