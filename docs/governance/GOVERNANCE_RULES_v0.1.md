@@ -239,3 +239,11 @@ This governance framework freezes the Option A foundation:
 ---
 
 *End of Governance Rules v0.1*
+
+---
+
+## 8. Legend Canonicalization Rule
+
+All canonical NodeIDs must be declared as markdown pipe-table rows in `Tetsu/OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS/LEGEND_MASTER.md`.
+Non-table entries (bullets, prose) are ignored by canonical extraction and are non-authoritative.
+

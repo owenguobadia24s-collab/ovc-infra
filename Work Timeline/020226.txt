@@ -1,0 +1,16 @@
+### Legend Canonicalization — COMPLETED
+
+Status: CLOSED  
+Date: 2026-02-02  
+
+- Bullet-style legend entries removed
+- Parser-aligned pipe-table legend enforced
+- Graph ↔ Legend alignment verified (missing = 0)
+- Canonical invariants frozen
+- Governance rule appended
+- Legend Law authored
+
+No further changes permitted without explicit governance revision.
+
+
+
