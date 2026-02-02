@@ -13,12 +13,20 @@
             "state": {
               "type": "markdown",
               "state": {
+<<<<<<< HEAD
                 "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md",
+=======
+                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_50__NEON_SCHEMA_TOPOLOGY.md",
+>>>>>>> 85cb367082e98ac3a2339ca71c51c1141ed91308
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
+<<<<<<< HEAD
               "title": "GRAPH_10__OVERVIEW__DATA_FLOW"
+=======
+              "title": "GRAPH_50__NEON_SCHEMA_TOPOLOGY"
+>>>>>>> 85cb367082e98ac3a2339ca71c51c1141ed91308
             }
           }
         ]
@@ -171,8 +179,8 @@
             "state": {
               "type": "mermaid-toolbar-view",
               "state": {},
-              "icon": "trident-custom",
-              "title": "Mermaid Toolbar"
+              "icon": "lucide-ghost",
+              "title": "mermaid-toolbar-view"
             }
           }
         ],
@@ -192,17 +200,25 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "mermaid-tools:Open Mermaid Toolbar": false,
-      "markdown-importer:Open format converter": false
+      "markdown-importer:Open format converter": false,
+      "mermaid-tools:Open Mermaid Toolbar": false
     }
   },
   "active": "1d1db3783e86ef1f",
   "lastOpenFiles": [
+<<<<<<< HEAD
     "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_12__OVERVIEW__ORCHESTRATION.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md",
     "OVC_REPO_MAZE/01_OPTION_A__INGEST.md",
     "OVC_REPO_MAZE/ROOM__ARTIFACTS.md",
     "OVC_REPO_MAZE/ROOM__DOCS.md",
+=======
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/A&C FLOW GRAPH.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_40__ARTIFACT_LIFECYCLE.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_11__OVERVIEW__QA_GATES.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md",
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS/LEGEND_PER_GRAPH.md",
+>>>>>>> 85cb367082e98ac3a2339ca71c51c1141ed91308
     "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS/LEGEND_MASTER.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS/LEGEND_PER_GRAPH.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_50__NEON_SCHEMA_TOPOLOGY.md",
@@ -210,9 +226,13 @@
     "OVC_REPO_MAZE/15_REPO_GRAPHS/02_CANVAS__OVC_ATLAS.canvas",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/01_CANVAS_LAYOUT_SPEC.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_41__VALIDATION_CHAIN.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_40__ARTIFACT_LIFECYCLE.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/02_CANVAS__OVC_ATLAS_resolved.canvas",
+<<<<<<< HEAD
     "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_11__OVERVIEW__QA_GATES.md",
+=======
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_12__OVERVIEW__ORCHESTRATION.md",
+    "OVC_REPO_MAZE/01_OPTION_A__INGEST.md",
+>>>>>>> 85cb367082e98ac3a2339ca71c51c1141ed91308
     "OVC_REPO_MAZE/15_REPO_GRAPHS/00_README__GRAPH_ATLAS.md",
     "OVC_REPO_MAZE/ROOM__SQL.md",
     "OVC_REPO_MAZE/ROOM__REPORTS.md",
@@ -226,7 +246,6 @@
     "OVC_REPO_MAZE/00_REPO_MAZE.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_31__ENFORCEMENT_POINTS.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/OPTION FLOW GRAPH.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/A&C FLOW GRAPH.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.drawio",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.svg",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS",
