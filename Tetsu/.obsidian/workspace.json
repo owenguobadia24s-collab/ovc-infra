@@ -1,32 +1,24 @@
 {
   "main": {
-    "id": "d6b67bc6c86bacbc",
+    "id": "2ce9e25cb029b81f",
     "type": "split",
     "children": [
       {
-        "id": "5fe7221362bc0bb7",
+        "id": "5f17fd3922edc0a8",
         "type": "tabs",
         "children": [
           {
-            "id": "1d1db3783e86ef1f",
+            "id": "d2263bcedfec4b3c",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-<<<<<<< HEAD
-                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md",
-=======
-                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_50__NEON_SCHEMA_TOPOLOGY.md",
->>>>>>> 85cb367082e98ac3a2339ca71c51c1141ed91308
+                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_51__EXTERNAL_STORES.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-<<<<<<< HEAD
-              "title": "GRAPH_10__OVERVIEW__DATA_FLOW"
-=======
-              "title": "GRAPH_50__NEON_SCHEMA_TOPOLOGY"
->>>>>>> 85cb367082e98ac3a2339ca71c51c1141ed91308
+              "title": "GRAPH_51__EXTERNAL_STORES"
             }
           }
         ]
@@ -35,15 +27,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "c95c08a5edc1b634",
+    "id": "ba87bf8aae8f45df",
     "type": "split",
     "children": [
       {
-        "id": "0875c32d1c904d86",
+        "id": "13ac86a1e01ca4de",
         "type": "tabs",
         "children": [
           {
-            "id": "c679af1450b7745e",
+            "id": "92af1e5c534f8b85",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -56,7 +48,7 @@
             }
           },
           {
-            "id": "9e66bc21f4e534f7",
+            "id": "e0fc66fb9cbb5920",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -73,7 +65,7 @@
             }
           },
           {
-            "id": "51c1d38723486f1e",
+            "id": "07b574f66bbbe188",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -89,20 +81,20 @@
     "width": 300
   },
   "right": {
-    "id": "8b18f0ba5195ceb6",
+    "id": "e93f714126d7cb4b",
     "type": "split",
     "children": [
       {
-        "id": "fbcba00312d8b4f6",
+        "id": "109a63800b141ea8",
         "type": "tabs",
         "children": [
           {
-            "id": "cb2e7b5cf3b62746",
+            "id": "e86f9f855a340995",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "OVC_REPO_MAZE/QA_GOVERNANCE.md",
+                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_51__EXTERNAL_STORES.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -112,25 +104,25 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for QA_GOVERNANCE"
+              "title": "Backlinks for GRAPH_51__EXTERNAL_STORES"
             }
           },
           {
-            "id": "b47af635d034ff29",
+            "id": "3f17e642ee0d2834",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/02_CANVAS__OVC_ATLAS.canvas",
+                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_51__EXTERNAL_STORES.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 02_CANVAS__OVC_ATLAS"
+              "title": "Outgoing links from GRAPH_51__EXTERNAL_STORES"
             }
           },
           {
-            "id": "12bda4a0f3fdf3d3",
+            "id": "f17d3e31b9aa0971",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -145,7 +137,7 @@
             }
           },
           {
-            "id": "eb0f24448eb87772",
+            "id": "99ce10bbbba91e08",
             "type": "leaf",
             "state": {
               "type": "all-properties",
@@ -159,32 +151,21 @@
             }
           },
           {
-            "id": "e556fd0d11a1325f",
+            "id": "067c8808fa7cf843",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/02_CANVAS__OVC_ATLAS.canvas",
+                "file": "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_51__EXTERNAL_STORES.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 02_CANVAS__OVC_ATLAS"
-            }
-          },
-          {
-            "id": "c758ad94159e2224",
-            "type": "leaf",
-            "state": {
-              "type": "mermaid-toolbar-view",
-              "state": {},
-              "icon": "lucide-ghost",
-              "title": "mermaid-toolbar-view"
+              "title": "Outline of GRAPH_51__EXTERNAL_STORES"
             }
           }
-        ],
-        "currentTab": 4
+        ]
       }
     ],
     "direction": "horizontal",
@@ -199,63 +180,14 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false,
       "markdown-importer:Open format converter": false,
+      "bases:Create new base": false,
       "mermaid-tools:Open Mermaid Toolbar": false
     }
   },
-  "active": "1d1db3783e86ef1f",
+  "active": "d2263bcedfec4b3c",
   "lastOpenFiles": [
-<<<<<<< HEAD
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_12__OVERVIEW__ORCHESTRATION.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md",
-    "OVC_REPO_MAZE/01_OPTION_A__INGEST.md",
-    "OVC_REPO_MAZE/ROOM__ARTIFACTS.md",
-    "OVC_REPO_MAZE/ROOM__DOCS.md",
-=======
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/A&C FLOW GRAPH.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_40__ARTIFACT_LIFECYCLE.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_11__OVERVIEW__QA_GATES.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS/LEGEND_PER_GRAPH.md",
->>>>>>> 85cb367082e98ac3a2339ca71c51c1141ed91308
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS/LEGEND_MASTER.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS/LEGEND_PER_GRAPH.md",
     "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_50__NEON_SCHEMA_TOPOLOGY.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_51__EXTERNAL_STORES.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/02_CANVAS__OVC_ATLAS.canvas",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/01_CANVAS_LAYOUT_SPEC.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION/GRAPH_41__VALIDATION_CHAIN.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/02_CANVAS__OVC_ATLAS_resolved.canvas",
-<<<<<<< HEAD
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_11__OVERVIEW__QA_GATES.md",
-=======
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_12__OVERVIEW__ORCHESTRATION.md",
-    "OVC_REPO_MAZE/01_OPTION_A__INGEST.md",
->>>>>>> 85cb367082e98ac3a2339ca71c51c1141ed91308
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/00_README__GRAPH_ATLAS.md",
-    "OVC_REPO_MAZE/ROOM__SQL.md",
-    "OVC_REPO_MAZE/ROOM__REPORTS.md",
-    "OVC_REPO_MAZE/OVC_REPO_MAZE.canvas",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_24__QA__PIPELINE.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_30__CONTRACTS_MAP.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/A&C FLOW GRAPH.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_21__OPT_B__PIPELINE.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/GRAPH_20__OPT_A__PIPELINE.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES/OPTION INTERNAL PIPELINE GRAPH.md",
-    "OVC_REPO_MAZE/00_REPO_MAZE.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT/GRAPH_31__ENFORCEMENT_POINTS.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/OPTION FLOW GRAPH.md",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.drawio",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW/GRAPH_10__OVERVIEW__DATA_FLOW.svg",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/90_LEGENDS",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/40_ARTIFACTS_VALIDATION",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/30_CONTRACTS_ENFORCEMENT",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/20_INTERNAL_PIPELINES",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/10_OPTION_FLOW",
-    "Untitled.base",
-    "Untitled 1.base",
-    "OVC_REPO_MAZE/15_REPO_GRAPHS/OPTION INTERNAL PIPELINE GRAPH.mmd"
+    "OVC_REPO_MAZE/15_REPO_GRAPHS/50_STORES_TOPOLOGY/GRAPH_51__EXTERNAL_STORES.md"
   ]
 }
