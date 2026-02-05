@@ -19,10 +19,24 @@ Usage:
 import argparse
 import csv
 import re
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_DIR = REPO_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from ovc_ops.run_envelope_v0_1 import (  # noqa: E402
+    ensure_run_dir,
+    get_git_state,
+    make_run_id,
+    seal_dir,
+    write_run_json,
+)
 
 
 def parse_index_md(index_path: Path) -> dict:
@@ -284,8 +298,12 @@ def main():
     )
     
     args = parser.parse_args()
-    
+
     repo_root = Path(args.repo_root).resolve()
+    run_id = make_run_id("op_d10")
+    run_dir = ensure_run_dir(repo_root / "reports" / "runs", run_id)
+    created_utc = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    git_commit, working_tree_state = get_git_state()
     
     if args.output:
         output_path = Path(args.output).resolve()
@@ -306,9 +324,39 @@ def main():
     
     # Generate resolved CSV
     row_count = generate_resolved_csv(repo_root, output_path)
+
+    copy_target = run_dir / "RUN_QUEUE_RESOLVED.csv"
+    shutil.copyfile(output_path, copy_target)
     
     print(f"Generated {output_path.name} with {row_count} rows")
     print("Done.")
+
+    try:
+        inputs_payload = {
+            "queue_path": "reports/path1/evidence/RUN_QUEUE.csv",
+            "index_path": "reports/path1/evidence/INDEX.md",
+            "source_output_path": "reports/path1/evidence/RUN_QUEUE_RESOLVED.csv",
+        }
+        run_json_payload = {
+            "run_id": run_dir.name,
+            "created_utc": created_utc,
+            "run_type": "op_run",
+            "option": "D",
+            "operation_id": "OP-D10",
+            "git_commit": git_commit,
+            "working_tree_state": working_tree_state,
+            "inputs": inputs_payload,
+            "outputs": [
+                "RUN_QUEUE_RESOLVED.csv",
+                "run.json",
+                "manifest.json",
+                "MANIFEST.sha256",
+            ],
+        }
+        write_run_json(run_dir, run_json_payload)
+        seal_dir(run_dir, ["RUN_QUEUE_RESOLVED.csv", "run.json"], strict=True)
+    except Exception as exc:
+        print(f"WARNING: run envelope write failed: {exc}")
 
 
 if __name__ == '__main__':
