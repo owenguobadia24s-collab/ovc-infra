@@ -1,0 +1,149 @@
+{
+  "config_version": "0.1",
+  "description": "Patterns that MUST NOT appear in Phase 3 codebase. Detection = build failure.",
+  "forbidden_patterns": {
+    "file_writes": {
+      "patterns": [
+        "open\\s*\\([^)]*['\"][wa+x]['\"]",
+        "open\\s*\\([^)]*mode\\s*=\\s*['\"][wa+x]",
+        "writeFileSync",
+        "writeFile\\s*\\(",
+        "appendFileSync",
+        "appendFile\\s*\\(",
+        "fs\\.write",
+        "createWriteStream",
+        "Deno\\.writeTextFile",
+        "Deno\\.writeFile"
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "File write operation detected"
+    },
+    "subprocess_execution": {
+      "patterns": [
+        "subprocess\\.run",
+        "subprocess\\.call",
+        "subprocess\\.Popen",
+        "os\\.system",
+        "os\\.popen",
+        "os\\.exec",
+        "child_process",
+        "spawn\\s*\\(",
+        "exec\\s*\\(",
+        "execSync",
+        "spawnSync"
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "Subprocess execution detected"
+    },
+    "git_writes": {
+      "patterns": [
+        "git\\s+push",
+        "git\\s+commit",
+        "git\\s+add",
+        "git\\s+reset",
+        "git\\s+checkout",
+        "git\\s+merge",
+        "git\\s+rebase"
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "Git write command detected"
+    },
+    "network_mutations": {
+      "patterns": [
+        "fetch\\s*\\([^)]*method\\s*:\\s*['\"]POST",
+        "fetch\\s*\\([^)]*method\\s*:\\s*['\"]PUT",
+        "fetch\\s*\\([^)]*method\\s*:\\s*['\"]PATCH",
+        "fetch\\s*\\([^)]*method\\s*:\\s*['\"]DELETE",
+        "axios\\.post",
+        "axios\\.put",
+        "axios\\.patch",
+        "axios\\.delete",
+        "\\.post\\s*\\(",
+        "\\.put\\s*\\(",
+        "\\.patch\\s*\\(",
+        "\\.delete\\s*\\(",
+        "WebSocket",
+        "new\\s+WebSocket",
+        "workflow_dispatch",
+        "repository_dispatch"
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "Network mutation detected"
+    },
+    "sealing_imports": {
+      "patterns": [
+        "import.*seal",
+        "from.*seal",
+        "require.*seal",
+        "seal_run_folder",
+        "compute_root_sha256",
+        "MANIFEST\\.sha256.*write",
+        "manifest\\.json.*write"
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "Sealing module import detected"
+    },
+    "database_writes": {
+      "patterns": [
+        "INSERT\\s+INTO",
+        "UPDATE\\s+.*SET",
+        "DELETE\\s+FROM",
+        "DROP\\s+TABLE",
+        "CREATE\\s+TABLE",
+        "ALTER\\s+TABLE",
+        "TRUNCATE",
+        "\\.execute\\s*\\([^)]*INSERT",
+        "\\.execute\\s*\\([^)]*UPDATE",
+        "\\.execute\\s*\\([^)]*DELETE"
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "Database write operation detected"
+    },
+    "ai_agent_imports": {
+      "patterns": [
+        "import\\s+openai",
+        "from\\s+openai",
+        "import\\s+anthropic",
+        "from\\s+anthropic",
+        "import\\s+langchain",
+        "from\\s+langchain",
+        "ChatGPT",
+        "Claude\\s*\\(",
+        "LLM\\s*\\(",
+        "Agent\\s*\\("
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "AI/Agent integration detected"
+    },
+    "action_buttons": {
+      "patterns": [
+        "onClick.*(?:Run|Trigger|Approve|Reject|Fix|Update|Reseal|Promote)",
+        "button.*(?:Run|Trigger|Approve|Reject|Fix|Update|Reseal|Promote)",
+        "<button[^>]*>\\s*(?:Run|Trigger|Approve|Reject|Fix|Update|Reseal|Promote)",
+        "handleFix",
+        "handleApprove",
+        "handleTrigger",
+        "handleRun",
+        "handleUpdate",
+        "handleReseal",
+        "handlePromote"
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "Action button/handler detected"
+    },
+    "form_mutations": {
+      "patterns": [
+        "<form[^>]*action\\s*=",
+        "<form[^>]*method\\s*=\\s*['\"]POST",
+        "onSubmit(?!.*e\\.preventDefault)"
+      ],
+      "severity": "CRITICAL",
+      "fail_message": "Form mutation detected"
+    }
+  },
+  "audit_policy": {
+    "fail_closed": true,
+    "uncertainty_is_failure": true,
+    "description": "If audit cannot determine pattern absence, it MUST fail."
+  }
+}

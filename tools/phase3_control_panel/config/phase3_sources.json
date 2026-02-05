@@ -1,0 +1,27 @@
+{
+  "config_version": "0.1",
+  "description": "Phase 3 Control Panel source configuration. Read-only references to canonical sources.",
+  "canon_roots": {
+    "run_root": ".codex/RUNS",
+    "registry_root": "docs/phase_2_2",
+    "governance_root": "docs/governance"
+  },
+  "pointer_files": {
+    "active_registry_pointers": "docs/phase_2_2/ACTIVE_REGISTRY_POINTERS_v0_1.json",
+    "registry_catalog": "docs/phase_2_2/REGISTRY_CATALOG_v0_1.json"
+  },
+  "governance_documents": {
+    "health_contracts": "docs/governance/contracts/phase_2_3/HEALTH_CONTRACTS_v0_1.md",
+    "enforcement_matrix": "docs/phase_2_2/OVC_ENFORCEMENT_COVERAGE_MATRIX_v0.2.md",
+    "governance_scorecard": "docs/phase_2_2/OVC_GOVERNANCE_COMPLETENESS_SCORECARD_v0.2.md",
+    "expected_versions": "docs/governance/EXPECTED_VERSIONS_v0_1.json"
+  },
+  "schemas": {
+    "schema_root": "docs/phase_2_2/schemas"
+  },
+  "read_only_enforcement": {
+    "statement": "No write credentials exist. All paths are read-only.",
+    "file_open_mode": "r",
+    "forbidden_modes": ["w", "a", "w+", "a+", "r+", "x"]
+  }
+}
