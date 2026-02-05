@@ -1,0 +1,87 @@
+{
+  "_comment": "NON-AUTHORITATIVE: This is an example file for illustration only. It does not represent real run data.",
+  "schema_version": "0.1",
+  "report_id": "AIR-20260205T120000Z-a1b2c3d4",
+  "generated_utc": "2026-02-05T12:00:00Z",
+  "interpreter_version": "0.1",
+  "run_id": "<run_id>",
+  "run_type": "<run_type>",
+  "run_created_utc": "2026-02-05T10:00:00Z",
+  "seal_status": {
+    "is_sealed": true,
+    "seal_valid": true,
+    "root_sha256": "<sha256_placeholder>"
+  },
+  "interpretation_summary": {
+    "overall_status": "FAIL",
+    "failure_count": 1,
+    "warning_count": 0,
+    "confidence": "HIGH"
+  },
+  "failures": [
+    {
+      "failure_id": "F001",
+      "failure_class": "AUDIT_FAILED",
+      "severity": "ERROR",
+      "confidence": "HIGH",
+      "description": "Phase 3 read-only audit exited with code 1 indicating violations detected.",
+      "evidence_refs": [
+        {
+          "artifact_path": "<path>/audit_output.log",
+          "source_check_id": "phase3_read_only_audit",
+          "rule_id": null,
+          "line_number": 42,
+          "excerpt": "AUDIT RESULT: FAIL - Total violations: 3"
+        }
+      ]
+    }
+  ],
+  "non_claims": [
+    {
+      "non_claim_id": "NC001",
+      "reason": "EVIDENCE_MISSING",
+      "description": "Database write audit results could not be verified; audit output file not present in run folder.",
+      "attempted_artifact": "<path>/db_audit_output.log"
+    }
+  ],
+  "next_actions": [
+    {
+      "action_id": "A001",
+      "action_type": "INVESTIGATE",
+      "description": "Review read-only audit violations in source code and remediate file write patterns.",
+      "priority": "P1",
+      "related_failure_ids": ["F001"]
+    }
+  ],
+  "evidence_index": [
+    {
+      "artifact_path": "run.json",
+      "artifact_type": "run_json",
+      "read_status": "SUCCESS",
+      "sha256": "<sha256_placeholder>"
+    },
+    {
+      "artifact_path": "manifest.json",
+      "artifact_type": "manifest_json",
+      "read_status": "SUCCESS",
+      "sha256": "<sha256_placeholder>"
+    },
+    {
+      "artifact_path": "MANIFEST.sha256",
+      "artifact_type": "manifest_sha256",
+      "read_status": "SUCCESS",
+      "sha256": "<sha256_placeholder>"
+    },
+    {
+      "artifact_path": "<path>/audit_output.log",
+      "artifact_type": "audit_output",
+      "read_status": "SUCCESS",
+      "sha256": "<sha256_placeholder>"
+    }
+  ],
+  "metadata": {
+    "contract_version": "AGENT_AUDIT_INTERPRETER_CONTRACT_v0.1",
+    "authority_statement": "NON-AUTHORITATIVE: This report is derived and does not constitute source truth.",
+    "notes": null
+  }
+}

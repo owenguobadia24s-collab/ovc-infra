@@ -1,0 +1,72 @@
+{
+  "_comment": "Known artifact patterns for Phase 4 Audit Interpreter v0.1",
+  "_contract": "AGENT_AUDIT_INTERPRETER_CONTRACT_v0.1",
+  "patterns": [
+    {
+      "pattern": "^run\\.json$",
+      "artifact_type": "run_json",
+      "required": true,
+      "description": "Run envelope file"
+    },
+    {
+      "pattern": "^manifest\\.json$",
+      "artifact_type": "manifest_json",
+      "required": false,
+      "description": "Manifest seal file (required for sealed runs)"
+    },
+    {
+      "pattern": "^MANIFEST\\.sha256$",
+      "artifact_type": "manifest_sha256",
+      "required": false,
+      "description": "Manifest hash file (required for sealed runs)"
+    },
+    {
+      "pattern": ".*_audit.*\\.log$",
+      "artifact_type": "audit_output",
+      "required": false,
+      "description": "Audit log output files"
+    },
+    {
+      "pattern": ".*_audit.*\\.json$",
+      "artifact_type": "audit_output",
+      "required": false,
+      "description": "Audit JSON output files"
+    },
+    {
+      "pattern": "^REGISTRY_DELTA_LOG.*\\.jsonl$",
+      "artifact_type": "data_artifact",
+      "required": false,
+      "description": "Registry delta log files"
+    },
+    {
+      "pattern": "^.*\\.jsonl$",
+      "artifact_type": "data_artifact",
+      "required": false,
+      "description": "JSONL data artifacts"
+    },
+    {
+      "pattern": "^.*\\.json$",
+      "artifact_type": "data_artifact",
+      "required": false,
+      "description": "JSON data artifacts (catch-all)"
+    },
+    {
+      "pattern": "^.*\\.csv$",
+      "artifact_type": "data_artifact",
+      "required": false,
+      "description": "CSV data artifacts"
+    },
+    {
+      "pattern": "^.*\\.md$",
+      "artifact_type": "other",
+      "required": false,
+      "description": "Markdown documentation"
+    },
+    {
+      "pattern": "^.*\\.log$",
+      "artifact_type": "other",
+      "required": false,
+      "description": "Log files (catch-all)"
+    }
+  ]
+}
