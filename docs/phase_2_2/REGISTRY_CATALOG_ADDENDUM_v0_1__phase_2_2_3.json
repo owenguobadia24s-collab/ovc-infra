@@ -1,0 +1,111 @@
+{
+  "addendum_version": "0.1",
+  "phase": "2.2.3",
+  "generated_utc": "2026-02-05T00:00:00Z",
+  "description": "Phase 2.2.3 — Registry Delta Event Log. Addendum to REGISTRY_CATALOG_v0_1.json. Do not edit the frozen Phase 2.2 catalog.",
+  "registries": [
+    {
+      "registry_id": "registry_delta_log",
+      "schema_id": "REGISTRY_registry_delta_log_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "jsonl_registry",
+      "description": "Append-only event log that records registry deltas derived from successive sealed snapshots. Each line represents a delta edge between two sealed states of a registry. Used for audit, reproducibility, and tracing registry state transitions over time.",
+      "authoritative_sources": [
+        {
+          "path": ".codex/RUNS/<run_id>/REGISTRY_DELTA_LOG_v0_1.jsonl",
+          "authority_class": "primary"
+        },
+        {
+          "path": "docs/phase_2_2/ACTIVE_REGISTRY_POINTERS_v0_1.json",
+          "authority_class": "input"
+        },
+        {
+          "path": ".codex/RUNS/<run_id>/manifest.json",
+          "authority_class": "input"
+        },
+        {
+          "path": "docs/phase_2_2/builders/build_registry_delta_log_v0_1.py",
+          "authority_class": "derived"
+        }
+      ],
+      "build_operation_id": "OP-QA11",
+      "write_policy": "append_only",
+      "state_model": "Each delta-log build produces a new sealed run folder containing REGISTRY_DELTA_LOG_v0_1.jsonl. The log is append-only across builds — each build extends the log by computing deltas from new sealed snapshots since the last delta-log build. 'Active' is NOT applicable — this is memory, not control.",
+      "seal_model": "manifest.json + MANIFEST.sha256 with ROOT_SHA256 per Run Envelope Standard v0.1",
+      "query_contract": {
+        "description": "Load REGISTRY_DELTA_LOG_v0_1.jsonl. Each line is a JSON object conforming to REGISTRY_registry_delta_log_v0_1.schema.json.",
+        "required_fields": [
+          "delta_version",
+          "registry_id",
+          "from_ref",
+          "to_ref",
+          "delta_basis",
+          "added_paths",
+          "removed_paths",
+          "modified_paths",
+          "counts",
+          "created_utc",
+          "derivation_run_id"
+        ],
+        "semantics": {
+          "from_ref": "null for first observation of a registry (bootstrapping edge)",
+          "to_ref": "non-null object referencing the sealed snapshot",
+          "delta_basis": "always 'manifest_diff' — computed by comparing manifest.json file lists",
+          "path_arrays": "sorted lexicographically for determinism"
+        }
+      },
+      "eligible_registries_for_delta_logging": [
+        {
+          "registry_id": "run_registry",
+          "reason": "JSONL registry with sealed manifest.json, represents snapshot-like output"
+        },
+        {
+          "registry_id": "op_status_table",
+          "reason": "JSON snapshot with sealed manifest.json, represents snapshot-like output"
+        },
+        {
+          "registry_id": "drift_signals",
+          "reason": "JSON snapshot with sealed manifest.json, represents snapshot-like output"
+        },
+        {
+          "registry_id": "migration_ledger",
+          "reason": "JSON snapshot with Phase 2.2.1 sealed manifest.json"
+        },
+        {
+          "registry_id": "expected_versions",
+          "reason": "JSON snapshot with Phase 2.2.1 sealed manifest.json"
+        },
+        {
+          "registry_id": "threshold_packs_file",
+          "reason": "JSON files with Phase 2.2.1 sealed manifest.json (multi-file)"
+        },
+        {
+          "registry_id": "derived_validation_reports",
+          "reason": "JSON snapshot with Phase 2.2.1 sealed manifest.json"
+        },
+        {
+          "registry_id": "fingerprint_index",
+          "reason": "CSV snapshot with Phase 2.2.1 sealed manifest.json"
+        }
+      ],
+      "excluded_registries": [
+        {
+          "registry_id": "threshold_registry_db",
+          "reason": "External database registry — cannot verify or compute manifest diffs from repo evidence"
+        },
+        {
+          "registry_id": "validation_range_results",
+          "reason": "Collection registry with no single sealed snapshot — diffs not meaningful at collection level"
+        },
+        {
+          "registry_id": "evidence_pack_registry",
+          "reason": "Collection registry with individual per-run seals — diffs not meaningful at collection level"
+        },
+        {
+          "registry_id": "system_health_report",
+          "reason": "Presentation-only artifact — no active pointer, no meaningful delta semantics"
+        }
+      ]
+    }
+  ]
+}

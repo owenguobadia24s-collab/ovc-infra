@@ -59,6 +59,11 @@ REGISTRY_MAP = {
         "registry_id": "drift_signals",
         "schema": "REGISTRY_drift_signals_v0_1.schema.json",
     },
+    # Phase 2.2.3 — Registry Delta Log
+    "REGISTRY_DELTA_LOG_v0_1.jsonl": {
+        "registry_id": "registry_delta_log",
+        "schema": "REGISTRY_registry_delta_log_v0_1.schema.json",
+    },
 }
 
 SCHEMA_DIR = Path(__file__).parent.parent / "schemas"

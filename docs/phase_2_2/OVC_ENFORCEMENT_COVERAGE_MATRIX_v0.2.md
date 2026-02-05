@@ -12,7 +12,7 @@
 
 | Change | Description |
 |--------|-------------|
-| ADD | OP-QA07 through OP-QA10 rows |
+| ADD | OP-QA07 through OP-QA11 rows |
 | RECALCULATE | Coverage percentages |
 
 All v0.1 rows are unchanged and inherited verbatim.
@@ -27,6 +27,7 @@ All v0.1 rows are unchanged and inherited verbatim.
 | OP-QA08 Op Status Table Build | Y | Y | — | — | Y | Y | Y | **C3** |
 | OP-QA09 Drift Signals Build | Y | Y | — | — | Y | Y | Y | **C3** |
 | OP-QA10 System Health Render | P | Y | — | — | Y | Y | Y | **C3** |
+| OP-QA11 Registry Delta Log Build | Y | Y | — | — | Y | Y | Y | **C3** |
 
 **Legend:** Y = Yes, P = Partial, — = Not present
 
@@ -46,16 +47,16 @@ All v0.1 rows are unchanged and inherited verbatim.
 |-------|-----------|-----------|-----------------|
 | C5 (Fully Governed) | 4 | 4 | OP-B01, OP-B02, OP-B08, OP-D03 |
 | C4 (Gated + Artifacts) | 8 | 8 | OP-A02, OP-A04, OP-B04, OP-C02, OP-D01, OP-D02, OP-D11, OP-QA01 |
-| C3 (CI/Audit Gated) | 14 | 18 | v0.1 C3 ops + OP-QA07, OP-QA08, OP-QA09, OP-QA10 |
+| C3 (CI/Audit Gated) | 14 | 19 | v0.1 C3 ops + OP-QA07, OP-QA08, OP-QA09, OP-QA10, OP-QA11 |
 | C2 (Runtime, not gated) | 5 | 5 | OP-D06, OP-D07, OP-D10, OP-QA05, OP-QA06 |
 | C1 | 0 | 0 | — |
 | C0 | 0 | 0 | — |
 
 | Metric | v0.1 | v0.2 |
 |--------|------|------|
-| Total Canonical Operations | 31 | 35 |
-| Enforcement Coverage (C3+) | 83.9% (26/31) | **85.7% (30/35)** |
-| C2 (Weak) Operations | 5 (16.1%) | 5 (14.3%) |
+| Total Canonical Operations | 31 | 36 |
+| Enforcement Coverage (C3+) | 83.9% (26/31) | **86.1% (31/36)** |
+| C2 (Weak) Operations | 5 (16.1%) | 5 (13.9%) |
 
 ---
 

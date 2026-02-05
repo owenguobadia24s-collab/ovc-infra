@@ -16,6 +16,7 @@
 | ADD OP-QA08 | Operation Status Table Build |
 | ADD OP-QA09 | Drift Signals Build |
 | ADD OP-QA10 | System Health Render |
+| ADD OP-QA11 | Registry Delta Log Build (Phase 2.2.3) |
 
 v0.1 operations (OP-A01 through OP-QA06, OP-NC01 through OP-NC29) are unchanged and inherited verbatim.
 
@@ -87,15 +88,31 @@ v0.1 operations (OP-A01 through OP-QA06, OP-NC01 through OP-NC29) are unchanged 
 | **Evidence Anchors** | `.codex/RUNS/<run_id>/SYSTEM_HEALTH_v0_1.md` |
 | **Dependencies** | OP-QA09, OP-QA08, OP-QA07 |
 
+### OP-QA11 — Registry Delta Log Build (Phase 2.2.3)
+
+| Field | Value |
+|-------|-------|
+| **Operation ID** | OP-QA11 |
+| **Option** | QA |
+| **Purpose** | Build an append-only JSONL delta log recording registry state transitions derived from sealed manifests |
+| **Bound Executables** | `docs/phase_2_2/builders/build_registry_delta_log_v0_1.py` |
+| **Inputs** | `.codex/RUNS/` (sealed run folders), `docs/phase_2_2/ACTIVE_REGISTRY_POINTERS_v0_1.json`, `docs/phase_2_2/REGISTRY_CATALOG_v0_1.json`, `docs/phase_2_2/REGISTRY_CATALOG_ADDENDUM_v0_1__phase_2_2_3.json` |
+| **Outputs** | `REGISTRY_DELTA_LOG_v0_1.jsonl`, `run.json`, `manifest.json`, `MANIFEST.sha256` |
+| **Determinism** | YES — same sealed inputs produce identical delta output |
+| **Failure Modes** | Missing runs root; missing active pointers file; malformed manifest.json in scanned folder |
+| **Enforcement Surfaces** | E1 (schema), E2 (builder validation), E5 (sealed artifact), E6 (runbook), E7 (run.json) |
+| **Evidence Anchors** | `.codex/RUNS/<run_id>/REGISTRY_DELTA_LOG_v0_1.jsonl` |
+| **Dependencies** | Sealed runs from OP-QA07, OP-QA08, OP-QA09, seal promotions from Phase 2.2.1 |
+
 ---
 
 ## Summary
 
 | Metric | v0.1 | v0.2 |
 |--------|------|------|
-| Total Canonical Operations | 31 | 35 |
+| Total Canonical Operations | 31 | 36 |
 | Non-Canonical Entries | 29 | 29 (unchanged) |
-| New QA Operations | — | 4 (OP-QA07 through OP-QA10) |
+| New QA Operations | — | 5 (OP-QA07 through OP-QA11) |
 
 ---
 
