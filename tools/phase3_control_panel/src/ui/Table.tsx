@@ -23,7 +23,7 @@ import React, { useState, useMemo } from 'react';
 // Table Types
 // =============================================================================
 
-export interface Column<T> {
+export interface Column<T extends object> {
   readonly key: keyof T | string;
   readonly label: string;
   readonly sortable?: boolean;
@@ -31,7 +31,7 @@ export interface Column<T> {
   readonly render?: (value: unknown, row: T) => React.ReactNode;
 }
 
-interface TableProps<T> {
+interface TableProps<T extends object> {
   readonly columns: ReadonlyArray<Column<T>>;
   readonly data: ReadonlyArray<T>;
   readonly keyField: keyof T;
@@ -92,7 +92,7 @@ function sortData<T>(
 // Table Component
 // =============================================================================
 
-export function Table<T extends Record<string, unknown>>({
+export function Table<T extends object>({
   columns,
   data,
   keyField,
