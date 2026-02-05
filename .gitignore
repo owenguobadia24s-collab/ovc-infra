@@ -273,3 +273,7 @@ artifacts/path1_summary.json
 
 # Codex run artifacts (never commit)
 .codex/RUNS/
+
+# nul
+nul
+NUL
