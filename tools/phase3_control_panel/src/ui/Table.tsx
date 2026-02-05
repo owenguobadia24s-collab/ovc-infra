@@ -98,10 +98,10 @@ export function Table<T extends object>({
   keyField,
   emptyMessage = 'No data available',
   onRowClick,
-  initialSortKey = null,
+  initialSortKey,
   initialSortDirection = 'desc'
 }: TableProps<T>): React.ReactElement {
-  const [sortKey, setSortKey] = useState<string | null>(initialSortKey);
+  const [sortKey, setSortKey] = useState<string | null>(initialSortKey ?? null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(
     initialSortKey ? initialSortDirection : null
   );

@@ -184,6 +184,83 @@ Exit codes:
 
 ---
 
+## Runtime Harness
+
+The control panel includes a minimal runtime harness for local development and closure validation testing.
+
+### Prerequisites
+
+```bash
+# From tools/phase3_control_panel/
+npm install
+```
+
+### Running the Dev Server
+
+```powershell
+# Set the repo root (required)
+$env:PHASE3_REPO_ROOT = "C:\path\to\ovc-infra"
+
+# Start the server (port 3311)
+npm run dev:server
+```
+
+Or on Unix/macOS:
+
+```bash
+PHASE3_REPO_ROOT=/path/to/ovc-infra npm run dev:server
+```
+
+### Available Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `/api/runs` | All runs from run_registry |
+| `/api/failures` | Failure aggregations |
+| `/api/artifacts/:runId` | Envelope + manifest for a run |
+| `/api/diff` | Diff between runs (query: `left`, `right`) |
+| `/api/health` | Computed health state |
+| `/api/governance` | Governance visibility data |
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PHASE3_REPO_ROOT` | Yes | Absolute path to ovc-infra repo root |
+| `PORT` | No | Server port (default: 3311) |
+
+### Running the Vite UI (Development)
+
+```bash
+# Start Vite dev server (port 5173)
+npm run dev
+```
+
+The Vite UI proxies API requests to the backend server at port 3311.
+
+### Building for Production
+
+```bash
+# Typecheck + build client
+npm run build
+
+# Build server
+npm run build:server
+
+# Run production server
+npm run start
+```
+
+### Read-Only Enforcement
+
+The runtime harness enforces read-only semantics:
+
+1. **Server denies all non-GET requests** — Returns 405 Method Not Allowed
+2. **Sources open files with `flag: 'r'` only** — No write modes
+3. **No mutation endpoints exist** — Only GET handlers registered
+
+---
+
 ## Pointing to a Canon Snapshot
 
 To use the control panel with a canon snapshot directory:
