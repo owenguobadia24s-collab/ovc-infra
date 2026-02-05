@@ -404,23 +404,23 @@ function DeltaLogView({ entry }: DeltaLogViewProps): React.ReactElement {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 16px', color: '#e0e0e0' }}>
-        <span style={{ color: '#666' }}>Delta ID:</span>
-        <span>{entry.delta_id}</span>
+        <span style={{ color: '#666' }}>Delta Version:</span>
+        <span>{entry.delta_version}</span>
 
         <span style={{ color: '#666' }}>Registry:</span>
         <span>{entry.registry_id}</span>
 
-        <span style={{ color: '#666' }}>Transition:</span>
-        <span>{entry.transition_type}</span>
+        <span style={{ color: '#666' }}>Delta Basis:</span>
+        <span>{entry.delta_basis}</span>
 
-        <span style={{ color: '#666' }}>Before Run:</span>
-        <span>{entry.before_run_id || 'N/A'}</span>
+        <span style={{ color: '#666' }}>From Run:</span>
+        <span>{entry.from_ref?.run_id || 'N/A (bootstrap)'}</span>
 
-        <span style={{ color: '#666' }}>After Run:</span>
-        <span>{entry.after_run_id}</span>
+        <span style={{ color: '#666' }}>To Run:</span>
+        <span>{entry.to_ref.run_id}</span>
 
-        <span style={{ color: '#666' }}>Recorded:</span>
-        <span>{entry.recorded_at}</span>
+        <span style={{ color: '#666' }}>Created:</span>
+        <span>{entry.created_utc}</span>
       </div>
 
       {/* Diff summary from delta log */}
@@ -429,12 +429,12 @@ function DeltaLogView({ entry }: DeltaLogViewProps): React.ReactElement {
           Delta Summary:
         </div>
         <div style={{ color: '#81c784' }}>
-          +{entry.diff_summary.files_added.length} added,{' '}
+          +{entry.counts.added} added,{' '}
           <span style={{ color: '#ff8a80' }}>
-            -{entry.diff_summary.files_removed.length} removed,{' '}
+            -{entry.counts.removed} removed,{' '}
           </span>
           <span style={{ color: '#ffcc80' }}>
-            ~{entry.diff_summary.files_changed.length} changed
+            ~{entry.counts.modified} changed
           </span>
         </div>
       </div>

@@ -15,7 +15,18 @@
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initializeSources, loadRunRegistry, loadOpStatusTable, loadExpectedVersions } from '../lib/sources';
+import {
+  initializeSources,
+  loadRunRegistrySafe,
+  loadOpStatusTableSafe,
+  loadExpectedVersionsSafe,
+  loadRunEnvelopeSafe,
+  loadManifestSafe,
+  loadDeltaLogSafe,
+  loadActivePointersSafe,
+  ParseStatus,
+  type LoadResultWithParse
+} from '../lib/sources';
 import { determineHealthState } from '../lib/health_rules';
 
 // ESM-compatible __dirname
@@ -39,6 +50,40 @@ if (!REPO_ROOT) {
 // Initialize sources with the repo root
 console.log(`Initializing sources from: ${REPO_ROOT}`);
 initializeSources(REPO_ROOT);
+
+// =============================================================================
+// Response Helper - Standardized ParseResult responses
+// =============================================================================
+
+interface ParseResultResponse {
+  status: string;
+  value: unknown;
+  error: { status: string; path: string; message: string; detail?: string } | null;
+  trace: unknown[];
+}
+
+/**
+ * Respond with a standardized ParseResult shape.
+ * Always returns HTTP 200 - the "state" is in the JSON body.
+ * No interpretation. Just structured data.
+ */
+function respondParse<T>(
+  res: Response,
+  result: LoadResultWithParse<T>
+): Response {
+  const response: ParseResultResponse = {
+    status: result.parseStatus,
+    value: result.data ?? null,
+    error: result.parseError ? {
+      status: result.parseError.code,
+      path: result.parseError.path,
+      message: result.parseError.message,
+      detail: result.parseError.detail
+    } : null,
+    trace: [result.trace]
+  };
+  return res.status(200).json(response);
+}
 
 // =============================================================================
 // Express App
@@ -74,107 +119,139 @@ app.get('/api/health-check', (_req: Request, res: Response) => {
 
 // Runs view data
 app.get('/api/runs', (_req: Request, res: Response) => {
-  try {
-    const result = loadRunRegistry();
-    res.json({
-      runs: result.data,
-      trace: result.trace
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: 'Failed to load run registry',
-      message: err instanceof Error ? err.message : String(err)
-    });
-  }
+  const result = loadRunRegistrySafe();
+  return respondParse(res, result);
 });
 
 // Failures view data
 app.get('/api/failures', (_req: Request, res: Response) => {
-  try {
-    const opStatus = loadOpStatusTable();
-    const runRegistry = loadRunRegistry();
+  const opStatus = loadOpStatusTableSafe();
+  const runRegistry = loadRunRegistrySafe();
 
-    // Filter to failed runs only
-    const failedRuns = (runRegistry.data as any[]).filter(r => r.status === 'FAIL');
-
-    res.json({
-      opStatusTable: opStatus.data,
-      failedRuns: failedRuns,
-      opStatusTrace: opStatus.trace,
-      runRegistryTrace: runRegistry.trace
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: 'Failed to load failure data',
-      message: err instanceof Error ? err.message : String(err)
-    });
+  // If either has a parse error, report the first error encountered
+  if (opStatus.parseStatus !== ParseStatus.OK) {
+    return respondParse(res, opStatus);
   }
+  if (runRegistry.parseStatus !== ParseStatus.OK) {
+    return respondParse(res, runRegistry);
+  }
+
+  // Filter to failed runs only
+  const failedRuns = (runRegistry.data as ReadonlyArray<{ status?: string }>).filter(
+    r => r.status === 'FAIL'
+  );
+
+  // Composite response - both OK
+  return res.status(200).json({
+    status: ParseStatus.OK,
+    value: {
+      opStatusTable: opStatus.data,
+      failedRuns: failedRuns
+    },
+    error: null,
+    trace: [opStatus.trace, runRegistry.trace]
+  });
 });
 
 // Health view data
 app.get('/api/health', (_req: Request, res: Response) => {
-  try {
-    // Build health evidence from available sources
-    const healthResult = determineHealthState({
-      pointers: null, // Would need loadActivePointers
-      driftSignals: null,
-      opStatusTable: [],
-      sealValidationResults: [],
-      governanceArtifactsReadable: true,
-      filesystemAccessible: true,
-      gitStateReadable: true
-    });
+  // Load pointers safely for health evidence
+  const pointersResult = loadActivePointersSafe();
+  
+  // Build health evidence from available sources
+  const healthResult = determineHealthState({
+    pointers: pointersResult.parseStatus === ParseStatus.OK ? pointersResult.data : null,
+    driftSignals: null,
+    opStatusTable: [],
+    sealValidationResults: [],
+    governanceArtifactsReadable: true,
+    filesystemAccessible: true,
+    gitStateReadable: true
+  });
 
-    res.json({
-      healthState: healthResult.state,
-      traces: [healthResult.trace]
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: 'Failed to compute health state',
-      message: err instanceof Error ? err.message : String(err)
-    });
-  }
+  return res.status(200).json({
+    status: ParseStatus.OK,
+    value: {
+      healthState: healthResult.state
+    },
+    error: null,
+    trace: [healthResult.trace, pointersResult.trace]
+  });
 });
 
 // Governance view data
 app.get('/api/governance', (_req: Request, res: Response) => {
-  try {
-    const expectedVersions = loadExpectedVersions();
-
-    res.json({
-      expectedVersions: expectedVersions.data,
+  const result = loadExpectedVersionsSafe();
+  
+  // Return standardized shape with governance-specific value structure
+  return res.status(200).json({
+    status: result.parseStatus,
+    value: result.parseStatus === ParseStatus.OK ? {
+      expectedVersions: result.data,
       enforcementLevels: [],
       knownGaps: [],
-      sealedRegistries: [],
-      traces: [expectedVersions.trace]
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: 'Failed to load governance data',
-      message: err instanceof Error ? err.message : String(err)
-    });
-  }
+      sealedRegistries: []
+    } : null,
+    error: result.parseError ? {
+      status: result.parseError.code,
+      path: result.parseError.path,
+      message: result.parseError.message
+    } : null,
+    trace: [result.trace]
+  });
+});
+
+// Diff view data
+app.get('/api/diff', (_req: Request, res: Response) => {
+  const result = loadDeltaLogSafe();
+  return respondParse(res, result);
 });
 
 // Artifact detail
 app.get('/api/artifacts/:runId', (req: Request, res: Response) => {
-  try {
-    const { runId } = req.params;
-    // Would use loadRunEnvelope, loadManifest, loadManifestSeal
-    res.json({
-      runId,
-      envelope: null,
-      manifest: null,
-      seal: null,
-      note: 'Artifact detail endpoint - implementation pending'
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: 'Failed to load artifact',
-      message: err instanceof Error ? err.message : String(err)
+  const { runId } = req.params;
+  
+  const envelopeResult = loadRunEnvelopeSafe(runId);
+  const manifestResult = loadManifestSafe(runId);
+
+  // If envelope has a parse error, report it
+  if (envelopeResult.parseStatus !== ParseStatus.OK && 
+      envelopeResult.parseStatus !== ParseStatus.MISSING) {
+    return respondParse(res, envelopeResult);
+  }
+
+  // If manifest has a parse error (other than missing), report it
+  if (manifestResult.parseStatus !== ParseStatus.OK && 
+      manifestResult.parseStatus !== ParseStatus.MISSING) {
+    return respondParse(res, manifestResult);
+  }
+
+  // If both are missing, report MISSING status
+  if (envelopeResult.parseStatus === ParseStatus.MISSING && 
+      manifestResult.parseStatus === ParseStatus.MISSING) {
+    return res.status(200).json({
+      status: ParseStatus.MISSING,
+      value: null,
+      error: {
+        status: ParseStatus.MISSING,
+        path: runId,
+        message: `Artifacts not found for run: ${runId}`
+      },
+      trace: [envelopeResult.trace, manifestResult.trace]
     });
   }
+
+  // Return what we have
+  return res.status(200).json({
+    status: ParseStatus.OK,
+    value: {
+      runId,
+      envelope: envelopeResult.data,
+      manifest: manifestResult.data
+    },
+    error: null,
+    trace: [envelopeResult.trace, manifestResult.trace]
+  });
 });
 
 // =============================================================================

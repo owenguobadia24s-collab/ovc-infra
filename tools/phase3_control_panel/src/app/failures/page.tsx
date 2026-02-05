@@ -44,8 +44,8 @@ export function FailuresPage({
   // Aggregate failures by operation
   const aggregates = aggregateFailures(failedRuns);
 
-  // Find operations with FAIL status in op_status_table
-  const failedOps = opStatusTable.filter(op => op.last_run_status === 'FAIL');
+  // Find operations with drift or warnings in op_status_table
+  const failedOps = opStatusTable.filter(op => op.op_drift === true || op.warnings.length > 0);
 
   return (
     <Layout currentPath="/failures" title="Failures View">
@@ -358,7 +358,10 @@ function aggregateFailures(runs: ReadonlyArray<RunRegistryEntry>): FailureAggreg
   const aggregateMap = new Map<string, FailureAggregate>();
 
   for (const run of runs) {
-    if (run.status !== 'FAIL') continue;
+    // Consider runs with warnings as having issues
+    if (run.warnings.length === 0) continue;
+    // Skip runs without operation_id (legacy/untyped runs)
+    if (!run.operation_id) continue;
 
     const existing = aggregateMap.get(run.operation_id);
     if (existing) {
@@ -366,16 +369,16 @@ function aggregateFailures(runs: ReadonlyArray<RunRegistryEntry>): FailureAggreg
         ...existing,
         failure_count: existing.failure_count + 1,
         last_failure_at:
-          run.indexed_at > (existing.last_failure_at || '')
-            ? run.indexed_at
+          (run.created_utc ?? '') > (existing.last_failure_at || '')
+            ? (run.created_utc ?? '')
             : existing.last_failure_at
       });
     } else {
       aggregateMap.set(run.operation_id, {
         operation_id: run.operation_id,
         failure_count: 1,
-        last_failure_at: run.indexed_at,
-        reasons: [] // Would need to load run.json for reasons
+        last_failure_at: run.created_utc ?? '',
+        reasons: run.warnings as string[] // Use warnings as reasons
       });
     }
   }
