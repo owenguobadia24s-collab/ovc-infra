@@ -339,6 +339,32 @@ Per Phase 3 Architecture Validation Report:
 
 ---
 
+## Contracts
+
+Phase 3 schema contracts document the observed, authoritative artifact structures. These are frozen, versioned specifications derived from evidence extraction.
+
+| Contract | Version | Description |
+|----------|---------|-------------|
+| [PHASE3_CANON_SCHEMA_CONTRACT_v0.1.md](docs/contracts/PHASE3_CANON_SCHEMA_CONTRACT_v0.1.md) | 0.1 | Human-readable schema contract for all Phase 3 artifacts |
+| [PHASE3_CANON_SCHEMA_CONTRACT_v0.1.json](docs/contracts/PHASE3_CANON_SCHEMA_CONTRACT_v0.1.json) | 0.1 | Machine-readable JSON schema contract |
+
+### Contract Principles
+
+1. **Derived from artifacts, not artifacts bent to contract** — Schemas describe what exists, not what we wish existed.
+2. **Read-only documentation** — Contracts do not grant authority or modify runtime behavior.
+3. **Unknown keys allowed** — Validators pass objects with unrecognized keys.
+4. **Version bumps required** — Any schema change (new required field, type change, nullability change) requires a contract version bump.
+
+### Artifacts in Scope (v0.1)
+
+| Artifact | File Pattern |
+|----------|-------------|
+| Run Registry | `RUN_REGISTRY_v0_1.jsonl` |
+| Operation Status Table | `OPERATION_STATUS_TABLE_v0_1.json` |
+| Registry Delta Log | `REGISTRY_DELTA_LOG_v0_1.jsonl` |
+
+---
+
 ## Success Condition
 
 This implementation is successful only if an auditor can verify:

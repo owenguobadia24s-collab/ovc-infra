@@ -1,0 +1,381 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Phase 3 Canon Schema Contract",
+  "version": "0.1",
+  "date": "2026-02-05",
+  "description": "Frozen, versioned schema contract derived from observed Phase 3 artifacts. Read-only documentation; does not grant authority.",
+  "artifacts": {
+    "RUN_REGISTRY_v0_1": {
+      "filePattern": "RUN_REGISTRY_v0_1.jsonl",
+      "discoveryPath": ".codex/RUNS/*run_registry_build*/RUN_REGISTRY_v0_1.jsonl",
+      "evidenceAnchor": {
+        "sourceRun": "2026-02-05__000138__run_registry_build",
+        "totalEntries": 89,
+        "sampleSize": 50
+      },
+      "schema": {
+        "type": "object",
+        "required": [
+          "registry_version",
+          "run_id",
+          "run_root",
+          "run_key",
+          "run_path",
+          "created_utc",
+          "run_type",
+          "option",
+          "operation_id",
+          "git_commit",
+          "working_tree_state",
+          "has_run_json",
+          "has_manifest_sha256",
+          "has_manifest_json",
+          "manifest_root_sha256",
+          "files",
+          "warnings"
+        ],
+        "properties": {
+          "registry_version": {
+            "type": "string",
+            "nullable": false,
+            "description": "Always '0.1' in observed data"
+          },
+          "run_id": {
+            "type": "string",
+            "nullable": false,
+            "description": "Unique run identifier"
+          },
+          "run_root": {
+            "type": "string",
+            "nullable": false,
+            "description": "Root path for runs (e.g., '.codex/RUNS')"
+          },
+          "run_key": {
+            "type": "string",
+            "nullable": false,
+            "description": "Composite key: {run_root}::{run_id}"
+          },
+          "run_path": {
+            "type": "string",
+            "nullable": false,
+            "description": "Full path to run folder"
+          },
+          "created_utc": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "28/50",
+            "description": "ISO 8601 timestamp; null for legacy runs"
+          },
+          "run_type": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "29/50",
+            "description": "Run type identifier; null for untyped runs"
+          },
+          "option": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "41/50",
+            "description": "Option category (A/B/C/D/QA); null if unassigned"
+          },
+          "operation_id": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "48/50",
+            "description": "Operation identifier (OP-XXX); null if untyped"
+          },
+          "git_commit": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "28/50",
+            "description": "Git commit SHA; null for legacy runs"
+          },
+          "working_tree_state": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "28/50",
+            "description": "'clean' or 'dirty'; null for legacy runs"
+          },
+          "has_run_json": {
+            "type": "boolean",
+            "nullable": false,
+            "description": "Whether run.json exists"
+          },
+          "has_manifest_sha256": {
+            "type": "boolean",
+            "nullable": false,
+            "description": "Whether MANIFEST.sha256 exists"
+          },
+          "has_manifest_json": {
+            "type": "boolean",
+            "nullable": false,
+            "description": "Whether manifest.json exists"
+          },
+          "manifest_root_sha256": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "29/50",
+            "description": "Root hash; null if no manifest"
+          },
+          "files": {
+            "type": "array",
+            "nullable": false,
+            "items": {
+              "type": "object",
+              "required": ["relpath", "bytes"],
+              "properties": {
+                "relpath": {
+                  "type": "string",
+                  "description": "Relative path within run folder"
+                },
+                "bytes": {
+                  "type": "number",
+                  "description": "File size in bytes"
+                }
+              }
+            },
+            "description": "Array of file metadata"
+          },
+          "warnings": {
+            "type": "array",
+            "nullable": false,
+            "items": { "type": "string" },
+            "description": "Array of warning messages"
+          }
+        }
+      }
+    },
+    "OPERATION_STATUS_TABLE_v0_1": {
+      "filePattern": "OPERATION_STATUS_TABLE_v0_1.json",
+      "discoveryPath": ".codex/RUNS/*op_status_table_build*/OPERATION_STATUS_TABLE_v0_1.json",
+      "evidenceAnchor": {
+        "sourceRun": "2026-02-05__000144__op_status_table_build",
+        "totalEntries": 31,
+        "sampleSize": 31
+      },
+      "schema": {
+        "type": "object",
+        "required": [
+          "status_version",
+          "option",
+          "operation_id",
+          "operation_name",
+          "coverage_level",
+          "last_run_id",
+          "last_run_created_utc",
+          "run_evidence_state",
+          "manifest_state",
+          "run_json_state",
+          "staleness_days",
+          "op_drift",
+          "op_drift_reasons",
+          "warnings"
+        ],
+        "properties": {
+          "status_version": {
+            "type": "string",
+            "nullable": false,
+            "description": "Always '0.1' in observed data"
+          },
+          "option": {
+            "type": "string",
+            "nullable": false,
+            "description": "Option category (A/B/C/D/QA)"
+          },
+          "operation_id": {
+            "type": "string",
+            "nullable": false,
+            "description": "Operation identifier (OP-XXX)"
+          },
+          "operation_name": {
+            "type": "string",
+            "nullable": false,
+            "description": "Human-readable operation name"
+          },
+          "coverage_level": {
+            "type": "string",
+            "nullable": false,
+            "description": "Coverage level (C2/C3/C4/C5)"
+          },
+          "last_run_id": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "27/31",
+            "description": "Most recent run ID; null if no typed run"
+          },
+          "last_run_created_utc": {
+            "type": ["string", "null"],
+            "nullable": true,
+            "observedNulls": "27/31",
+            "description": "ISO 8601 timestamp; null if no typed run"
+          },
+          "run_evidence_state": {
+            "type": "string",
+            "nullable": false,
+            "description": "'LEGACY_ONLY' or 'OBSERVED'"
+          },
+          "manifest_state": {
+            "type": "string",
+            "nullable": false,
+            "description": "'UNKNOWN' or 'PRESENT'"
+          },
+          "run_json_state": {
+            "type": "string",
+            "nullable": false,
+            "description": "'UNKNOWN' or 'PRESENT'"
+          },
+          "staleness_days": {
+            "type": ["number", "null"],
+            "nullable": true,
+            "observedNulls": "27/31",
+            "description": "Days since last run; null if no typed run"
+          },
+          "op_drift": {
+            "type": ["boolean", "null"],
+            "nullable": true,
+            "observedNulls": "27/31",
+            "description": "Drift detected flag; null if unknown"
+          },
+          "op_drift_reasons": {
+            "type": "array",
+            "nullable": false,
+            "items": { "type": "string" },
+            "description": "Array of drift reason codes"
+          },
+          "warnings": {
+            "type": "array",
+            "nullable": false,
+            "items": { "type": "string" },
+            "description": "Array of warning messages"
+          }
+        }
+      }
+    },
+    "REGISTRY_DELTA_LOG_v0_1": {
+      "filePattern": "REGISTRY_DELTA_LOG_v0_1.jsonl",
+      "discoveryPath": ".codex/RUNS/*registry_delta_log*/REGISTRY_DELTA_LOG_v0_1.jsonl",
+      "evidenceAnchor": {
+        "sourceRun": "2026-02-05__031005__registry_delta_log_build",
+        "totalEntries": 22,
+        "sampleSize": 22
+      },
+      "schema": {
+        "type": "object",
+        "required": [
+          "delta_version",
+          "registry_id",
+          "from_ref",
+          "to_ref",
+          "delta_basis",
+          "added_paths",
+          "removed_paths",
+          "modified_paths",
+          "counts",
+          "created_utc",
+          "derivation_run_id"
+        ],
+        "properties": {
+          "delta_version": {
+            "type": "string",
+            "nullable": false,
+            "description": "Always '0.1' in observed data"
+          },
+          "registry_id": {
+            "type": "string",
+            "nullable": false,
+            "description": "Registry identifier"
+          },
+          "from_ref": {
+            "type": ["object", "null"],
+            "nullable": true,
+            "observedNulls": "8/22",
+            "description": "Previous state reference; null for bootstrap entries",
+            "properties": {
+              "run_id": { "type": "string" },
+              "run_root": { "type": "string" },
+              "relpath": { "type": ["string", "null"] },
+              "manifest_sha256": { "type": "string" }
+            },
+            "required": ["run_id", "run_root", "manifest_sha256"]
+          },
+          "to_ref": {
+            "type": "object",
+            "nullable": false,
+            "description": "Current state reference",
+            "properties": {
+              "run_id": { "type": "string" },
+              "run_root": { "type": "string" },
+              "relpath": { "type": ["string", "null"] },
+              "manifest_sha256": { "type": "string" }
+            },
+            "required": ["run_id", "run_root", "manifest_sha256"]
+          },
+          "delta_basis": {
+            "type": "string",
+            "nullable": false,
+            "description": "Basis for delta computation (e.g., 'manifest_diff')"
+          },
+          "added_paths": {
+            "type": "array",
+            "nullable": false,
+            "items": { "type": "string" },
+            "description": "List of added file paths"
+          },
+          "removed_paths": {
+            "type": "array",
+            "nullable": false,
+            "items": { "type": "string" },
+            "description": "List of removed file paths"
+          },
+          "modified_paths": {
+            "type": "array",
+            "nullable": false,
+            "items": { "type": "string" },
+            "description": "List of modified file paths"
+          },
+          "counts": {
+            "type": "object",
+            "nullable": false,
+            "properties": {
+              "added": { "type": "number" },
+              "removed": { "type": "number" },
+              "modified": { "type": "number" }
+            },
+            "required": ["added", "removed", "modified"],
+            "description": "Summary counts object"
+          },
+          "created_utc": {
+            "type": "string",
+            "nullable": false,
+            "description": "ISO 8601 timestamp of delta creation"
+          },
+          "derivation_run_id": {
+            "type": "string",
+            "nullable": false,
+            "description": "Run ID that produced this delta"
+          }
+        }
+      }
+    }
+  },
+  "compatibilityRules": {
+    "unknownKeys": "ALLOWED",
+    "validationBehavior": {
+      "missingRequiredField": "INVALID",
+      "wrongType": "INVALID",
+      "allRequiredWithCorrectTypes": "VALID"
+    }
+  },
+  "changeControl": {
+    "bumpTriggers": [
+      "New required field added",
+      "Required field removed",
+      "Field type changed",
+      "Field nullability changed"
+    ],
+    "noBumpNeeded": [
+      "New optional field added (unknown keys allowed)",
+      "Documentation clarification"
+    ]
+  }
+}

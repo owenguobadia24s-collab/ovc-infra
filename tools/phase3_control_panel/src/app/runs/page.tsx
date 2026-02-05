@@ -131,14 +131,15 @@ interface RunsSummaryProps {
 }
 
 function RunsSummary({ runs }: RunsSummaryProps): React.ReactElement {
-  const passCount = runs.filter(r => r.status === 'PASS').length;
-  const failCount = runs.filter(r => r.status === 'FAIL').length;
-  const otherCount = runs.length - passCount - failCount;
+  // Count runs with warnings as having issues
+  const withWarnings = runs.filter(r => r.warnings.length > 0).length;
+  const cleanCount = runs.length - withWarnings;
 
   const operationCounts = new Map<string, number>();
   for (const run of runs) {
-    const count = operationCounts.get(run.operation_id) || 0;
-    operationCounts.set(run.operation_id, count + 1);
+    const opId = run.operation_id ?? 'untyped';
+    const count = operationCounts.get(opId) || 0;
+    operationCounts.set(opId, count + 1);
   }
 
   return (
@@ -166,11 +167,10 @@ function RunsSummary({ runs }: RunsSummaryProps): React.ReactElement {
         Summary
       </h4>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
         <SummaryCard label="Total Runs" value={runs.length} />
-        <SummaryCard label="Passed" value={passCount} color="#4caf50" />
-        <SummaryCard label="Failed" value={failCount} color="#f44336" />
-        <SummaryCard label="Other" value={otherCount} color="#9e9e9e" />
+        <SummaryCard label="Clean" value={cleanCount} color="#4caf50" />
+        <SummaryCard label="With Warnings" value={withWarnings} color="#ff9800" />
       </div>
 
       <div style={{ marginTop: '16px', color: '#666' }}>
