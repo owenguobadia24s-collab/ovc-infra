@@ -100,7 +100,7 @@ jobs:
                       if script_path.startswith("-"):
                           continue
                       # Skip variable references
-                      if "${{" in script_path or "${" in script_path:
+                      if "${" in script_path:
                           continue
                       # Check if file exists
                       if not Path(script_path).exists():
