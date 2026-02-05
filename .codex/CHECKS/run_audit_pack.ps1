@@ -22,6 +22,8 @@ $stamp = New-RunStamp
 $runDir = Join-Path $runsRoot $stamp
 New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 
+$success = $false
+
 Push-Location $repoRoot
 try {
   $graphPath = ""
@@ -64,7 +66,86 @@ try {
   } else {
     python .codex\CHECKS\coverage_audit.py --run-dir $runDir --graphs-root $graphRoot
   }
+
+  $success = $true
 }
 finally {
   Pop-Location
+  if ($success) {
+    try {
+      $createdUtc = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+      $pySrc = Join-Path $repoRoot "src"
+      $prevPythonPath = $env:PYTHONPATH
+      if ($env:PYTHONPATH) {
+        $env:PYTHONPATH = "$pySrc;$env:PYTHONPATH"
+      } else {
+        $env:PYTHONPATH = "$pySrc"
+      }
+      $env:OVC_RUN_DIR = $runDir
+      $env:OVC_CREATED_UTC = $createdUtc
+      $env:OVC_GRAPH_PATH = $graphPath
+      $env:OVC_GRAPH_ROOT = $graphRoot
+
+@'
+from pathlib import Path
+import os
+from ovc_ops.run_envelope_v0_1 import get_git_state, seal_dir, write_run_json
+
+run_dir = Path(os.environ["OVC_RUN_DIR"])
+created_utc = os.environ.get("OVC_CREATED_UTC")
+graph_path = os.environ.get("OVC_GRAPH_PATH") or ""
+graph_root = os.environ.get("OVC_GRAPH_ROOT") or ""
+git_commit, working_tree_state = get_git_state()
+
+inputs = {}
+if graph_path:
+    inputs["graph_path"] = graph_path
+if graph_root:
+    inputs["graph_root"] = graph_root
+
+outputs = [
+    "tree_snapshot.txt",
+    "rg_index.txt",
+    "repo_files.txt",
+    "legend_nodes.json",
+    "graph_nodes.json",
+    "coverage_report.md",
+    "run.json",
+    "manifest.json",
+    "MANIFEST.sha256",
+]
+
+payload = {
+    "run_id": run_dir.name,
+    "created_utc": created_utc,
+    "run_type": "op_run",
+    "option": "QA",
+    "operation_id": "OP-QA05",
+    "git_commit": git_commit,
+    "working_tree_state": working_tree_state,
+    "outputs": outputs,
+}
+if inputs:
+    payload["inputs"] = inputs
+
+write_run_json(run_dir, payload)
+seal_dir(run_dir, [
+    "tree_snapshot.txt",
+    "rg_index.txt",
+    "repo_files.txt",
+    "legend_nodes.json",
+    "graph_nodes.json",
+    "coverage_report.md",
+    "run.json",
+])
+'@ | python -
+      if ($null -ne $prevPythonPath) {
+        $env:PYTHONPATH = $prevPythonPath
+      } else {
+        Remove-Item Env:\PYTHONPATH -ErrorAction SilentlyContinue
+      }
+    } catch {
+      Write-Warning "run envelope write failed: $_"
+    }
+  }
 }

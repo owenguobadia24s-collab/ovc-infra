@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List
 
@@ -14,10 +15,22 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+REPO_ROOT = SCRIPT_DIR.parents[2]
+SRC_DIR = REPO_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
 from lib import (  # noqa: E402
     build_manifest_lines,
     collect_included_files,
     json_dumps_deterministic,
+)
+from ovc_ops.run_envelope_v0_1 import (  # noqa: E402
+    ensure_run_dir,
+    get_git_state,
+    make_run_id,
+    seal_dir,
+    write_run_json,
 )
 
 TOOL_VERSION = "path1_seal_v0_1"
@@ -146,9 +159,34 @@ def seal_one_run(repo_root: Path, run_id: str, dry_run: bool, strict: bool) -> D
 
 
 def main() -> int:
+    run_dir: Path | None = None
+    created_utc = None
+    git_commit = None
+    working_tree_state = None
+    inputs_payload: Dict | None = None
     try:
         args = build_arg_parser().parse_args()
         repo_root = Path(args.repo_root).resolve()
+        run_id = make_run_id("op_d06")
+        run_dir = ensure_run_dir(repo_root / "reports" / "runs", run_id)
+        created_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        git_commit, working_tree_state = get_git_state()
+
+        inputs_payload = {}
+        if args.all:
+            inputs_payload["mode"] = "all"
+            if args.max_runs is not None:
+                inputs_payload["max_runs"] = args.max_runs
+        else:
+            inputs_payload["mode"] = "single"
+            inputs_payload["run_id"] = args.run_id
+        if args.dry_run:
+            inputs_payload["dry_run"] = True
+        if args.strict:
+            inputs_payload["strict"] = True
+        if not inputs_payload:
+            inputs_payload = None
+
         runs_root = repo_root / "reports" / "path1" / "evidence" / "runs"
         if not runs_root.exists() or not runs_root.is_dir():
             print("ERROR: runs folder missing")
@@ -229,6 +267,29 @@ def main() -> int:
     except Exception as exc:
         print(f"ERROR: {exc}")
         return 3
+    finally:
+        if run_dir is not None:
+            try:
+                run_json_payload = {
+                    "run_id": run_dir.name,
+                    "created_utc": created_utc,
+                    "run_type": "op_run",
+                    "option": "D",
+                    "operation_id": "OP-D06",
+                    "git_commit": git_commit,
+                    "working_tree_state": working_tree_state,
+                    "outputs": [
+                        "run.json",
+                        "manifest.json",
+                        "MANIFEST.sha256",
+                    ],
+                }
+                if inputs_payload is not None:
+                    run_json_payload["inputs"] = inputs_payload
+                write_run_json(run_dir, run_json_payload)
+                seal_dir(run_dir, ["run.json"])
+            except Exception as exc:
+                print(f"WARNING: run envelope write failed: {exc}")
 
 
 if __name__ == "__main__":

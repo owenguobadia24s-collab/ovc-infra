@@ -13,6 +13,7 @@ import math
 import os
 import re
 import struct
+import sys
 import zlib
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -30,6 +31,17 @@ SOURCE_VIEW_NAMES = [
     "derived.v_ovc_c2_features_v0_1",
     "derived.v_ovc_c3_features_v0_1",
 ]
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_DIR = REPO_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from ovc_ops.run_envelope_v0_1 import (  # noqa: E402
+    get_git_state,
+    seal_dir,
+    write_run_json,
+)
 
 
 def validate_date(value: str, field_name: str) -> str:
@@ -435,6 +447,44 @@ def run_for_date(conn, repo_root: Path, symbol: str, date_ny: str, run_id: Optio
         pack_version,
         pack_hash,
         command_text,
+    )
+
+    git_commit, working_tree_state = get_git_state()
+    outputs = [
+        "RUN.md",
+        f"outputs/{OUTPUT_SUBDIR}/trajectory.csv",
+        f"outputs/{OUTPUT_SUBDIR}/trajectory.png",
+        f"outputs/{OUTPUT_SUBDIR}/quadrant_string.txt",
+        f"outputs/{OUTPUT_SUBDIR}/path_metrics.json",
+        "run.json",
+        "manifest.json",
+        "MANIFEST.sha256",
+    ]
+    run_json_payload = {
+        "run_id": run_id,
+        "created_utc": generated_at,
+        "run_type": "op_run",
+        "option": "D",
+        "operation_id": "OP-D07",
+        "git_commit": git_commit,
+        "working_tree_state": working_tree_state,
+        "inputs": {
+            "symbol": symbol,
+            "date_ny": date_ny,
+        },
+        "outputs": outputs,
+    }
+    write_run_json(run_dir, run_json_payload)
+    seal_dir(
+        run_dir,
+        [
+            "RUN.md",
+            f"outputs/{OUTPUT_SUBDIR}/trajectory.csv",
+            f"outputs/{OUTPUT_SUBDIR}/trajectory.png",
+            f"outputs/{OUTPUT_SUBDIR}/quadrant_string.txt",
+            f"outputs/{OUTPUT_SUBDIR}/path_metrics.json",
+            "run.json",
+        ],
     )
 
     print(f"Run complete: {run_id} ({symbol} {date_ny})")
