@@ -1,9 +1,27 @@
-* text=auto
+# Option A: normalize all text to LF in repo + working tree
+* text=auto eol=lf
 
-*.md   text eol=lf
-*.yml  text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
 *.yaml text eol=lf
-*.py   text eol=lf
-*.ini  text eol=lf
-*.sql  text eol=lf
-*.txt  text eol=lf
+*.py text eol=lf
+*.sql text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.jsonl text eol=lf
+*.csv text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.mts text eol=lf
+*.ps1 text eol=lf
+*.sh text eol=lf
+*.css text eol=lf
+*.drawio text eol=lf
+*.pine text eol=lf
+*.sha256 text eol=lf
+*.canvas text eol=lf
+*.ini text eol=lf
+
+# Binary (observed)
+*.png  binary
