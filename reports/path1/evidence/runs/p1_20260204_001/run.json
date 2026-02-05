@@ -1,0 +1,23 @@
+{
+  "created_utc": "2026-02-04T22:45:58Z",
+  "git_commit": "39696066e87f82b694bf4f20905f0f3ea3c9cce2",
+  "inputs": {
+    "date_ny": "2023-10-02",
+    "symbol": "GBPUSD"
+  },
+  "operation_id": "OP-D07",
+  "option": "D",
+  "outputs": [
+    "RUN.md",
+    "outputs/state_plane_v0_2/trajectory.csv",
+    "outputs/state_plane_v0_2/trajectory.png",
+    "outputs/state_plane_v0_2/quadrant_string.txt",
+    "outputs/state_plane_v0_2/path_metrics.json",
+    "run.json",
+    "manifest.json",
+    "MANIFEST.sha256"
+  ],
+  "run_id": "p1_20260204_001",
+  "run_type": "op_run",
+  "working_tree_state": "dirty"
+}
