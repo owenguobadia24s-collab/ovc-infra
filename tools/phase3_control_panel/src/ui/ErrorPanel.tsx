@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import { ParseError, ParseStatus, parseErrorToDisplayError, parseStatusToMessage } from '../lib/parse';
 
 // =============================================================================
 // Error Types
@@ -21,6 +22,36 @@ export interface DisplayError {
   readonly details?: string;
   readonly source?: string;
   readonly timestamp: string;
+}
+
+// =============================================================================
+// Parse Error Adapter
+// =============================================================================
+
+/**
+ * Adapter component that renders a ParseError using the ErrorPanel.
+ * Converts ParseError to DisplayError format.
+ */
+export function ParseErrorPanel({
+  parseError,
+  parseStatus,
+  source
+}: {
+  readonly parseError: ParseError;
+  readonly parseStatus: ParseStatus;
+  readonly source?: string;
+}): React.ReactElement {
+  const displayError: DisplayError = {
+    code: parseError.code,
+    message: parseStatusToMessage(parseStatus),
+    details: parseError.detail
+      ? `${parseError.message}\nPath: ${parseError.path}\nDetail: ${parseError.detail}`
+      : `${parseError.message}\nPath: ${parseError.path}`,
+    source: source || parseError.path,
+    timestamp: new Date().toISOString()
+  };
+
+  return <ErrorPanel error={displayError} />;
 }
 
 // =============================================================================
