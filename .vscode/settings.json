@@ -21,6 +21,14 @@
   "python.testing.autoTestDiscoverOnSaveEnabled": false,
   "python.analysis.autoImportCompletions": true,
   "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.extraPaths": [
+    "./scripts/path1",
+    "./scripts/path1_replay",
+    "./src",
+    "./src/validate",
+    "./trajectory_families"
+  ],
+  "python.defaultInterpreterPath": ".\\.venv\\Scripts\\python.exe",
 
   // --- Terminal consistency ---
   "terminal.integrated.defaultProfile.windows": "PowerShell",
