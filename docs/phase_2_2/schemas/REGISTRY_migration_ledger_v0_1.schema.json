@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Migration Ledger v0.1 — Schema",
+  "description": "Schema for schema/applied_migrations.json. Tracks SQL migration application status.",
+  "schema_version": "0.1",
+  "registry_id": "migration_ledger",
+  "type": "object",
+  "required": ["_version", "migrations"],
+  "properties": {
+    "_comment": {
+      "type": "string",
+      "description": "Human-readable description of this ledger."
+    },
+    "_version": {
+      "type": "string",
+      "description": "Ledger format version."
+    },
+    "_created": {
+      "type": "string",
+      "description": "Date the ledger was created (YYYY-MM-DD)."
+    },
+    "migrations": {
+      "type": "array",
+      "description": "Ordered list of SQL migration records.",
+      "items": {
+        "type": "object",
+        "required": ["file", "description", "applied_at", "applied_by", "status"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Relative path to the SQL migration file."
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the migration."
+          },
+          "applied_at": {
+            "type": ["string", "null"],
+            "description": "ISO8601 timestamp of application, or null if not applied/unknown.",
+            "time_semantics": "point-in-time, UTC or local, ISO8601"
+          },
+          "applied_by": {
+            "type": ["string", "null"],
+            "description": "Identity of the applier, or null if unknown."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["UNVERIFIED", "VERIFIED", "FAILED", "SKIPPED"],
+            "description": "Verification status. UNVERIFIED = applied but not proven. Note: only UNVERIFIED observed in evidence."
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "tri_state_fields": {
+    "applied_at": "string (known) | null (unknown)",
+    "applied_by": "string (known) | null (unknown)",
+    "status": "UNVERIFIED implies unknown verification, not false"
+  }
+}

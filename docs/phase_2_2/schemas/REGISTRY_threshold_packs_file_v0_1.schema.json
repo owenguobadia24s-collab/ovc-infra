@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Threshold Packs (File-Based) v0.1 — Catalog Entry Schema",
+  "description": "Schema for threshold pack configuration files under configs/threshold_packs/. NOTE: Three distinct pack shapes exist; this schema is a union type.",
+  "schema_version": "0.1",
+  "registry_id": "threshold_packs_file",
+  "oneOf": [
+    {
+      "title": "C3 Example Pack",
+      "description": "Shape observed in c3_example_pack_v1.json",
+      "type": "object",
+      "required": ["min_body_bp", "max_wick_ratio_bp", "lookback", "min_range_bp", "volatility_threshold_bp"],
+      "properties": {
+        "min_body_bp": { "type": "integer" },
+        "max_wick_ratio_bp": { "type": "integer" },
+        "lookback": { "type": "integer" },
+        "min_range_bp": { "type": "integer" },
+        "volatility_threshold_bp": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "title": "C3 Regime Trend Pack",
+      "description": "Shape observed in c3_regime_trend_v1.json",
+      "type": "object",
+      "required": ["lookback", "min_range_bp", "min_direction_ratio_bp", "min_hh_ll_count"],
+      "properties": {
+        "lookback": { "type": "integer" },
+        "min_range_bp": { "type": "integer" },
+        "min_direction_ratio_bp": { "type": "integer" },
+        "min_hh_ll_count": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "title": "State Plane Default Pack",
+      "description": "Shape observed in state_plane_v0_2_default_v1.json",
+      "type": "object",
+      "required": ["version", "scope", "thresholds", "weights", "y_map", "columns", "source_views"],
+      "properties": {
+        "version": { "type": "string" },
+        "scope": { "type": "string" },
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "E_hi": { "type": "number" },
+            "S_hi": { "type": "number" }
+          }
+        },
+        "weights": { "type": "object" },
+        "y_map": { "type": "object" },
+        "columns": { "type": "object" },
+        "source_views": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  ],
+  "tri_state_fields": {
+    "note": "Threshold packs are immutable config objects. No tri-state fields apply to pack contents. Tri-state applies at the pointer level (active_ref_known)."
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Derived Validation Report v0.1 — Schema",
+  "description": "Schema for artifacts/derived_validation/<uuid>/derived_validation_report.json. Derived from observed evidence.",
+  "schema_version": "0.1",
+  "registry_id": "derived_validation_reports",
+  "type": "object",
+  "required": [
+    "run_id",
+    "version",
+    "symbol",
+    "start_date",
+    "end_date",
+    "status",
+    "errors",
+    "warnings"
+  ],
+  "properties": {
+    "run_id": { "type": "string", "description": "UUID of the validation run." },
+    "version": { "type": "string", "description": "Report format version." },
+    "symbol": { "type": "string" },
+    "start_date": { "type": "string", "time_semantics": "date-only, YYYY-MM-DD" },
+    "end_date": { "type": "string", "time_semantics": "date-only, YYYY-MM-DD" },
+    "mode": { "type": "string" },
+    "compare_tv": { "type": "boolean" },
+    "b_block_count": { "type": "integer" },
+    "c1_row_count": { "type": "integer" },
+    "c2_row_count": { "type": "integer" },
+    "coverage_parity": { "type": "boolean" },
+    "c1_duplicates": { "type": "integer" },
+    "c2_duplicates": { "type": "integer" },
+    "c1_null_rates": {
+      "type": "object",
+      "description": "Per-column null rates for C1 features.",
+      "additionalProperties": { "type": "number" }
+    },
+    "c2_null_rates": {
+      "type": "object",
+      "description": "Per-column null rates for C2 features.",
+      "additionalProperties": { "type": "number" }
+    },
+    "c2_window_spec_valid": { "type": "boolean" },
+    "c2_window_spec_errors": { "type": "array", "items": { "type": "string" } },
+    "determinism_sample_size": { "type": "integer" },
+    "determinism_mismatches": { "type": "integer" },
+    "determinism_details": { "type": "array" },
+    "tv_comparison_enabled": { "type": "boolean" },
+    "tv_reference_available": { "type": "boolean" },
+    "tv_matched_blocks": { "type": "integer" },
+    "tv_diff_summary": { "type": "object" },
+    "tv_top_mismatches": { "type": "array" },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "status": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "PARTIAL"],
+      "description": "Overall validation status."
+    }
+  },
+  "additionalProperties": false,
+  "tri_state_fields": {
+    "note": "Status is ternary: PASS | FAIL | PARTIAL. Null rates are 0.0-1.0 (known), never null."
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "manifest_sha256": "746fe6b8c995768cfd428d0bdb694d98c1a176a728c014f93f0f3468e1266379",
+    "registry_id": "migration_ledger",
+    "relpath": "applied_migrations_snapshot.json",
+    "run_dir": "C:\\Users\\Owner\\projects\\ovc-infra\\.codex\\RUNS\\2026-02-05__015605__seal_migration_ledger",
+    "run_id": "2026-02-05__015605__seal_migration_ledger",
+    "run_root": ".codex/RUNS"
+  },
+  {
+    "manifest_sha256": "89621b58271a6f3e0365e793a12fcb10d5cc00c6606b6d1538544d976f5d25d1",
+    "registry_id": "expected_versions",
+    "relpath": "EXPECTED_VERSIONS_v0_1_snapshot.json",
+    "run_dir": "C:\\Users\\Owner\\projects\\ovc-infra\\.codex\\RUNS\\2026-02-05__015605__seal_expected_versions",
+    "run_id": "2026-02-05__015605__seal_expected_versions",
+    "run_root": ".codex/RUNS"
+  },
+  {
+    "manifest_sha256": "b57a7ef3c4101db1533cacfe28a19c6d0a2c3e3699328cb45a9b56821e66791a",
+    "registry_id": "threshold_packs_file",
+    "relpath": null,
+    "run_dir": "C:\\Users\\Owner\\projects\\ovc-infra\\.codex\\RUNS\\2026-02-05__015605__seal_threshold_packs",
+    "run_id": "2026-02-05__015605__seal_threshold_packs",
+    "run_root": ".codex/RUNS"
+  },
+  {
+    "manifest_sha256": "b3f7b41fe1d0f0f47a902d2e6e4803b3f78580061032e79922061d9b9353a807",
+    "registry_id": "fingerprint_index",
+    "relpath": "fingerprint_index_snapshot.csv",
+    "run_dir": "C:\\Users\\Owner\\projects\\ovc-infra\\.codex\\RUNS\\2026-02-05__015605__seal_fingerprint_index",
+    "run_id": "2026-02-05__015605__seal_fingerprint_index",
+    "run_root": ".codex/RUNS"
+  },
+  {
+    "manifest_sha256": "563db8ae7bf2be47443912145c4cb8fafaeccce4ad14ca877ee5382f403ade3d",
+    "registry_id": "derived_validation_reports",
+    "relpath": "derived_validation_report.json",
+    "run_dir": "C:\\Users\\Owner\\projects\\ovc-infra\\.codex\\RUNS\\2026-02-05__015605__seal_derived_validation",
+    "run_id": "2026-02-05__015605__seal_derived_validation",
+    "run_root": ".codex/RUNS"
+  }
+]

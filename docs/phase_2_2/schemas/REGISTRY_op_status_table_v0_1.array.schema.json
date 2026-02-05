@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Operation Status Table v0.1 — Array Wrapper Schema",
+  "description": "Top-level array wrapper for OPERATION_STATUS_TABLE_v0_1.json. Items conform to the v0.1 entry schema.",
+  "schema_version": "0.1",
+  "registry_id": "op_status_table",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "status_version",
+      "option",
+      "operation_id",
+      "operation_name",
+      "coverage_level",
+      "last_run_id",
+      "last_run_created_utc",
+      "run_evidence_state",
+      "manifest_state",
+      "run_json_state",
+      "staleness_days",
+      "op_drift",
+      "op_drift_reasons",
+      "warnings"
+    ],
+    "properties": {
+      "status_version": {
+        "type": "string",
+        "const": "0.1"
+      },
+      "option": {
+        "type": "string",
+        "enum": ["A", "B", "C", "D", "QA"]
+      },
+      "operation_id": {
+        "type": "string",
+        "pattern": "^OP-",
+        "description": "Operation identifier from Allowed Operations Catalog."
+      },
+      "operation_name": {
+        "type": "string",
+        "description": "Human-readable operation name."
+      },
+      "coverage_level": {
+        "type": "string",
+        "enum": ["C0", "C1", "C2", "C3", "C4", "C5"],
+        "description": "Enforcement coverage level from the Coverage Matrix."
+      },
+      "last_run_id": {
+        "type": ["string", "null"],
+        "description": "Most recent run_id for this operation, or null if no run observed."
+      },
+      "last_run_created_utc": {
+        "type": ["string", "null"],
+        "description": "Timestamp of the most recent run, or null.",
+        "time_semantics": "point-in-time, UTC, ISO8601"
+      },
+      "run_evidence_state": {
+        "type": "string",
+        "enum": ["OBSERVED", "UNOBSERVED", "LEGACY_ONLY"],
+        "description": "Whether run evidence exists. LEGACY_ONLY = runs exist but are legacy/untyped."
+      },
+      "manifest_state": {
+        "type": "string",
+        "enum": ["PRESENT", "MISSING", "UNKNOWN"],
+        "description": "Tri-state: manifest seal presence. UNKNOWN = could not determine."
+      },
+      "run_json_state": {
+        "type": "string",
+        "enum": ["PRESENT", "MISSING", "UNKNOWN"],
+        "description": "Tri-state: run.json envelope presence. UNKNOWN = could not determine."
+      },
+      "staleness_days": {
+        "type": ["integer", "null"],
+        "description": "Days since last run, or null if no run observed."
+      },
+      "op_drift": {
+        "type": ["boolean", "null"],
+        "description": "Tri-state drift indicator. true = drift detected, false = no drift, null = unknown (insufficient evidence)."
+      },
+      "op_drift_reasons": {
+        "type": "array",
+        "description": "Reasons for drift, if any.",
+        "items": { "type": "string" }
+      },
+      "warnings": {
+        "type": "array",
+        "description": "Any warnings about this operation's status.",
+        "items": { "type": "string" }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tri_state_fields": {
+    "manifest_state": "PRESENT | MISSING | UNKNOWN",
+    "run_json_state": "PRESENT | MISSING | UNKNOWN",
+    "op_drift": "true | false | null (unknown)",
+    "staleness_days": "integer | null (unknown)",
+    "last_run_id": "string | null (unknown/none)"
+  }
+}

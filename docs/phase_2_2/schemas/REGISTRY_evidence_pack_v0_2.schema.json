@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Pack Registry v0.2 — Manifest Entry Schema",
+  "description": "Schema for evidence pack manifest entries. Evidence packs are run_folder artifacts with multiple manifests.",
+  "schema_version": "0.2",
+  "registry_id": "evidence_pack_registry",
+  "type": "object",
+  "required": ["relpath", "bytes", "sha256"],
+  "properties": {
+    "relpath": {
+      "type": "string",
+      "description": "Relative path within the evidence pack folder."
+    },
+    "bytes": {
+      "type": "integer",
+      "description": "File size in bytes."
+    },
+    "sha256": {
+      "type": "string",
+      "description": "SHA256 hex digest of the file contents."
+    }
+  },
+  "additionalProperties": false,
+  "pack_metadata_schema": {
+    "description": "Schema for meta.json within an evidence pack (observed structure).",
+    "type": "object",
+    "properties": {
+      "pack_version": { "type": "string" },
+      "symbol": { "type": "string" },
+      "date_ny": { "type": "string" },
+      "created_utc": { "type": "string" }
+    }
+  },
+  "tri_state_fields": {
+    "note": "Evidence pack manifests are deterministic. No tri-state fields in manifest entries."
+  }
+}

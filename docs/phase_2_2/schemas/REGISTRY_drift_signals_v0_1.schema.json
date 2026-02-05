@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Drift Signals v0.1 — Root Schema",
+  "description": "Schema for DRIFT_SIGNALS_v0_1.json. System-wide drift detection artifact.",
+  "schema_version": "0.1",
+  "registry_id": "drift_signals",
+  "type": "object",
+  "required": [
+    "drift_version",
+    "expected_versions_source",
+    "generated_utc",
+    "git_commit",
+    "working_tree_state",
+    "canon_tree_hash",
+    "expected",
+    "system_drift",
+    "op_drift_policy",
+    "warnings"
+  ],
+  "properties": {
+    "drift_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "expected_versions_source": {
+      "type": "string",
+      "description": "Path to the EXPECTED_VERSIONS governance file used as input."
+    },
+    "generated_utc": {
+      "type": "string",
+      "description": "ISO8601 UTC timestamp of drift signal generation.",
+      "time_semantics": "point-in-time, UTC, ISO8601"
+    },
+    "git_commit": {
+      "type": ["string", "null"],
+      "description": "Git commit SHA at generation time."
+    },
+    "working_tree_state": {
+      "type": ["string", "null"],
+      "enum": ["clean", "dirty", null]
+    },
+    "canon_tree_hash": {
+      "type": "string",
+      "description": "SHA256 hash of canonical file tree (deterministic content hash)."
+    },
+    "expected": {
+      "type": "object",
+      "required": ["schema_version", "threshold_pack"],
+      "properties": {
+        "schema_version": {
+          "type": "object",
+          "required": ["expected", "computed", "observed", "drift", "source_path"],
+          "properties": {
+            "expected": { "type": ["string", "null"] },
+            "computed": { "type": "boolean" },
+            "observed": {
+              "type": "object",
+              "properties": {
+                "run_registry": { "type": ["string", "null"] },
+                "op_status_table": { "type": ["string", "null"] },
+                "run_envelope": { "type": ["string", "null"] }
+              }
+            },
+            "drift": { "type": ["boolean", "null"], "description": "Tri-state: true = drift, false = no drift, null = unknown." },
+            "source_path": { "type": "string" }
+          }
+        },
+        "threshold_pack": {
+          "type": "object",
+          "required": ["expected", "computed", "observed", "drift", "source_path"],
+          "properties": {
+            "expected": { "type": ["string", "null"] },
+            "computed": { "type": "boolean" },
+            "observed": { "type": ["string", "null"] },
+            "drift": { "type": ["boolean", "null"], "description": "Tri-state: true = drift, false = no drift, null = unknown." },
+            "source_path": { "type": "string" }
+          }
+        }
+      }
+    },
+    "system_drift": {
+      "type": "object",
+      "required": ["canon_dirty", "schema_drift", "threshold_drift", "threshold_drift_computed"],
+      "properties": {
+        "canon_dirty": { "type": "boolean", "description": "True if working tree is dirty." },
+        "schema_drift": { "type": ["boolean", "null"], "description": "Tri-state schema drift." },
+        "threshold_drift": { "type": ["boolean", "null"], "description": "Tri-state threshold drift." },
+        "threshold_drift_computed": { "type": "boolean", "description": "Whether threshold drift was computable." }
+      }
+    },
+    "op_drift_policy": {
+      "type": "object",
+      "required": ["op_drift_requires_evidence", "rules"],
+      "properties": {
+        "op_drift_requires_evidence": { "type": "boolean" },
+        "rules": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false,
+  "tri_state_fields": {
+    "expected.schema_version.drift": "true | false | null",
+    "expected.threshold_pack.drift": "true | false | null",
+    "system_drift.schema_drift": "true | false | null",
+    "system_drift.threshold_drift": "true | false | null"
+  }
+}
