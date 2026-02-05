@@ -84,6 +84,16 @@
 
 ---
 
+## Governance Law Coverage (New in v0.2)
+
+| Category | Coverage | Notes |
+|----------|----------|-------|
+| Operational Law (Phase 1.5) | 100% | Allowed Operations Catalog v0.1 frozen |
+| Registry Law (Phase 2.2) | 100% | Registry Seal Contract, Active Pointer Contract, Artifact Types frozen |
+| Maintenance Law (Phase 2.3) | 100% | Phase 2.3 Maintenance Contracts frozen; normative governance complete |
+
+---
+
 ## Known Gaps (Bounded, v0.2)
 
 | Gap | Impact | Bounded? | Closable? |
