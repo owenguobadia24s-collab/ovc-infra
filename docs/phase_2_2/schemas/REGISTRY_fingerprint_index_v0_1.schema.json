@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fingerprint Index v0.1 — Row Schema",
+  "description": "Schema for rows in reports/path1/trajectory_families/v0.1/fingerprints/index.csv. CSV format; this schema describes the columnar structure.",
+  "schema_version": "0.1",
+  "registry_id": "fingerprint_index",
+  "format": "csv",
+  "type": "object",
+  "required": [
+    "fingerprint_id",
+    "date_ny",
+    "symbol",
+    "trajectory_csv_path",
+    "fingerprint_json_path",
+    "path_length",
+    "efficiency",
+    "dominant_quadrant",
+    "content_hash"
+  ],
+  "properties": {
+    "fingerprint_id": {
+      "type": "string",
+      "description": "Unique fingerprint ID (fp_SYMBOL_YYYYMMDD_HASH)."
+    },
+    "date_ny": {
+      "type": "string",
+      "description": "New York date.",
+      "time_semantics": "date-only, YYYY-MM-DD"
+    },
+    "symbol": { "type": "string" },
+    "trajectory_csv_path": {
+      "type": "string",
+      "description": "Relative path to the source trajectory CSV."
+    },
+    "fingerprint_json_path": {
+      "type": "string",
+      "description": "Relative path to the fingerprint JSON."
+    },
+    "path_length": { "type": "number" },
+    "efficiency": { "type": "number" },
+    "dominant_quadrant": {
+      "type": "string",
+      "description": "Dominant quadrant (Q1|Q2|Q3|Q4)."
+    },
+    "family_id": {
+      "type": ["string", "null"],
+      "description": "Assigned family ID, or empty/null if not yet classified."
+    },
+    "content_hash": {
+      "type": "string",
+      "description": "SHA256 content hash of the fingerprint."
+    }
+  },
+  "tri_state_fields": {
+    "family_id": "string (assigned) | empty (not yet classified)"
+  }
+}

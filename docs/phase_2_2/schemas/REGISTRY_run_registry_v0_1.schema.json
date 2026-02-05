@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Run Registry v0.1 — Line Schema",
+  "description": "Schema for individual lines in RUN_REGISTRY_v0_1.jsonl. Derived from Phase 2.1 evidence at .codex/RUNS/*/RUN_REGISTRY_v0_1.schema.json.",
+  "schema_version": "0.1",
+  "registry_id": "run_registry",
+  "type": "object",
+  "required": [
+    "registry_version",
+    "run_id",
+    "run_root",
+    "run_key",
+    "run_path",
+    "has_run_json",
+    "has_manifest_sha256",
+    "has_manifest_json",
+    "files",
+    "warnings"
+  ],
+  "properties": {
+    "registry_version": {
+      "type": "string",
+      "const": "0.1",
+      "description": "Schema version of this registry line."
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Run folder name (e.g. 2026-02-04__213601__run_registry_build)."
+    },
+    "run_root": {
+      "type": "string",
+      "description": "Root directory containing the run (e.g. .codex/RUNS)."
+    },
+    "run_key": {
+      "type": "string",
+      "description": "Unique composite key: run_root::run_id."
+    },
+    "run_path": {
+      "type": "string",
+      "description": "Relative path to the run folder."
+    },
+    "created_utc": {
+      "type": ["string", "null"],
+      "description": "ISO8601 UTC timestamp from run.json, or null if absent.",
+      "time_semantics": "point-in-time, UTC, ISO8601"
+    },
+    "run_type": {
+      "type": ["string", "null"],
+      "description": "Run type from run.json (e.g. op_run, run_registry_build), or null."
+    },
+    "option": {
+      "type": ["string", "null"],
+      "description": "Option from run.json (A|B|C|D|QA), or null."
+    },
+    "operation_id": {
+      "type": ["string", "null"],
+      "description": "Operation ID from run.json (OP-*), or null."
+    },
+    "git_commit": {
+      "type": ["string", "null"],
+      "description": "Git commit SHA from run.json, or null."
+    },
+    "working_tree_state": {
+      "type": ["string", "null"],
+      "enum": ["clean", "dirty", null],
+      "description": "Git working tree state from run.json."
+    },
+    "has_run_json": {
+      "type": "boolean",
+      "description": "Whether run.json exists in the run folder."
+    },
+    "has_manifest_sha256": {
+      "type": "boolean",
+      "description": "Whether MANIFEST.sha256 exists in the run folder."
+    },
+    "has_manifest_json": {
+      "type": "boolean",
+      "description": "Whether manifest.json exists in the run folder."
+    },
+    "manifest_root_sha256": {
+      "type": ["string", "null"],
+      "description": "ROOT_SHA256 from MANIFEST.sha256, or null if absent/unparseable."
+    },
+    "files": {
+      "type": "array",
+      "description": "List of files in the run folder.",
+      "items": {
+        "type": "object",
+        "required": ["relpath", "bytes"],
+        "properties": {
+          "relpath": { "type": "string" },
+          "bytes": { "type": "integer" }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "description": "Any warnings emitted during indexing.",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false,
+  "tri_state_fields": {
+    "note": "Fields typed as [string, null] use null to represent 'unknown' (tri-state: value | null/unknown). Boolean fields are binary (true/false)."
+  }
+}

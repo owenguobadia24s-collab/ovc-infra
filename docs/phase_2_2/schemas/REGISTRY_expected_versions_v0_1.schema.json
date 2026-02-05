@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Expected Versions v0.1 — Schema",
+  "description": "Schema for docs/governance/EXPECTED_VERSIONS_v0_1.json. Central governance truth for expected versions.",
+  "schema_version": "0.1",
+  "registry_id": "expected_versions",
+  "type": "object",
+  "required": ["version", "expected"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Format version of this file."
+    },
+    "expected": {
+      "type": "object",
+      "required": ["schema_version", "threshold_pack_version"],
+      "properties": {
+        "schema_version": {
+          "type": ["string", "null"],
+          "description": "Expected schema version across all registries."
+        },
+        "threshold_pack_version": {
+          "type": ["string", "null"],
+          "description": "Expected threshold pack version, or null if not yet defined."
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "tri_state_fields": {
+    "threshold_pack_version": "string (known) | null (not yet defined — not the same as absent)"
+  }
+}

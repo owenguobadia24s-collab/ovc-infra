@@ -1,0 +1,219 @@
+{
+  "catalog_version": "0.1",
+  "generated_utc": "2026-02-05T00:00:00Z",
+  "description": "Phase 2.2 Registry Catalog. One entry per discovered registry in ovc-infra.",
+  "registries": [
+    {
+      "registry_id": "run_registry",
+      "schema_id": "REGISTRY_run_registry_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "jsonl_registry",
+      "description": "Append-only ledger of all run envelopes discovered across run roots. Each line is one indexed run.",
+      "authoritative_sources": [
+        { "path": ".codex/RUNS/<run_id>/RUN_REGISTRY_v0_1.jsonl", "authority_class": "primary" },
+        { "path": "tools/run_registry/build_run_registry_v0_1.py", "authority_class": "derived" }
+      ],
+      "build_operation_id": "unknown — not yet mapped to Allowed Operations Catalog",
+      "write_policy": "append_new_snapshot",
+      "state_model": "Each build produces a new immutable JSONL snapshot in a new run folder. No in-place mutation. 'Active' is determined only via explicit pointer.",
+      "seal_model": "manifest.json + MANIFEST.sha256 with ROOT_SHA256 per Run Envelope Standard v0.1",
+      "query_contract": "Read all lines from the JSONL pointed to by the active pointer. Each line is a JSON object conforming to RUN_REGISTRY_v0_1.schema.json."
+    },
+    {
+      "registry_id": "op_status_table",
+      "schema_id": "REGISTRY_op_status_table_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "json_snapshot",
+      "description": "Per-operation health, freshness, and drift status table. Derived from run_registry + governance docs.",
+      "authoritative_sources": [
+        { "path": ".codex/RUNS/<run_id>/OPERATION_STATUS_TABLE_v0_1.json", "authority_class": "primary" },
+        { "path": "tools/run_registry/build_op_status_table_v0_1.py", "authority_class": "derived" },
+        { "path": "OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md", "authority_class": "primary" },
+        { "path": "OVC_ENFORCEMENT_COVERAGE_MATRIX_v0.1.md", "authority_class": "primary" }
+      ],
+      "build_operation_id": "unknown — not yet mapped to Allowed Operations Catalog",
+      "write_policy": "append_new_snapshot",
+      "state_model": "Each build produces a new immutable JSON array in a new run folder. No in-place mutation.",
+      "seal_model": "manifest.json + MANIFEST.sha256 with ROOT_SHA256 per Run Envelope Standard v0.1",
+      "query_contract": "Load the JSON array from the active pointer. Each element conforms to OPERATION_STATUS_TABLE_v0_1.schema.json."
+    },
+    {
+      "registry_id": "drift_signals",
+      "schema_id": "REGISTRY_drift_signals_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "json_snapshot",
+      "description": "System-wide drift detection: schema version drift, threshold pack drift, git canon state, per-op drift policy.",
+      "authoritative_sources": [
+        { "path": ".codex/RUNS/<run_id>/DRIFT_SIGNALS_v0_1.json", "authority_class": "primary" },
+        { "path": "tools/run_registry/build_drift_signals_v0_1.py", "authority_class": "derived" },
+        { "path": "docs/governance/EXPECTED_VERSIONS_v0_1.json", "authority_class": "primary" }
+      ],
+      "build_operation_id": "unknown — not yet mapped to Allowed Operations Catalog",
+      "write_policy": "append_new_snapshot",
+      "state_model": "Each build produces a new immutable JSON object in a new run folder. No in-place mutation.",
+      "seal_model": "manifest.json + MANIFEST.sha256 with ROOT_SHA256 per Run Envelope Standard v0.1",
+      "query_contract": "Load the JSON object from the active pointer. Conforms to DRIFT_SIGNALS_v0_1.schema.json."
+    },
+    {
+      "registry_id": "migration_ledger",
+      "schema_id": "REGISTRY_migration_ledger_v0_1",
+      "schema_version": "1.0",
+      "artifact_type": "json_snapshot",
+      "description": "Tracks applied SQL migrations with verification status. Single mutable file (pre-Phase-2.2 artifact).",
+      "authoritative_sources": [
+        { "path": "schema/applied_migrations.json", "authority_class": "primary" }
+      ],
+      "build_operation_id": "unknown — manual ledger, no automated builder",
+      "write_policy": "append_only",
+      "state_model": "Single file with mutable entries. Status transitions: null -> UNVERIFIED -> VERIFIED. PRE-2.2 WARNING: This registry is not sealed and has no run envelope. It requires Phase 2.2 wrapping.",
+      "seal_model": "NONE — gap identified. No manifest or hash seal exists for this artifact.",
+      "query_contract": "Load JSON, read migrations[] array. Each entry has file, description, applied_at, applied_by, status."
+    },
+    {
+      "registry_id": "expected_versions",
+      "schema_id": "REGISTRY_expected_versions_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "json_snapshot",
+      "description": "Central truth for expected schema and threshold pack versions. Consumed by drift signals builder.",
+      "authoritative_sources": [
+        { "path": "docs/governance/EXPECTED_VERSIONS_v0_1.json", "authority_class": "primary" }
+      ],
+      "build_operation_id": "unknown — manual governance artifact",
+      "write_policy": "mutable_pointer_only",
+      "state_model": "Single governance file. Updated only via governance review. Not sealed in a run envelope.",
+      "seal_model": "NONE — gap identified. Governance artifact without run envelope seal.",
+      "query_contract": "Load JSON. Read expected.schema_version and expected.threshold_pack_version."
+    },
+    {
+      "registry_id": "threshold_packs_file",
+      "schema_id": "REGISTRY_threshold_packs_file_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "json_snapshot",
+      "description": "Filesystem-based threshold pack configurations. Three packs observed: c3_example_pack_v1, c3_regime_trend_v1, state_plane_v0_2_default_v1.",
+      "authoritative_sources": [
+        { "path": "configs/threshold_packs/c3_example_pack_v1.json", "authority_class": "primary" },
+        { "path": "configs/threshold_packs/c3_regime_trend_v1.json", "authority_class": "primary" },
+        { "path": "configs/threshold_packs/state_plane_v0_2_default_v1.json", "authority_class": "primary" }
+      ],
+      "build_operation_id": "OP-B07 (Threshold Registry Management)",
+      "write_policy": "append_only",
+      "state_model": "New packs are added as new files. Existing files are not mutated. Active selection is via threshold_registry_db or manual reference.",
+      "seal_model": "NONE — gap identified. Individual pack files are not sealed in run envelopes. SHA256 computed at build time by threshold_registry_v0_1.py but not persisted as a manifest.",
+      "query_contract": "Load individual JSON files by pack name. Schema varies by pack type (c3 vs state_plane)."
+    },
+    {
+      "registry_id": "threshold_registry_db",
+      "schema_id": "REGISTRY_threshold_registry_db_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "external_database",
+      "description": "PostgreSQL-backed threshold registry with immutable packs and active pointers. Managed by src/config/threshold_registry_v0_1.py.",
+      "authoritative_sources": [
+        { "path": "src/config/threshold_registry_v0_1.py", "authority_class": "primary" },
+        { "path": "sql/04_threshold_registry_v0_1.sql", "authority_class": "primary" },
+        { "path": "sql/06_state_plane_threshold_pack_v0_2.sql", "authority_class": "primary" }
+      ],
+      "build_operation_id": "OP-B07 (Threshold Registry Management)",
+      "write_policy": "append_only",
+      "state_model": "Immutable packs stored in DB. Active selection via upsert active pointer table. Scope hierarchy: GLOBAL < SYMBOL < SYMBOL_TF.",
+      "seal_model": "SHA256 of canonicalized config JSON stored per pack. Integrity validated by validate_integrity() method.",
+      "query_contract": "Call get_active_pack(pack_id, scope, symbol, timeframe) via Python API or direct SQL query."
+    },
+    {
+      "registry_id": "validation_range_results",
+      "schema_id": "REGISTRY_validation_range_results_v0_1",
+      "schema_version": "unknown",
+      "artifact_type": "jsonl_registry",
+      "description": "Append-only JSONL of per-day validation results for range runs. One line per day per range_run_id.",
+      "authoritative_sources": [
+        { "path": "reports/validation/validate_range_<uuid>_days.jsonl", "authority_class": "primary" }
+      ],
+      "build_operation_id": "OP-D04 (Post-Run Validation / Validation Harness)",
+      "write_policy": "append_only",
+      "state_model": "Each range run produces one JSONL file. Files are never mutated after creation.",
+      "seal_model": "NONE — gap identified. No manifest or hash seal exists for these files.",
+      "query_contract": "Read JSONL lines. Each line: range_run_id, day_run_id, symbol, date_ny, status, expected_blocks, ovc_blocks, outcome_blocks, mismatch_count, reasons[]."
+    },
+    {
+      "registry_id": "derived_validation_reports",
+      "schema_id": "REGISTRY_derived_validation_reports_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "json_snapshot",
+      "description": "Derived feature validation reports (C1/C2 coverage, determinism, null rates). Pointed to by LATEST.txt.",
+      "authoritative_sources": [
+        { "path": "artifacts/derived_validation/<uuid>/derived_validation_report.json", "authority_class": "primary" },
+        { "path": "artifacts/derived_validation/LATEST.txt", "authority_class": "derived" }
+      ],
+      "build_operation_id": "OP-B08 (Derived Validation)",
+      "write_policy": "append_new_snapshot",
+      "state_model": "Each validation run produces a new folder under artifacts/derived_validation/<uuid>/. LATEST.txt is a mutable pointer containing the UUID of the active report.",
+      "seal_model": "PARTIAL — LATEST.txt is a plain-text pointer. No manifest.json or MANIFEST.sha256 observed in the validation output folder.",
+      "query_contract": "Read UUID from LATEST.txt, load <uuid>/derived_validation_report.json. Fields: run_id, status, c1_null_rates, c2_null_rates, determinism_mismatches, etc."
+    },
+    {
+      "registry_id": "evidence_pack_registry",
+      "schema_id": "REGISTRY_evidence_pack_v0_2",
+      "schema_version": "0.2",
+      "artifact_type": "run_folder",
+      "description": "Evidence packs for Path1 runs. Contain manifest.json, build_manifest.json, data_manifest.json, meta.json, qc_report.json.",
+      "authoritative_sources": [
+        { "path": "reports/path1/evidence/runs/<run_id>/outputs/evidence_pack_v0_2/", "authority_class": "primary" },
+        { "path": "scripts/path1/build_evidence_pack_v0_2.py", "authority_class": "derived" }
+      ],
+      "build_operation_id": "OP-D01 (Path1 Evidence Pack Build v0.2)",
+      "write_policy": "append_new_snapshot",
+      "state_model": "Each run produces a new immutable evidence pack under a new run_id folder. pack_build.jsonl records the build log.",
+      "seal_model": "manifest.json + pack_sha256.txt. Run-level seal via MANIFEST.sha256.",
+      "query_contract": "Navigate to run folder, load manifest.json for file listing, meta.json for pack metadata, qc_report.json for quality checks."
+    },
+    {
+      "registry_id": "fingerprint_index",
+      "schema_id": "REGISTRY_fingerprint_index_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "index",
+      "description": "CSV index of trajectory family fingerprints. Maps fingerprint_id to trajectory paths, metrics, and family assignments.",
+      "authoritative_sources": [
+        { "path": "reports/path1/trajectory_families/v0.1/fingerprints/index.csv", "authority_class": "primary" }
+      ],
+      "build_operation_id": "OP-D08 (Trajectory Families / Fingerprints)",
+      "write_policy": "append_only",
+      "state_model": "CSV with rows appended as new fingerprints are computed. Header row defines schema.",
+      "seal_model": "NONE — gap identified. No manifest or hash seal for the CSV index.",
+      "query_contract": "Read CSV. Columns: fingerprint_id, date_ny, symbol, trajectory_csv_path, fingerprint_json_path, path_length, efficiency, dominant_quadrant, family_id, content_hash."
+    },
+    {
+      "registry_id": "system_health_report",
+      "schema_id": "REGISTRY_system_health_report_v0_1",
+      "schema_version": "0.1",
+      "artifact_type": "run_folder",
+      "description": "Rendered system health markdown + summary. Presentation-only derivation from op_status_table + drift_signals.",
+      "authoritative_sources": [
+        { "path": ".codex/RUNS/<run_id>/SYSTEM_HEALTH_v0_1.md", "authority_class": "derived" },
+        { "path": "tools/run_registry/render_system_health_v0_1.py", "authority_class": "derived" }
+      ],
+      "build_operation_id": "unknown — not yet mapped to Allowed Operations Catalog",
+      "write_policy": "append_new_snapshot",
+      "state_model": "Each render produces a new run folder with markdown output. Read-only derivation.",
+      "seal_model": "manifest.json + MANIFEST.sha256 with ROOT_SHA256 per Run Envelope Standard v0.1",
+      "query_contract": "Read the markdown file from the active pointer for human-readable system health."
+    }
+  ],
+  "shadow_registries_detected": [
+    {
+      "registry_id": "rg_index",
+      "description": "Repository file graph index (rg_index.txt) produced by .codex/CHECKS/rg_index.ps1. Found in multiple run folders. Not a data registry but acts as a shadow index of repo structure.",
+      "status": "shadow — not promoted to formal registry",
+      "reason": "Utility artifact, not a memory object. No schema, no active pointer contract needed."
+    },
+    {
+      "registry_id": "pack_build_log",
+      "description": "JSONL build log in evidence pack folders (pack_build.jsonl). Append-only record of pack construction steps.",
+      "status": "shadow — subordinate to evidence_pack_registry",
+      "reason": "Part of the evidence pack artifact set, not an independent registry."
+    }
+  ],
+  "gap_summary": {
+    "registries_without_seal": ["migration_ledger", "expected_versions", "threshold_packs_file", "validation_range_results", "fingerprint_index"],
+    "registries_without_build_operation": ["run_registry", "op_status_table", "drift_signals", "system_health_report", "migration_ledger", "expected_versions"],
+    "registries_with_implicit_active_state": ["derived_validation_reports", "threshold_packs_file", "expected_versions", "migration_ledger"]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Validation Range Results v0.1 — Line Schema",
+  "description": "Schema for lines in reports/validation/validate_range_*_days.jsonl. Derived from observed JSONL evidence.",
+  "schema_version": "0.1",
+  "registry_id": "validation_range_results",
+  "type": "object",
+  "required": [
+    "range_run_id",
+    "day_run_id",
+    "symbol",
+    "date_ny",
+    "status",
+    "expected_blocks",
+    "ovc_blocks",
+    "outcome_blocks",
+    "mismatch_count",
+    "reasons"
+  ],
+  "properties": {
+    "range_run_id": {
+      "type": "string",
+      "description": "UUID of the parent range validation run."
+    },
+    "day_run_id": {
+      "type": ["string", "null"],
+      "description": "UUID of the day-level sub-run, or null (e.g. weekends)."
+    },
+    "symbol": {
+      "type": "string",
+      "description": "Trading symbol (e.g. GBPUSD)."
+    },
+    "date_ny": {
+      "type": "string",
+      "description": "New York date (YYYY-MM-DD).",
+      "time_semantics": "date-only, New York business calendar"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "SKIP"],
+      "description": "Day-level validation outcome."
+    },
+    "expected_blocks": {
+      "type": "integer",
+      "description": "Expected number of blocks for this day."
+    },
+    "ovc_blocks": {
+      "type": ["integer", "null"],
+      "description": "Observed OVC block count, or null if not evaluated."
+    },
+    "outcome_blocks": {
+      "type": ["integer", "null"],
+      "description": "Observed outcome block count, or null if not evaluated."
+    },
+    "mismatch_count": {
+      "type": ["integer", "null"],
+      "description": "Number of mismatched blocks, or null if not evaluated."
+    },
+    "reasons": {
+      "type": "array",
+      "description": "Reason codes for the status determination.",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false,
+  "tri_state_fields": {
+    "ovc_blocks": "integer (known) | null (not evaluated)",
+    "outcome_blocks": "integer (known) | null (not evaluated)",
+    "mismatch_count": "integer (known) | null (not evaluated)",
+    "day_run_id": "string (known) | null (not applicable, e.g. weekend)"
+  }
+}

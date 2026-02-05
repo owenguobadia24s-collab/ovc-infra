@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "System Health Report v0.1 — Stub Schema",
+  "description": "Schema stub for SYSTEM_HEALTH_v0_1.md. This is a presentation-only (rendered Markdown) artifact. No structured JSON schema applies; this stub documents its existence and contract.",
+  "schema_version": "0.1",
+  "registry_id": "system_health_report",
+  "artifact_format": "markdown",
+  "inputs": [
+    "OPERATION_STATUS_TABLE_v0_1.json (via active pointer)",
+    "DRIFT_SIGNALS_v0_1.json (via active pointer)",
+    "RUN_REGISTRY_v0_1.jsonl (via active pointer)"
+  ],
+  "output": "SYSTEM_HEALTH_v0_1.md — human-readable one-glance health report",
+  "structured_schema": "not applicable — markdown rendering only",
+  "tri_state_fields": {
+    "note": "Not applicable. Presentation-only artifact."
+  }
+}
