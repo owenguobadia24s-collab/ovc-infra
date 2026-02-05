@@ -1,0 +1,32 @@
+[
+  {
+    "relpath": "RUN.md",
+    "bytes": 1534,
+    "sha256": "b64d255ba751f9b2ee29d97e9639ddcf62ec54513072f5066e0489ae3b0e2591"
+  },
+  {
+    "relpath": "outputs/state_plane_v0_2/path_metrics.json",
+    "bytes": 251,
+    "sha256": "8776571904ae04465b592f96fe0ea62685d78921752a93cb7a2c819069c581e5"
+  },
+  {
+    "relpath": "outputs/state_plane_v0_2/quadrant_string.txt",
+    "bytes": 37,
+    "sha256": "7493bf59d5b7558ae126657fe149a2a1bcf09e2cf3e301f56e043bf7d5cc0868"
+  },
+  {
+    "relpath": "outputs/state_plane_v0_2/trajectory.csv",
+    "bytes": 709,
+    "sha256": "391f4de287fdf59999e4921360e5d77458e780fe29743a654cdafdc242c4f09a"
+  },
+  {
+    "relpath": "outputs/state_plane_v0_2/trajectory.png",
+    "bytes": 5914,
+    "sha256": "d34de5814614e1bc0465d909e772e621fd62fae3f02d3bd3396c0e2bbf9ed4ba"
+  },
+  {
+    "relpath": "run.json",
+    "bytes": 620,
+    "sha256": "912adcaff95c0f946c3182b18f9e8a7e7d96a29f9674be5885d457c31cb9da5c"
+  }
+]
