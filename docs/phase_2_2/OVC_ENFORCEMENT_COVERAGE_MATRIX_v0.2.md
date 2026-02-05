@@ -60,4 +60,20 @@ All v0.1 rows are unchanged and inherited verbatim.
 
 ---
 
+## Enforcement Notes
+
+### Phase 2.3 — Maintenance Contracts
+
+| Property | Value |
+|----------|-------|
+| **Classification** | Normative / Non-Executable |
+| **Enforcement** | Documentation-only |
+| **Rationale** | Defines law governing change; introduces no runtime enforcement surfaces. |
+
+The four Maintenance Contracts (Upgrade, Deprecation, Recovery, Health) are normative governance artifacts. They define what shall, must, and may not occur during state transitions — but they do not introduce execution code, CI gates, validators, or runtime checks. Enforcement is by reference during manual or automated operations that invoke state changes.
+
+No new enforcement levels are added by Phase 2.3.
+
+---
+
 *End of Enforcement Coverage Matrix v0.2*
