@@ -1,0 +1,60 @@
+{
+  "schema_version": "0.1",
+  "report_id": "AIR-20260205T115037Z-4c7ccfa9",
+  "generated_utc": "2026-02-05T11:50:37Z",
+  "interpreter_version": "0.1",
+  "run_id": "2026-02-05__031005__registry_delta_log_build",
+  "run_type": "registry_delta_log_build",
+  "run_created_utc": "2026-02-05T03:10:05Z",
+  "seal_status": {
+    "is_sealed": true,
+    "seal_valid": true,
+    "root_sha256": "fd89395befa7759016f36c0a710fff5715c9b2182539f7a7a4dd51d6ffd28bab"
+  },
+  "interpretation_summary": {
+    "overall_status": "PASS",
+    "failure_count": 0,
+    "warning_count": 0,
+    "confidence": "HIGH"
+  },
+  "failures": [],
+  "non_claims": [],
+  "next_actions": [],
+  "evidence_index": [
+    {
+      "artifact_path": "MANIFEST.sha256",
+      "artifact_type": "manifest_sha256",
+      "read_status": "SUCCESS",
+      "sha256": "ffd240ad0c03f810668f2b82a477b3bcfe47823672b623cb1cd770e3b40146ba"
+    },
+    {
+      "artifact_path": "REGISTRY_DELTA_LOG_v0_1.jsonl",
+      "artifact_type": "data_artifact",
+      "read_status": "SUCCESS",
+      "sha256": "409248a31ad5d88c5f3e818d4b5ea5187d2115cb9d6a6ee472c7288bab08e36a"
+    },
+    {
+      "artifact_path": "audit_interpretation_v0.1.json",
+      "artifact_type": "data_artifact",
+      "read_status": "SUCCESS",
+      "sha256": "af7e754347ebdbaad06287f5a2a06dde4dac5ef882651ee7c520d406fa19385d"
+    },
+    {
+      "artifact_path": "manifest.json",
+      "artifact_type": "manifest_json",
+      "read_status": "SUCCESS",
+      "sha256": "41d91e9081aa556a8f65256a7645e67ba4810ec15e97e8fd1d329a0fdfa7698c"
+    },
+    {
+      "artifact_path": "run.json",
+      "artifact_type": "run_json",
+      "read_status": "SUCCESS",
+      "sha256": "14d93493bd48bfef16ed4f4377266d46c6b910d156440d788da34b46e6e16cec"
+    }
+  ],
+  "metadata": {
+    "contract_version": "AGENT_AUDIT_INTERPRETER_CONTRACT_v0.1",
+    "authority_statement": "NON-AUTHORITATIVE: This report is derived and does not constitute source truth.",
+    "notes": null
+  }
+}

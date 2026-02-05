@@ -1,0 +1,59 @@
+{
+  "_comment": "Artifact type mappings for Phase 4 Audit Interpreter v0.1",
+  "_contract": "AGENT_AUDIT_INTERPRETER_CONTRACT_v0.1",
+  "types": {
+    "run_json": {
+      "description": "Run envelope file",
+      "parser": "json",
+      "required_fields": ["run_id", "created_utc", "run_type"],
+      "validation": "run_envelope"
+    },
+    "manifest_json": {
+      "description": "Manifest seal file",
+      "parser": "json",
+      "required_fields": [],
+      "validation": "manifest_array"
+    },
+    "manifest_sha256": {
+      "description": "Manifest hash file",
+      "parser": "text_lines",
+      "required_fields": [],
+      "validation": "sha256_manifest"
+    },
+    "audit_output": {
+      "description": "Audit output file",
+      "parser": "auto",
+      "required_fields": [],
+      "validation": "none"
+    },
+    "data_artifact": {
+      "description": "Data artifact file",
+      "parser": "auto",
+      "required_fields": [],
+      "validation": "none"
+    },
+    "other": {
+      "description": "Other artifact file",
+      "parser": "none",
+      "required_fields": [],
+      "validation": "none"
+    }
+  },
+  "read_status_enum": ["SUCCESS", "NOT_FOUND", "PARSE_ERROR", "ACCESS_DENIED"],
+  "failure_class_enum": [
+    "SEAL_INVALID",
+    "RUN_ENVELOPE_MALFORMED",
+    "AUDIT_FAILED",
+    "ARTIFACT_MISSING",
+    "ARTIFACT_MALFORMED",
+    "SCHEMA_VIOLATION",
+    "EVIDENCE_INCOMPLETE",
+    "UNKNOWN"
+  ],
+  "severity_enum": ["CRITICAL", "ERROR", "WARNING", "INFO"],
+  "confidence_enum": ["HIGH", "MEDIUM", "LOW", "NONE"],
+  "non_claim_reason_enum": ["EVIDENCE_MISSING", "EVIDENCE_AMBIGUOUS", "PARSE_FAILURE", "OUT_OF_SCOPE"],
+  "action_type_enum": ["INVESTIGATE", "REMEDIATE", "DOCUMENT", "ESCALATE", "NONE"],
+  "priority_enum": ["P0", "P1", "P2", "P3"],
+  "overall_status_enum": ["PASS", "FAIL", "UNKNOWN"]
+}

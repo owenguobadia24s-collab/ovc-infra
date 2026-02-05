@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "AUDIT_INTERPRETATION_REPORT_v0.1.json",
+  "title": "Audit Interpretation Report v0.1",
+  "description": "Schema for Phase 4 Audit Interpreter output. Conforms to JSON Schema Draft-07.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "generated_utc",
+    "interpreter_version",
+    "run_id",
+    "run_type",
+    "run_created_utc",
+    "seal_status",
+    "interpretation_summary",
+    "failures",
+    "non_claims",
+    "next_actions",
+    "evidence_index",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1",
+      "description": "Schema version identifier"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^AIR-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$",
+      "description": "Unique report identifier: AIR-YYYYMMDDTHHMMSSZ-<8 hex chars>"
+    },
+    "generated_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 UTC timestamp of report generation"
+    },
+    "interpreter_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Version of the interpreter that generated this report"
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Identifier of the interpreted run folder"
+    },
+    "run_type": {
+      "type": "string",
+      "description": "Run type from run.json"
+    },
+    "run_created_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp of the run from run.json"
+    },
+    "seal_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["is_sealed", "seal_valid"],
+      "properties": {
+        "is_sealed": {
+          "type": "boolean",
+          "description": "Whether manifest.json and MANIFEST.sha256 are present"
+        },
+        "seal_valid": {
+          "type": ["boolean", "null"],
+          "description": "Whether seal hashes match. Null if not sealed."
+        },
+        "root_sha256": {
+          "type": ["string", "null"],
+          "description": "ROOT_SHA256 value if sealed and valid"
+        }
+      }
+    },
+    "interpretation_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overall_status", "failure_count", "warning_count", "confidence"],
+      "properties": {
+        "overall_status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "UNKNOWN"],
+          "description": "Overall interpretation result"
+        },
+        "failure_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of failure entries"
+        },
+        "warning_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of warning-severity entries"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["HIGH", "MEDIUM", "LOW", "NONE"],
+          "description": "Overall confidence in interpretation"
+        }
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["failure_id", "failure_class", "severity", "confidence", "description", "evidence_refs"],
+        "properties": {
+          "failure_id": {
+            "type": "string",
+            "description": "Unique identifier for this failure within the report"
+          },
+          "failure_class": {
+            "type": "string",
+            "enum": [
+              "SEAL_INVALID",
+              "RUN_ENVELOPE_MALFORMED",
+              "AUDIT_FAILED",
+              "ARTIFACT_MISSING",
+              "ARTIFACT_MALFORMED",
+              "SCHEMA_VIOLATION",
+              "EVIDENCE_INCOMPLETE",
+              "UNKNOWN"
+            ],
+            "description": "Closed enum of failure classifications"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["CRITICAL", "ERROR", "WARNING", "INFO"],
+            "description": "Severity level of the failure"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["HIGH", "MEDIUM", "LOW", "NONE"],
+            "description": "Confidence in this failure classification"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the failure"
+          },
+          "evidence_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/evidence_ref"
+            },
+            "description": "References to source artifacts supporting this failure"
+          }
+        }
+      },
+      "description": "Array of detected failures"
+    },
+    "non_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["non_claim_id", "reason", "description"],
+        "properties": {
+          "non_claim_id": {
+            "type": "string",
+            "description": "Unique identifier for this non-claim"
+          },
+          "reason": {
+            "type": "string",
+            "enum": ["EVIDENCE_MISSING", "EVIDENCE_AMBIGUOUS", "PARSE_FAILURE", "OUT_OF_SCOPE"],
+            "description": "Reason why claim was not made"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of what could not be claimed"
+          },
+          "attempted_artifact": {
+            "type": ["string", "null"],
+            "description": "Path to artifact that was attempted to be read, if applicable"
+          }
+        }
+      },
+      "description": "Array of claims that were withheld due to insufficient evidence"
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action_id", "action_type", "description", "priority"],
+        "properties": {
+          "action_id": {
+            "type": "string",
+            "description": "Unique identifier for this action"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": ["INVESTIGATE", "REMEDIATE", "DOCUMENT", "ESCALATE", "NONE"],
+            "description": "Type of recommended action"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the recommended action"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["P0", "P1", "P2", "P3"],
+            "description": "Priority level (P0 = highest)"
+          },
+          "related_failure_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Failure IDs this action addresses"
+          }
+        }
+      },
+      "description": "Array of recommended next actions"
+    },
+    "evidence_index": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_path", "artifact_type", "read_status"],
+        "properties": {
+          "artifact_path": {
+            "type": "string",
+            "description": "Relative path to artifact within run folder"
+          },
+          "artifact_type": {
+            "type": "string",
+            "enum": ["run_json", "manifest_json", "manifest_sha256", "audit_output", "data_artifact", "other"],
+            "description": "Type of artifact"
+          },
+          "read_status": {
+            "type": "string",
+            "enum": ["SUCCESS", "NOT_FOUND", "PARSE_ERROR", "ACCESS_DENIED"],
+            "description": "Status of reading this artifact"
+          },
+          "sha256": {
+            "type": ["string", "null"],
+            "description": "SHA256 hash of artifact if successfully read"
+          }
+        }
+      },
+      "description": "Index of all artifacts referenced during interpretation"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "authority_statement"],
+      "properties": {
+        "contract_version": {
+          "type": "string",
+          "const": "AGENT_AUDIT_INTERPRETER_CONTRACT_v0.1",
+          "description": "Contract governing this interpretation"
+        },
+        "authority_statement": {
+          "type": "string",
+          "const": "NON-AUTHORITATIVE: This report is derived and does not constitute source truth.",
+          "description": "Mandatory authority disclaimer"
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Optional interpreter notes"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_path"],
+      "properties": {
+        "artifact_path": {
+          "type": "string",
+          "description": "Relative path to source artifact"
+        },
+        "source_check_id": {
+          "type": ["string", "null"],
+          "description": "Check identifier if from an audit"
+        },
+        "rule_id": {
+          "type": ["string", "null"],
+          "description": "Rule identifier if from a schema/contract"
+        },
+        "line_number": {
+          "type": ["integer", "null"],
+          "description": "Line number in artifact if applicable"
+        },
+        "excerpt": {
+          "type": ["string", "null"],
+          "maxLength": 500,
+          "description": "Relevant excerpt from artifact (max 500 chars)"
+        }
+      }
+    }
+  }
+}
