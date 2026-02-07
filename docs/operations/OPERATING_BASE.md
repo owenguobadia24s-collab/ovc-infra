@@ -246,12 +246,22 @@ curl.exe -X POST http://localhost:8787/tv --data-binary "@tests/sample_exports/m
 ### Run Tests
 
 ```powershell
-# Python tests (from repo root)
+# Python tests (CANONICAL: unittest discovery)
+# Requires tests/__init__.py to make tests/ importable (Python 3.14+)
+python -m unittest discover -s tests -t . -p "test_*.py" -v
+
+# Alternative: with fault handler for debugging hangs
+python -X faulthandler -m unittest discover -s tests -t . -p "test_*.py" -v
+
+# Legacy: pytest (if installed)
 python -m pytest tests/
 
 # Worker tests (from infra/ovc-webhook)
 npm test
 ```
+
+**Why unittest discovery?**
+Python 3.14+ requires `tests/` to be importable for `unittest discover` to work. The empty `tests/__init__.py` serves as a package marker. The canonical command above is the authoritative way to run all Python tests in this repo (~105 tests, ~3s runtime).
 
 ### Lint/Format
 
@@ -520,3 +530,4 @@ python -m tools.validate_contract contracts/export_contract_v0.1.1_min.json test
 ---
 
 **End of Operating Base**
+
