@@ -1,0 +1,19 @@
+{
+  "kind": "DEV_CHANGE_LEDGER_SEAL",
+  "version": "0.1",
+  "generated_utc": "2026-02-07T17:32:07Z",
+  "range": {
+    "from": "39696066e87f82b694bf4f20905f0f3ea3c9cce2",
+    "to": "7021c84d722a6782d032dbeccfccc8aa81bd3353"
+  },
+  "artifacts": {
+    "docs/catalogs/DEV_CHANGE_LEDGER_v0.1.jsonl": {
+      "sha256": "83ea7bd97a235d6e4b8374d4107b2f57a37a7a7ac504c652a41ae99b2a09bd11",
+      "bytes": 26494
+    },
+    "tools/dev_catalog/git2dev_change_ledger.py": {
+      "sha256": "70885bf4ee686db63c9ac2ccfe1a704e71435b7e0ceca16e4047e4f7544a5713",
+      "bytes": 7000
+    }
+  }
+}
