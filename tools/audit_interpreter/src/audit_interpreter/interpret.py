@@ -26,6 +26,7 @@ from .pipeline.detect_seal import detect_seal, SealStatus
 from .pipeline.scan_artifacts import scan_artifacts, ScanResult
 from .pipeline.parse_artifacts import parse_artifacts, ParseResult
 from .pipeline.classify_failures import classify_failures, ClassificationResult
+from .pipeline.change_classifier import run_change_classifier, render_change_classification_section
 from .pipeline.build_report import build_report
 from .pipeline.validate_report import validate_report, ValidationResult
 
@@ -56,7 +57,8 @@ def interpret_run(
     schema_path: Optional[Path] = None,
     stdout: bool = False,
     strict: bool = False,
-    repo_root: Optional[Path] = None
+    repo_root: Optional[Path] = None,
+    base_ref: Optional[str] = None,
 ) -> InterpretResult:
     """
     Interpret a Phase 3 run folder and emit a canonical report.
@@ -68,6 +70,7 @@ def interpret_run(
         stdout: If True, print report to stdout instead of writing file
         strict: If True, treat unknown artifacts as OUT_OF_SCOPE non-claims
         repo_root: Repository root for resolving paths (default: cwd)
+        base_ref: Optional git base ref for change classification context
 
     Returns:
         InterpretResult with success status, report, and any errors
@@ -102,6 +105,22 @@ def interpret_run(
 
     context = load_result.context
     errors.extend(load_result.errors)
+
+    # =========================================================================
+    # CONTEXT STEP: Change Classification (descriptive only, non-fatal)
+    # =========================================================================
+    primary_output_dir = context.run_folder
+    fallback_output_dir = runs_root / ".audit_work" / context.run_id
+    classification_json, classification_meta = run_change_classifier(
+        base_ref=base_ref,
+        repo_root=(repo_root if repo_root is not None else Path.cwd()),
+        output_dir=primary_output_dir,
+        fallback_output_dir=fallback_output_dir,
+    )
+    classification_notes = render_change_classification_section(
+        classification_json,
+        classification_meta,
+    )
 
     # =========================================================================
     # PIPELINE STEP 2: Detect Seal
@@ -140,7 +159,7 @@ def interpret_run(
         seal_status,
         scan_result.artifacts,
         classification,
-        notes=None
+        notes=classification_notes
     )
 
     # =========================================================================

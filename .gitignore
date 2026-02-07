@@ -281,3 +281,4 @@ NUL
 #commit
 out.err
 out.json
+.audit_work/

@@ -71,6 +71,11 @@ def create_parser() -> argparse.ArgumentParser:
         help="Override repository root directory (default: current directory)"
     )
 
+    interpret_parser.add_argument(
+        "--base-ref",
+        help="Optional base ref for change classification context (default: classifier auto-resolve)"
+    )
+
     # version command
     parser.add_argument(
         "--version",
@@ -88,7 +93,8 @@ def cmd_interpret(args: argparse.Namespace) -> int:
         runs_root=args.runs_root,
         stdout=args.stdout,
         strict=args.strict,
-        repo_root=args.repo_root
+        repo_root=args.repo_root,
+        base_ref=args.base_ref
     )
 
     if result.success:
@@ -104,6 +110,10 @@ def cmd_interpret(args: argparse.Namespace) -> int:
             print(f"  Failure Count:  {summary.get('failure_count', 0)}", file=summary_out)
             print(f"  Warning Count:  {summary.get('warning_count', 0)}", file=summary_out)
             print(f"  Confidence:     {summary.get('confidence', 'NONE')}", file=summary_out)
+
+            notes = result.report.get("metadata", {}).get("notes")
+            if isinstance(notes, str) and notes.strip():
+                print(f"\n{notes}", file=summary_out)
 
         return 0
     else:
