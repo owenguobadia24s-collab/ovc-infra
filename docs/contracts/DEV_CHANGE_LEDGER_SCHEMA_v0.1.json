@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ovc://contracts/dev_change_ledger_schema/v0.1",
+  "title": "DEV Change Ledger Line v0.1",
+  "description": "Schema for one JSONL line record emitted by git2dev_change_ledger.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "commit",
+    "author",
+    "committer",
+    "subject",
+    "parents",
+    "stats",
+    "paths",
+    "phase_hint",
+    "intent_hint",
+    "directories_touched",
+    "generator"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "DEV_CHANGE_LEDGER_LINE_v0.1"
+    },
+    "commit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hash",
+        "timestamp_utc"
+      ],
+      "properties": {
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        "timestamp_utc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        }
+      }
+    },
+    "author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "email"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "committer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "email"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "subject": {
+      "type": "string"
+    },
+    "parents": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{7,40}$"
+      }
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "files",
+        "insertions",
+        "deletions"
+      ],
+      "properties": {
+        "files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "insertions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deletions": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "added",
+        "modified",
+        "deleted",
+        "renamed"
+      ],
+      "properties": {
+        "added": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "modified": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deleted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "renamed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "to"
+            ],
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "phase_hint": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "Phase 0",
+            "Phase 1",
+            "Phase 1.5",
+            "Phase 2",
+            "Phase 2.1",
+            "Phase 2.2",
+            "Phase 2.3",
+            "Phase 3",
+            "Phase 3.1",
+            "Phase 4",
+            "Phase 5",
+            "Phase 6"
+          ]
+        }
+      ]
+    },
+    "intent_hint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "directories_touched": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "version"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "const": "git2dev_change_ledger.py"
+        },
+        "version": {
+          "type": "string",
+          "const": "0.1"
+        }
+      }
+    }
+  }
+}

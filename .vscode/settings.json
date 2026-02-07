@@ -34,6 +34,8 @@
   "terminal.integrated.defaultProfile.windows": "PowerShell",
   "terminal.integrated.cwd": "C:\\Users\\Owner\\projects\\ovc-infra",
   "python.testing.pytestArgs": [
-    "."
-  ]
+    "reports"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

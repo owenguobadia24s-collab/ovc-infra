@@ -1,0 +1,55 @@
+name: "CI: Change Classifier"
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-change-classifier-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CHANGE_CLASSIFIER_BASE: origin/main
+      CHANGE_CLASSIFIER_ALLOW_UNKNOWN: "false"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run change classifier
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+
+          allow_flag=""
+          if [[ "${CHANGE_CLASSIFIER_ALLOW_UNKNOWN}" == "true" ]]; then
+            allow_flag="--allow-unknown"
+          fi
+
+          python scripts/governance/classify_change.py \
+            --base "${CHANGE_CLASSIFIER_BASE}" \
+            ${allow_flag} \
+            --json \
+            --out artifacts/change_classifier.json | tee artifacts/change_classifier.txt
+
+      - name: Upload classifier artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: change-classifier
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
