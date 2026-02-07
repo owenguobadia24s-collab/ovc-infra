@@ -1,0 +1,9 @@
+test_classifier_cannot_be_invoked_is_non_fatal_and_warned (tests.test_audit_interpreter_change_classification.TestAuditInterpreterChangeClassification.test_classifier_cannot_be_invoked_is_non_fatal_and_warned) ... ok
+test_classifier_exit_2_is_non_fatal_and_warned (tests.test_audit_interpreter_change_classification.TestAuditInterpreterChangeClassification.test_classifier_exit_2_is_non_fatal_and_warned) ... ok
+test_report_includes_change_classification_and_writes_artifact (tests.test_audit_interpreter_change_classification.TestAuditInterpreterChangeClassification.test_report_includes_change_classification_and_writes_artifact) ... ok
+test_sealed_run_folder_does_not_crash_interpreter (tests.test_audit_interpreter_change_classification.TestAuditInterpreterChangeClassification.test_sealed_run_folder_does_not_crash_interpreter) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.136s
+
+OK
