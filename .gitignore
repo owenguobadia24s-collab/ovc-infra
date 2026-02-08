@@ -273,6 +273,8 @@ artifacts/path1_summary.json
 
 # Codex run artifacts (never commit)
 .codex/RUNS/
+.codex/_pytest_*.txt
+.codex/_unittest_*.txt
 
 # nul
 nul
@@ -281,3 +283,11 @@ NUL
 #commit
 out.err
 out.json
+
+# local test artifacts
+testdir/
+testdir2/
+.pytest-tmp-overlay/
+
+# local dev helper
+tools/dev/codex_tests.ps1
