@@ -53,15 +53,8 @@ def normalize_seal_path(path: Path, root: Path) -> str:
 
 def resolve_repo_path(path: Path, repo_root: Path) -> Path:
     if path.is_absolute():
-        return path
-    resolved_root = repo_root.resolve()
-    repo_candidate = (resolved_root / path).resolve()
-    try:
-        repo_candidate.relative_to(resolved_root)
-        return repo_candidate
-    except ValueError:
-        # Allow caller paths like ../docs/... from subdirectories while keeping repo-root defaults.
-        return (Path.cwd() / path).resolve()
+        return path.resolve()
+    return (repo_root.resolve() / path).resolve()
 
 
 def write_text(path: Path, content: str) -> None:
