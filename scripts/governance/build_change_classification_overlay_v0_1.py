@@ -51,6 +51,19 @@ def normalize_seal_path(path: Path, root: Path) -> str:
         return resolved_path.as_posix()
 
 
+def resolve_repo_path(path: Path, repo_root: Path) -> Path:
+    if path.is_absolute():
+        return path
+    resolved_root = repo_root.resolve()
+    repo_candidate = (resolved_root / path).resolve()
+    try:
+        repo_candidate.relative_to(resolved_root)
+        return repo_candidate
+    except ValueError:
+        # Allow caller paths like ../docs/... from subdirectories while keeping repo-root defaults.
+        return (Path.cwd() / path).resolve()
+
+
 def write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as handle:
@@ -215,13 +228,21 @@ def main(argv: list[str]) -> int:
     try:
         args = parse_args(argv)
 
-        out_path = Path(args.out)
-        ledger_path = Path(args.ledger)
-        classifier_path = Path(args.classifier)
-        seal_json_path = Path(args.seal_json) if args.seal_json else out_path.with_suffix(".seal.json")
-        seal_sha256_path = Path(args.seal_sha256) if args.seal_sha256 else out_path.with_suffix(".seal.sha256")
-        generator_path = Path(__file__)
         repo_root = get_repo_root()
+        out_path = resolve_repo_path(Path(args.out), repo_root)
+        ledger_path = resolve_repo_path(Path(args.ledger), repo_root)
+        classifier_path = resolve_repo_path(Path(args.classifier), repo_root)
+        seal_json_path = (
+            resolve_repo_path(Path(args.seal_json), repo_root)
+            if args.seal_json
+            else out_path.with_suffix(".seal.json")
+        )
+        seal_sha256_path = (
+            resolve_repo_path(Path(args.seal_sha256), repo_root)
+            if args.seal_sha256
+            else out_path.with_suffix(".seal.sha256")
+        )
+        generator_path = Path(__file__)
 
         commits = read_ledger_commits(ledger_path)
         overlay_records = build_overlay_records(classifier_path=classifier_path, commits=commits)
