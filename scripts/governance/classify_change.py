@@ -189,7 +189,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Classify changed paths by governance change taxonomy.")
     parser.add_argument("--staged", action="store_true", help="Use git diff against index (--cached).")
     parser.add_argument("--base", help="Base ref for diff mode: git diff --name-only <ref>...HEAD.")
-    parser.add_argument("--range", dest="range_spec", help="Range for diff mode: git diff --name-only <A> <B>.")
+    parser.add_argument("--range", dest="range_spec", help="--range A..B (runs git diff --name-only A B)")
     parser.add_argument("--allow-unknown", action="store_true", help="Allow UNKNOWN class without failing.")
     parser.add_argument(
         "--fail-on",
