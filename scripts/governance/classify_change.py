@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -148,11 +147,35 @@ def resolve_default_base_ref() -> str:
     raise RuntimeError("could not resolve base ref from upstream, origin/main, or main")
 
 
-def collect_changed_paths(staged: bool, base_ref: str | None) -> tuple[list[str], str, str | None]:
+def parse_range_spec(range_spec: str) -> tuple[str, str]:
+    if "..." in range_spec:
+        raise ValueError("--range must use two-dot syntax A..B; triple-dot is not allowed")
+    if range_spec.count("..") != 1:
+        raise ValueError("--range must be in A..B form")
+    start, end = range_spec.split("..", 1)
+    start = start.strip()
+    end = end.strip()
+    if not start or not end:
+        raise ValueError("--range must be in A..B form")
+    if start.endswith(".") or end.startswith("."):
+        raise ValueError("--range must be in A..B form")
+    return start, end
+
+
+def collect_changed_paths(
+    staged: bool,
+    base_ref: str | None,
+    range_spec: str | None,
+) -> tuple[list[str], str, str | None]:
     if staged:
         output = run_git(["diff", "--name-only", "--cached"])
         mode = "staged"
         resolved_base = None
+    elif range_spec:
+        range_start, range_end = parse_range_spec(range_spec)
+        output = run_git(["diff", "--name-only", range_start, range_end])
+        mode = "range"
+        resolved_base = range_start
     else:
         resolved_base = base_ref or resolve_default_base_ref()
         output = run_git(["diff", "--name-only", f"{resolved_base}...HEAD"])
@@ -166,6 +189,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Classify changed paths by governance change taxonomy.")
     parser.add_argument("--staged", action="store_true", help="Use git diff against index (--cached).")
     parser.add_argument("--base", help="Base ref for diff mode: git diff --name-only <ref>...HEAD.")
+    parser.add_argument("--range", dest="range_spec", help="Range for diff mode: git diff --name-only <A> <B>.")
     parser.add_argument("--allow-unknown", action="store_true", help="Allow UNKNOWN class without failing.")
     parser.add_argument(
         "--fail-on",
@@ -181,6 +205,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
     if args.staged and args.base:
         raise ValueError("--staged and --base are mutually exclusive")
+    if args.staged and args.range_spec:
+        raise ValueError("--staged and --range are mutually exclusive")
+    if args.base and args.range_spec:
+        raise ValueError("--base and --range are mutually exclusive")
     if args.out and not args.json:
         raise ValueError("--out requires --json")
 
@@ -222,7 +250,11 @@ def emit_json(payload: dict, out_path: str | None) -> None:
 def main(argv: list[str]) -> int:
     try:
         args = parse_args(argv)
-        paths, mode, base_ref = collect_changed_paths(staged=args.staged, base_ref=args.base)
+        paths, mode, base_ref = collect_changed_paths(
+            staged=args.staged,
+            base_ref=args.base,
+            range_spec=args.range_spec,
+        )
         result = classify_paths(paths)
 
         payload = {
