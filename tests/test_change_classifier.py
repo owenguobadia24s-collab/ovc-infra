@@ -1,6 +1,7 @@
 import importlib.util
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 def load_classifier_module():
@@ -69,6 +70,40 @@ class TestChangeClassifier(unittest.TestCase):
     def test_exit_code_success(self):
         code = self.mod.determine_exit_code(classes=["A"], allow_unknown=False, fail_on=["B"])
         self.assertEqual(code, 0)
+
+    def test_parse_args_range_mode(self):
+        args = self.mod.parse_args(["--range", "abc123..def456"])
+        self.assertEqual(args.range_spec, "abc123..def456")
+        self.assertIsNone(args.base)
+        self.assertFalse(args.staged)
+
+    def test_parse_args_range_mutually_exclusive_with_staged(self):
+        with self.assertRaises(ValueError):
+            self.mod.parse_args(["--staged", "--range", "abc..def"])
+
+    def test_parse_args_range_mutually_exclusive_with_base(self):
+        with self.assertRaises(ValueError):
+            self.mod.parse_args(["--base", "main", "--range", "abc..def"])
+
+    def test_collect_changed_paths_range_mode(self):
+        with patch.object(self.mod, "run_git", return_value="a.txt\nb.txt\n") as run_git_mock:
+            paths, mode, base_ref = self.mod.collect_changed_paths(
+                staged=False,
+                base_ref=None,
+                range_spec="abc123..def456",
+            )
+        run_git_mock.assert_called_once_with(["diff", "--name-only", "abc123", "def456"])
+        self.assertEqual(paths, ["a.txt", "b.txt"])
+        self.assertEqual(mode, "range")
+        self.assertEqual(base_ref, "abc123")
+
+    def test_collect_changed_paths_range_mode_invalid_spec(self):
+        with self.assertRaises(ValueError):
+            self.mod.collect_changed_paths(staged=False, base_ref=None, range_spec="abc123")
+
+    def test_collect_changed_paths_range_mode_rejects_triple_dot(self):
+        with self.assertRaises(ValueError):
+            self.mod.collect_changed_paths(staged=False, base_ref=None, range_spec="abc...def")
 
 
 if __name__ == "__main__":
