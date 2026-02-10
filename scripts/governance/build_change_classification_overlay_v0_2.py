@@ -7,17 +7,20 @@ Produces overlay JSONL + seal files with version "0.2".
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
 # Import all shared functions from the v0.1 builder
 from build_change_classification_overlay_v0_1 import (
-    build_overlay_records,
+    collect_commit_files,
     get_repo_root,
     normalize_seal_path,
     read_ledger_commits,
     resolve_repo_path,
+    run_git,
     sha256_bytes,
     write_overlay_jsonl,
     write_text,
@@ -72,6 +75,68 @@ def write_seal_files(seal_payload: dict, seal_json_path: Path, seal_sha256_path:
     write_text(seal_sha256_path, f"{seal_hash}  {seal_json_path.name}\n")
 
 
+def commit_has_parent(commit_hash: str) -> bool:
+    proc = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", f"{commit_hash}^"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return proc.returncode == 0
+
+
+def collect_root_commit_files(commit_hash: str) -> list[str]:
+    output = run_git(["show", "--no-color", "--pretty=format:", "--name-only", commit_hash])
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def load_classifier_module(classifier_path: Path):
+    spec = importlib.util.spec_from_file_location("overlay_v02_classifier_module", str(classifier_path))
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"failed to load classifier module from {classifier_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)  # type: ignore[attr-defined]
+    classify_paths = getattr(module, "classify_paths", None)
+    if classify_paths is None:
+        raise RuntimeError("classifier module missing classify_paths function")
+    return module
+
+
+def classify_files(module, files: list[str], commit_hash: str) -> tuple[list[str], bool, bool]:
+    payload = module.classify_paths(files)
+    classes = payload.get("classes")
+    if not isinstance(classes, list) or not all(isinstance(c, str) and c for c in classes):
+        raise RuntimeError(f"classifier returned invalid classes for commit {commit_hash}")
+    if not classes:
+        classes = ["UNKNOWN"]
+    unknown = classes == ["UNKNOWN"]
+    ambiguous = len(classes) > 1
+    return classes, unknown, ambiguous
+
+
+def build_overlay_records_v0_2(classifier_path: Path, commits: list[str]) -> list[dict]:
+    records: list[dict] = []
+    classifier_module = load_classifier_module(classifier_path)
+    for commit_hash in commits:
+        if commit_has_parent(commit_hash):
+            file_list = collect_commit_files(commit_hash)
+        else:
+            file_list = collect_root_commit_files(commit_hash)
+        classes, unknown, ambiguous = classify_files(classifier_module, file_list, commit_hash)
+        records.append(
+            {
+                "commit": commit_hash,
+                "classes": classes,
+                "unknown": unknown,
+                "ambiguous": ambiguous,
+                "files": len(file_list),
+                "base": f"{commit_hash}^",
+            }
+        )
+    return records
+
+
 def main(argv: list[str]) -> int:
     try:
         args = parse_args(argv)
@@ -93,7 +158,7 @@ def main(argv: list[str]) -> int:
         generator_path = Path(__file__)
 
         commits = read_ledger_commits(ledger_path)
-        overlay_records = build_overlay_records(classifier_path=classifier_path, commits=commits)
+        overlay_records = build_overlay_records_v0_2(classifier_path=classifier_path, commits=commits)
         write_overlay_jsonl(overlay_records, out_path)
 
         seal_payload = build_seal_payload(

@@ -291,3 +291,4 @@ testdir2/
 
 # local dev helper
 tools/dev/codex_tests.ps1
+.codex/_scratch/

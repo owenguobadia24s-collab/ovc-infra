@@ -1,0 +1,19 @@
+{
+  "artifacts": {
+    ".codex/_scratch/DEV_CHANGE_LEDGER_BACKFILL.jsonl": {
+      "bytes": 256821,
+      "sha256": "3c455e93953c69f5f2b2cd11c438332a8fe66715e1f1227d287b21c716ea55fd"
+    },
+    "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl": {
+      "bytes": 256821,
+      "sha256": "3c455e93953c69f5f2b2cd11c438332a8fe66715e1f1227d287b21c716ea55fd"
+    }
+  },
+  "generated_from_max_commit_timestamp_utc": "2026-02-10T15:43:04Z",
+  "kind": "DEV_CHANGE_LEDGER_SEAL",
+  "range": {
+    "from": "e144cf064769f1a5e332090d02a272f6cadc0e6c",
+    "to": "c3cf19d2bd8f193ae45c2c49a30171e58e73375e"
+  },
+  "version": "0.2"
+}
