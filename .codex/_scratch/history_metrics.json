@@ -1,0 +1,6336 @@
+{
+  "repo": {
+    "root": "e144cf064769f1a5e332090d02a272f6cadc0e6c",
+    "head": "cfd91a7d80267d717ab519102b1ce7956361503c",
+    "total_commits": 264
+  },
+  "aggregates": {
+    "directory_counts": {
+      "docs/": 102,
+      "sql/": 68,
+      "reports/": 61,
+      "scripts/": 53,
+      ".github/": 46,
+      "/": 41,
+      "src/": 29,
+      "tests/": 27,
+      "tools/": 23,
+      "infra/": 23,
+      "Tetsu/": 16,
+      "contracts/": 15,
+      ".codex/": 11,
+      "pine/": 9,
+      "research/": 9,
+      ".vscode/": 6,
+      "artifacts/": 5,
+      "_quarantine/": 4,
+      "specs/": 3,
+      "configs/": 3,
+      "_archive/": 3,
+      "\"/": 2,
+      "\"tools/": 2,
+      "ovc-webhook/": 2,
+      "trajectory_families/": 2,
+      "CLAIMS/": 2,
+      "releases/": 1,
+      "schema/": 1,
+      "Work Timeline/": 1
+    },
+    "tag_counts": {
+      "evidence_runs": 90,
+      "ci_workflows": 48,
+      "scripts_general": 46,
+      "validation": 42,
+      "source_code": 29,
+      "tests": 27,
+      "infra": 23,
+      "governance_contracts": 20,
+      "tools_general": 16,
+      "repo_maze": 16,
+      "contracts": 15,
+      "codex_runtime": 11,
+      "pine": 9,
+      "research": 9,
+      "operations": 7,
+      "governance_tooling": 7,
+      "control_panel": 6,
+      "artifacts": 5,
+      "catalogs": 5,
+      "specs": 3,
+      "trajectory": 2,
+      "claims": 2,
+      "repo_map": 2,
+      "releases": 1,
+      "schema": 1,
+      "audit_interpreter": 1
+    },
+    "monthly_counts": {
+      "2026-01": 212,
+      "2026-02": 52
+    },
+    "author_counts": {
+      "Owen Guobadia": 201,
+      "owenguobadia24s-collab": 37,
+      "github-actions[bot]": 14,
+      "ovc-ledger-bot": 12
+    }
+  },
+  "commits": [
+    {
+      "hash": "e144cf064769f1a5e332090d02a272f6cadc0e6c",
+      "date": "2026-01-14T01:00:01Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Initial commit",
+      "touched_dirs": [],
+      "touched_file_count": 0,
+      "tags": []
+    },
+    {
+      "hash": "a78f7c9d92ba466f69218e65edc8b19e43bc852b",
+      "date": "2026-01-14T01:02:43Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Update .gitignore for OVC and data/logs",
+      "touched_dirs": [
+        "/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "dc6e7f5913a5c4c3ed81e1f7cbf3a383c51188fc",
+      "date": "2026-01-14T01:20:35Z",
+      "author": "Owen Guobadia",
+      "subject": "Add OVC backfill v0.1 (OANDA checkpointed) + repo structure",
+      "touched_dirs": [
+        "docs/",
+        "sql/",
+        "src/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "evidence_runs",
+        "source_code"
+      ]
+    },
+    {
+      "hash": "d6c8b7c90a87bf79114a4831eb8e9444a84194ab",
+      "date": "2026-01-14T01:30:37Z",
+      "author": "Owen Guobadia",
+      "subject": "Add GitHub Actions daily backfill workflow",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "456723685af257dae2873bd6055023bc2ed3e7a7",
+      "date": "2026-01-14T01:37:05Z",
+      "author": "Owen Guobadia",
+      "subject": "Add requirements.txt for GitHub Actions",
+      "touched_dirs": [
+        "/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "b57a2ecf8ab6c2ebda562fe3e78ad1b95ab548b7",
+      "date": "2026-01-14T01:47:09Z",
+      "author": "Owen Guobadia",
+      "subject": "Add requests to requirements",
+      "touched_dirs": [
+        "/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "69fa3f767706e4ea76a7c65c4f27cd4529cd19f5",
+      "date": "2026-01-14T01:57:57Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add secret validation step to backfill workflow",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "51b2c05b6fbae995185fc1e7ec7d8a3340688dc3",
+      "date": "2026-01-14T02:13:24Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Update backfill workflow schedule to run every 6 hours",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "6b2a443bc4da2fa93d2c9475e93c4d6fa330f64b",
+      "date": "2026-01-14T02:16:38Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add MAINT_DAYS environment variable to backfill workflow",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "e069d4d1edb566da0e9baeda02e28d012843f1a7",
+      "date": "2026-01-14T03:02:46Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add initial OVC_v0_1.pine script with export functions",
+      "touched_dirs": [
+        "pine/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "pine"
+      ]
+    },
+    {
+      "hash": "b8d1cfe29816fbbf7ae01d1d6566b25f310e0523",
+      "date": "2026-01-14T04:16:22Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add export_contract_v0.1_min.json schema",
+      "touched_dirs": [
+        "contracts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "contracts"
+      ]
+    },
+    {
+      "hash": "ebf848ffdf5a70fe57c9d44afdb8a124e8ba7741",
+      "date": "2026-01-14T04:19:36Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Update print statement from 'Hello' to 'Goodbye'",
+      "touched_dirs": [
+        "contracts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "contracts"
+      ]
+    },
+    {
+      "hash": "2d57db81d46d20a53b05c040f29000bc1cf121be",
+      "date": "2026-01-14T04:20:27Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add export_contract_v0.1_full.json schema",
+      "touched_dirs": [
+        "contracts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "contracts"
+      ]
+    },
+    {
+      "hash": "8e1882cb31cf1571522533553c05f43a4e989c29",
+      "date": "2026-01-14T08:29:16Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add contract validation functionality",
+      "touched_dirs": [
+        "\"/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "40ed50f8b29c55954eb843f388f15ebae412eabf",
+      "date": "2026-01-14T08:30:28Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Delete \\tools\\validate_contract.py",
+      "touched_dirs": [
+        "\"/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "171cd228a37550cd52e02598997907aad76b8dc1",
+      "date": "2026-01-14T08:31:23Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add contract validation functionality",
+      "touched_dirs": [
+        "\"tools/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "b694a744daa305e5b5ac522a159c23a023586d5f",
+      "date": "2026-01-14T08:31:49Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Delete tools\\validate_contract.py",
+      "touched_dirs": [
+        "\"tools/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "be09dd8b58769540fc16260529816f9baef514d6",
+      "date": "2026-01-14T08:36:08Z",
+      "author": "Owen Guobadia",
+      "subject": "Add v0.1 export contracts, validation tools, and tests",
+      "touched_dirs": [
+        "tests/",
+        "tools/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "tests",
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "aad49831233824189a9c95528dc4dcee0fd9b237",
+      "date": "2026-01-14T08:36:18Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        "tests/",
+        "tools/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "tests",
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "c5574da312127422fb4af8513bf455b798f7f188",
+      "date": "2026-01-14T09:29:49Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add export string for MIN contract in min_001.txt",
+      "touched_dirs": [
+        "tests/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "tests"
+      ]
+    },
+    {
+      "hash": "e8c253791cb6b44febb0ba6ea70b5b4042c015f0",
+      "date": "2026-01-14T09:37:00Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Update export string in full_001.txt",
+      "touched_dirs": [
+        "tests/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "tests"
+      ]
+    },
+    {
+      "hash": "4547615fb0df2ce0c207d6fa4d43ff3099070da3",
+      "date": "2026-01-14T10:29:13Z",
+      "author": "Owen Guobadia",
+      "subject": "Update export strings in full_001.txt and min_001.txt; add validation script for export strings",
+      "touched_dirs": [
+        "/",
+        "tests/",
+        "tools/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "tests",
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "09d951775170a52c51278b04919233c633a7ed9c",
+      "date": "2026-01-14T10:42:13Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor export contract schema: remove formatting and update types for clarity and consistency",
+      "touched_dirs": [
+        "contracts/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "contracts"
+      ]
+    },
+    {
+      "hash": "1859414a24a6eae9742110e2d1b4cd0c58951b3a",
+      "date": "2026-01-14T10:57:45Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance validation logic: normalize input values and improve type checks for contract fields",
+      "touched_dirs": [
+        "tools/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "455955f79ebf6d1889d48b6fa61fa1cfd02a3bbb",
+      "date": "2026-01-14T11:02:34Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor type checking in _check_type function: streamline conditions and enhance error messages for better clarity",
+      "touched_dirs": [
+        "tools/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "1cf568a4e1288565d068f24eb9c290f804a63ccf",
+      "date": "2026-01-14T11:07:11Z",
+      "author": "Owen Guobadia",
+      "subject": "Update field types in export contract schema: change to string_or_empty and bool_any for improved flexibility",
+      "touched_dirs": [
+        "contracts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "contracts"
+      ]
+    },
+    {
+      "hash": "3df870db1e0ebf18eca4684900c27c7e9e0f7c3f",
+      "date": "2026-01-14T11:10:39Z",
+      "author": "Owen Guobadia",
+      "subject": "Update rail_loc field type to string_or_empty for improved flexibility",
+      "touched_dirs": [
+        "contracts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "contracts"
+      ]
+    },
+    {
+      "hash": "42bf13666843a8bf43fa70f4bcbede93f0c9149e",
+      "date": "2026-01-14T12:44:49Z",
+      "author": "Owen Guobadia",
+      "subject": "Update tradeable and ready fields to use bool_01 type for consistency in export format",
+      "touched_dirs": [
+        "contracts/",
+        "pine/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "contracts",
+        "pine"
+      ]
+    },
+    {
+      "hash": "84479bf92eceb76324ea5a222293f35cdbe20b27",
+      "date": "2026-01-14T13:50:44Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add file association for wrangler.json in settings",
+      "touched_dirs": [
+        "ovc-webhook/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "4c6102503f057300a13918acfd1b845997cfbdde",
+      "date": "2026-01-14T13:55:53Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Delete ovc-webhook/vscode directory",
+      "touched_dirs": [
+        "ovc-webhook/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "8b566f3aa4daad1e4960a43831dd6aa13fa432ee",
+      "date": "2026-01-14T14:07:05Z",
+      "author": "Owen Guobadia",
+      "subject": "Add ovc-webhook worker project",
+      "touched_dirs": [
+        "/",
+        "infra/"
+      ],
+      "touched_file_count": 16,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "cf5d987444ce3c7bd92f76fac2bf31a6530bb4d0",
+      "date": "2026-01-14T14:15:46Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Refactor fetch function and enhance error handling",
+      "touched_dirs": [
+        "infra/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "7c3982068064cde8acec78811adde90eca014e59",
+      "date": "2026-01-14T15:57:49Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Refactor OVC webhook for improved clarity and structure",
+      "touched_dirs": [
+        "infra/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "aaecb0cab415bdc94a67ffb92ad903d488150367",
+      "date": "2026-01-14T18:01:00Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Worker: upsert MIN into ovc_blocks_v01 (Option B)",
+      "touched_dirs": [
+        ".github/",
+        "docs/",
+        "infra/",
+        "src/"
+      ],
+      "touched_file_count": 7,
+      "tags": [
+        "ci_workflows",
+        "infra",
+        "source_code"
+      ]
+    },
+    {
+      "hash": "df6e2c64fc22312b89e5baf052ec725d8bea5a07",
+      "date": "2026-01-14T18:02:46Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge pull request #1 from owenguobadia24s-collab/codex/complete-step-8b-hardening-for-ovc",
+      "touched_dirs": [
+        ".github/",
+        "docs/",
+        "infra/",
+        "src/"
+      ],
+      "touched_file_count": 7,
+      "tags": [
+        "ci_workflows",
+        "infra",
+        "source_code"
+      ]
+    },
+    {
+      "hash": "1b17fb4f810ff70c5f2357a423090022a8d10ed1",
+      "date": "2026-01-14T18:09:45Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Allow empty tis and hints in full export contract",
+      "touched_dirs": [
+        "contracts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "contracts"
+      ]
+    },
+    {
+      "hash": "fb35f49767878631a9f78967cdb4c8b7150f6027",
+      "date": "2026-01-14T18:10:11Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge pull request #2 from owenguobadia24s-collab/codex/fix-export_contract_v0.1_full.json",
+      "touched_dirs": [
+        ".github/",
+        "/",
+        "contracts/",
+        "docs/",
+        "infra/",
+        "pine/",
+        "src/"
+      ],
+      "touched_file_count": 25,
+      "tags": [
+        "ci_workflows",
+        "contracts",
+        "infra",
+        "pine",
+        "source_code"
+      ]
+    },
+    {
+      "hash": "d5d84d360f28140b7a6b09a9a43594195917800f",
+      "date": "2026-01-14T18:13:34Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Update MIN export contract field types (#3)",
+      "touched_dirs": [
+        "contracts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "contracts"
+      ]
+    },
+    {
+      "hash": "7a2ea214f506ed7320836ea9aef4277d37d04eb7",
+      "date": "2026-01-14T18:36:25Z",
+      "author": "Owen Guobadia",
+      "subject": "Add AI Agent guidelines to project documentation",
+      "touched_dirs": [
+        "docs/",
+        "infra/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "439df1e58bf3cfab68cb9fa42313a228e4ebba01",
+      "date": "2026-01-14T19:23:26Z",
+      "author": "Owen Guobadia",
+      "subject": "Fix formatting by removing trailing empty lines in index.ts",
+      "touched_dirs": [
+        "infra/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "f01d1624156f25af2d913c6e9220f23c341cd2ae",
+      "date": "2026-01-15T12:27:32Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add current OVC workflow documentation",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "e0fbcdf0e1175bb5aa746303e76fec97a123a6f8",
+      "date": "2026-01-15T12:28:26Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge pull request #4 from owenguobadia24s-collab/codex/create-ovc-current-workflow-documentation",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "dc12a30c14c62855ae1b4505f2292ce6bc55e39b",
+      "date": "2026-01-16T18:08:09Z",
+      "author": "Owen Guobadia",
+      "subject": "Add OVC current workflow documentation",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "e9a5ef31982bf1086ef0633801f4c88a6d1bc7a9",
+      "date": "2026-01-16T18:13:06Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "15353b9226cdc441cca675eda7cdb0cb91ade68d",
+      "date": "2026-01-16T21:16:53Z",
+      "author": "Owen Guobadia",
+      "subject": "Gate1: lock MIN contract + specs + SQL v0.1",
+      "touched_dirs": [
+        "/",
+        "contracts/",
+        "docs/",
+        "specs/",
+        "sql/"
+      ],
+      "touched_file_count": 21,
+      "tags": [
+        "contracts",
+        "evidence_runs",
+        "specs",
+        "validation"
+      ]
+    },
+    {
+      "hash": "043271a319ccfc104911a2fade6eb3dbce861633",
+      "date": "2026-01-16T22:19:10Z",
+      "author": "Owen Guobadia",
+      "subject": "Fix table name references in SQL scripts for consistency",
+      "touched_dirs": [
+        "sql/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "02abc800df9a757b7a7e792a88a6d5cec9ea3cb4",
+      "date": "2026-01-16T22:32:36Z",
+      "author": "Owen Guobadia",
+      "subject": "Fix table reference in events view SQL script for accuracy",
+      "touched_dirs": [
+        "sql/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "8553d26409513c1b2abbe55a56c2d9da620777ae",
+      "date": "2026-01-16T22:36:02Z",
+      "author": "Owen Guobadia",
+      "subject": "Fix date column references in events views for consistency",
+      "touched_dirs": [
+        "sql/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "98d55cd4e57eb2ca36a36cf2f44432eb0068f7b1",
+      "date": "2026-01-16T22:50:47Z",
+      "author": "Owen Guobadia",
+      "subject": "Fix column references in events view for accuracy",
+      "touched_dirs": [
+        "sql/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "a4943ebb9401ac7a694316c215a93b4309b9a320",
+      "date": "2026-01-17T02:22:30Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: Implement export string generation for MIN and FULL profiles in Pine script",
+      "touched_dirs": [
+        "infra/",
+        "pine/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "infra",
+        "pine"
+      ]
+    },
+    {
+      "hash": "9555b7f67fde1578f02df14866d1940e2dba3dbb",
+      "date": "2026-01-17T02:38:50Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: Add initial workspace configuration for ovc-infra",
+      "touched_dirs": [
+        "infra/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "6e3ee4a167af58cea41236135c318b77bca7b0eb",
+      "date": "2026-01-17T02:57:00Z",
+      "author": "Owen Guobadia",
+      "subject": "Pine script for Tradining View panels",
+      "touched_dirs": [
+        "pine/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "pine"
+      ]
+    },
+    {
+      "hash": "f7bbdde22c1a27c22a164f5a0e5e3c83d6f5e013",
+      "date": "2026-01-17T03:41:49Z",
+      "author": "Owen Guobadia",
+      "subject": "WIP: align infra validation to v0.1.1 MIN",
+      "touched_dirs": [
+        "infra/",
+        "tests/",
+        "tools/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "infra",
+        "tests",
+        "tools_general",
+        "validation"
+      ]
+    },
+    {
+      "hash": "f205e42e1e936f048290671d4134bb10ad814f6b",
+      "date": "2026-01-17T03:42:47Z",
+      "author": "Owen Guobadia",
+      "subject": "Pine: align MIN export to contract v0.1_min_r1 + readiness panel",
+      "touched_dirs": [
+        "docs/",
+        "pine/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "pine"
+      ]
+    },
+    {
+      "hash": "a71332b4f91148f7c3e720210d65a6b5160db93d",
+      "date": "2026-01-17T03:59:32Z",
+      "author": "Owen Guobadia",
+      "subject": "Infra: enforce MIN contract v0.1.1",
+      "touched_dirs": [
+        "docs/",
+        "infra/",
+        "tests/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "infra",
+        "tests",
+        "validation"
+      ]
+    },
+    {
+      "hash": "f6d9928e6c2ab862395a51eae6403985f31fb0ea",
+      "date": "2026-01-17T04:32:21Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge pull request #5 from owenguobadia24s-collab/wip/infra-contract-validation",
+      "touched_dirs": [
+        "docs/",
+        "infra/",
+        "tests/",
+        "tools/"
+      ],
+      "touched_file_count": 7,
+      "tags": [
+        "infra",
+        "tests",
+        "tools_general",
+        "validation"
+      ]
+    },
+    {
+      "hash": "9d05d844c4f072ce513c3ed8803b1ed31b288a27",
+      "date": "2026-01-17T04:37:47Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge branch 'main' into pr/pine-min-export-v0.1_min_r1",
+      "touched_dirs": [
+        "docs/",
+        "infra/",
+        "pine/",
+        "tests/",
+        "tools/"
+      ],
+      "touched_file_count": 9,
+      "tags": [
+        "infra",
+        "pine",
+        "tests",
+        "tools_general",
+        "validation"
+      ]
+    },
+    {
+      "hash": "f42b38c714fbc4441ce7dbe0898bb66e8dfabf77",
+      "date": "2026-01-17T04:37:53Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge pull request #6 from owenguobadia24s-collab/pr/pine-min-export-v0.1_min_r1",
+      "touched_dirs": [
+        "docs/",
+        "pine/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "pine"
+      ]
+    },
+    {
+      "hash": "903698622a46dbc7515b110cf605269406e72360",
+      "date": "2026-01-17T04:46:32Z",
+      "author": "Owen Guobadia",
+      "subject": "edit",
+      "touched_dirs": [
+        "tests/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "tests"
+      ]
+    },
+    {
+      "hash": "a47e2897bfccd9b1e5b108bcda69449011dc350b",
+      "date": "2026-01-17T06:37:55Z",
+      "author": "Owen Guobadia",
+      "subject": "Disable ret semantic check for v0.1 ingest stability",
+      "touched_dirs": [
+        "infra/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "fab9e5ba3cac560c71c3f5d98f013fd223296559",
+      "date": "2026-01-17T06:58:24Z",
+      "author": "Owen Guobadia",
+      "subject": "Docs: normalize workflow + verification scripts",
+      "touched_dirs": [
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "82ed3f00cc42983a0037af3e888d5e3ec624a819",
+      "date": "2026-01-17T07:05:03Z",
+      "author": "Owen Guobadia",
+      "subject": "sample script tightening",
+      "touched_dirs": [
+        "tests/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "tests"
+      ]
+    },
+    {
+      "hash": "72ce4b0a78717ca79fbc0360447faf20a1e73f70",
+      "date": "2026-01-17T15:28:56Z",
+      "author": "Owen Guobadia",
+      "subject": "chore: lock v0.1 ingest boundary + harden verifier (MIN default, FULL opt-in)",
+      "touched_dirs": [
+        "/",
+        "contracts/",
+        "docs/",
+        "src/",
+        "tests/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "contracts",
+        "source_code",
+        "tests"
+      ]
+    },
+    {
+      "hash": "bacc7ff998bc4375e8e1ad3bbbb6393dc51fa60a",
+      "date": "2026-01-17T16:36:14Z",
+      "author": "Owen Guobadia",
+      "subject": "Define the Derived Metric Classes and the First Canonical Feature Set",
+      "touched_dirs": [
+        "contracts/",
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "contracts",
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "607a8c5c4e828295534f03ef18d9ea51fde7d3c6",
+      "date": "2026-01-17T17:12:47Z",
+      "author": "Owen Guobadia",
+      "subject": "Evaluation + Feedback Layer (v0.1)",
+      "touched_dirs": [
+        "contracts/",
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 7,
+      "tags": [
+        "contracts",
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "0dde7775c0f1f8073776e06d843da5bf56711ccb",
+      "date": "2026-01-17T17:29:05Z",
+      "author": "Owen Guobadia",
+      "subject": "validation harness, spotchek and guardrail",
+      "touched_dirs": [
+        "infra/",
+        "scripts/",
+        "sql/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "evidence_runs",
+        "infra",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "13a589b968eedf3690c3d6103ef9de0f69094a8e",
+      "date": "2026-01-17T18:02:40Z",
+      "author": "Owen Guobadia",
+      "subject": "Option D",
+      "touched_dirs": [
+        ".github/",
+        "/",
+        "docs/",
+        "scripts/",
+        "sql/"
+      ],
+      "touched_file_count": 7,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "68306e813ecfae4b9d5a0015441d64bbb8545119",
+      "date": "2026-01-17T18:53:10Z",
+      "author": "Owen Guobadia",
+      "subject": "Seal Option D: reliable Option C orchestration, eval-run registration, spotchecks, and run reports",
+      "touched_dirs": [
+        "/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "e3b80fc3cebdf11218409ce368e85a5b9192f923",
+      "date": "2026-01-17T20:40:32Z",
+      "author": "Owen Guobadia",
+      "subject": "Option A -> D Audit",
+      "touched_dirs": [
+        "pine/",
+        "sql/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "evidence_runs",
+        "pine"
+      ]
+    },
+    {
+      "hash": "cd780720b768933334a53f0231c60b4227311e13",
+      "date": "2026-01-17T21:17:23Z",
+      "author": "Owen Guobadia",
+      "subject": "Add Neon->Notion sync (ops watermark + script + CI workflow)",
+      "touched_dirs": [
+        ".github/",
+        "/",
+        "docs/",
+        "scripts/",
+        "sql/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "e33590e869894c6081acd4e09ac3d2ce08fd0611",
+      "date": "2026-01-17T22:58:30Z",
+      "author": "Owen Guobadia",
+      "subject": "Notion Connection +",
+      "touched_dirs": [
+        "/",
+        "scripts/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "5ddb81c41c2e38ecf1bd0ad1a761c2b0075f6b4a",
+      "date": "2026-01-17T23:16:35Z",
+      "author": "Owen Guobadia",
+      "subject": "Day TApe Validation",
+      "touched_dirs": [
+        "docs/",
+        "sql/",
+        "src/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "evidence_runs",
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "e4fb8f4f419430da52f6e73b195c0fe60eb0fc99",
+      "date": "2026-01-17T23:54:29Z",
+      "author": "Owen Guobadia",
+      "subject": "DTV",
+      "touched_dirs": [
+        "/",
+        "docs/",
+        "scripts/",
+        "src/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "scripts_general",
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "c9d506c182070e50503aa4dcf103f836a8c72eaa",
+      "date": "2026-01-18T00:10:10Z",
+      "author": "Owen Guobadia",
+      "subject": "DTV",
+      "touched_dirs": [
+        "docs/",
+        "src/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "99d030e51d59edfbe6105898d14fdd89efd44f70",
+      "date": "2026-01-18T00:34:53Z",
+      "author": "Owen Guobadia",
+      "subject": "Add historical ingestion functionality for TradingView CSV data",
+      "touched_dirs": [
+        "docs/",
+        "src/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "1759c448f2d135d240ea747913d85a3868653b73",
+      "date": "2026-01-18T01:06:07Z",
+      "author": "Owen Guobadia",
+      "subject": "Implement CSV path resolution with auto-pick functionality in ingestion and validation scripts",
+      "touched_dirs": [
+        "docs/",
+        "src/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "a36a2b94fbfbced1ca0898997ba08dc0ef260dd2",
+      "date": "2026-01-18T01:22:04Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance OANDA ingestion workflow with validation options and add OANDA 2H CSV export script",
+      "touched_dirs": [
+        ".github/",
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "ci_workflows",
+        "scripts_general",
+        "validation"
+      ]
+    },
+    {
+      "hash": "01ec28f134404dbad08184ff04b9ac7615b99c2a",
+      "date": "2026-01-18T05:46:40Z",
+      "author": "Owen Guobadia",
+      "subject": "Add pipeline status harness and logging doctrine documentation",
+      "touched_dirs": [
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "scripts_general",
+        "validation"
+      ]
+    },
+    {
+      "hash": "71072aa465e553a151b4f57ce6fb78e59b5f30e3",
+      "date": "2026-01-18T06:01:59Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor backfill scripts and update documentation for P2 workflow alignment",
+      "touched_dirs": [
+        "docs/",
+        "src/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "201fd6c8465a645b52b08435a1665638b2cfa281",
+      "date": "2026-01-18T06:43:57Z",
+      "author": "Owen Guobadia",
+      "subject": "Update documentation and SQL validation packs for enhanced pipeline status and derived data validation",
+      "touched_dirs": [
+        "docs/",
+        "sql/",
+        "src/"
+      ],
+      "touched_file_count": 8,
+      "tags": [
+        "evidence_runs",
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "407d99a6dc4dd06177550d8d0a40b4a6514a9310",
+      "date": "2026-01-18T06:48:44Z",
+      "author": "Owen Guobadia",
+      "subject": "Update workflow and logging doctrine documentation to reflect current validation statuses and next phase requirements",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 2,
+      "tags": []
+    },
+    {
+      "hash": "f09687dd9b6481b0c7d5fc26984ac984db39a269",
+      "date": "2026-01-18T07:42:17Z",
+      "author": "Owen Guobadia",
+      "subject": "Add multi-day validation script and update pipeline status checks",
+      "touched_dirs": [
+        "docs/",
+        "scripts/",
+        "src/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "scripts_general",
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "46f691a4aca2aab9d8167380feadd77cbd78ef00",
+      "date": "2026-01-18T07:55:25Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance validation scripts to support multi-day range reporting and add metadata handling",
+      "touched_dirs": [
+        "docs/",
+        "src/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "b1e87b4a798398971745dab4f7b835ba1b633dc4",
+      "date": "2026-01-18T09:35:36Z",
+      "author": "Owen Guobadia",
+      "subject": "Option B Sealed",
+      "touched_dirs": [
+        ".github/",
+        "docs/",
+        "src/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "ci_workflows",
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "d9a89c033de344b71b648ff33af27f076c0895d2",
+      "date": "2026-01-18T09:55:36Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: add backfill-then-validate GitHub Action (range support)",
+      "touched_dirs": [
+        ".github/",
+        "docs/",
+        "src/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "ci_workflows",
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "6dd44ac4df88b8be74874df6d01198846b8516e4",
+      "date": "2026-01-18T11:32:16Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: add canonical OVC metric architecture documentation",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "2116934d8cb285cb63f75946a29d0045fcd9ec19",
+      "date": "2026-01-18T11:58:39Z",
+      "author": "Owen Guobadia",
+      "subject": "OVC MA",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "bc1782dc944e9eef2089332451a64b6b5f7a8408",
+      "date": "2026-01-18T18:18:09Z",
+      "author": "Owen Guobadia",
+      "subject": "Add Metric Trial Log v0 and Versioned Config Proposal documents",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "validation"
+      ]
+    },
+    {
+      "hash": "cbb8bfcee27dea9525e43be8b9017d64fbda5bf5",
+      "date": "2026-01-18T19:54:00Z",
+      "author": "Owen Guobadia",
+      "subject": "Option B.1 Implementation",
+      "touched_dirs": [
+        "docs/",
+        "sql/",
+        "src/",
+        "tests/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "evidence_runs",
+        "source_code",
+        "tests"
+      ]
+    },
+    {
+      "hash": "ab9daed3998490f0e456ff188fa55ab1ca685429",
+      "date": "2026-01-18T21:43:28Z",
+      "author": "Owen Guobadia",
+      "subject": "Option B.2 Implemented",
+      "touched_dirs": [
+        ".github/",
+        "artifacts/",
+        "docs/",
+        "scripts/",
+        "sql/",
+        "src/",
+        "tests/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "artifacts",
+        "ci_workflows",
+        "evidence_runs",
+        "scripts_general",
+        "source_code",
+        "tests",
+        "validation"
+      ]
+    },
+    {
+      "hash": "961738bf86f3845f7969922cc9e211c84bf0b22f",
+      "date": "2026-01-18T22:19:09Z",
+      "author": "Owen Guobadia",
+      "subject": "OVC Option C.3 Stub and unit tests for Threshold Registry",
+      "touched_dirs": [
+        "configs/",
+        "docs/",
+        "sql/",
+        "src/",
+        "tests/"
+      ],
+      "touched_file_count": 8,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "source_code",
+        "tests"
+      ]
+    },
+    {
+      "hash": "e43ee24cad882874e42356a34af4c8ad82ec0d88",
+      "date": "2026-01-18T22:36:34Z",
+      "author": "Owen Guobadia",
+      "subject": "(c3_regime_trend): Implement C3 regime trend classifier (v0.1)",
+      "touched_dirs": [
+        "configs/",
+        "docs/",
+        "sql/",
+        "src/",
+        "tests/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "source_code",
+        "tests"
+      ]
+    },
+    {
+      "hash": "d348c04646de00626c534cdf39d5ee1cae7e8511",
+      "date": "2026-01-18T22:42:28Z",
+      "author": "Owen Guobadia",
+      "subject": "C3 lifecycle documentation and entry checklist",
+      "touched_dirs": [
+        "docs/",
+        "src/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "source_code"
+      ]
+    },
+    {
+      "hash": "23fcb1976810add88fc9309a8f2fa7fa8c275448",
+      "date": "2026-01-19T22:19:54Z",
+      "author": "Owen Guobadia",
+      "subject": "Pipeline Reality Map",
+      "touched_dirs": [
+        "docs/",
+        "infra/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "e32bbad69adf6abbf80631a2fdf7fcc687d053d9",
+      "date": "2026-01-19T22:32:41Z",
+      "author": "Owen Guobadia",
+      "subject": "Implement parseExport and msToTimestamptzStart2H functions for TradingView export parsing and timestamp computation",
+      "touched_dirs": [
+        "infra/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "infra"
+      ]
+    },
+    {
+      "hash": "2764b9c2e8ad17e3ce809e9f2100c3e1ffbcf89f",
+      "date": "2026-01-19T22:43:39Z",
+      "author": "Owen Guobadia",
+      "subject": "Fix typo in NOTION_TOKEN environment variable and update documentation; add required env var check in notion_sync.py",
+      "touched_dirs": [
+        ".github/",
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "ci_workflows",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "ee46496d262759fcae78902ffc07b4d2ac71282e",
+      "date": "2026-01-19T23:07:30Z",
+      "author": "Owen Guobadia",
+      "subject": "RUN_ARTIFACT_IMPLEMENTATION",
+      "touched_dirs": [
+        ".github/",
+        "contracts/",
+        "docs/",
+        "scripts/",
+        "src/"
+      ],
+      "touched_file_count": 20,
+      "tags": [
+        "ci_workflows",
+        "contracts",
+        "scripts_general",
+        "source_code"
+      ]
+    },
+    {
+      "hash": "597ca8e2c8a774a490342e796ab6da5424fdb003",
+      "date": "2026-01-19T23:14:58Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor validation logic in validate_derived_range_v0_1.py for improved readability and structure",
+      "touched_dirs": [
+        "src/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "source_code"
+      ]
+    },
+    {
+      "hash": "800fbb9a6063f067a63b2f51b5e6bd801d7769e8",
+      "date": "2026-01-19T23:23:34Z",
+      "author": "Owen Guobadia",
+      "subject": "Add changelog for Pipeline Reality Map v0.1 detailing updates and resolved gaps",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 2,
+      "tags": []
+    },
+    {
+      "hash": "468a2b1e6bce122ee138820a404793491179262b",
+      "date": "2026-01-19T23:52:53Z",
+      "author": "Owen Guobadia",
+      "subject": "Add Verification Report v0.1 detailing deployment and workflow statuses",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "f8840146485d41034d9eb81f062a0617fd8a507d",
+      "date": "2026-01-19T23:57:03Z",
+      "author": "Owen Guobadia",
+      "subject": "Add OVC Data Flow Canon v0.1 as authoritative reference for data ownership and downstream flows",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "c0a56dca5669a44d533917f3fdf798fba5a531fa",
+      "date": "2026-01-20T01:30:52Z",
+      "author": "Owen Guobadia",
+      "subject": "feat(docs): Update Pipeline Reality Map and OVC Current Workflow",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 8,
+      "tags": [
+        "validation"
+      ]
+    },
+    {
+      "hash": "44d409e5a7f9c3ca15cc14b82b96bce5640ed307",
+      "date": "2026-01-20T01:47:47Z",
+      "author": "Owen Guobadia",
+      "subject": "Add initial implementation contract and SQL view for C1 features",
+      "touched_dirs": [
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "9cf0060e6f423183fbf56c464824254e150be9c2",
+      "date": "2026-01-20T02:15:14Z",
+      "author": "Owen Guobadia",
+      "subject": "Add initial implementation contract and SQL view for C2 features",
+      "touched_dirs": [
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "abc32d76165090fcb47b0348f808d961155396c2",
+      "date": "2026-01-20T02:42:17Z",
+      "author": "Owen Guobadia",
+      "subject": "Add C3 Implementation Contract and SQL View for C3 Features",
+      "touched_dirs": [
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "0197359d49adff54eedae2d3c60e160fe9ba183c",
+      "date": "2026-01-20T03:05:49Z",
+      "author": "Owen Guobadia",
+      "subject": "Option C",
+      "touched_dirs": [
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "evidence_runs",
+        "validation"
+      ]
+    },
+    {
+      "hash": "88eff122fe893c14902013cedf36c25793e75e8f",
+      "date": "2026-01-20T03:11:01Z",
+      "author": "Owen Guobadia",
+      "subject": " OVC Doctrine and Immutability Notice",
+      "touched_dirs": [
+        "docs/",
+        "releases/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "releases"
+      ]
+    },
+    {
+      "hash": "f2f8bd0bbdf3ce7a25eee7a62955602ae24d06d3",
+      "date": "2026-01-20T04:58:31Z",
+      "author": "Owen Guobadia",
+      "subject": "Add research artifacts and documentation for exploratory studies",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "913bd4d3430bff9361fcebbeb08eb2f0ce6fcc1b",
+      "date": "2026-01-20T05:01:54Z",
+      "author": "Owen Guobadia",
+      "subject": "Add initial study files for basic feature-outcome analysis of GBPUSD",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "007f21eacce9bef66989ab5034089658cf946cac",
+      "date": "2026-01-20T05:04:53Z",
+      "author": "Owen Guobadia",
+      "subject": "Add block_range_intensity score implementation as a research artifact",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "db312bd11cfd3c240d41f6c48c2b3fbf4cb3ab69",
+      "date": "2026-01-20T05:10:12Z",
+      "author": "Owen Guobadia",
+      "subject": "Add initial files for block range intensity score sanity study",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "5553e731fc66651ddb934303f7e67f893712f47f",
+      "date": "2026-01-20T05:13:47Z",
+      "author": "Owen Guobadia",
+      "subject": "Add study files for block range intensity score analysis",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "4607f31a4ed930592be155455ec3a92237aacda4",
+      "date": "2026-01-20T05:18:09Z",
+      "author": "Owen Guobadia",
+      "subject": "Add initial files for block range intensity score temporal stability study",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "9a2f52a5e592e1b36937fb383bbee36c54b1ef20",
+      "date": "2026-01-20T05:27:39Z",
+      "author": "Owen Guobadia",
+      "subject": "Add initial study files for block range intensity by volatility regime analysis",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "336d0eb6edc063b295ac0f30c030e591fd0b0d8e",
+      "date": "2026-01-20T05:31:50Z",
+      "author": "Owen Guobadia",
+      "subject": "Add study 20260120: Block Range Intensity by Session",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "38fcad2b1963a4b193fa4f629c89999f7d38a172",
+      "date": "2026-01-20T05:43:18Z",
+      "author": "Owen Guobadia",
+      "subject": "Add study documentation for block range intensity by C3 trend bias",
+      "touched_dirs": [
+        "research/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "research"
+      ]
+    },
+    {
+      "hash": "04d95ab73c8d2dbbe4c5e28616aff6d0843ddf2d",
+      "date": "2026-01-20T06:41:53Z",
+      "author": "Owen Guobadia",
+      "subject": "Add new studies for DIS, LID, and RES scores focusing on stability and outcome associations",
+      "touched_dirs": [
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 13,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "0f853613954d252b57104386a6edcdf010c4b52b",
+      "date": "2026-01-20T08:29:35Z",
+      "author": "Owen Guobadia",
+      "subject": "Update DIS score to v1.1, removing directional_efficiency dependency; add documentation and status files for Path 1 freeze",
+      "touched_dirs": [
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 10,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "a04f8b2d318e6340923f3641876b2ac2bca1c028",
+      "date": "2026-01-20T08:39:31Z",
+      "author": "Owen Guobadia",
+      "subject": "Add distributional analysis studies for DIS-v1.1, LID-v1.0, and RES-v1.0 scores with corresponding views",
+      "touched_dirs": [
+        "sql/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "b07313878bb6d92a0425f56fd7c0919144638a2a",
+      "date": "2026-01-20T09:24:25Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: Add operational guide and SQL patches for Path 1 evidence runs",
+      "touched_dirs": [
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 9,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "49e8139869233e5e9fe26d56013866f32af57b41",
+      "date": "2026-01-20T09:46:19Z",
+      "author": "Owen Guobadia",
+      "subject": "Evidence Run 002",
+      "touched_dirs": [
+        "sql/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "fb2bbd3b4513e5b61840519dc3053785300a00c2",
+      "date": "2026-01-20T10:06:54Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: Add Path 1 Evidence Protocol and SQL studies for DIS, LID, and RES scores",
+      "touched_dirs": [
+        "docs/",
+        "sql/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "1774ef56bfd2165b8b8e7a83230cd39a1fb46fc8",
+      "date": "2026-01-20T10:19:30Z",
+      "author": "Owen Guobadia",
+      "subject": "Path 1 Github Action Pipe",
+      "touched_dirs": [
+        ".github/",
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "ci_workflows",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "a512105780ad4af36705294041b10ad3ebbeee78",
+      "date": "2026-01-20T10:25:58Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: add RUN_QUEUE.csv and update gitignore for path1 reports",
+      "touched_dirs": [
+        "/",
+        "reports/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "f63c710cad5464006ac83f9dd2face06b7f1f477",
+      "date": "2026-01-20T10:27:37Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: populate RUN_QUEUE (runs 004-012)",
+      "touched_dirs": [
+        "reports/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "d2e816266340a2e57b9432a886c3d9fef230be28",
+      "date": "2026-01-20T10:29:42Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: fix CSV comment parsing + add INDEX.md for existing runs",
+      "touched_dirs": [
+        "reports/",
+        "scripts/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "f394fa5fe3b8d121c71d3e84e7a7e90d35012b2c",
+      "date": "2026-01-20T10:31:01Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: add contents:write permission for branch push",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "4e1826bf2c8b83ec07c5603ad177b0cc17ffa2d9",
+      "date": "2026-01-20T10:44:02Z",
+      "author": "Owen Guobadia",
+      "subject": "Add new score reports and definitions for DIS, LID, and RES",
+      "touched_dirs": [
+        "docs/",
+        "reports/"
+      ],
+      "touched_file_count": 26,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "19ae34b9980d3914d3a4ea62f5330a80ca364edc",
+      "date": "2026-01-20T11:49:06Z",
+      "author": "Owen Guobadia",
+      "subject": "Patch Path 1 Evidence Queue: Add concurrency control and artifact verification steps",
+      "touched_dirs": [
+        ".github/",
+        "scripts/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "ci_workflows",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "9da90de165d75a0184473cba476d202ac5416728",
+      "date": "2026-01-20T11:55:16Z",
+      "author": "Owen Guobadia",
+      "subject": "Fix NOOP marker logging to use correct queue path variable",
+      "touched_dirs": [
+        "scripts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "a67ef074544d1c75e30eb74759418ea197dfb5f0",
+      "date": "2026-01-20T12:04:44Z",
+      "author": "Owen Guobadia",
+      "subject": "Add post-run validation script and update README with usage instructions",
+      "touched_dirs": [
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "c1b801135e4bccebb2b44c307044ddfd9c6d1628",
+      "date": "2026-01-20T12:12:21Z",
+      "author": "Owen Guobadia",
+      "subject": "Update validation checks for evidence reports: refine artifact section regex and enhance invariants disclaimer validation",
+      "touched_dirs": [
+        "scripts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "03b3e9cf39b5a81ab9e7391f8827a27e49bd874d",
+      "date": "2026-01-20T12:21:03Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance post-run validation for evidence runs: capture executed run IDs and validate integrity checks",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "d5a9c3694ea11a09563170c9ca59d1670784dae2",
+      "date": "2026-01-20T12:33:06Z",
+      "author": "github-actions[bot]",
+      "subject": "Path 1 Evidence Run(s) - Automated",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 91,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "fcbe9465b876661545ebf9859bf6cd707dbb7204",
+      "date": "2026-01-20T12:54:24Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge pull request #8 from owenguobadia24s-collab/evidence-run-20260120-123211",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 91,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "83f3d21122c122a44fbd3a85f78d7d4008202c58",
+      "date": "2026-01-20T13:08:32Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance evidence run queue management: add status updates and actual date tracking for completed runs",
+      "touched_dirs": [
+        "reports/",
+        "scripts/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "27fde4919e4969dad22738895d85fced89eba514",
+      "date": "2026-01-20T13:11:25Z",
+      "author": "github-actions[bot]",
+      "subject": "Path 1 Evidence Run(s) - Automated",
+      "touched_dirs": [
+        "reports/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "9e269228ac7849c1e8a9714fd8c94f1f886d1e8a",
+      "date": "2026-01-20T13:18:13Z",
+      "author": "Owen Guobadia",
+      "subject": "Update RUN_QUEUE.csv:",
+      "touched_dirs": [
+        "reports/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "41f13eab69e53e92421a9345bc4e0fac66f4d0df",
+      "date": "2026-01-20T13:19:17Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge pull request #9 from owenguobadia24s-collab/evidence-run-20260120-131115",
+      "touched_dirs": [
+        "reports/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "ef3e50e405dfa96d7d63364400ee309746b772e4",
+      "date": "2026-01-20T13:34:12Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance evidence run management: add date format validation and deduplication in INDEX.md updates",
+      "touched_dirs": [
+        "reports/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "d4b1a6e781599c3d903a7a4de2ad2742d067ad90",
+      "date": "2026-01-20T14:01:21Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance evidence run scripts: add warnings for local queue status and validation scope",
+      "touched_dirs": [
+        ".github/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "ci_workflows",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "7cb0896c3c1068a27ebddb89ad36f0397ff06e6d",
+      "date": "2026-01-20T14:13:12Z",
+      "author": "github-actions[bot]",
+      "subject": "Path 1 Evidence Run(s) - Automated",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 31,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "221a982ba8da35868c8d30473abf572e56a11821",
+      "date": "2026-01-20T14:16:32Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge pull request #10 from owenguobadia24s-collab/evidence-run-20260120-141256",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 31,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "32459654a7757f97b1c0d53d90bfe681130612c3",
+      "date": "2026-01-20T14:27:03Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance evidence run management: generate RUN_QUEUE_RESOLVED.csv for queue reconciliation and update workflow for automated PR creation",
+      "touched_dirs": [
+        ".github/",
+        "reports/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "66ecada57104a6362a4e936a0ac5fcb768dbdef2",
+      "date": "2026-01-20T14:39:05Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance PR creation process: use PAT for auto-merge and add validation for OVC_PR_BOT_TOKEN secret",
+      "touched_dirs": [
+        ".github/",
+        "reports/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "ce7755e318101ab2b1a9b0552f2fe5ef841a66c4",
+      "date": "2026-01-20T14:40:06Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance PR creation process: improve validation for OVC_PR_BOT_TOKEN and update PR existence check",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "ee6a769447286071ea628f89a127af00fe2c43b9",
+      "date": "2026-01-20T14:45:11Z",
+      "author": "Owen Guobadia",
+      "subject": "Enhance PR creation process: add authentication verification for OVC_PR_BOT_TOKEN and set GITHUB_TOKEN for clarity",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "e25017bd86466fce6308b8dc74f80fbb4382beaa",
+      "date": "2026-01-21T18:15:50Z",
+      "author": "Owen Guobadia",
+      "subject": "Add verification outputs and SQL specifications for OVC project",
+      "touched_dirs": [
+        ".github/",
+        "/",
+        "docs/",
+        "reports/",
+        "specs/",
+        "src/"
+      ],
+      "touched_file_count": 42,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "operations",
+        "source_code",
+        "specs",
+        "validation"
+      ]
+    },
+    {
+      "hash": "27354e74047cd908eca1a40188416dcfd875a583",
+      "date": "2026-01-21T21:48:05Z",
+      "author": "Owen Guobadia",
+      "subject": "Repo-restructuring",
+      "touched_dirs": [
+        "artifacts/",
+        "docs/",
+        "scripts/",
+        "specs/"
+      ],
+      "touched_file_count": 177,
+      "tags": [
+        "artifacts",
+        "governance_contracts",
+        "operations",
+        "scripts_general",
+        "specs",
+        "validation"
+      ]
+    },
+    {
+      "hash": "b092afc564f9339724bb13c9f08315652b03a2fb",
+      "date": "2026-01-21T23:08:49Z",
+      "author": "Owen Guobadia",
+      "subject": "Quadrant state plane evidence runner and related SQL views",
+      "touched_dirs": [
+        ".github/",
+        "configs/",
+        "docs/",
+        "reports/",
+        "scripts/",
+        "sql/"
+      ],
+      "touched_file_count": 17,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "bf516503e1c796f4baf35d80f1d615e8217e3ba9",
+      "date": "2026-01-22T03:57:26Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: add Evidence Pack v0.2 + run p1_20260120_031 outputs; add backfill_m15 workflow; ignore pytest temp dirs",
+      "touched_dirs": [
+        ".github/",
+        "/",
+        "docs/",
+        "infra/",
+        "reports/",
+        "scripts/",
+        "sql/",
+        "src/",
+        "tests/"
+      ],
+      "touched_file_count": 92,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "infra",
+        "scripts_general",
+        "source_code",
+        "tests",
+        "validation"
+      ]
+    },
+    {
+      "hash": "80f9e62ee44ec31d1de27585923a72d085a2b2e9",
+      "date": "2026-01-22T03:58:57Z",
+      "author": "Owen Guobadia",
+      "subject": "Add .gitattributes for LF normalization",
+      "touched_dirs": [
+        "/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "a5edd1adea92d8c21da2e7eeda181ab15c699d3d",
+      "date": "2026-01-22T04:04:45Z",
+      "author": "Owen Guobadia",
+      "subject": "BIG LOad",
+      "touched_dirs": [
+        "reports/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "255578eb11eea81792ee0b475137b14f6815b5b1",
+      "date": "2026-01-22T04:10:04Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: enforce UTF-8 writes, remove utcnow, and make evidence runs append-only",
+      "touched_dirs": [
+        "scripts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "ee6eedeaae948218edeae3b98de8d640036a57ca",
+      "date": "2026-01-22T04:32:09Z",
+      "author": "Owen Guobadia",
+      "subject": "Update RUN_QUEUE.csv to mark run_id 014 as complete; enhance run_evidence_queue.py with run completeness checks and quarantine functionality",
+      "touched_dirs": [
+        "reports/",
+        "scripts/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "e2fbbc0fac39376c18213ced46399b8c90f7c649",
+      "date": "2026-01-22T04:35:15Z",
+      "author": "Owen Guobadia",
+      "subject": "chore(vscode): track settings.json only",
+      "touched_dirs": [
+        "/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "2316949b478190c2aa1be564a1d8b466c2faa05b",
+      "date": "2026-01-22T04:40:30Z",
+      "author": "Owen Guobadia",
+      "subject": "chore(vscode): track settings.json only",
+      "touched_dirs": [
+        ".vscode/",
+        "/"
+      ],
+      "touched_file_count": 2,
+      "tags": []
+    },
+    {
+      "hash": "fdbbe977e85fcc7ba244a6433289f81b66095a2d",
+      "date": "2026-01-22T04:44:11Z",
+      "author": "Owen Guobadia",
+      "subject": "chore(gitignore): ignore nested .vscode folders",
+      "touched_dirs": [
+        "/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "4673c7a6e8c6b5b19d6f2986b8f40c9d0ec720fa",
+      "date": "2026-01-22T04:48:56Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: evidence run p1_20260120_016",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "ca147a606ce00a7e6b8d2a59aa427e0469dd5759",
+      "date": "2026-01-22T04:52:19Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: evidence run p1_20260120_017",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "26903304ea71a196706c84d7bb1c4babcd3e537a",
+      "date": "2026-01-22T04:58:03Z",
+      "author": "Owen Guobadia",
+      "subject": "Path1: evidence run p1_20260120_018",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "3d707c234e0bd5d8fcba69bb2579beacf2123ce0",
+      "date": "2026-01-22T05:01:59Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Add GitHub Actions workflow for evidence processing",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "094a2dda4ef82ceffca60c9f47b3e5cf85f4c105",
+      "date": "2026-01-22T05:08:06Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Change OVC_DB_URL to DATABASE_URL in workflow",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "e7fb6747a47c2d1e175661ff43944c166962e3ae",
+      "date": "2026-01-22T05:20:09Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Refactor GitHub Actions workflow for Path1 evidence",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "35507a0cedbbdc774fd96572154bf2425d27ad2d",
+      "date": "2026-01-22T05:21:50Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "9a7cb20e247af0a54a77317422c8547cd3050a2e",
+      "date": "2026-01-22T05:49:57Z",
+      "author": "Owen Guobadia",
+      "subject": "Add non-canonical summary generation for Path 1 evidence runs",
+      "touched_dirs": [
+        ".github/",
+        "/",
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "ci_workflows",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "f5064286f8a5e3183328e19c036315b0f66bf2a2",
+      "date": "2026-01-22T05:57:45Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "dbda28f7371cb1f895b4cf3c08799817ec243a47",
+      "date": "2026-01-22T06:23:09Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "4a5588b2ea20e838f41de5f5bb610878988ea6ff",
+      "date": "2026-01-22T06:24:25Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "119b9f2367630150c690943afb22fb6e7fb133d7",
+      "date": "2026-01-22T06:24:58Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "788fbba78385487d8d60402b1d5d15e020688cb6",
+      "date": "2026-01-22T06:25:44Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "5393d43ce2247b359a4df24740f1757888006fff",
+      "date": "2026-01-22T06:26:49Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "e696b83ad3c8c1c26a4c8ea1be155f0a53542cae",
+      "date": "2026-01-22T06:28:10Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "5ca5a325b92f780cf570394a25dcf21ec9b84db9",
+      "date": "2026-01-22T06:29:14Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "ee6e3e3872229f8ab5fbcac4aa2504d6caf91ab2",
+      "date": "2026-01-22T06:44:51Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: Introduce Path1 Sealing Protocol and Replay Verification",
+      "touched_dirs": [
+        ".github/",
+        ".vscode/",
+        "docs/",
+        "scripts/",
+        "tests/"
+      ],
+      "touched_file_count": 10,
+      "tags": [
+        "ci_workflows",
+        "scripts_general",
+        "tests"
+      ]
+    },
+    {
+      "hash": "f10548b4d300da4fffa4f791131d6603766b5529",
+      "date": "2026-01-22T06:46:15Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "ecdd8c7a1796e88f43efafce89041e20683fbd35",
+      "date": "2026-01-22T06:48:17Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "3c9fbb1079f710d3c36e69572c61f82e318c18ea",
+      "date": "2026-01-22T06:49:07Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        ".github/",
+        ".vscode/",
+        "/",
+        "docs/",
+        "reports/",
+        "scripts/",
+        "sql/",
+        "tests/"
+      ],
+      "touched_file_count": 128,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs",
+        "scripts_general",
+        "tests"
+      ]
+    },
+    {
+      "hash": "7e079568e8e628b88eadb5f096c32b19eb722323",
+      "date": "2026-01-22T07:00:41Z",
+      "author": "Owen Guobadia",
+      "subject": "fix: Enhance queue status update with error handling and validation for executed_successes",
+      "touched_dirs": [
+        "scripts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "04e3ece74e421b58ebe09ffebc233c9ad21e7e6f",
+      "date": "2026-01-22T07:03:10Z",
+      "author": "ovc-ledger-bot",
+      "subject": "Path1: automated evidence run",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "510823df51a7a5393809dc0b394f851894bda078",
+      "date": "2026-01-22T07:33:37Z",
+      "author": "Owen Guobadia",
+      "subject": "fix: Enhance evidence runner with debugging and error handling for summary writing",
+      "touched_dirs": [
+        ".github/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "ci_workflows",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "363bd81c2b3443aa9fb18e95267f18e8e2bf0b0f",
+      "date": "2026-01-22T07:43:47Z",
+      "author": "Owen Guobadia",
+      "subject": "fix: Improve execution summary and error handling in evidence queue runner",
+      "touched_dirs": [
+        "scripts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "b5250062586da176d4e6ab235602ae9a99dd0c7b",
+      "date": "2026-01-22T07:49:49Z",
+      "author": "Owen Guobadia",
+      "subject": "fix: Add debug logging option to evidence queue runner",
+      "touched_dirs": [
+        "scripts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "fe1bccbb1eb8f315f493c4b8e7a3ba3fd940e7f0",
+      "date": "2026-01-22T07:52:05Z",
+      "author": "Owen Guobadia",
+      "subject": "fix: Clarify results tuple contract in main function documentation",
+      "touched_dirs": [
+        "reports/",
+        "scripts/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "edfe1bc01fb97b3595007e079f5a674648dcfb94",
+      "date": "2026-01-22T08:54:17Z",
+      "author": "Owen Guobadia",
+      "subject": "fix: Improve change detection and logging in Path1 evidence runner",
+      "touched_dirs": [
+        ".github/",
+        "reports/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "ci_workflows",
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "101e3b48650b99dd04c52bff24140f40ed8eb7e5",
+      "date": "2026-01-22T15:28:27Z",
+      "author": "Owen Guobadia",
+      "subject": "chore: remove reserved 'nul' file and rebuild index",
+      "touched_dirs": [
+        "/",
+        "docs/",
+        "scripts/",
+        "tests/"
+      ],
+      "touched_file_count": 14,
+      "tags": [
+        "scripts_general",
+        "tests"
+      ]
+    },
+    {
+      "hash": "851fbad324673e97d0f97be4bcc242013e334929",
+      "date": "2026-01-22T16:00:20Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: add initial implementation of trajectory families module",
+      "touched_dirs": [
+        ".vscode/",
+        "infra/",
+        "reports/",
+        "scripts/",
+        "tests/",
+        "trajectory_families/"
+      ],
+      "touched_file_count": 15,
+      "tags": [
+        "evidence_runs",
+        "infra",
+        "scripts_general",
+        "tests",
+        "trajectory"
+      ]
+    },
+    {
+      "hash": "b7b09557b7fea4c0199066df93ff64e591922494",
+      "date": "2026-01-22T16:28:46Z",
+      "author": "Owen Guobadia",
+      "subject": "fix: enhance SQL file path resolution and add existence check in run scripts",
+      "touched_dirs": [
+        "reports/",
+        "scripts/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "evidence_runs",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "02b8f1a5dec4c302e24aac422635afb4cd8a6907",
+      "date": "2026-01-22T16:33:53Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: add documentation for locating canonical state-plane trajectories",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "24d1b4d471038fd7c1e75c506e4189780e4af898",
+      "date": "2026-01-22T16:42:52Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: implement clustering and gallery generation commands in trajectory families module",
+      "touched_dirs": [
+        "scripts/",
+        "trajectory_families/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "scripts_general",
+        "trajectory"
+      ]
+    },
+    {
+      "hash": "359079c5f18d07f71b31872e21ab4adf1a3e9440",
+      "date": "2026-01-22T18:48:20Z",
+      "author": "Owen Guobadia",
+      "subject": "Add evidence and outputs for state plane run p1_20260122_004",
+      "touched_dirs": [
+        "CLAIMS/",
+        "reports/"
+      ],
+      "touched_file_count": 15,
+      "tags": [
+        "claims",
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "04c340594ca6f7bca286482bf70f326dab5b6d1e",
+      "date": "2026-01-22T18:58:08Z",
+      "author": "Owen Guobadia",
+      "subject": "gov: index claim anchors v0.1",
+      "touched_dirs": [
+        "CLAIMS/",
+        "docs/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "claims"
+      ]
+    },
+    {
+      "hash": "19c9d26e1fa8b00fe89ffc6d5a124b2913f83f50",
+      "date": "2026-01-22T18:58:46Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: update anchor index and add reference in organization notes",
+      "touched_dirs": [],
+      "touched_file_count": 0,
+      "tags": []
+    },
+    {
+      "hash": "a49f425da9cba5cf7c05f1538848c9f0ebafd0b9",
+      "date": "2026-01-22T21:10:17Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: update documentation for Path 1 structure and conventions, marking historical context",
+      "touched_dirs": [
+        "/",
+        "docs/",
+        "reports/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "d62806071d873b3a7090de073de3de451421a4be",
+      "date": "2026-01-22T21:48:49Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor documentation for Evidence Pack v0.3 Overlays and Path 1 Execution Model",
+      "touched_dirs": [
+        "/",
+        "docs/",
+        "reports/"
+      ],
+      "touched_file_count": 18,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "86c5680cf927403cce344d7672dbec5ca121b44b",
+      "date": "2026-01-22T21:57:36Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: enhance ledger update process in Path1 workflow",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "0cf7aac0e70dc6d758dbca94b0acb4a954a2cc27",
+      "date": "2026-01-23T14:24:55Z",
+      "author": "Owen Guobadia",
+      "subject": "Add new workflows for CI sanity checks and Path 1 evidence generation",
+      "touched_dirs": [
+        ".github/",
+        "artifacts/",
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "artifacts",
+        "ci_workflows",
+        "operations",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "2f375f2360688c1d2a46c9e2d10c85073d17678b",
+      "date": "2026-01-23T14:26:14Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        ".github/",
+        "artifacts/",
+        "docs/",
+        "scripts/"
+      ],
+      "touched_file_count": 7,
+      "tags": [
+        "artifacts",
+        "ci_workflows",
+        "operations",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "064339bb46becb8c9d774441796ae5b8695c2762",
+      "date": "2026-01-23T17:50:57Z",
+      "author": "Owen Guobadia",
+      "subject": "Add comprehensive documentation and schema verification for OVC pipeline",
+      "touched_dirs": [
+        ".github/",
+        "docs/",
+        "schema/",
+        "scripts/"
+      ],
+      "touched_file_count": 17,
+      "tags": [
+        "ci_workflows",
+        "governance_contracts",
+        "schema",
+        "scripts_general"
+      ]
+    },
+    {
+      "hash": "ec3a7253fe401f9285d7899136eb537565fb3a89",
+      "date": "2026-01-23T18:32:37Z",
+      "author": "Owen Guobadia",
+      "subject": "governance: install rulebook, agent system, and baseline audit (no behavior change)",
+      "touched_dirs": [
+        "docs/",
+        "tools/"
+      ],
+      "touched_file_count": 5,
+      "tags": [
+        "governance_contracts",
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "51f48c227ef69f6ba7a0eb293746265577034fa2",
+      "date": "2026-01-23T19:56:44Z",
+      "author": "Owen Guobadia",
+      "subject": "feat: add comprehensive governance documentation and preflight instructions",
+      "touched_dirs": [
+        ".github/",
+        "/",
+        "Tetsu/",
+        "docs/"
+      ],
+      "touched_file_count": 14,
+      "tags": [
+        "ci_workflows",
+        "governance_contracts",
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "380e199d700cbce7c6304ac96d18ad1626490622",
+      "date": "2026-01-23T20:43:11Z",
+      "author": "Owen Guobadia",
+      "subject": "Remove obsolete governance documents and prompts; update maze generation script output path",
+      "touched_dirs": [
+        "/",
+        "docs/",
+        "tools/"
+      ],
+      "touched_file_count": 11,
+      "tags": [
+        "governance_contracts",
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "bae8dade70c31ba07ba20ac0556202a60df9fdcf",
+      "date": "2026-01-24T07:58:35Z",
+      "author": "Owen Guobadia",
+      "subject": " OVC Repo Maze",
+      "touched_dirs": [
+        "Tetsu/",
+        "tools/"
+      ],
+      "touched_file_count": 20,
+      "tags": [
+        "repo_maze",
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "7b017981530ab53fcf8db4235cf9341578eb0d95",
+      "date": "2026-01-24T11:33:15Z",
+      "author": "Owen Guobadia",
+      "subject": "Add Canonical Repo Map v0.1",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "governance_contracts"
+      ]
+    },
+    {
+      "hash": "875e2fd6ac91e85ae5bfafe5b0e19b801e262668",
+      "date": "2026-01-24T11:55:17Z",
+      "author": "Owen Guobadia",
+      "subject": "Append changelog entry for Canonical Repo Map v0.1",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "governance_contracts"
+      ]
+    },
+    {
+      "hash": "536742709ec0420bb521f32b28ef5c84b61ff154",
+      "date": "2026-01-25T08:16:37Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor OVC_REPO_MAZE structure and update documentation",
+      "touched_dirs": [
+        "Tetsu/",
+        "docs/"
+      ],
+      "touched_file_count": 21,
+      "tags": [
+        "governance_contracts",
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "d271e385528ec6bc30132515c4dacb887d5b6db9",
+      "date": "2026-01-25T10:19:14Z",
+      "author": "Owen Guobadia",
+      "subject": "Add draft for QA Organization Map detailing folder structure, roles, and governance",
+      "touched_dirs": [
+        "Tetsu/",
+        "docs/"
+      ],
+      "touched_file_count": 36,
+      "tags": [
+        "repo_map",
+        "repo_maze",
+        "validation"
+      ]
+    },
+    {
+      "hash": "5994d30ad425cf4d7f45feff9c3c6d1f7835f576",
+      "date": "2026-01-26T15:46:09Z",
+      "author": "Owen Guobadia",
+      "subject": "Add comprehensive legend documentation for each graph in the repository",
+      "touched_dirs": [
+        "Tetsu/"
+      ],
+      "touched_file_count": 17,
+      "tags": [
+        "repo_maze",
+        "validation"
+      ]
+    },
+    {
+      "hash": "cd19465967f98f8916b2f9ad18c5fe3888440fda",
+      "date": "2026-01-29T11:20:13Z",
+      "author": "Owen Guobadia",
+      "subject": "Update workspace configuration to switch active file type to canvas and adjust last opened files",
+      "touched_dirs": [
+        "Tetsu/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "739ed433c57e17e257745f4072b6c3fd6f0fa335",
+      "date": "2026-01-30T01:18:49Z",
+      "author": "Owen Guobadia",
+      "subject": "Add Option A1 and A2 contracts for bar and event ingest",
+      "touched_dirs": [
+        "Tetsu/",
+        "docs/"
+      ],
+      "touched_file_count": 9,
+      "tags": [
+        "governance_contracts",
+        "repo_map",
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "615c7964b8c1a82f1807b3f055cff5e4f602a7a4",
+      "date": "2026-01-30T06:01:39Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260130_GBPUSD_20260129_len5d_78e22c92",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "57bd17b2fc325ce323a77c768c7cdec9b805d316",
+      "date": "2026-01-31T05:28:46Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260131_GBPUSD_20260130_len5d_687bafa3",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "316384b2a3c7be3433732b511662390d0057947c",
+      "date": "2026-02-01T06:11:01Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260201_GBPUSD_20260131_len5d_475dd734",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "f1688f92b5a987fa2f8aca7c3c022b694a7f87a9",
+      "date": "2026-02-01T16:42:27Z",
+      "author": "Owen Guobadia",
+      "subject": "Update workspace configuration and add new contracts for feature registry and TradingView reference",
+      "touched_dirs": [
+        "Tetsu/",
+        "docs/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "governance_contracts",
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "53a3c0b9a0ba5c9a506224a338ba3da5ba40e2aa",
+      "date": "2026-02-01T16:42:31Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        "Tetsu/",
+        "docs/",
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 27,
+      "tags": [
+        "evidence_runs",
+        "governance_contracts",
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "f5318b3c33952781932b148d44c6909f78972a8e",
+      "date": "2026-02-02T06:44:44Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260202_GBPUSD_20260201_len5d_31f19f8a",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "4c245c6e90eec04733739f8879d1868e977f0257",
+      "date": "2026-02-02T14:36:41Z",
+      "author": "Owen Guobadia",
+      "subject": "Add codex audit harness (prompts + checks); ignore runtime and runs",
+      "touched_dirs": [
+        ".codex/",
+        "/"
+      ],
+      "touched_file_count": 8,
+      "tags": [
+        "codex_runtime",
+        "operations",
+        "validation"
+      ]
+    },
+    {
+      "hash": "44403d3f47251c870c548e726a596384e30ca426",
+      "date": "2026-02-02T15:24:36Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branches 'main' and 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        ".codex/",
+        "/",
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 20,
+      "tags": [
+        "codex_runtime",
+        "evidence_runs",
+        "operations",
+        "validation"
+      ]
+    },
+    {
+      "hash": "ef2dd2f4067b60028788b439394172e92d9d98ef",
+      "date": "2026-02-02T17:03:21Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Update workspace and documentation for Neon Schema Topology",
+      "touched_dirs": [
+        "Tetsu/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "85cb367082e98ac3a2339ca71c51c1141ed91308",
+      "date": "2026-02-02T17:03:44Z",
+      "author": "owenguobadia24s-collab",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        ".codex/",
+        "/",
+        "Tetsu/"
+      ],
+      "touched_file_count": 10,
+      "tags": [
+        "codex_runtime",
+        "operations",
+        "repo_maze",
+        "validation"
+      ]
+    },
+    {
+      "hash": "d844f2eb3abfe31ee7651bb5f2260ea4988c13df",
+      "date": "2026-02-02T18:26:45Z",
+      "author": "Owen Guobadia",
+      "subject": "Audit Harness_V1",
+      "touched_dirs": [
+        ".codex/",
+        "Tetsu/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "codex_runtime",
+        "repo_maze",
+        "validation"
+      ]
+    },
+    {
+      "hash": "731fe267ee2796446931564fb779fc52545878bf",
+      "date": "2026-02-02T18:28:08Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        ".codex/",
+        "Tetsu/"
+      ],
+      "touched_file_count": 8,
+      "tags": [
+        "codex_runtime",
+        "repo_maze",
+        "validation"
+      ]
+    },
+    {
+      "hash": "b19cf71b1d1c48b59e5ba5853e37c33a45688220",
+      "date": "2026-02-02T19:31:01Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor rg_index.ps1 queries and update workspace.json for GRAPH_51__EXTERNAL_STORES; add preflight_parse.ps1 and config.toml for script validation",
+      "touched_dirs": [
+        ".codex/",
+        "Tetsu/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "codex_runtime",
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "f758bd189a8b8b7a0b13baed703a4014b29748d5",
+      "date": "2026-02-02T19:48:35Z",
+      "author": "Owen Guobadia",
+      "subject": "Update timestamp generation in coverage_audit.py and refactor rg_index.ps1 for improved readability and functionality",
+      "touched_dirs": [
+        ".codex/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "codex_runtime",
+        "validation"
+      ]
+    },
+    {
+      "hash": "3dc06d8df45105eb06284c476f32243021c2a8b9",
+      "date": "2026-02-02T21:06:37Z",
+      "author": "Owen Guobadia",
+      "subject": "codex: non-spec graph NodeID rename planner + applied safe renames",
+      "touched_dirs": [
+        ".codex/",
+        "Tetsu/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "codex_runtime",
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "b3e733edcd5f4e26d1894d0f57074fa91ca3cca0",
+      "date": "2026-02-02T23:00:17Z",
+      "author": "Owen Guobadia",
+      "subject": "freeze(legend): canonicalize NodeID authority and lock governance",
+      "touched_dirs": [
+        "Tetsu/",
+        "Work Timeline/",
+        "docs/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "governance_contracts",
+        "repo_maze"
+      ]
+    },
+    {
+      "hash": "11bba2ccaf601e48416c0558bd01328fd8ab33b3",
+      "date": "2026-02-03T06:08:18Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260203_GBPUSD_20260202_len5d_8c35df6c",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "956982dbb26f1db70741c3b2a207d1e65277afd1",
+      "date": "2026-02-04T06:05:33Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260204_GBPUSD_20260203_len5d_c00576a2",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "02fc2accfe43f534e2cc305a216679be5e2a0b52",
+      "date": "2026-02-04T20:14:03Z",
+      "author": "Owen Guobadia",
+      "subject": "Phase 1 - Goveranance Reference & Inspection Phase 1.5 - Governance Cohesion & Closure Phase 1.6 \u2014 Canonical Pruning & Freeze",
+      "touched_dirs": [
+        ".codex/",
+        ".github/",
+        "_archive/",
+        "_quarantine/",
+        "infra/",
+        "scripts/",
+        "sql/",
+        "src/",
+        "tools/"
+      ],
+      "touched_file_count": 52,
+      "tags": [
+        "ci_workflows",
+        "codex_runtime",
+        "evidence_runs",
+        "infra",
+        "scripts_general",
+        "source_code",
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "12ef20f81b8555e879993aaeaca0caf088266b9b",
+      "date": "2026-02-04T20:14:32Z",
+      "author": "Owen Guobadia",
+      "subject": ".continued",
+      "touched_dirs": [
+        "/",
+        "_archive/",
+        "_quarantine/",
+        "docs/",
+        "infra/",
+        "reports/",
+        "sql/",
+        "src/"
+      ],
+      "touched_file_count": 16,
+      "tags": [
+        "evidence_runs",
+        "governance_contracts",
+        "infra",
+        "source_code",
+        "validation"
+      ]
+    },
+    {
+      "hash": "39696066e87f82b694bf4f20905f0f3ea3c9cce2",
+      "date": "2026-02-04T20:14:36Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        ".codex/",
+        ".github/",
+        "/",
+        "_archive/",
+        "_quarantine/",
+        "docs/",
+        "infra/",
+        "reports/",
+        "scripts/",
+        "sql/",
+        "src/",
+        "tools/"
+      ],
+      "touched_file_count": 91,
+      "tags": [
+        "ci_workflows",
+        "codex_runtime",
+        "evidence_runs",
+        "governance_contracts",
+        "infra",
+        "scripts_general",
+        "source_code",
+        "tools_general",
+        "validation"
+      ]
+    },
+    {
+      "hash": "e54a663953319ac936696413623538e5139e9849",
+      "date": "2026-02-05T00:53:52Z",
+      "author": "Owen Guobadia",
+      "subject": "docs(governance): add run envelope standard + expected versions v0.1",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "governance_contracts"
+      ]
+    },
+    {
+      "hash": "456567ea4a3a64b3a374152955b1ba150628216a",
+      "date": "2026-02-05T00:54:03Z",
+      "author": "Owen Guobadia",
+      "subject": "feat(qa): add run envelope v0.1 + validation pack + registry tooling",
+      "touched_dirs": [
+        ".codex/",
+        "scripts/",
+        "src/",
+        "tests/",
+        "tools/"
+      ],
+      "touched_file_count": 11,
+      "tags": [
+        "codex_runtime",
+        "scripts_general",
+        "source_code",
+        "tests",
+        "tools_general",
+        "validation"
+      ]
+    },
+    {
+      "hash": "41600c050adf38bc71e8ced7244d5b6917497154",
+      "date": "2026-02-05T00:54:11Z",
+      "author": "Owen Guobadia",
+      "subject": "evidence(path1): add p1_20260204_001 artifacts and update resolved queue",
+      "touched_dirs": [
+        "reports/"
+      ],
+      "touched_file_count": 10,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "a4f56d59989f53af9d204a2589f11abf523a6e7d",
+      "date": "2026-02-05T00:55:14Z",
+      "author": "Owen Guobadia",
+      "subject": "test(compat): restore tools.validate_contract + parse_export via archive shims",
+      "touched_dirs": [
+        "tools/"
+      ],
+      "touched_file_count": 3,
+      "tags": [
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "a818656ec69636a910e6bdc459bf6d122d85b802",
+      "date": "2026-02-05T02:28:02Z",
+      "author": "Owen Guobadia",
+      "subject": "Phase 2.2: add registry schema wrapper + validation reports",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 32,
+      "tags": [
+        "governance_contracts",
+        "validation"
+      ]
+    },
+    {
+      "hash": "519d031e804f247df4fb65b0a186b8c374e93fc9",
+      "date": "2026-02-05T02:28:12Z",
+      "author": "Owen Guobadia",
+      "subject": "Phase 2.2.1/2 Add new schemas and validators for registry management",
+      "touched_dirs": [
+        "/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "fd374fa7bb76584c072d1abf7751adde9484a462",
+      "date": "2026-02-05T02:59:06Z",
+      "author": "Owen Guobadia",
+      "subject": "Option A: enforce LF normalization + ignore Windows nul",
+      "touched_dirs": [
+        "/"
+      ],
+      "touched_file_count": 1,
+      "tags": []
+    },
+    {
+      "hash": "dd964ca3d0151285b5a3d5fc398f4b70feec7b30",
+      "date": "2026-02-05T03:15:59Z",
+      "author": "Owen Guobadia",
+      "subject": "Phase 2.2.3 Registry Delta Log functionality",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 9,
+      "tags": [
+        "validation"
+      ]
+    },
+    {
+      "hash": "287cf61e3e0ecba43f4606b1f0dc1ee37284b04b",
+      "date": "2026-02-05T03:52:22Z",
+      "author": "Owen Guobadia",
+      "subject": "Phase 2.3 Maintenance Contracts including Health, Recovery, and Upgrade Contracts",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 8,
+      "tags": [
+        "governance_contracts"
+      ]
+    },
+    {
+      "hash": "34e45abaa3e1214689e2348e295c76090f279a6c",
+      "date": "2026-02-05T04:18:21Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor CI workflows to streamline script path validation and enhance environment variable management",
+      "touched_dirs": [
+        ".github/",
+        ".vscode/",
+        "/",
+        "_quarantine/",
+        "docs/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "ci_workflows",
+        "validation"
+      ]
+    },
+    {
+      "hash": "3b73583bcc60a6f93d2aa437188be998f6f50551",
+      "date": "2026-02-05T05:55:19Z",
+      "author": "Owen Guobadia",
+      "subject": "Phase 3 with timeline display and summary stats",
+      "touched_dirs": [
+        "/",
+        "tools/"
+      ],
+      "touched_file_count": 17,
+      "tags": [
+        "control_panel",
+        "validation"
+      ]
+    },
+    {
+      "hash": "07022ac03513f1191f0bc192d8979d5318801c3f",
+      "date": "2026-02-05T06:13:00Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260205_GBPUSD_20260204_len5d_34fb1bcb",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "8f660b20cd1d0df1780e10e7b52efe7564868719",
+      "date": "2026-02-05T06:44:19Z",
+      "author": "Owen Guobadia",
+      "subject": "Add TypeScript configuration and package files for phase 3 control panel",
+      "touched_dirs": [
+        "tools/"
+      ],
+      "touched_file_count": 4,
+      "tags": [
+        "control_panel"
+      ]
+    },
+    {
+      "hash": "8452511e7ae16af73801df8db9137a2fb429c466",
+      "date": "2026-02-05T06:45:20Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        "/",
+        "reports/",
+        "sql/",
+        "tools/"
+      ],
+      "touched_file_count": 32,
+      "tags": [
+        "control_panel",
+        "evidence_runs",
+        "validation"
+      ]
+    },
+    {
+      "hash": "8f5c33733a2ff75f51d3c8848ada4de0596d6506",
+      "date": "2026-02-05T06:48:35Z",
+      "author": "Owen Guobadia",
+      "subject": "Update AI Agent Instructions with project overview, governance rules, and developer workflows",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "71cfd9c1f982dc1fa96fd36f12406f0cfe6dddf4",
+      "date": "2026-02-05T07:09:55Z",
+      "author": "Owen Guobadia",
+      "subject": "Add ParseErrorPanel component to adapt ParseError for ErrorPanel display",
+      "touched_dirs": [
+        "tools/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "control_panel"
+      ]
+    },
+    {
+      "hash": "1af13559e2f56707f29d12b62b34d46917f09c22",
+      "date": "2026-02-05T07:24:02Z",
+      "author": "Owen Guobadia",
+      "subject": " Implement Phase 3 Control Panel with read-only functionality",
+      "touched_dirs": [
+        "tools/"
+      ],
+      "touched_file_count": 11,
+      "tags": [
+        "control_panel"
+      ]
+    },
+    {
+      "hash": "9fa7d15fbb1433fb1cdb88d6ff0f7f2012dd3fe1",
+      "date": "2026-02-05T08:52:15Z",
+      "author": "Owen Guobadia",
+      "subject": "Refactor DeltaLogView and FailuresPage components for improved clarity and accuracy",
+      "touched_dirs": [
+        "tools/"
+      ],
+      "touched_file_count": 8,
+      "tags": [
+        "control_panel"
+      ]
+    },
+    {
+      "hash": "22e99cd6be68a05c4c967758bacae7cbe4ff0ad6",
+      "date": "2026-02-05T10:13:05Z",
+      "author": "Owen Guobadia",
+      "subject": "Add initial draft of CONTRACT_EVOLUTION_PROTOCOL for governance and versioning guidelines",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "governance_contracts"
+      ]
+    },
+    {
+      "hash": "9267725acf1cb687ad543188a75076013f29b0c0",
+      "date": "2026-02-05T11:53:16Z",
+      "author": "Owen Guobadia",
+      "subject": "Phase 4:  audit interpretation/ agent",
+      "touched_dirs": [
+        "/",
+        "docs/",
+        "tools/"
+      ],
+      "touched_file_count": 20,
+      "tags": [
+        "audit_interpreter",
+        "governance_contracts",
+        "validation"
+      ]
+    },
+    {
+      "hash": "a317006c3e075bb61e6d6a009c1b96537c1cc95f",
+      "date": "2026-02-06T06:10:05Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260206_GBPUSD_20260205_len5d_cc78af78",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "7021c84d722a6782d032dbeccfccc8aa81bd3353",
+      "date": "2026-02-07T05:33:31Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260207_GBPUSD_20260206_len5d_efde5bd5",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "ff1564dd8e4cd61b5bbc76db3aebbba48852abdb",
+      "date": "2026-02-07T18:26:34Z",
+      "author": "Owen Guobadia",
+      "subject": "Change Taxonomy & Governance Classification (Post-Phase 4): introduce change classification and ledger generation",
+      "touched_dirs": [
+        ".github/",
+        ".vscode/",
+        "/",
+        "artifacts/",
+        "docs/",
+        "scripts/",
+        "tests/",
+        "tools/"
+      ],
+      "touched_file_count": 13,
+      "tags": [
+        "artifacts",
+        "catalogs",
+        "ci_workflows",
+        "governance_contracts",
+        "governance_tooling",
+        "tests",
+        "tools_general"
+      ]
+    },
+    {
+      "hash": "2a68adf9762ff6910ea1883a6d5cf1f999cf7dae",
+      "date": "2026-02-07T18:29:46Z",
+      "author": "Owen Guobadia",
+      "subject": "docs(pr): add change classification section to PR template",
+      "touched_dirs": [
+        ".github/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "ci_workflows"
+      ]
+    },
+    {
+      "hash": "7d92461d83ba71f8df87d28a130a7279c86d0e62",
+      "date": "2026-02-08T05:12:11Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260208_GBPUSD_20260207_len5d_3d531e1b",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    },
+    {
+      "hash": "8950c6cb233d58406ddaf20247d0367948bab316",
+      "date": "2026-02-08T14:32:41Z",
+      "author": "Owen Guobadia",
+      "subject": "governance: harden --range parsing (reject triple-dot) + tests",
+      "touched_dirs": [
+        "scripts/",
+        "tests/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "governance_tooling",
+        "tests"
+      ]
+    },
+    {
+      "hash": "3ee57f59d634db7bb5b1ebb8f642444ee1d7fca2",
+      "date": "2026-02-08T14:59:28Z",
+      "author": "Owen Guobadia",
+      "subject": "governance: deterministic hardening for overlay v0.1 (range parser + repo-root seal keys)",
+      "touched_dirs": [
+        "docs/",
+        "scripts/",
+        "tests/"
+      ],
+      "touched_file_count": 6,
+      "tags": [
+        "catalogs",
+        "governance_tooling",
+        "tests"
+      ]
+    },
+    {
+      "hash": "35eb846e5c7111384b1570ab3a142d3fee8f3002",
+      "date": "2026-02-08T16:23:57Z",
+      "author": "Owen Guobadia",
+      "subject": "governance: make overlay builder cwd-independent (repo-root path resolution)",
+      "touched_dirs": [
+        "scripts/"
+      ],
+      "touched_file_count": 1,
+      "tags": [
+        "governance_tooling"
+      ]
+    },
+    {
+      "hash": "d50080c7197abd03ed944af08d21f64cbccbd65e",
+      "date": "2026-02-08T16:27:49Z",
+      "author": "Owen Guobadia",
+      "subject": "merge: overlay v0.1 deterministic hardening",
+      "touched_dirs": [
+        "docs/",
+        "scripts/",
+        "tests/"
+      ],
+      "touched_file_count": 7,
+      "tags": [
+        "catalogs",
+        "governance_tooling",
+        "tests"
+      ]
+    },
+    {
+      "hash": "6919b4e26e428bedfa3187e8ecd049c4da2aa14a",
+      "date": "2026-02-08T16:47:54Z",
+      "author": "Owen Guobadia",
+      "subject": "governance: tighten overlay builder path resolution + ignore local test artifacts",
+      "touched_dirs": [
+        "/",
+        "scripts/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "governance_tooling"
+      ]
+    },
+    {
+      "hash": "52d4a177ba43263c8817db27b6634b073b4e5015",
+      "date": "2026-02-08T16:51:35Z",
+      "author": "Owen Guobadia",
+      "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "touched_dirs": [
+        "/",
+        "docs/",
+        "reports/",
+        "scripts/",
+        "sql/",
+        "tests/"
+      ],
+      "touched_file_count": 20,
+      "tags": [
+        "catalogs",
+        "evidence_runs",
+        "governance_tooling",
+        "tests"
+      ]
+    },
+    {
+      "hash": "5053bbfdba14990f4017d22ea8cead36e0adb94f",
+      "date": "2026-02-09T01:55:06Z",
+      "author": "Owen Guobadia",
+      "subject": "POST phase 4 consolidation: Retroactive Continuity Spine and OVC Development Timeline v0.1",
+      "touched_dirs": [
+        "docs/"
+      ],
+      "touched_file_count": 2,
+      "tags": [
+        "catalogs"
+      ]
+    },
+    {
+      "hash": "cfd91a7d80267d717ab519102b1ce7956361503c",
+      "date": "2026-02-09T05:12:52Z",
+      "author": "github-actions[bot]",
+      "subject": "path1 evidence: p1_20260209_GBPUSD_20260208_len5d_b4cdab60",
+      "touched_dirs": [
+        "reports/",
+        "sql/"
+      ],
+      "touched_file_count": 12,
+      "tags": [
+        "evidence_runs"
+      ]
+    }
+  ],
+  "epochs": [
+    {
+      "epoch_index": 0,
+      "date_range": [
+        "2026-01-14T01:00:01+00:00",
+        "2026-01-14T08:31:49+00:00"
+      ],
+      "commit_count": 17,
+      "dominant_dirs": {
+        ".github/": 4,
+        "/": 3,
+        "contracts/": 3,
+        "\"/": 2,
+        "\"tools/": 2,
+        "docs/": 1,
+        "sql/": 1,
+        "src/": 1,
+        "pine/": 1
+      },
+      "dominant_tags": {
+        "ci_workflows": 4,
+        "contracts": 3,
+        "evidence_runs": 1,
+        "source_code": 1,
+        "pine": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "dc6e7f5913a5c4c3ed81e1f7cbf3a383c51188fc",
+          "date": "2026-01-14T01:20:35Z",
+          "subject": "Add OVC backfill v0.1 (OANDA checkpointed) + repo structure"
+        },
+        {
+          "hash": "a78f7c9d92ba466f69218e65edc8b19e43bc852b",
+          "date": "2026-01-14T01:02:43Z",
+          "subject": "Update .gitignore for OVC and data/logs"
+        },
+        {
+          "hash": "d6c8b7c90a87bf79114a4831eb8e9444a84194ab",
+          "date": "2026-01-14T01:30:37Z",
+          "subject": "Add GitHub Actions daily backfill workflow"
+        }
+      ],
+      "label": ".github/+/: contract backfill workflow"
+    },
+    {
+      "epoch_index": 1,
+      "date_range": [
+        "2026-01-14T08:36:08+00:00",
+        "2026-01-14T08:36:08+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "tests/": 1,
+        "tools/": 1
+      },
+      "dominant_tags": {
+        "tests": 1,
+        "tools_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "be09dd8b58769540fc16260529816f9baef514d6",
+          "date": "2026-01-14T08:36:08Z",
+          "subject": "Add v0.1 export contracts, validation tools, and tests"
+        }
+      ],
+      "label": "tests/+tools/: export contracts validation"
+    },
+    {
+      "epoch_index": 2,
+      "date_range": [
+        "2026-01-14T08:36:18+00:00",
+        "2026-01-14T08:36:18+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "tests/": 1,
+        "tools/": 1
+      },
+      "dominant_tags": {
+        "tests": 1,
+        "tools_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "aad49831233824189a9c95528dc4dcee0fd9b237",
+          "date": "2026-01-14T08:36:18Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        }
+      ],
+      "label": "tests/+tools/: merge branch main"
+    },
+    {
+      "epoch_index": 3,
+      "date_range": [
+        "2026-01-14T09:29:49+00:00",
+        "2026-01-14T09:37:00+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "tests/": 2
+      },
+      "dominant_tags": {
+        "tests": 2
+      },
+      "representative_commits": [
+        {
+          "hash": "c5574da312127422fb4af8513bf455b798f7f188",
+          "date": "2026-01-14T09:29:49Z",
+          "subject": "Add export string for MIN contract in min_001.txt"
+        },
+        {
+          "hash": "e8c253791cb6b44febb0ba6ea70b5b4042c015f0",
+          "date": "2026-01-14T09:37:00Z",
+          "subject": "Update export string in full_001.txt"
+        }
+      ],
+      "label": "tests/: export string min"
+    },
+    {
+      "epoch_index": 4,
+      "date_range": [
+        "2026-01-14T10:29:13+00:00",
+        "2026-01-14T10:29:13+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "/": 1,
+        "tests/": 1,
+        "tools/": 1
+      },
+      "dominant_tags": {
+        "tests": 1,
+        "tools_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "4547615fb0df2ce0c207d6fa4d43ff3099070da3",
+          "date": "2026-01-14T10:29:13Z",
+          "subject": "Update export strings in full_001.txt and min_001.txt; add validation script for export strings"
+        }
+      ],
+      "label": "/+tests/: export strings 001"
+    },
+    {
+      "epoch_index": 5,
+      "date_range": [
+        "2026-01-14T10:42:13+00:00",
+        "2026-01-14T10:57:45+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "contracts/": 1,
+        "tools/": 1
+      },
+      "dominant_tags": {
+        "contracts": 1,
+        "tools_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "09d951775170a52c51278b04919233c633a7ed9c",
+          "date": "2026-01-14T10:42:13Z",
+          "subject": "Refactor export contract schema: remove formatting and update types for clarity and consistency"
+        },
+        {
+          "hash": "1859414a24a6eae9742110e2d1b4cd0c58951b3a",
+          "date": "2026-01-14T10:57:45Z",
+          "subject": "Enhance validation logic: normalize input values and improve type checks for contract fields"
+        }
+      ],
+      "label": "contracts/+tools/: contract refactor export"
+    },
+    {
+      "epoch_index": 6,
+      "date_range": [
+        "2026-01-14T11:02:34+00:00",
+        "2026-01-14T14:15:46+00:00"
+      ],
+      "commit_count": 8,
+      "dominant_dirs": {
+        "contracts/": 3,
+        "ovc-webhook/": 2,
+        "infra/": 2,
+        "tools/": 1,
+        "pine/": 1,
+        "/": 1
+      },
+      "dominant_tags": {
+        "contracts": 3,
+        "infra": 2,
+        "tools_general": 1,
+        "pine": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "8b566f3aa4daad1e4960a43831dd6aa13fa432ee",
+          "date": "2026-01-14T14:07:05Z",
+          "subject": "Add ovc-webhook worker project"
+        },
+        {
+          "hash": "42bf13666843a8bf43fa70f4bcbede93f0c9149e",
+          "date": "2026-01-14T12:44:49Z",
+          "subject": "Update tradeable and ready fields to use bool_01 type for consistency in export format"
+        },
+        {
+          "hash": "455955f79ebf6d1889d48b6fa61fa1cfd02a3bbb",
+          "date": "2026-01-14T11:02:34Z",
+          "subject": "Refactor type checking in _check_type function: streamline conditions and enhance error messages for better clarity"
+        }
+      ],
+      "label": "contracts/+ovc-webhook/: type refactor function"
+    },
+    {
+      "epoch_index": 7,
+      "date_range": [
+        "2026-01-14T15:57:49+00:00",
+        "2026-01-14T15:57:49+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "infra/": 1
+      },
+      "dominant_tags": {
+        "infra": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "7c3982068064cde8acec78811adde90eca014e59",
+          "date": "2026-01-14T15:57:49Z",
+          "subject": "Refactor OVC webhook for improved clarity and structure"
+        }
+      ],
+      "label": "infra/: refactor ovc webhook"
+    },
+    {
+      "epoch_index": 8,
+      "date_range": [
+        "2026-01-14T18:01:00+00:00",
+        "2026-01-14T18:01:00+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        ".github/": 1,
+        "docs/": 1,
+        "infra/": 1,
+        "src/": 1
+      },
+      "dominant_tags": {
+        "ci_workflows": 1,
+        "infra": 1,
+        "source_code": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "aaecb0cab415bdc94a67ffb92ad903d488150367",
+          "date": "2026-01-14T18:01:00Z",
+          "subject": "Worker: upsert MIN into ovc_blocks_v01 (Option B)"
+        }
+      ],
+      "label": ".github/+docs/: worker upsert min"
+    },
+    {
+      "epoch_index": 9,
+      "date_range": [
+        "2026-01-14T18:02:46+00:00",
+        "2026-01-15T12:28:26+00:00"
+      ],
+      "commit_count": 8,
+      "dominant_dirs": {
+        "docs/": 5,
+        "infra/": 4,
+        "contracts/": 3,
+        ".github/": 2,
+        "src/": 2,
+        "/": 1,
+        "pine/": 1
+      },
+      "dominant_tags": {
+        "infra": 4,
+        "contracts": 3,
+        "ci_workflows": 2,
+        "source_code": 2,
+        "pine": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "fb35f49767878631a9f78967cdb4c8b7150f6027",
+          "date": "2026-01-14T18:10:11Z",
+          "subject": "Merge pull request #2 from owenguobadia24s-collab/codex/fix-export_contract_v0.1_full.json"
+        },
+        {
+          "hash": "df6e2c64fc22312b89e5baf052ec725d8bea5a07",
+          "date": "2026-01-14T18:02:46Z",
+          "subject": "Merge pull request #1 from owenguobadia24s-collab/codex/complete-step-8b-hardening-for-ovc"
+        },
+        {
+          "hash": "7a2ea214f506ed7320836ea9aef4277d37d04eb7",
+          "date": "2026-01-14T18:36:25Z",
+          "subject": "Add AI Agent guidelines to project documentation"
+        }
+      ],
+      "label": "docs/+infra/: merge pull request"
+    },
+    {
+      "epoch_index": 10,
+      "date_range": [
+        "2026-01-16T18:08:09+00:00",
+        "2026-01-16T18:13:06+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "docs/": 2
+      },
+      "dominant_tags": {},
+      "representative_commits": [
+        {
+          "hash": "dc12a30c14c62855ae1b4505f2292ce6bc55e39b",
+          "date": "2026-01-16T18:08:09Z",
+          "subject": "Add OVC current workflow documentation"
+        },
+        {
+          "hash": "e9a5ef31982bf1086ef0633801f4c88a6d1bc7a9",
+          "date": "2026-01-16T18:13:06Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        }
+      ],
+      "label": "docs/: ovc current workflow"
+    },
+    {
+      "epoch_index": 11,
+      "date_range": [
+        "2026-01-16T21:16:53+00:00",
+        "2026-01-16T22:36:02+00:00"
+      ],
+      "commit_count": 4,
+      "dominant_dirs": {
+        "sql/": 4,
+        "/": 1,
+        "contracts/": 1,
+        "docs/": 1,
+        "specs/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 4,
+        "contracts": 1,
+        "specs": 1,
+        "validation": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "15353b9226cdc441cca675eda7cdb0cb91ade68d",
+          "date": "2026-01-16T21:16:53Z",
+          "subject": "Gate1: lock MIN contract + specs + SQL v0.1"
+        },
+        {
+          "hash": "043271a319ccfc104911a2fade6eb3dbce861633",
+          "date": "2026-01-16T22:19:10Z",
+          "subject": "Fix table name references in SQL scripts for consistency"
+        },
+        {
+          "hash": "02abc800df9a757b7a7e792a88a6d5cec9ea3cb4",
+          "date": "2026-01-16T22:32:36Z",
+          "subject": "Fix table reference in events view SQL script for accuracy"
+        }
+      ],
+      "label": "sql/+/: sql table references"
+    },
+    {
+      "epoch_index": 12,
+      "date_range": [
+        "2026-01-16T22:50:47+00:00",
+        "2026-01-16T22:50:47+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "98d55cd4e57eb2ca36a36cf2f44432eb0068f7b1",
+          "date": "2026-01-16T22:50:47Z",
+          "subject": "Fix column references in events view for accuracy"
+        }
+      ],
+      "label": "sql/: column references events"
+    },
+    {
+      "epoch_index": 13,
+      "date_range": [
+        "2026-01-17T02:22:30+00:00",
+        "2026-01-17T02:22:30+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "infra/": 1,
+        "pine/": 1
+      },
+      "dominant_tags": {
+        "infra": 1,
+        "pine": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "a4943ebb9401ac7a694316c215a93b4309b9a320",
+          "date": "2026-01-17T02:22:30Z",
+          "subject": "feat: Implement export string generation for MIN and FULL profiles in Pine script"
+        }
+      ],
+      "label": "infra/+pine/: feat implement export"
+    },
+    {
+      "epoch_index": 14,
+      "date_range": [
+        "2026-01-17T02:38:50+00:00",
+        "2026-01-17T04:46:32+00:00"
+      ],
+      "commit_count": 9,
+      "dominant_dirs": {
+        "infra/": 5,
+        "tests/": 5,
+        "docs/": 5,
+        "pine/": 4,
+        "tools/": 3
+      },
+      "dominant_tags": {
+        "infra": 5,
+        "tests": 5,
+        "pine": 4,
+        "validation": 4,
+        "tools_general": 3
+      },
+      "representative_commits": [
+        {
+          "hash": "9d05d844c4f072ce513c3ed8803b1ed31b288a27",
+          "date": "2026-01-17T04:37:47Z",
+          "subject": "Merge branch 'main' into pr/pine-min-export-v0.1_min_r1"
+        },
+        {
+          "hash": "f6d9928e6c2ab862395a51eae6403985f31fb0ea",
+          "date": "2026-01-17T04:32:21Z",
+          "subject": "Merge pull request #5 from owenguobadia24s-collab/wip/infra-contract-validation"
+        },
+        {
+          "hash": "f7bbdde22c1a27c22a164f5a0e5e3c83d6f5e013",
+          "date": "2026-01-17T03:41:49Z",
+          "subject": "WIP: align infra validation to v0.1.1 MIN"
+        }
+      ],
+      "label": "infra/+tests/: min infra pine"
+    },
+    {
+      "epoch_index": 15,
+      "date_range": [
+        "2026-01-17T06:37:55+00:00",
+        "2026-01-17T06:58:24+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "infra/": 1,
+        "docs/": 1,
+        "scripts/": 1
+      },
+      "dominant_tags": {
+        "infra": 1,
+        "scripts_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "fab9e5ba3cac560c71c3f5d98f013fd223296559",
+          "date": "2026-01-17T06:58:24Z",
+          "subject": "Docs: normalize workflow + verification scripts"
+        },
+        {
+          "hash": "a47e2897bfccd9b1e5b108bcda69449011dc350b",
+          "date": "2026-01-17T06:37:55Z",
+          "subject": "Disable ret semantic check for v0.1 ingest stability"
+        }
+      ],
+      "label": "infra/+docs/: disable ret semantic"
+    },
+    {
+      "epoch_index": 16,
+      "date_range": [
+        "2026-01-17T07:05:03+00:00",
+        "2026-01-17T20:40:32+00:00"
+      ],
+      "commit_count": 8,
+      "dominant_dirs": {
+        "sql/": 5,
+        "docs/": 4,
+        "/": 3,
+        "contracts/": 3,
+        "scripts/": 3,
+        "tests/": 2,
+        "src/": 1,
+        "infra/": 1,
+        ".github/": 1,
+        "pine/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 5,
+        "contracts": 3,
+        "scripts_general": 3,
+        "tests": 2,
+        "source_code": 1,
+        "infra": 1,
+        "ci_workflows": 1,
+        "pine": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "607a8c5c4e828295534f03ef18d9ea51fde7d3c6",
+          "date": "2026-01-17T17:12:47Z",
+          "subject": "Evaluation + Feedback Layer (v0.1)"
+        },
+        {
+          "hash": "13a589b968eedf3690c3d6103ef9de0f69094a8e",
+          "date": "2026-01-17T18:02:40Z",
+          "subject": "Option D"
+        },
+        {
+          "hash": "72ce4b0a78717ca79fbc0360447faf20a1e73f70",
+          "date": "2026-01-17T15:28:56Z",
+          "subject": "chore: lock v0.1 ingest boundary + harden verifier (MIN default, FULL opt-in)"
+        }
+      ],
+      "label": "sql/+docs/: option sample script"
+    },
+    {
+      "epoch_index": 17,
+      "date_range": [
+        "2026-01-17T21:17:23+00:00",
+        "2026-01-17T21:17:23+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        ".github/": 1,
+        "/": 1,
+        "docs/": 1,
+        "scripts/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "ci_workflows": 1,
+        "evidence_runs": 1,
+        "scripts_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "cd780720b768933334a53f0231c60b4227311e13",
+          "date": "2026-01-17T21:17:23Z",
+          "subject": "Add Neon->Notion sync (ops watermark + script + CI workflow)"
+        }
+      ],
+      "label": ".github/+/: neon notion sync"
+    },
+    {
+      "epoch_index": 18,
+      "date_range": [
+        "2026-01-17T22:58:30+00:00",
+        "2026-01-18T00:34:53+00:00"
+      ],
+      "commit_count": 5,
+      "dominant_dirs": {
+        "docs/": 4,
+        "src/": 4,
+        "/": 2,
+        "scripts/": 2,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "source_code": 4,
+        "validation": 4,
+        "scripts_general": 2,
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "e4fb8f4f419430da52f6e73b195c0fe60eb0fc99",
+          "date": "2026-01-17T23:54:29Z",
+          "subject": "DTV"
+        },
+        {
+          "hash": "99d030e51d59edfbe6105898d14fdd89efd44f70",
+          "date": "2026-01-18T00:34:53Z",
+          "subject": "Add historical ingestion functionality for TradingView CSV data"
+        },
+        {
+          "hash": "5ddb81c41c2e38ecf1bd0ad1a761c2b0075f6b4a",
+          "date": "2026-01-17T23:16:35Z",
+          "subject": "Day TApe Validation"
+        }
+      ],
+      "label": "docs/+src/: dtv notion connection"
+    },
+    {
+      "epoch_index": 19,
+      "date_range": [
+        "2026-01-18T01:06:07+00:00",
+        "2026-01-18T01:06:07+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "docs/": 1,
+        "src/": 1
+      },
+      "dominant_tags": {
+        "source_code": 1,
+        "validation": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "1759c448f2d135d240ea747913d85a3868653b73",
+          "date": "2026-01-18T01:06:07Z",
+          "subject": "Implement CSV path resolution with auto-pick functionality in ingestion and validation scripts"
+        }
+      ],
+      "label": "docs/+src/: implement csv path"
+    },
+    {
+      "epoch_index": 20,
+      "date_range": [
+        "2026-01-18T01:22:04+00:00",
+        "2026-01-18T05:46:40+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "docs/": 2,
+        "scripts/": 2,
+        ".github/": 1
+      },
+      "dominant_tags": {
+        "scripts_general": 2,
+        "validation": 2,
+        "ci_workflows": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "01ec28f134404dbad08184ff04b9ac7615b99c2a",
+          "date": "2026-01-18T05:46:40Z",
+          "subject": "Add pipeline status harness and logging doctrine documentation"
+        },
+        {
+          "hash": "a36a2b94fbfbced1ca0898997ba08dc0ef260dd2",
+          "date": "2026-01-18T01:22:04Z",
+          "subject": "Enhance OANDA ingestion workflow with validation options and add OANDA 2H CSV export script"
+        }
+      ],
+      "label": "docs/+scripts/: oanda enhance ingestion"
+    },
+    {
+      "epoch_index": 21,
+      "date_range": [
+        "2026-01-18T06:01:59+00:00",
+        "2026-01-18T06:01:59+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "docs/": 1,
+        "src/": 1
+      },
+      "dominant_tags": {
+        "source_code": 1,
+        "validation": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "71072aa465e553a151b4f57ce6fb78e59b5f30e3",
+          "date": "2026-01-18T06:01:59Z",
+          "subject": "Refactor backfill scripts and update documentation for P2 workflow alignment"
+        }
+      ],
+      "label": "docs/+src/: refactor backfill scripts"
+    },
+    {
+      "epoch_index": 22,
+      "date_range": [
+        "2026-01-18T06:43:57+00:00",
+        "2026-01-18T22:19:09+00:00"
+      ],
+      "commit_count": 12,
+      "dominant_dirs": {
+        "docs/": 12,
+        "src/": 8,
+        "sql/": 4,
+        ".github/": 3,
+        "tests/": 3,
+        "scripts/": 2,
+        "artifacts/": 1,
+        "configs/": 1
+      },
+      "dominant_tags": {
+        "source_code": 8,
+        "validation": 7,
+        "evidence_runs": 4,
+        "ci_workflows": 4,
+        "tests": 3,
+        "scripts_general": 2,
+        "artifacts": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "ab9daed3998490f0e456ff188fa55ab1ca685429",
+          "date": "2026-01-18T21:43:28Z",
+          "subject": "Option B.2 Implemented"
+        },
+        {
+          "hash": "201fd6c8465a645b52b08435a1665638b2cfa281",
+          "date": "2026-01-18T06:43:57Z",
+          "subject": "Update documentation and SQL validation packs for enhanced pipeline status and derived data validation"
+        },
+        {
+          "hash": "961738bf86f3845f7969922cc9e211c84bf0b22f",
+          "date": "2026-01-18T22:19:09Z",
+          "subject": "OVC Option C.3 Stub and unit tests for Threshold Registry"
+        }
+      ],
+      "label": "docs/+src/: validation option documentation"
+    },
+    {
+      "epoch_index": 23,
+      "date_range": [
+        "2026-01-18T22:36:34+00:00",
+        "2026-01-19T23:14:58+00:00"
+      ],
+      "commit_count": 7,
+      "dominant_dirs": {
+        "docs/": 5,
+        "src/": 4,
+        "infra/": 2,
+        ".github/": 2,
+        "scripts/": 2,
+        "configs/": 1,
+        "sql/": 1,
+        "tests/": 1,
+        "contracts/": 1
+      },
+      "dominant_tags": {
+        "source_code": 4,
+        "ci_workflows": 3,
+        "infra": 2,
+        "scripts_general": 2,
+        "evidence_runs": 1,
+        "tests": 1,
+        "contracts": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "ee46496d262759fcae78902ffc07b4d2ac71282e",
+          "date": "2026-01-19T23:07:30Z",
+          "subject": "RUN_ARTIFACT_IMPLEMENTATION"
+        },
+        {
+          "hash": "e43ee24cad882874e42356a34af4c8ad82ec0d88",
+          "date": "2026-01-18T22:36:34Z",
+          "subject": "(c3_regime_trend): Implement C3 regime trend classifier (v0.1)"
+        },
+        {
+          "hash": "d348c04646de00626c534cdf39d5ee1cae7e8511",
+          "date": "2026-01-18T22:42:28Z",
+          "subject": "C3 lifecycle documentation and entry checklist"
+        }
+      ],
+      "label": "docs/+src/: regime trend implement"
+    },
+    {
+      "epoch_index": 24,
+      "date_range": [
+        "2026-01-19T23:23:34+00:00",
+        "2026-01-20T01:30:52+00:00"
+      ],
+      "commit_count": 4,
+      "dominant_dirs": {
+        "docs/": 4
+      },
+      "dominant_tags": {
+        "validation": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "c0a56dca5669a44d533917f3fdf798fba5a531fa",
+          "date": "2026-01-20T01:30:52Z",
+          "subject": "feat(docs): Update Pipeline Reality Map and OVC Current Workflow"
+        },
+        {
+          "hash": "800fbb9a6063f067a63b2f51b5e6bd801d7769e8",
+          "date": "2026-01-19T23:23:34Z",
+          "subject": "Add changelog for Pipeline Reality Map v0.1 detailing updates and resolved gaps"
+        },
+        {
+          "hash": "468a2b1e6bce122ee138820a404793491179262b",
+          "date": "2026-01-19T23:52:53Z",
+          "subject": "Add Verification Report v0.1 detailing deployment and workflow statuses"
+        }
+      ],
+      "label": "docs/: pipeline reality map"
+    },
+    {
+      "epoch_index": 25,
+      "date_range": [
+        "2026-01-20T01:47:47+00:00",
+        "2026-01-20T01:47:47+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "docs/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "44d409e5a7f9c3ca15cc14b82b96bce5640ed307",
+          "date": "2026-01-20T01:47:47Z",
+          "subject": "Add initial implementation contract and SQL view for C1 features"
+        }
+      ],
+      "label": "docs/+sql/: initial implementation contract"
+    },
+    {
+      "epoch_index": 26,
+      "date_range": [
+        "2026-01-20T02:15:14+00:00",
+        "2026-01-20T02:15:14+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "docs/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "9cf0060e6f423183fbf56c464824254e150be9c2",
+          "date": "2026-01-20T02:15:14Z",
+          "subject": "Add initial implementation contract and SQL view for C2 features"
+        }
+      ],
+      "label": "docs/+sql/: initial implementation contract"
+    },
+    {
+      "epoch_index": 27,
+      "date_range": [
+        "2026-01-20T02:42:17+00:00",
+        "2026-01-20T03:05:49+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "docs/": 2,
+        "sql/": 2
+      },
+      "dominant_tags": {
+        "evidence_runs": 2,
+        "validation": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "0197359d49adff54eedae2d3c60e160fe9ba183c",
+          "date": "2026-01-20T03:05:49Z",
+          "subject": "Option C"
+        },
+        {
+          "hash": "abc32d76165090fcb47b0348f808d961155396c2",
+          "date": "2026-01-20T02:42:17Z",
+          "subject": "Add C3 Implementation Contract and SQL View for C3 Features"
+        }
+      ],
+      "label": "docs/+sql/: implementation contract sql"
+    },
+    {
+      "epoch_index": 28,
+      "date_range": [
+        "2026-01-20T03:11:01+00:00",
+        "2026-01-20T03:11:01+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "docs/": 1,
+        "releases/": 1
+      },
+      "dominant_tags": {
+        "releases": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "88eff122fe893c14902013cedf36c25793e75e8f",
+          "date": "2026-01-20T03:11:01Z",
+          "subject": " OVC Doctrine and Immutability Notice"
+        }
+      ],
+      "label": "docs/+releases/: ovc doctrine immutability"
+    },
+    {
+      "epoch_index": 29,
+      "date_range": [
+        "2026-01-20T04:58:31+00:00",
+        "2026-01-20T04:58:31+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "research/": 1
+      },
+      "dominant_tags": {
+        "research": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "f2f8bd0bbdf3ce7a25eee7a62955602ae24d06d3",
+          "date": "2026-01-20T04:58:31Z",
+          "subject": "Add research artifacts and documentation for exploratory studies"
+        }
+      ],
+      "label": "research/: research artifacts documentation"
+    },
+    {
+      "epoch_index": 30,
+      "date_range": [
+        "2026-01-20T05:01:54+00:00",
+        "2026-01-20T05:01:54+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "research/": 1
+      },
+      "dominant_tags": {
+        "research": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "913bd4d3430bff9361fcebbeb08eb2f0ce6fcc1b",
+          "date": "2026-01-20T05:01:54Z",
+          "subject": "Add initial study files for basic feature-outcome analysis of GBPUSD"
+        }
+      ],
+      "label": "research/: initial study files"
+    },
+    {
+      "epoch_index": 31,
+      "date_range": [
+        "2026-01-20T05:04:53+00:00",
+        "2026-01-20T05:04:53+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "research/": 1
+      },
+      "dominant_tags": {
+        "research": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "007f21eacce9bef66989ab5034089658cf946cac",
+          "date": "2026-01-20T05:04:53Z",
+          "subject": "Add block_range_intensity score implementation as a research artifact"
+        }
+      ],
+      "label": "research/: block range intensity"
+    },
+    {
+      "epoch_index": 32,
+      "date_range": [
+        "2026-01-20T05:10:12+00:00",
+        "2026-01-20T05:10:12+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "research/": 1
+      },
+      "dominant_tags": {
+        "research": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "db312bd11cfd3c240d41f6c48c2b3fbf4cb3ab69",
+          "date": "2026-01-20T05:10:12Z",
+          "subject": "Add initial files for block range intensity score sanity study"
+        }
+      ],
+      "label": "research/: initial files block"
+    },
+    {
+      "epoch_index": 33,
+      "date_range": [
+        "2026-01-20T05:13:47+00:00",
+        "2026-01-20T05:27:39+00:00"
+      ],
+      "commit_count": 3,
+      "dominant_dirs": {
+        "research/": 3
+      },
+      "dominant_tags": {
+        "research": 3
+      },
+      "representative_commits": [
+        {
+          "hash": "5553e731fc66651ddb934303f7e67f893712f47f",
+          "date": "2026-01-20T05:13:47Z",
+          "subject": "Add study files for block range intensity score analysis"
+        },
+        {
+          "hash": "4607f31a4ed930592be155455ec3a92237aacda4",
+          "date": "2026-01-20T05:18:09Z",
+          "subject": "Add initial files for block range intensity score temporal stability study"
+        },
+        {
+          "hash": "9a2f52a5e592e1b36937fb383bbee36c54b1ef20",
+          "date": "2026-01-20T05:27:39Z",
+          "subject": "Add initial study files for block range intensity by volatility regime analysis"
+        }
+      ],
+      "label": "research/: study files block"
+    },
+    {
+      "epoch_index": 34,
+      "date_range": [
+        "2026-01-20T05:31:50+00:00",
+        "2026-01-20T05:31:50+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "research/": 1
+      },
+      "dominant_tags": {
+        "research": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "336d0eb6edc063b295ac0f30c030e591fd0b0d8e",
+          "date": "2026-01-20T05:31:50Z",
+          "subject": "Add study 20260120: Block Range Intensity by Session"
+        }
+      ],
+      "label": "research/: study 20260120 block"
+    },
+    {
+      "epoch_index": 35,
+      "date_range": [
+        "2026-01-20T05:43:18+00:00",
+        "2026-01-20T10:06:54+00:00"
+      ],
+      "commit_count": 7,
+      "dominant_dirs": {
+        "sql/": 6,
+        "docs/": 4,
+        "research/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 6,
+        "research": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "04d95ab73c8d2dbbe4c5e28616aff6d0843ddf2d",
+          "date": "2026-01-20T06:41:53Z",
+          "subject": "Add new studies for DIS, LID, and RES scores focusing on stability and outcome associations"
+        },
+        {
+          "hash": "0f853613954d252b57104386a6edcdf010c4b52b",
+          "date": "2026-01-20T08:29:35Z",
+          "subject": "Update DIS score to v1.1, removing directional_efficiency dependency; add documentation and status files for Path 1 freeze"
+        },
+        {
+          "hash": "b07313878bb6d92a0425f56fd7c0919144638a2a",
+          "date": "2026-01-20T09:24:25Z",
+          "subject": "feat: Add operational guide and SQL patches for Path 1 evidence runs"
+        }
+      ],
+      "label": "sql/+docs/: dis studies lid"
+    },
+    {
+      "epoch_index": 36,
+      "date_range": [
+        "2026-01-20T10:19:30+00:00",
+        "2026-01-20T10:27:37+00:00"
+      ],
+      "commit_count": 3,
+      "dominant_dirs": {
+        "reports/": 2,
+        ".github/": 1,
+        "docs/": 1,
+        "scripts/": 1,
+        "/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 2,
+        "ci_workflows": 1,
+        "scripts_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "1774ef56bfd2165b8b8e7a83230cd39a1fb46fc8",
+          "date": "2026-01-20T10:19:30Z",
+          "subject": "Path 1 Github Action Pipe"
+        },
+        {
+          "hash": "a512105780ad4af36705294041b10ad3ebbeee78",
+          "date": "2026-01-20T10:25:58Z",
+          "subject": "Path1: add RUN_QUEUE.csv and update gitignore for path1 reports"
+        },
+        {
+          "hash": "f63c710cad5464006ac83f9dd2face06b7f1f477",
+          "date": "2026-01-20T10:27:37Z",
+          "subject": "Path1: populate RUN_QUEUE (runs 004-012)"
+        }
+      ],
+      "label": "reports/+.github/: path1 queue path"
+    },
+    {
+      "epoch_index": 37,
+      "date_range": [
+        "2026-01-20T10:29:42+00:00",
+        "2026-01-20T12:12:21+00:00"
+      ],
+      "commit_count": 7,
+      "dominant_dirs": {
+        "scripts/": 5,
+        "reports/": 2,
+        ".github/": 2,
+        "docs/": 2
+      },
+      "dominant_tags": {
+        "scripts_general": 5,
+        "evidence_runs": 2,
+        "ci_workflows": 2
+      },
+      "representative_commits": [
+        {
+          "hash": "4e1826bf2c8b83ec07c5603ad177b0cc17ffa2d9",
+          "date": "2026-01-20T10:44:02Z",
+          "subject": "Add new score reports and definitions for DIS, LID, and RES"
+        },
+        {
+          "hash": "d2e816266340a2e57b9432a886c3d9fef230be28",
+          "date": "2026-01-20T10:29:42Z",
+          "subject": "Path1: fix CSV comment parsing + add INDEX.md for existing runs"
+        },
+        {
+          "hash": "19ae34b9980d3914d3a4ea62f5330a80ca364edc",
+          "date": "2026-01-20T11:49:06Z",
+          "subject": "Patch Path 1 Evidence Queue: Add concurrency control and artifact verification steps"
+        }
+      ],
+      "label": "scripts/+reports/: validation path1 reports"
+    },
+    {
+      "epoch_index": 38,
+      "date_range": [
+        "2026-01-20T12:21:03+00:00",
+        "2026-01-20T13:11:25+00:00"
+      ],
+      "commit_count": 5,
+      "dominant_dirs": {
+        "reports/": 4,
+        "sql/": 2,
+        ".github/": 1,
+        "scripts/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 4,
+        "ci_workflows": 1,
+        "scripts_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "d5a9c3694ea11a09563170c9ca59d1670784dae2",
+          "date": "2026-01-20T12:33:06Z",
+          "subject": "Path 1 Evidence Run(s) - Automated"
+        },
+        {
+          "hash": "fcbe9465b876661545ebf9859bf6cd707dbb7204",
+          "date": "2026-01-20T12:54:24Z",
+          "subject": "Merge pull request #8 from owenguobadia24s-collab/evidence-run-20260120-123211"
+        },
+        {
+          "hash": "83f3d21122c122a44fbd3a85f78d7d4008202c58",
+          "date": "2026-01-20T13:08:32Z",
+          "subject": "Enhance evidence run queue management: add status updates and actual date tracking for completed runs"
+        }
+      ],
+      "label": "reports/+sql/: evidence enhance runs"
+    },
+    {
+      "epoch_index": 39,
+      "date_range": [
+        "2026-01-20T13:18:13+00:00",
+        "2026-01-20T13:34:12+00:00"
+      ],
+      "commit_count": 3,
+      "dominant_dirs": {
+        "reports/": 3,
+        "scripts/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 3,
+        "scripts_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "41f13eab69e53e92421a9345bc4e0fac66f4d0df",
+          "date": "2026-01-20T13:19:17Z",
+          "subject": "Merge pull request #9 from owenguobadia24s-collab/evidence-run-20260120-131115"
+        },
+        {
+          "hash": "ef3e50e405dfa96d7d63364400ee309746b772e4",
+          "date": "2026-01-20T13:34:12Z",
+          "subject": "Enhance evidence run management: add date format validation and deduplication in INDEX.md updates"
+        },
+        {
+          "hash": "9e269228ac7849c1e8a9714fd8c94f1f886d1e8a",
+          "date": "2026-01-20T13:18:13Z",
+          "subject": "Update RUN_QUEUE.csv:"
+        }
+      ],
+      "label": "reports/+scripts/: evidence queue csv"
+    },
+    {
+      "epoch_index": 40,
+      "date_range": [
+        "2026-01-20T14:01:21+00:00",
+        "2026-01-20T14:01:21+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        ".github/": 1,
+        "scripts/": 1
+      },
+      "dominant_tags": {
+        "ci_workflows": 1,
+        "scripts_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "d4b1a6e781599c3d903a7a4de2ad2742d067ad90",
+          "date": "2026-01-20T14:01:21Z",
+          "subject": "Enhance evidence run scripts: add warnings for local queue status and validation scope"
+        }
+      ],
+      "label": ".github/+scripts/: enhance evidence scripts"
+    },
+    {
+      "epoch_index": 41,
+      "date_range": [
+        "2026-01-20T14:13:12+00:00",
+        "2026-01-22T04:35:15+00:00"
+      ],
+      "commit_count": 15,
+      "dominant_dirs": {
+        "reports/": 9,
+        ".github/": 7,
+        "scripts/": 6,
+        "sql/": 4,
+        "/": 4,
+        "docs/": 4,
+        "specs/": 2,
+        "src/": 2,
+        "artifacts/": 1,
+        "configs/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 9,
+        "ci_workflows": 7,
+        "scripts_general": 6,
+        "validation": 3,
+        "operations": 2,
+        "source_code": 2,
+        "specs": 2,
+        "artifacts": 1,
+        "governance_contracts": 1,
+        "infra": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "27354e74047cd908eca1a40188416dcfd875a583",
+          "date": "2026-01-21T21:48:05Z",
+          "subject": "Repo-restructuring"
+        },
+        {
+          "hash": "bf516503e1c796f4baf35d80f1d615e8217e3ba9",
+          "date": "2026-01-22T03:57:26Z",
+          "subject": "Path1: add Evidence Pack v0.2 + run p1_20260120_031 outputs; add backfill_m15 workflow; ignore pytest temp dirs"
+        },
+        {
+          "hash": "e25017bd86466fce6308b8dc74f80fbb4382beaa",
+          "date": "2026-01-21T18:15:50Z",
+          "subject": "Add verification outputs and SQL specifications for OVC project"
+        }
+      ],
+      "label": "reports/+.github/: evidence enhance queue"
+    },
+    {
+      "epoch_index": 42,
+      "date_range": [
+        "2026-01-22T04:40:30+00:00",
+        "2026-01-22T04:52:19+00:00"
+      ],
+      "commit_count": 4,
+      "dominant_dirs": {
+        "/": 2,
+        "reports/": 2,
+        "sql/": 2,
+        ".vscode/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 2
+      },
+      "representative_commits": [
+        {
+          "hash": "4673c7a6e8c6b5b19d6f2986b8f40c9d0ec720fa",
+          "date": "2026-01-22T04:48:56Z",
+          "subject": "Path1: evidence run p1_20260120_016"
+        },
+        {
+          "hash": "ca147a606ce00a7e6b8d2a59aa427e0469dd5759",
+          "date": "2026-01-22T04:52:19Z",
+          "subject": "Path1: evidence run p1_20260120_017"
+        },
+        {
+          "hash": "2316949b478190c2aa1be564a1d8b466c2faa05b",
+          "date": "2026-01-22T04:40:30Z",
+          "subject": "chore(vscode): track settings.json only"
+        }
+      ],
+      "label": "/+reports/: chore vscode path1"
+    },
+    {
+      "epoch_index": 43,
+      "date_range": [
+        "2026-01-22T04:58:03+00:00",
+        "2026-01-22T05:08:06+00:00"
+      ],
+      "commit_count": 3,
+      "dominant_dirs": {
+        ".github/": 2,
+        "reports/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "ci_workflows": 2,
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "26903304ea71a196706c84d7bb1c4babcd3e537a",
+          "date": "2026-01-22T04:58:03Z",
+          "subject": "Path1: evidence run p1_20260120_018"
+        },
+        {
+          "hash": "3d707c234e0bd5d8fcba69bb2579beacf2123ce0",
+          "date": "2026-01-22T05:01:59Z",
+          "subject": "Add GitHub Actions workflow for evidence processing"
+        },
+        {
+          "hash": "094a2dda4ef82ceffca60c9f47b3e5cf85f4c105",
+          "date": "2026-01-22T05:08:06Z",
+          "subject": "Change OVC_DB_URL to DATABASE_URL in workflow"
+        }
+      ],
+      "label": ".github/+reports/: evidence workflow url"
+    },
+    {
+      "epoch_index": 44,
+      "date_range": [
+        "2026-01-22T05:20:09+00:00",
+        "2026-01-22T06:24:58+00:00"
+      ],
+      "commit_count": 7,
+      "dominant_dirs": {
+        "reports/": 5,
+        "sql/": 5,
+        ".github/": 2,
+        "/": 1,
+        "docs/": 1,
+        "scripts/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 5,
+        "ci_workflows": 2,
+        "scripts_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "35507a0cedbbdc774fd96572154bf2425d27ad2d",
+          "date": "2026-01-22T05:21:50Z",
+          "subject": "Path1: automated evidence run"
+        },
+        {
+          "hash": "f5064286f8a5e3183328e19c036315b0f66bf2a2",
+          "date": "2026-01-22T05:57:45Z",
+          "subject": "Path1: automated evidence run"
+        },
+        {
+          "hash": "dbda28f7371cb1f895b4cf3c08799817ec243a47",
+          "date": "2026-01-22T06:23:09Z",
+          "subject": "Path1: automated evidence run"
+        }
+      ],
+      "label": "reports/+sql/: evidence path1 automated"
+    },
+    {
+      "epoch_index": 45,
+      "date_range": [
+        "2026-01-22T06:25:44+00:00",
+        "2026-01-22T16:00:20+00:00"
+      ],
+      "commit_count": 17,
+      "dominant_dirs": {
+        "reports/": 11,
+        "scripts/": 9,
+        "sql/": 8,
+        ".github/": 4,
+        "tests/": 4,
+        ".vscode/": 3,
+        "docs/": 3,
+        "/": 2,
+        "infra/": 1,
+        "trajectory_families/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 11,
+        "scripts_general": 9,
+        "ci_workflows": 4,
+        "tests": 4,
+        "infra": 1,
+        "trajectory": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "3c9fbb1079f710d3c36e69572c61f82e318c18ea",
+          "date": "2026-01-22T06:49:07Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        },
+        {
+          "hash": "851fbad324673e97d0f97be4bcc242013e334929",
+          "date": "2026-01-22T16:00:20Z",
+          "subject": "feat: add initial implementation of trajectory families module"
+        },
+        {
+          "hash": "101e3b48650b99dd04c52bff24140f40ed8eb7e5",
+          "date": "2026-01-22T15:28:27Z",
+          "subject": "chore: remove reserved 'nul' file and rebuild index"
+        }
+      ],
+      "label": "reports/+scripts/: evidence path1 automated"
+    },
+    {
+      "epoch_index": 46,
+      "date_range": [
+        "2026-01-22T16:28:46+00:00",
+        "2026-01-22T18:58:46+00:00"
+      ],
+      "commit_count": 6,
+      "dominant_dirs": {
+        "reports/": 2,
+        "scripts/": 2,
+        "docs/": 2,
+        "CLAIMS/": 2,
+        "trajectory_families/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 2,
+        "scripts_general": 2,
+        "claims": 2,
+        "trajectory": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "359079c5f18d07f71b31872e21ab4adf1a3e9440",
+          "date": "2026-01-22T18:48:20Z",
+          "subject": "Add evidence and outputs for state plane run p1_20260122_004"
+        },
+        {
+          "hash": "24d1b4d471038fd7c1e75c506e4189780e4af898",
+          "date": "2026-01-22T16:42:52Z",
+          "subject": "feat: implement clustering and gallery generation commands in trajectory families module"
+        },
+        {
+          "hash": "b7b09557b7fea4c0199066df93ff64e591922494",
+          "date": "2026-01-22T16:28:46Z",
+          "subject": "fix: enhance SQL file path resolution and add existence check in run scripts"
+        }
+      ],
+      "label": "reports/+scripts/: feat state plane"
+    },
+    {
+      "epoch_index": 47,
+      "date_range": [
+        "2026-01-22T21:10:17+00:00",
+        "2026-01-23T19:56:44+00:00"
+      ],
+      "commit_count": 8,
+      "dominant_dirs": {
+        "docs/": 7,
+        ".github/": 5,
+        "/": 3,
+        "scripts/": 3,
+        "reports/": 2,
+        "artifacts/": 2,
+        "schema/": 1,
+        "tools/": 1,
+        "Tetsu/": 1
+      },
+      "dominant_tags": {
+        "ci_workflows": 5,
+        "scripts_general": 3,
+        "governance_contracts": 3,
+        "evidence_runs": 2,
+        "artifacts": 2,
+        "operations": 2,
+        "schema": 1,
+        "tools_general": 1,
+        "repo_maze": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "d62806071d873b3a7090de073de3de451421a4be",
+          "date": "2026-01-22T21:48:49Z",
+          "subject": "Refactor documentation for Evidence Pack v0.3 Overlays and Path 1 Execution Model"
+        },
+        {
+          "hash": "064339bb46becb8c9d774441796ae5b8695c2762",
+          "date": "2026-01-23T17:50:57Z",
+          "subject": "Add comprehensive documentation and schema verification for OVC pipeline"
+        },
+        {
+          "hash": "51f48c227ef69f6ba7a0eb293746265577034fa2",
+          "date": "2026-01-23T19:56:44Z",
+          "subject": "feat: add comprehensive governance documentation and preflight instructions"
+        }
+      ],
+      "label": "docs/+.github/: documentation feat path"
+    },
+    {
+      "epoch_index": 48,
+      "date_range": [
+        "2026-01-23T20:43:11+00:00",
+        "2026-01-24T07:58:35+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "tools/": 2,
+        "/": 1,
+        "docs/": 1,
+        "Tetsu/": 1
+      },
+      "dominant_tags": {
+        "tools_general": 2,
+        "governance_contracts": 1,
+        "repo_maze": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "bae8dade70c31ba07ba20ac0556202a60df9fdcf",
+          "date": "2026-01-24T07:58:35Z",
+          "subject": " OVC Repo Maze"
+        },
+        {
+          "hash": "380e199d700cbce7c6304ac96d18ad1626490622",
+          "date": "2026-01-23T20:43:11Z",
+          "subject": "Remove obsolete governance documents and prompts; update maze generation script output path"
+        }
+      ],
+      "label": "tools/+/: maze remove obsolete"
+    },
+    {
+      "epoch_index": 49,
+      "date_range": [
+        "2026-01-24T11:33:15+00:00",
+        "2026-01-26T15:46:09+00:00"
+      ],
+      "commit_count": 5,
+      "dominant_dirs": {
+        "docs/": 4,
+        "Tetsu/": 3
+      },
+      "dominant_tags": {
+        "governance_contracts": 3,
+        "repo_maze": 3,
+        "validation": 2,
+        "repo_map": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "d271e385528ec6bc30132515c4dacb887d5b6db9",
+          "date": "2026-01-25T10:19:14Z",
+          "subject": "Add draft for QA Organization Map detailing folder structure, roles, and governance"
+        },
+        {
+          "hash": "536742709ec0420bb521f32b28ef5c84b61ff154",
+          "date": "2026-01-25T08:16:37Z",
+          "subject": "Refactor OVC_REPO_MAZE structure and update documentation"
+        },
+        {
+          "hash": "5994d30ad425cf4d7f45feff9c3c6d1f7835f576",
+          "date": "2026-01-26T15:46:09Z",
+          "subject": "Add comprehensive legend documentation for each graph in the repository"
+        }
+      ],
+      "label": "docs/+Tetsu/: repo map canonical"
+    },
+    {
+      "epoch_index": 50,
+      "date_range": [
+        "2026-01-29T11:20:13+00:00",
+        "2026-02-01T16:42:27+00:00"
+      ],
+      "commit_count": 6,
+      "dominant_dirs": {
+        "Tetsu/": 3,
+        "reports/": 3,
+        "sql/": 3,
+        "docs/": 2
+      },
+      "dominant_tags": {
+        "repo_maze": 3,
+        "evidence_runs": 3,
+        "governance_contracts": 2,
+        "repo_map": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "615c7964b8c1a82f1807b3f055cff5e4f602a7a4",
+          "date": "2026-01-30T06:01:39Z",
+          "subject": "path1 evidence: p1_20260130_GBPUSD_20260129_len5d_78e22c92"
+        },
+        {
+          "hash": "57bd17b2fc325ce323a77c768c7cdec9b805d316",
+          "date": "2026-01-31T05:28:46Z",
+          "subject": "path1 evidence: p1_20260131_GBPUSD_20260130_len5d_687bafa3"
+        },
+        {
+          "hash": "316384b2a3c7be3433732b511662390d0057947c",
+          "date": "2026-02-01T06:11:01Z",
+          "subject": "path1 evidence: p1_20260201_GBPUSD_20260131_len5d_475dd734"
+        }
+      ],
+      "label": "Tetsu/+reports/: path1 evidence gbpusd"
+    },
+    {
+      "epoch_index": 51,
+      "date_range": [
+        "2026-02-01T16:42:31+00:00",
+        "2026-02-01T16:42:31+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "Tetsu/": 1,
+        "docs/": 1,
+        "reports/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 1,
+        "governance_contracts": 1,
+        "repo_maze": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "53a3c0b9a0ba5c9a506224a338ba3da5ba40e2aa",
+          "date": "2026-02-01T16:42:31Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        }
+      ],
+      "label": "Tetsu/+docs/: merge branch main"
+    },
+    {
+      "epoch_index": 52,
+      "date_range": [
+        "2026-02-02T06:44:44+00:00",
+        "2026-02-02T06:44:44+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "reports/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "f5318b3c33952781932b148d44c6909f78972a8e",
+          "date": "2026-02-02T06:44:44Z",
+          "subject": "path1 evidence: p1_20260202_GBPUSD_20260201_len5d_31f19f8a"
+        }
+      ],
+      "label": "reports/+sql/: path1 evidence 20260202"
+    },
+    {
+      "epoch_index": 53,
+      "date_range": [
+        "2026-02-02T14:36:41+00:00",
+        "2026-02-02T15:24:36+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        ".codex/": 2,
+        "/": 2,
+        "reports/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "codex_runtime": 2,
+        "operations": 2,
+        "validation": 2,
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "44403d3f47251c870c548e726a596384e30ca426",
+          "date": "2026-02-02T15:24:36Z",
+          "subject": "Merge branches 'main' and 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        },
+        {
+          "hash": "4c245c6e90eec04733739f8879d1868e977f0257",
+          "date": "2026-02-02T14:36:41Z",
+          "subject": "Add codex audit harness (prompts + checks); ignore runtime and runs"
+        }
+      ],
+      "label": ".codex/+/: main codex audit"
+    },
+    {
+      "epoch_index": 54,
+      "date_range": [
+        "2026-02-02T17:03:21+00:00",
+        "2026-02-02T17:03:21+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "Tetsu/": 1
+      },
+      "dominant_tags": {
+        "repo_maze": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "ef2dd2f4067b60028788b439394172e92d9d98ef",
+          "date": "2026-02-02T17:03:21Z",
+          "subject": "Update workspace and documentation for Neon Schema Topology"
+        }
+      ],
+      "label": "Tetsu/: workspace documentation neon"
+    },
+    {
+      "epoch_index": 55,
+      "date_range": [
+        "2026-02-02T17:03:44+00:00",
+        "2026-02-02T19:31:01+00:00"
+      ],
+      "commit_count": 4,
+      "dominant_dirs": {
+        ".codex/": 4,
+        "Tetsu/": 4,
+        "/": 1
+      },
+      "dominant_tags": {
+        "codex_runtime": 4,
+        "repo_maze": 4,
+        "validation": 3,
+        "operations": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "85cb367082e98ac3a2339ca71c51c1141ed91308",
+          "date": "2026-02-02T17:03:44Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        },
+        {
+          "hash": "731fe267ee2796446931564fb779fc52545878bf",
+          "date": "2026-02-02T18:28:08Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        },
+        {
+          "hash": "d844f2eb3abfe31ee7651bb5f2260ea4988c13df",
+          "date": "2026-02-02T18:26:45Z",
+          "subject": "Audit Harness_V1"
+        }
+      ],
+      "label": ".codex/+Tetsu/: merge branch main"
+    },
+    {
+      "epoch_index": 56,
+      "date_range": [
+        "2026-02-02T19:48:35+00:00",
+        "2026-02-02T21:06:37+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        ".codex/": 2,
+        "Tetsu/": 1
+      },
+      "dominant_tags": {
+        "codex_runtime": 2,
+        "validation": 1,
+        "repo_maze": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "3dc06d8df45105eb06284c476f32243021c2a8b9",
+          "date": "2026-02-02T21:06:37Z",
+          "subject": "codex: non-spec graph NodeID rename planner + applied safe renames"
+        },
+        {
+          "hash": "f758bd189a8b8b7a0b13baed703a4014b29748d5",
+          "date": "2026-02-02T19:48:35Z",
+          "subject": "Update timestamp generation in coverage_audit.py and refactor rg_index.ps1 for improved readability and functionality"
+        }
+      ],
+      "label": ".codex/+Tetsu/: timestamp generation coverage"
+    },
+    {
+      "epoch_index": 57,
+      "date_range": [
+        "2026-02-02T23:00:17+00:00",
+        "2026-02-04T06:05:33+00:00"
+      ],
+      "commit_count": 3,
+      "dominant_dirs": {
+        "reports/": 2,
+        "sql/": 2,
+        "Tetsu/": 1,
+        "Work Timeline/": 1,
+        "docs/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 2,
+        "governance_contracts": 1,
+        "repo_maze": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "11bba2ccaf601e48416c0558bd01328fd8ab33b3",
+          "date": "2026-02-03T06:08:18Z",
+          "subject": "path1 evidence: p1_20260203_GBPUSD_20260202_len5d_8c35df6c"
+        },
+        {
+          "hash": "956982dbb26f1db70741c3b2a207d1e65277afd1",
+          "date": "2026-02-04T06:05:33Z",
+          "subject": "path1 evidence: p1_20260204_GBPUSD_20260203_len5d_c00576a2"
+        },
+        {
+          "hash": "b3e733edcd5f4e26d1894d0f57074fa91ca3cca0",
+          "date": "2026-02-02T23:00:17Z",
+          "subject": "freeze(legend): canonicalize NodeID authority and lock governance"
+        }
+      ],
+      "label": "reports/+sql/: path1 evidence 20260203"
+    },
+    {
+      "epoch_index": 58,
+      "date_range": [
+        "2026-02-04T20:14:03+00:00",
+        "2026-02-05T00:54:11+00:00"
+      ],
+      "commit_count": 6,
+      "dominant_dirs": {
+        "src/": 4,
+        ".codex/": 3,
+        "_archive/": 3,
+        "_quarantine/": 3,
+        "infra/": 3,
+        "scripts/": 3,
+        "sql/": 3,
+        "tools/": 3,
+        "docs/": 3,
+        "reports/": 3
+      },
+      "dominant_tags": {
+        "evidence_runs": 4,
+        "source_code": 4,
+        "codex_runtime": 3,
+        "infra": 3,
+        "scripts_general": 3,
+        "tools_general": 3,
+        "governance_contracts": 3,
+        "validation": 3,
+        "ci_workflows": 2,
+        "tests": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "39696066e87f82b694bf4f20905f0f3ea3c9cce2",
+          "date": "2026-02-04T20:14:36Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        },
+        {
+          "hash": "02fc2accfe43f534e2cc305a216679be5e2a0b52",
+          "date": "2026-02-04T20:14:03Z",
+          "subject": "Phase 1 - Goveranance Reference & Inspection Phase 1.5 - Governance Cohesion & Closure Phase 1.6 \u2014 Canonical Pruning & Freeze"
+        },
+        {
+          "hash": "12ef20f81b8555e879993aaeaca0caf088266b9b",
+          "date": "2026-02-04T20:14:32Z",
+          "subject": ".continued"
+        }
+      ],
+      "label": "src/+.codex/: phase governance envelope"
+    },
+    {
+      "epoch_index": 59,
+      "date_range": [
+        "2026-02-05T00:55:14+00:00",
+        "2026-02-05T02:28:02+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "tools/": 1,
+        "docs/": 1
+      },
+      "dominant_tags": {
+        "tools_general": 1,
+        "governance_contracts": 1,
+        "validation": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "a818656ec69636a910e6bdc459bf6d122d85b802",
+          "date": "2026-02-05T02:28:02Z",
+          "subject": "Phase 2.2: add registry schema wrapper + validation reports"
+        },
+        {
+          "hash": "a4f56d59989f53af9d204a2589f11abf523a6e7d",
+          "date": "2026-02-05T00:55:14Z",
+          "subject": "test(compat): restore tools.validate_contract + parse_export via archive shims"
+        }
+      ],
+      "label": "tools/+docs/: test compat restore"
+    },
+    {
+      "epoch_index": 60,
+      "date_range": [
+        "2026-02-05T02:28:12+00:00",
+        "2026-02-05T02:59:06+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "/": 2
+      },
+      "dominant_tags": {},
+      "representative_commits": [
+        {
+          "hash": "519d031e804f247df4fb65b0a186b8c374e93fc9",
+          "date": "2026-02-05T02:28:12Z",
+          "subject": "Phase 2.2.1/2 Add new schemas and validators for registry management"
+        },
+        {
+          "hash": "fd374fa7bb76584c072d1abf7751adde9484a462",
+          "date": "2026-02-05T02:59:06Z",
+          "subject": "Option A: enforce LF normalization + ignore Windows nul"
+        }
+      ],
+      "label": "/: phase schemas validators"
+    },
+    {
+      "epoch_index": 61,
+      "date_range": [
+        "2026-02-05T03:15:59+00:00",
+        "2026-02-05T03:52:22+00:00"
+      ],
+      "commit_count": 2,
+      "dominant_dirs": {
+        "docs/": 2
+      },
+      "dominant_tags": {
+        "validation": 1,
+        "governance_contracts": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "dd964ca3d0151285b5a3d5fc398f4b70feec7b30",
+          "date": "2026-02-05T03:15:59Z",
+          "subject": "Phase 2.2.3 Registry Delta Log functionality"
+        },
+        {
+          "hash": "287cf61e3e0ecba43f4606b1f0dc1ee37284b04b",
+          "date": "2026-02-05T03:52:22Z",
+          "subject": "Phase 2.3 Maintenance Contracts including Health, Recovery, and Upgrade Contracts"
+        }
+      ],
+      "label": "docs/: phase contracts registry"
+    },
+    {
+      "epoch_index": 62,
+      "date_range": [
+        "2026-02-05T04:18:21+00:00",
+        "2026-02-05T06:13:00+00:00"
+      ],
+      "commit_count": 3,
+      "dominant_dirs": {
+        "/": 2,
+        ".github/": 1,
+        ".vscode/": 1,
+        "_quarantine/": 1,
+        "docs/": 1,
+        "tools/": 1,
+        "reports/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "validation": 2,
+        "ci_workflows": 1,
+        "control_panel": 1,
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "3b73583bcc60a6f93d2aa437188be998f6f50551",
+          "date": "2026-02-05T05:55:19Z",
+          "subject": "Phase 3 with timeline display and summary stats"
+        },
+        {
+          "hash": "07022ac03513f1191f0bc192d8979d5318801c3f",
+          "date": "2026-02-05T06:13:00Z",
+          "subject": "path1 evidence: p1_20260205_GBPUSD_20260204_len5d_34fb1bcb"
+        },
+        {
+          "hash": "34e45abaa3e1214689e2348e295c76090f279a6c",
+          "date": "2026-02-05T04:18:21Z",
+          "subject": "Refactor CI workflows to streamline script path validation and enhance environment variable management"
+        }
+      ],
+      "label": "/+.github/: refactor workflows streamline"
+    },
+    {
+      "epoch_index": 63,
+      "date_range": [
+        "2026-02-05T06:44:19+00:00",
+        "2026-02-05T06:44:19+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "tools/": 1
+      },
+      "dominant_tags": {
+        "control_panel": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "8f660b20cd1d0df1780e10e7b52efe7564868719",
+          "date": "2026-02-05T06:44:19Z",
+          "subject": "Add TypeScript configuration and package files for phase 3 control panel"
+        }
+      ],
+      "label": "tools/: typescript configuration package"
+    },
+    {
+      "epoch_index": 64,
+      "date_range": [
+        "2026-02-05T06:45:20+00:00",
+        "2026-02-05T06:45:20+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "/": 1,
+        "reports/": 1,
+        "sql/": 1,
+        "tools/": 1
+      },
+      "dominant_tags": {
+        "control_panel": 1,
+        "evidence_runs": 1,
+        "validation": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "8452511e7ae16af73801df8db9137a2fb429c466",
+          "date": "2026-02-05T06:45:20Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        }
+      ],
+      "label": "/+reports/: merge branch main"
+    },
+    {
+      "epoch_index": 65,
+      "date_range": [
+        "2026-02-05T06:48:35+00:00",
+        "2026-02-05T06:48:35+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        ".github/": 1
+      },
+      "dominant_tags": {
+        "ci_workflows": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "8f5c33733a2ff75f51d3c8848ada4de0596d6506",
+          "date": "2026-02-05T06:48:35Z",
+          "subject": "Update AI Agent Instructions with project overview, governance rules, and developer workflows"
+        }
+      ],
+      "label": ".github/: agent instructions project"
+    },
+    {
+      "epoch_index": 66,
+      "date_range": [
+        "2026-02-05T07:09:55+00:00",
+        "2026-02-07T05:33:31+00:00"
+      ],
+      "commit_count": 7,
+      "dominant_dirs": {
+        "tools/": 4,
+        "docs/": 2,
+        "reports/": 2,
+        "sql/": 2,
+        "/": 1
+      },
+      "dominant_tags": {
+        "control_panel": 3,
+        "governance_contracts": 2,
+        "evidence_runs": 2,
+        "audit_interpreter": 1,
+        "validation": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "9267725acf1cb687ad543188a75076013f29b0c0",
+          "date": "2026-02-05T11:53:16Z",
+          "subject": "Phase 4:  audit interpretation/ agent"
+        },
+        {
+          "hash": "a317006c3e075bb61e6d6a009c1b96537c1cc95f",
+          "date": "2026-02-06T06:10:05Z",
+          "subject": "path1 evidence: p1_20260206_GBPUSD_20260205_len5d_cc78af78"
+        },
+        {
+          "hash": "7021c84d722a6782d032dbeccfccc8aa81bd3353",
+          "date": "2026-02-07T05:33:31Z",
+          "subject": "path1 evidence: p1_20260207_GBPUSD_20260206_len5d_efde5bd5"
+        }
+      ],
+      "label": "tools/+docs/: phase path1 evidence"
+    },
+    {
+      "epoch_index": 67,
+      "date_range": [
+        "2026-02-07T18:26:34+00:00",
+        "2026-02-07T18:26:34+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        ".github/": 1,
+        ".vscode/": 1,
+        "/": 1,
+        "artifacts/": 1,
+        "docs/": 1,
+        "scripts/": 1,
+        "tests/": 1,
+        "tools/": 1
+      },
+      "dominant_tags": {
+        "artifacts": 1,
+        "catalogs": 1,
+        "ci_workflows": 1,
+        "governance_contracts": 1,
+        "governance_tooling": 1,
+        "tests": 1,
+        "tools_general": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "ff1564dd8e4cd61b5bbc76db3aebbba48852abdb",
+          "date": "2026-02-07T18:26:34Z",
+          "subject": "Change Taxonomy & Governance Classification (Post-Phase 4): introduce change classification and ledger generation"
+        }
+      ],
+      "label": ".github/+.vscode/: change classification taxonomy"
+    },
+    {
+      "epoch_index": 68,
+      "date_range": [
+        "2026-02-07T18:29:46+00:00",
+        "2026-02-07T18:29:46+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        ".github/": 1
+      },
+      "dominant_tags": {
+        "ci_workflows": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "2a68adf9762ff6910ea1883a6d5cf1f999cf7dae",
+          "date": "2026-02-07T18:29:46Z",
+          "subject": "docs(pr): add change classification section to PR template"
+        }
+      ],
+      "label": ".github/: docs change classification"
+    },
+    {
+      "epoch_index": 69,
+      "date_range": [
+        "2026-02-08T05:12:11+00:00",
+        "2026-02-08T14:59:28+00:00"
+      ],
+      "commit_count": 3,
+      "dominant_dirs": {
+        "scripts/": 2,
+        "tests/": 2,
+        "reports/": 1,
+        "sql/": 1,
+        "docs/": 1
+      },
+      "dominant_tags": {
+        "governance_tooling": 2,
+        "tests": 2,
+        "evidence_runs": 1,
+        "catalogs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "7d92461d83ba71f8df87d28a130a7279c86d0e62",
+          "date": "2026-02-08T05:12:11Z",
+          "subject": "path1 evidence: p1_20260208_GBPUSD_20260207_len5d_3d531e1b"
+        },
+        {
+          "hash": "3ee57f59d634db7bb5b1ebb8f642444ee1d7fca2",
+          "date": "2026-02-08T14:59:28Z",
+          "subject": "governance: deterministic hardening for overlay v0.1 (range parser + repo-root seal keys)"
+        },
+        {
+          "hash": "8950c6cb233d58406ddaf20247d0367948bab316",
+          "date": "2026-02-08T14:32:41Z",
+          "subject": "governance: harden --range parsing (reject triple-dot) + tests"
+        }
+      ],
+      "label": "scripts/+tests/: governance range path1"
+    },
+    {
+      "epoch_index": 70,
+      "date_range": [
+        "2026-02-08T16:23:57+00:00",
+        "2026-02-08T16:23:57+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "scripts/": 1
+      },
+      "dominant_tags": {
+        "governance_tooling": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "35eb846e5c7111384b1570ab3a142d3fee8f3002",
+          "date": "2026-02-08T16:23:57Z",
+          "subject": "governance: make overlay builder cwd-independent (repo-root path resolution)"
+        }
+      ],
+      "label": "scripts/: governance make overlay"
+    },
+    {
+      "epoch_index": 71,
+      "date_range": [
+        "2026-02-08T16:27:49+00:00",
+        "2026-02-08T16:51:35+00:00"
+      ],
+      "commit_count": 3,
+      "dominant_dirs": {
+        "scripts/": 3,
+        "docs/": 2,
+        "tests/": 2,
+        "/": 2,
+        "reports/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "governance_tooling": 3,
+        "catalogs": 2,
+        "tests": 2,
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "52d4a177ba43263c8817db27b6634b073b4e5015",
+          "date": "2026-02-08T16:51:35Z",
+          "subject": "Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra"
+        },
+        {
+          "hash": "d50080c7197abd03ed944af08d21f64cbccbd65e",
+          "date": "2026-02-08T16:27:49Z",
+          "subject": "merge: overlay v0.1 deterministic hardening"
+        },
+        {
+          "hash": "6919b4e26e428bedfa3187e8ecd049c4da2aa14a",
+          "date": "2026-02-08T16:47:54Z",
+          "subject": "governance: tighten overlay builder path resolution + ignore local test artifacts"
+        }
+      ],
+      "label": "scripts/+docs/: merge overlay deterministic"
+    },
+    {
+      "epoch_index": 72,
+      "date_range": [
+        "2026-02-09T01:55:06+00:00",
+        "2026-02-09T01:55:06+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "docs/": 1
+      },
+      "dominant_tags": {
+        "catalogs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "5053bbfdba14990f4017d22ea8cead36e0adb94f",
+          "date": "2026-02-09T01:55:06Z",
+          "subject": "POST phase 4 consolidation: Retroactive Continuity Spine and OVC Development Timeline v0.1"
+        }
+      ],
+      "label": "docs/: post phase consolidation"
+    },
+    {
+      "epoch_index": 73,
+      "date_range": [
+        "2026-02-09T05:12:52+00:00",
+        "2026-02-09T05:12:52+00:00"
+      ],
+      "commit_count": 1,
+      "dominant_dirs": {
+        "reports/": 1,
+        "sql/": 1
+      },
+      "dominant_tags": {
+        "evidence_runs": 1
+      },
+      "representative_commits": [
+        {
+          "hash": "cfd91a7d80267d717ab519102b1ce7956361503c",
+          "date": "2026-02-09T05:12:52Z",
+          "subject": "path1 evidence: p1_20260209_GBPUSD_20260208_len5d_b4cdab60"
+        }
+      ],
+      "label": "reports/+sql/: path1 evidence 20260209"
+    }
+  ],
+  "crossover_summary": {
+    "top_overlaps": {
+      "ci_workflows + scripts_general": 21,
+      "evidence_runs + scripts_general": 17,
+      "source_code + validation": 17,
+      "ci_workflows + evidence_runs": 14,
+      "ci_workflows + source_code": 13,
+      "evidence_runs + source_code": 12,
+      "evidence_runs + validation": 11,
+      "scripts_general + validation": 9,
+      "ci_workflows + validation": 8,
+      "codex_runtime + validation": 8,
+      "evidence_runs + tests": 8,
+      "scripts_general + source_code": 8,
+      "tests + tools_general": 8,
+      "ci_workflows + tests": 7,
+      "infra + source_code": 7,
+      "infra + validation": 7,
+      "scripts_general + tests": 7,
+      "source_code + tests": 7,
+      "tests + validation": 7,
+      "ci_workflows + infra": 6
+    }
+  }
+}

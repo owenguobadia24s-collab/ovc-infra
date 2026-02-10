@@ -1,0 +1,161 @@
+{
+  "repo": {
+    "root": "e144cf064769f1a5e332090d02a272f6cadc0e6c",
+    "head": "cfd91a7d80267d717ab519102b1ce7956361503c",
+    "total_commits": 264
+  },
+  "micro_epochs_count": 63,
+  "macro_epochs_count": 20,
+  "top_dirs": [
+    {
+      "dir": "docs/",
+      "commits": 102
+    },
+    {
+      "dir": "sql/",
+      "commits": 68
+    },
+    {
+      "dir": "reports/",
+      "commits": 61
+    },
+    {
+      "dir": "scripts/",
+      "commits": 53
+    },
+    {
+      "dir": ".github/",
+      "commits": 46
+    },
+    {
+      "dir": "/",
+      "commits": 44
+    },
+    {
+      "dir": "src/",
+      "commits": 29
+    },
+    {
+      "dir": "tests/",
+      "commits": 27
+    },
+    {
+      "dir": "tools/",
+      "commits": 25
+    },
+    {
+      "dir": "infra/",
+      "commits": 23
+    }
+  ],
+  "top_tags": [
+    {
+      "tag": "evidence_runs",
+      "commits": 90
+    },
+    {
+      "tag": "ci_workflows",
+      "commits": 48
+    },
+    {
+      "tag": "scripts_general",
+      "commits": 46
+    },
+    {
+      "tag": "validation",
+      "commits": 45
+    },
+    {
+      "tag": "source_code",
+      "commits": 29
+    },
+    {
+      "tag": "tests",
+      "commits": 27
+    },
+    {
+      "tag": "infra",
+      "commits": 23
+    },
+    {
+      "tag": "governance_contracts",
+      "commits": 20
+    },
+    {
+      "tag": "tools_general",
+      "commits": 18
+    },
+    {
+      "tag": "repo_maze",
+      "commits": 16
+    }
+  ],
+  "top_classifications": [
+    {
+      "class": "UNKNOWN",
+      "commits": 160
+    },
+    {
+      "class": "C",
+      "commits": 123
+    },
+    {
+      "class": "A",
+      "commits": 64
+    },
+    {
+      "class": "E",
+      "commits": 58
+    },
+    {
+      "class": "B",
+      "commits": 21
+    },
+    {
+      "class": "D",
+      "commits": 6
+    }
+  ],
+  "top_overlaps": [
+    {
+      "pair": "ci_workflows + scripts_general",
+      "commits": 21
+    },
+    {
+      "pair": "evidence_runs + scripts_general",
+      "commits": 17
+    },
+    {
+      "pair": "source_code + validation",
+      "commits": 17
+    },
+    {
+      "pair": "ci_workflows + evidence_runs",
+      "commits": 14
+    },
+    {
+      "pair": "ci_workflows + source_code",
+      "commits": 13
+    },
+    {
+      "pair": "evidence_runs + source_code",
+      "commits": 12
+    },
+    {
+      "pair": "evidence_runs + validation",
+      "commits": 11
+    },
+    {
+      "pair": "scripts_general + validation",
+      "commits": 10
+    },
+    {
+      "pair": "ci_workflows + validation",
+      "commits": 9
+    },
+    {
+      "pair": "codex_runtime + validation",
+      "commits": 8
+    }
+  ]
+}

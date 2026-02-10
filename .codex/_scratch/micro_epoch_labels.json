@@ -1,0 +1,254 @@
+[
+  {
+    "micro_epoch": 0,
+    "label": "/+.github/ | ci_workflows+contracts | backfill contract workflow"
+  },
+  {
+    "micro_epoch": 1,
+    "label": "tools/+tests/ | tools_general+tests | tools contract export"
+  },
+  {
+    "micro_epoch": 2,
+    "label": "tests/ | tests | export string full"
+  },
+  {
+    "micro_epoch": 3,
+    "label": "contracts/+tools/ | contracts+tools_general | export type refactor"
+  },
+  {
+    "micro_epoch": 4,
+    "label": "infra/ | infra | refactor ovc webhook"
+  },
+  {
+    "micro_epoch": 5,
+    "label": ".github/+docs/ | ci_workflows+infra | worker upsert min"
+  },
+  {
+    "micro_epoch": 6,
+    "label": "docs/+infra/ | infra+contracts | merge pull request"
+  },
+  {
+    "micro_epoch": 7,
+    "label": "docs/ | ovc current workflow"
+  },
+  {
+    "micro_epoch": 8,
+    "label": "sql/+/ | evidence_runs+contracts | sql table references"
+  },
+  {
+    "micro_epoch": 9,
+    "label": "sql/+infra/ | evidence_runs+infra | column references events"
+  },
+  {
+    "micro_epoch": 10,
+    "label": "infra/+tests/ | infra+tests | min infra pine"
+  },
+  {
+    "micro_epoch": 11,
+    "label": "infra/+docs/ | infra+scripts_general | disable ret semantic"
+  },
+  {
+    "micro_epoch": 12,
+    "label": "docs/+sql/ | evidence_runs+contracts | option sample script"
+  },
+  {
+    "micro_epoch": 13,
+    "label": "pine/+sql/ | evidence_runs+pine | option audit"
+  },
+  {
+    "micro_epoch": 14,
+    "label": "docs/+scripts/ | validation+scripts_general | validation ingestion csv"
+  },
+  {
+    "micro_epoch": 15,
+    "label": "docs/+src/ | source_code+validation | refactor backfill scripts"
+  },
+  {
+    "micro_epoch": 16,
+    "label": "docs/+src/ | source_code+validation | validation option documentation"
+  },
+  {
+    "micro_epoch": 17,
+    "label": "docs/+src/ | source_code+ci_workflows | regime trend implement"
+  },
+  {
+    "micro_epoch": 18,
+    "label": "docs/+sql/ | evidence_runs+validation | pipeline reality map"
+  },
+  {
+    "micro_epoch": 19,
+    "label": "docs/+sql/ | evidence_runs+validation | implementation contract sql"
+  },
+  {
+    "micro_epoch": 20,
+    "label": "docs/+releases/ | releases | ovc doctrine immutability"
+  },
+  {
+    "micro_epoch": 21,
+    "label": "research/ | research | research artifacts documentation"
+  },
+  {
+    "micro_epoch": 22,
+    "label": "research/ | research | initial study files"
+  },
+  {
+    "micro_epoch": 23,
+    "label": "research/ | research | block range intensity"
+  },
+  {
+    "micro_epoch": 24,
+    "label": "research/ | research | initial files block"
+  },
+  {
+    "micro_epoch": 25,
+    "label": "research/ | research | study files block"
+  },
+  {
+    "micro_epoch": 26,
+    "label": "research/ | research | study 20260120 block"
+  },
+  {
+    "micro_epoch": 27,
+    "label": "sql/+docs/ | evidence_runs+research | dis studies lid"
+  },
+  {
+    "micro_epoch": 28,
+    "label": "reports/+.github/ | evidence_runs+ci_workflows | path1 queue path"
+  },
+  {
+    "micro_epoch": 29,
+    "label": "scripts/+reports/ | scripts_general+evidence_runs | validation path1 reports"
+  },
+  {
+    "micro_epoch": 30,
+    "label": "reports/+sql/ | evidence_runs+ci_workflows | evidence enhance runs"
+  },
+  {
+    "micro_epoch": 31,
+    "label": "reports/+scripts/ | evidence_runs+scripts_general | evidence queue csv"
+  },
+  {
+    "micro_epoch": 32,
+    "label": ".github/+scripts/ | ci_workflows+scripts_general | enhance evidence scripts"
+  },
+  {
+    "micro_epoch": 33,
+    "label": "reports/+.github/ | evidence_runs+ci_workflows | evidence enhance queue"
+  },
+  {
+    "micro_epoch": 34,
+    "label": "/+reports/ | evidence_runs | chore vscode path1"
+  },
+  {
+    "micro_epoch": 35,
+    "label": ".github/+reports/ | ci_workflows+evidence_runs | evidence workflow url"
+  },
+  {
+    "micro_epoch": 36,
+    "label": "reports/+sql/ | evidence_runs+ci_workflows | evidence path1 automated"
+  },
+  {
+    "micro_epoch": 37,
+    "label": "reports/+scripts/ | evidence_runs+scripts_general | evidence path1 automated"
+  },
+  {
+    "micro_epoch": 38,
+    "label": "reports/+scripts/ | evidence_runs+scripts_general | feat state plane"
+  },
+  {
+    "micro_epoch": 39,
+    "label": "docs/+.github/ | ci_workflows+scripts_general | documentation path feat"
+  },
+  {
+    "micro_epoch": 40,
+    "label": "/+docs/ | governance_contracts+ci_workflows | governance feat comprehensive"
+  },
+  {
+    "micro_epoch": 41,
+    "label": "Tetsu/+docs/ | repo_maze+governance_contracts | repo map ovc"
+  },
+  {
+    "micro_epoch": 42,
+    "label": "Tetsu/+reports/ | repo_maze+evidence_runs | path1 evidence gbpusd"
+  },
+  {
+    "micro_epoch": 43,
+    "label": "Tetsu/+docs/ | evidence_runs+governance_contracts | merge branch main"
+  },
+  {
+    "micro_epoch": 44,
+    "label": "reports/+sql/ | evidence_runs | path1 evidence 20260202"
+  },
+  {
+    "micro_epoch": 45,
+    "label": ".codex/+/ | codex_runtime+operations | codex audit harness"
+  },
+  {
+    "micro_epoch": 46,
+    "label": ".codex/+/ | codex_runtime+evidence_runs | main merge branches"
+  },
+  {
+    "micro_epoch": 47,
+    "label": ".codex/+Tetsu/ | codex_runtime+repo_maze | merge branch main"
+  },
+  {
+    "micro_epoch": 48,
+    "label": ".codex/+Tetsu/ | codex_runtime+validation | timestamp generation coverage"
+  },
+  {
+    "micro_epoch": 49,
+    "label": "reports/+sql/ | evidence_runs+governance_contracts | path1 evidence 20260203"
+  },
+  {
+    "micro_epoch": 50,
+    "label": "src/+.codex/ | evidence_runs+source_code | phase governance envelope"
+  },
+  {
+    "micro_epoch": 51,
+    "label": "/+tools/ | tools_general+governance_contracts | phase registry test"
+  },
+  {
+    "micro_epoch": 52,
+    "label": "docs/ | validation+governance_contracts | phase contracts registry"
+  },
+  {
+    "micro_epoch": 53,
+    "label": "/+.github/ | validation+ci_workflows | refactor workflows streamline"
+  },
+  {
+    "micro_epoch": 54,
+    "label": "tools/ | control_panel | typescript configuration package"
+  },
+  {
+    "micro_epoch": 55,
+    "label": "/+reports/ | control_panel+evidence_runs | merge branch main"
+  },
+  {
+    "micro_epoch": 56,
+    "label": "tools/+docs/ | control_panel+governance_contracts | agent governance phase"
+  },
+  {
+    "micro_epoch": 57,
+    "label": ".github/+.vscode/ | artifacts+catalogs | change classification taxonomy"
+  },
+  {
+    "micro_epoch": 58,
+    "label": ".github/ | ci_workflows | docs change classification"
+  },
+  {
+    "micro_epoch": 59,
+    "label": "scripts/+tests/ | governance_tooling+tests | governance range path1"
+  },
+  {
+    "micro_epoch": 60,
+    "label": "scripts/ | governance_tooling | governance make overlay"
+  },
+  {
+    "micro_epoch": 61,
+    "label": "scripts/+docs/ | governance_tooling+catalogs | merge overlay deterministic"
+  },
+  {
+    "micro_epoch": 62,
+    "label": "docs/+reports/ | catalogs+evidence_runs | post phase consolidation"
+  }
+]
