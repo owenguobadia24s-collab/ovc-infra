@@ -1,0 +1,13 @@
+{
+  "total_rows": 264,
+  "class_counts": {
+    "UNKNOWN": 160,
+    "C": 123,
+    "A": 64,
+    "E": 58,
+    "B": 21,
+    "D": 6
+  },
+  "unknown_count": 72,
+  "ambiguous_count": 119
+}

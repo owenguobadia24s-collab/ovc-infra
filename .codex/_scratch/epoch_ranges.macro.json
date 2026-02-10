@@ -1,0 +1,1526 @@
+[
+  {
+    "macro_epoch": 0,
+    "micro_epochs": [
+      0
+    ],
+    "start_hash": "e144cf064769f1a5e332090d02a272f6cadc0e6c",
+    "end_hash": "171cd228a37550cd52e02598997907aad76b8dc1",
+    "start_date": "2026-01-14T01:00:01+00:00",
+    "end_date": "2026-01-14T08:31:23+00:00",
+    "commit_count": 16,
+    "dominant_dirs": [
+      {
+        "dir": "/",
+        "commits": 6
+      },
+      {
+        "dir": ".github/",
+        "commits": 4
+      },
+      {
+        "dir": "contracts/",
+        "commits": 3
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      },
+      {
+        "dir": "src/",
+        "commits": 1
+      },
+      {
+        "dir": "pine/",
+        "commits": 1
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "ci_workflows",
+        "commits": 4
+      },
+      {
+        "tag": "contracts",
+        "commits": 3
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "source_code",
+        "commits": 1
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      },
+      {
+        "tag": "tools_general",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 10
+      },
+      {
+        "class": "E",
+        "commits": 6
+      },
+      {
+        "class": "C",
+        "commits": 6
+      }
+    ],
+    "representative_commits": [
+      "dc6e7f5913a5c4c3ed81e1f7cbf3a383c51188fc|2026-01-14T01:20:35Z|Add OVC backfill v0.1 (OANDA checkpointed) + repo structure",
+      "e144cf064769f1a5e332090d02a272f6cadc0e6c|2026-01-14T01:00:01Z|Initial commit",
+      "a78f7c9d92ba466f69218e65edc8b19e43bc852b|2026-01-14T01:02:43Z|Update .gitignore for OVC and data/logs",
+      "d6c8b7c90a87bf79114a4831eb8e9444a84194ab|2026-01-14T01:30:37Z|Add GitHub Actions daily backfill workflow",
+      "456723685af257dae2873bd6055023bc2ed3e7a7|2026-01-14T01:37:05Z|Add requirements.txt for GitHub Actions"
+    ],
+    "label": "/+.github/ | ci_workflows+contracts | backfill contract workflow"
+  },
+  {
+    "macro_epoch": 1,
+    "micro_epochs": [
+      1,
+      2
+    ],
+    "start_hash": "b694a744daa305e5b5ac522a159c23a023586d5f",
+    "end_hash": "e8c253791cb6b44febb0ba6ea70b5b4042c015f0",
+    "start_date": "2026-01-14T08:31:49+00:00",
+    "end_date": "2026-01-14T09:37:00+00:00",
+    "commit_count": 5,
+    "dominant_dirs": [
+      {
+        "dir": "tests/",
+        "commits": 4
+      },
+      {
+        "dir": "tools/",
+        "commits": 3
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "tests",
+        "commits": 4
+      },
+      {
+        "tag": "tools_general",
+        "commits": 3
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "C",
+        "commits": 5
+      }
+    ],
+    "representative_commits": [
+      "be09dd8b58769540fc16260529816f9baef514d6|2026-01-14T08:36:08Z|Add v0.1 export contracts, validation tools, and tests",
+      "aad49831233824189a9c95528dc4dcee0fd9b237|2026-01-14T08:36:18Z|Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "b694a744daa305e5b5ac522a159c23a023586d5f|2026-01-14T08:31:49Z|Delete tools\\validate_contract.py",
+      "c5574da312127422fb4af8513bf455b798f7f188|2026-01-14T09:29:49Z|Add export string for MIN contract in min_001.txt",
+      "e8c253791cb6b44febb0ba6ea70b5b4042c015f0|2026-01-14T09:37:00Z|Update export string in full_001.txt"
+    ],
+    "label": "tests/+tools/ | tests+tools_general | export tools contract"
+  },
+  {
+    "macro_epoch": 2,
+    "micro_epochs": [
+      3
+    ],
+    "start_hash": "4547615fb0df2ce0c207d6fa4d43ff3099070da3",
+    "end_hash": "cf5d987444ce3c7bd92f76fac2bf31a6530bb4d0",
+    "start_date": "2026-01-14T10:29:13+00:00",
+    "end_date": "2026-01-14T14:15:46+00:00",
+    "commit_count": 11,
+    "dominant_dirs": [
+      {
+        "dir": "contracts/",
+        "commits": 4
+      },
+      {
+        "dir": "tools/",
+        "commits": 3
+      },
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": "ovc-webhook/",
+        "commits": 2
+      },
+      {
+        "dir": "infra/",
+        "commits": 2
+      },
+      {
+        "dir": "tests/",
+        "commits": 1
+      },
+      {
+        "dir": "pine/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "contracts",
+        "commits": 4
+      },
+      {
+        "tag": "tools_general",
+        "commits": 3
+      },
+      {
+        "tag": "infra",
+        "commits": 2
+      },
+      {
+        "tag": "tests",
+        "commits": 1
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 9
+      },
+      {
+        "class": "C",
+        "commits": 3
+      },
+      {
+        "class": "E",
+        "commits": 1
+      }
+    ],
+    "representative_commits": [
+      "8b566f3aa4daad1e4960a43831dd6aa13fa432ee|2026-01-14T14:07:05Z|Add ovc-webhook worker project",
+      "4547615fb0df2ce0c207d6fa4d43ff3099070da3|2026-01-14T10:29:13Z|Update export strings in full_001.txt and min_001.txt; add validation script for export strings",
+      "09d951775170a52c51278b04919233c633a7ed9c|2026-01-14T10:42:13Z|Refactor export contract schema: remove formatting and update types for clarity and consistency",
+      "42bf13666843a8bf43fa70f4bcbede93f0c9149e|2026-01-14T12:44:49Z|Update tradeable and ready fields to use bool_01 type for consistency in export format",
+      "1859414a24a6eae9742110e2d1b4cd0c58951b3a|2026-01-14T10:57:45Z|Enhance validation logic: normalize input values and improve type checks for contract fields"
+    ],
+    "label": "contracts/+tools/ | contracts+tools_general | export type refactor"
+  },
+  {
+    "macro_epoch": 3,
+    "micro_epochs": [
+      4
+    ],
+    "start_hash": "7c3982068064cde8acec78811adde90eca014e59",
+    "end_hash": "7c3982068064cde8acec78811adde90eca014e59",
+    "start_date": "2026-01-14T15:57:49+00:00",
+    "end_date": "2026-01-14T15:57:49+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "infra/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "infra",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 1
+      }
+    ],
+    "representative_commits": [
+      "7c3982068064cde8acec78811adde90eca014e59|2026-01-14T15:57:49Z|Refactor OVC webhook for improved clarity and structure"
+    ],
+    "label": "infra/ | infra | refactor ovc webhook"
+  },
+  {
+    "macro_epoch": 4,
+    "micro_epochs": [
+      5,
+      6,
+      7
+    ],
+    "start_hash": "aaecb0cab415bdc94a67ffb92ad903d488150367",
+    "end_hash": "e9a5ef31982bf1086ef0633801f4c88a6d1bc7a9",
+    "start_date": "2026-01-14T18:01:00+00:00",
+    "end_date": "2026-01-16T18:13:06+00:00",
+    "commit_count": 11,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 8
+      },
+      {
+        "dir": "infra/",
+        "commits": 5
+      },
+      {
+        "dir": ".github/",
+        "commits": 3
+      },
+      {
+        "dir": "src/",
+        "commits": 3
+      },
+      {
+        "dir": "contracts/",
+        "commits": 3
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "pine/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "infra",
+        "commits": 5
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 3
+      },
+      {
+        "tag": "source_code",
+        "commits": 3
+      },
+      {
+        "tag": "contracts",
+        "commits": 3
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 11
+      },
+      {
+        "class": "C",
+        "commits": 3
+      },
+      {
+        "class": "E",
+        "commits": 3
+      }
+    ],
+    "representative_commits": [
+      "fb35f49767878631a9f78967cdb4c8b7150f6027|2026-01-14T18:10:11Z|Merge pull request #2 from owenguobadia24s-collab/codex/fix-export_contract_v0.1_full.json",
+      "aaecb0cab415bdc94a67ffb92ad903d488150367|2026-01-14T18:01:00Z|Worker: upsert MIN into ovc_blocks_v01 (Option B)",
+      "df6e2c64fc22312b89e5baf052ec725d8bea5a07|2026-01-14T18:02:46Z|Merge pull request #1 from owenguobadia24s-collab/codex/complete-step-8b-hardening-for-ovc",
+      "7a2ea214f506ed7320836ea9aef4277d37d04eb7|2026-01-14T18:36:25Z|Add AI Agent guidelines to project documentation",
+      "1b17fb4f810ff70c5f2357a423090022a8d10ed1|2026-01-14T18:09:45Z|Allow empty tis and hints in full export contract"
+    ],
+    "label": "docs/+infra/ | infra+ci_workflows | ovc merge owenguobadia24s"
+  },
+  {
+    "macro_epoch": 5,
+    "micro_epochs": [
+      8
+    ],
+    "start_hash": "15353b9226cdc441cca675eda7cdb0cb91ade68d",
+    "end_hash": "8553d26409513c1b2abbe55a56c2d9da620777ae",
+    "start_date": "2026-01-16T21:16:53+00:00",
+    "end_date": "2026-01-16T22:36:02+00:00",
+    "commit_count": 4,
+    "dominant_dirs": [
+      {
+        "dir": "sql/",
+        "commits": 4
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "contracts/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "specs/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 4
+      },
+      {
+        "tag": "contracts",
+        "commits": 1
+      },
+      {
+        "tag": "specs",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 4
+      }
+    ],
+    "representative_commits": [
+      "15353b9226cdc441cca675eda7cdb0cb91ade68d|2026-01-16T21:16:53Z|Gate1: lock MIN contract + specs + SQL v0.1",
+      "043271a319ccfc104911a2fade6eb3dbce861633|2026-01-16T22:19:10Z|Fix table name references in SQL scripts for consistency",
+      "02abc800df9a757b7a7e792a88a6d5cec9ea3cb4|2026-01-16T22:32:36Z|Fix table reference in events view SQL script for accuracy",
+      "8553d26409513c1b2abbe55a56c2d9da620777ae|2026-01-16T22:36:02Z|Fix date column references in events views for consistency"
+    ],
+    "label": "sql/+/ | evidence_runs+contracts | sql table references"
+  },
+  {
+    "macro_epoch": 6,
+    "micro_epochs": [
+      9,
+      10
+    ],
+    "start_hash": "98d55cd4e57eb2ca36a36cf2f44432eb0068f7b1",
+    "end_hash": "903698622a46dbc7515b110cf605269406e72360",
+    "start_date": "2026-01-16T22:50:47+00:00",
+    "end_date": "2026-01-17T04:46:32+00:00",
+    "commit_count": 11,
+    "dominant_dirs": [
+      {
+        "dir": "infra/",
+        "commits": 6
+      },
+      {
+        "dir": "pine/",
+        "commits": 5
+      },
+      {
+        "dir": "tests/",
+        "commits": 5
+      },
+      {
+        "dir": "docs/",
+        "commits": 5
+      },
+      {
+        "dir": "tools/",
+        "commits": 3
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "infra",
+        "commits": 6
+      },
+      {
+        "tag": "pine",
+        "commits": 5
+      },
+      {
+        "tag": "tests",
+        "commits": 5
+      },
+      {
+        "tag": "validation",
+        "commits": 4
+      },
+      {
+        "tag": "tools_general",
+        "commits": 3
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 10
+      },
+      {
+        "class": "C",
+        "commits": 5
+      }
+    ],
+    "representative_commits": [
+      "9d05d844c4f072ce513c3ed8803b1ed31b288a27|2026-01-17T04:37:47Z|Merge branch 'main' into pr/pine-min-export-v0.1_min_r1",
+      "f6d9928e6c2ab862395a51eae6403985f31fb0ea|2026-01-17T04:32:21Z|Merge pull request #5 from owenguobadia24s-collab/wip/infra-contract-validation",
+      "f7bbdde22c1a27c22a164f5a0e5e3c83d6f5e013|2026-01-17T03:41:49Z|WIP: align infra validation to v0.1.1 MIN",
+      "f205e42e1e936f048290671d4134bb10ad814f6b|2026-01-17T03:42:47Z|Pine: align MIN export to contract v0.1_min_r1 + readiness panel",
+      "a71332b4f91148f7c3e720210d65a6b5160db93d|2026-01-17T03:59:32Z|Infra: enforce MIN contract v0.1.1"
+    ],
+    "label": "infra/+pine/ | infra+pine | min pine export"
+  },
+  {
+    "macro_epoch": 7,
+    "micro_epochs": [
+      11,
+      12
+    ],
+    "start_hash": "a47e2897bfccd9b1e5b108bcda69449011dc350b",
+    "end_hash": "68306e813ecfae4b9d5a0015441d64bbb8545119",
+    "start_date": "2026-01-17T06:37:55+00:00",
+    "end_date": "2026-01-17T18:53:10+00:00",
+    "commit_count": 9,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 5
+      },
+      {
+        "dir": "scripts/",
+        "commits": 4
+      },
+      {
+        "dir": "sql/",
+        "commits": 4
+      },
+      {
+        "dir": "/",
+        "commits": 3
+      },
+      {
+        "dir": "contracts/",
+        "commits": 3
+      },
+      {
+        "dir": "infra/",
+        "commits": 2
+      },
+      {
+        "dir": "tests/",
+        "commits": 2
+      },
+      {
+        "dir": "src/",
+        "commits": 1
+      },
+      {
+        "dir": ".github/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "scripts_general",
+        "commits": 4
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 4
+      },
+      {
+        "tag": "contracts",
+        "commits": 3
+      },
+      {
+        "tag": "infra",
+        "commits": 2
+      },
+      {
+        "tag": "tests",
+        "commits": 2
+      },
+      {
+        "tag": "source_code",
+        "commits": 1
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 7
+      },
+      {
+        "class": "C",
+        "commits": 6
+      },
+      {
+        "class": "E",
+        "commits": 2
+      }
+    ],
+    "representative_commits": [
+      "607a8c5c4e828295534f03ef18d9ea51fde7d3c6|2026-01-17T17:12:47Z|Evaluation + Feedback Layer (v0.1)",
+      "13a589b968eedf3690c3d6103ef9de0f69094a8e|2026-01-17T18:02:40Z|Option D",
+      "72ce4b0a78717ca79fbc0360447faf20a1e73f70|2026-01-17T15:28:56Z|chore: lock v0.1 ingest boundary + harden verifier (MIN default, FULL opt-in)",
+      "bacc7ff998bc4375e8e1ad3bbbb6393dc51fa60a|2026-01-17T16:36:14Z|Define the Derived Metric Classes and the First Canonical Feature Set",
+      "fab9e5ba3cac560c71c3f5d98f013fd223296559|2026-01-17T06:58:24Z|Docs: normalize workflow + verification scripts"
+    ],
+    "label": "docs/+scripts/ | scripts_general+evidence_runs | option ingest disable"
+  },
+  {
+    "macro_epoch": 8,
+    "micro_epochs": [
+      13
+    ],
+    "start_hash": "e3b80fc3cebdf11218409ce368e85a5b9192f923",
+    "end_hash": "e3b80fc3cebdf11218409ce368e85a5b9192f923",
+    "start_date": "2026-01-17T20:40:32+00:00",
+    "end_date": "2026-01-17T20:40:32+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "pine/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 1
+      }
+    ],
+    "representative_commits": [
+      "e3b80fc3cebdf11218409ce368e85a5b9192f923|2026-01-17T20:40:32Z|Option A -> D Audit"
+    ],
+    "label": "pine/+sql/ | evidence_runs+pine | option audit"
+  },
+  {
+    "macro_epoch": 9,
+    "micro_epochs": [
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "start_hash": "cd780720b768933334a53f0231c60b4227311e13",
+    "end_hash": "0197359d49adff54eedae2d3c60e160fe9ba183c",
+    "start_date": "2026-01-17T21:17:23+00:00",
+    "end_date": "2026-01-20T03:05:49+00:00",
+    "commit_count": 37,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 34
+      },
+      {
+        "dir": "src/",
+        "commits": 18
+      },
+      {
+        "dir": "sql/",
+        "commits": 11
+      },
+      {
+        "dir": "scripts/",
+        "commits": 9
+      },
+      {
+        "dir": ".github/",
+        "commits": 7
+      },
+      {
+        "dir": "tests/",
+        "commits": 4
+      },
+      {
+        "dir": "/",
+        "commits": 3
+      },
+      {
+        "dir": "configs/",
+        "commits": 2
+      },
+      {
+        "dir": "infra/",
+        "commits": 2
+      },
+      {
+        "dir": "artifacts/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "source_code",
+        "commits": 18
+      },
+      {
+        "tag": "validation",
+        "commits": 17
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 11
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 9
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 9
+      },
+      {
+        "tag": "tests",
+        "commits": 4
+      },
+      {
+        "tag": "infra",
+        "commits": 2
+      },
+      {
+        "tag": "artifacts",
+        "commits": 1
+      },
+      {
+        "tag": "contracts",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 36
+      },
+      {
+        "class": "C",
+        "commits": 23
+      },
+      {
+        "class": "E",
+        "commits": 6
+      }
+    ],
+    "representative_commits": [
+      "ee46496d262759fcae78902ffc07b4d2ac71282e|2026-01-19T23:07:30Z|RUN_ARTIFACT_IMPLEMENTATION",
+      "ab9daed3998490f0e456ff188fa55ab1ca685429|2026-01-18T21:43:28Z|Option B.2 Implemented",
+      "201fd6c8465a645b52b08435a1665638b2cfa281|2026-01-18T06:43:57Z|Update documentation and SQL validation packs for enhanced pipeline status and derived data validation",
+      "961738bf86f3845f7969922cc9e211c84bf0b22f|2026-01-18T22:19:09Z|OVC Option C.3 Stub and unit tests for Threshold Registry",
+      "c0a56dca5669a44d533917f3fdf798fba5a531fa|2026-01-20T01:30:52Z|feat(docs): Update Pipeline Reality Map and OVC Current Workflow"
+    ],
+    "label": "docs/+src/ | source_code+validation | validation documentation workflow"
+  },
+  {
+    "macro_epoch": 10,
+    "micro_epochs": [
+      20
+    ],
+    "start_hash": "88eff122fe893c14902013cedf36c25793e75e8f",
+    "end_hash": "88eff122fe893c14902013cedf36c25793e75e8f",
+    "start_date": "2026-01-20T03:11:01+00:00",
+    "end_date": "2026-01-20T03:11:01+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "releases/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "releases",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 1
+      }
+    ],
+    "representative_commits": [
+      "88eff122fe893c14902013cedf36c25793e75e8f|2026-01-20T03:11:01Z| OVC Doctrine and Immutability Notice"
+    ],
+    "label": "docs/+releases/ | releases | ovc doctrine immutability"
+  },
+  {
+    "macro_epoch": 11,
+    "micro_epochs": [
+      21,
+      22,
+      23,
+      24,
+      25,
+      26
+    ],
+    "start_hash": "f2f8bd0bbdf3ce7a25eee7a62955602ae24d06d3",
+    "end_hash": "336d0eb6edc063b295ac0f30c030e591fd0b0d8e",
+    "start_date": "2026-01-20T04:58:31+00:00",
+    "end_date": "2026-01-20T05:31:50+00:00",
+    "commit_count": 8,
+    "dominant_dirs": [
+      {
+        "dir": "research/",
+        "commits": 8
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "research",
+        "commits": 8
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 8
+      }
+    ],
+    "representative_commits": [
+      "f2f8bd0bbdf3ce7a25eee7a62955602ae24d06d3|2026-01-20T04:58:31Z|Add research artifacts and documentation for exploratory studies",
+      "913bd4d3430bff9361fcebbeb08eb2f0ce6fcc1b|2026-01-20T05:01:54Z|Add initial study files for basic feature-outcome analysis of GBPUSD",
+      "db312bd11cfd3c240d41f6c48c2b3fbf4cb3ab69|2026-01-20T05:10:12Z|Add initial files for block range intensity score sanity study",
+      "5553e731fc66651ddb934303f7e67f893712f47f|2026-01-20T05:13:47Z|Add study files for block range intensity score analysis",
+      "4607f31a4ed930592be155455ec3a92237aacda4|2026-01-20T05:18:09Z|Add initial files for block range intensity score temporal stability study"
+    ],
+    "label": "research/ | research | study block range"
+  },
+  {
+    "macro_epoch": 12,
+    "micro_epochs": [
+      27
+    ],
+    "start_hash": "38fcad2b1963a4b193fa4f629c89999f7d38a172",
+    "end_hash": "fb2bbd3b4513e5b61840519dc3053785300a00c2",
+    "start_date": "2026-01-20T05:43:18+00:00",
+    "end_date": "2026-01-20T10:06:54+00:00",
+    "commit_count": 7,
+    "dominant_dirs": [
+      {
+        "dir": "sql/",
+        "commits": 6
+      },
+      {
+        "dir": "docs/",
+        "commits": 4
+      },
+      {
+        "dir": "research/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 6
+      },
+      {
+        "tag": "research",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "A",
+        "commits": 6
+      },
+      {
+        "class": "UNKNOWN",
+        "commits": 5
+      }
+    ],
+    "representative_commits": [
+      "04d95ab73c8d2dbbe4c5e28616aff6d0843ddf2d|2026-01-20T06:41:53Z|Add new studies for DIS, LID, and RES scores focusing on stability and outcome associations",
+      "0f853613954d252b57104386a6edcdf010c4b52b|2026-01-20T08:29:35Z|Update DIS score to v1.1, removing directional_efficiency dependency; add documentation and status files for Path 1 freeze",
+      "b07313878bb6d92a0425f56fd7c0919144638a2a|2026-01-20T09:24:25Z|feat: Add operational guide and SQL patches for Path 1 evidence runs",
+      "38fcad2b1963a4b193fa4f629c89999f7d38a172|2026-01-20T05:43:18Z|Add study documentation for block range intensity by C3 trend bias",
+      "a04f8b2d318e6340923f3641876b2ac2bca1c028|2026-01-20T08:39:31Z|Add distributional analysis studies for DIS-v1.1, LID-v1.0, and RES-v1.0 scores with corresponding views"
+    ],
+    "label": "sql/+docs/ | evidence_runs+research | dis studies lid"
+  },
+  {
+    "macro_epoch": 13,
+    "micro_epochs": [
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44
+    ],
+    "start_hash": "1774ef56bfd2165b8b8e7a83230cd39a1fb46fc8",
+    "end_hash": "f5318b3c33952781932b148d44c6909f78972a8e",
+    "start_date": "2026-01-20T10:19:30+00:00",
+    "end_date": "2026-02-02T06:44:44+00:00",
+    "commit_count": 94,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 48
+      },
+      {
+        "dir": "scripts/",
+        "commits": 30
+      },
+      {
+        "dir": "docs/",
+        "commits": 28
+      },
+      {
+        "dir": "sql/",
+        "commits": 27
+      },
+      {
+        "dir": ".github/",
+        "commits": 25
+      },
+      {
+        "dir": "/",
+        "commits": 14
+      },
+      {
+        "dir": "Tetsu/",
+        "commits": 9
+      },
+      {
+        "dir": "tests/",
+        "commits": 5
+      },
+      {
+        "dir": ".vscode/",
+        "commits": 4
+      },
+      {
+        "dir": "artifacts/",
+        "commits": 3
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 48
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 30
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 25
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 11
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 9
+      },
+      {
+        "tag": "validation",
+        "commits": 8
+      },
+      {
+        "tag": "tests",
+        "commits": 5
+      },
+      {
+        "tag": "operations",
+        "commits": 4
+      },
+      {
+        "tag": "artifacts",
+        "commits": 3
+      },
+      {
+        "tag": "tools_general",
+        "commits": 3
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "A",
+        "commits": 46
+      },
+      {
+        "class": "C",
+        "commits": 44
+      },
+      {
+        "class": "UNKNOWN",
+        "commits": 34
+      },
+      {
+        "class": "E",
+        "commits": 29
+      },
+      {
+        "class": "B",
+        "commits": 11
+      }
+    ],
+    "representative_commits": [
+      "27354e74047cd908eca1a40188416dcfd875a583|2026-01-21T21:48:05Z|Repo-restructuring",
+      "3c9fbb1079f710d3c36e69572c61f82e318c18ea|2026-01-22T06:49:07Z|Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "bf516503e1c796f4baf35d80f1d615e8217e3ba9|2026-01-22T03:57:26Z|Path1: add Evidence Pack v0.2 + run p1_20260120_031 outputs; add backfill_m15 workflow; ignore pytest temp dirs",
+      "d5a9c3694ea11a09563170c9ca59d1670784dae2|2026-01-20T12:33:06Z|Path 1 Evidence Run(s) - Automated",
+      "fcbe9465b876661545ebf9859bf6cd707dbb7204|2026-01-20T12:54:24Z|Merge pull request #8 from owenguobadia24s-collab/evidence-run-20260120-123211"
+    ],
+    "label": "reports/+scripts/ | evidence_runs+scripts_general | evidence path1 automated"
+  },
+  {
+    "macro_epoch": 14,
+    "micro_epochs": [
+      45,
+      46,
+      47,
+      48
+    ],
+    "start_hash": "4c245c6e90eec04733739f8879d1868e977f0257",
+    "end_hash": "3dc06d8df45105eb06284c476f32243021c2a8b9",
+    "start_date": "2026-02-02T14:36:41+00:00",
+    "end_date": "2026-02-02T21:06:37+00:00",
+    "commit_count": 9,
+    "dominant_dirs": [
+      {
+        "dir": ".codex/",
+        "commits": 8
+      },
+      {
+        "dir": "Tetsu/",
+        "commits": 6
+      },
+      {
+        "dir": "/",
+        "commits": 3
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "codex_runtime",
+        "commits": 8
+      },
+      {
+        "tag": "validation",
+        "commits": 6
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 6
+      },
+      {
+        "tag": "operations",
+        "commits": 3
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "C",
+        "commits": 8
+      },
+      {
+        "class": "UNKNOWN",
+        "commits": 8
+      },
+      {
+        "class": "E",
+        "commits": 3
+      },
+      {
+        "class": "A",
+        "commits": 1
+      }
+    ],
+    "representative_commits": [
+      "44403d3f47251c870c548e726a596384e30ca426|2026-02-02T15:24:36Z|Merge branches 'main' and 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "85cb367082e98ac3a2339ca71c51c1141ed91308|2026-02-02T17:03:44Z|Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "4c245c6e90eec04733739f8879d1868e977f0257|2026-02-02T14:36:41Z|Add codex audit harness (prompts + checks); ignore runtime and runs",
+      "731fe267ee2796446931564fb779fc52545878bf|2026-02-02T18:28:08Z|Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "d844f2eb3abfe31ee7651bb5f2260ea4988c13df|2026-02-02T18:26:45Z|Audit Harness_V1"
+    ],
+    "label": ".codex/+Tetsu/ | codex_runtime+validation | main audit merge"
+  },
+  {
+    "macro_epoch": 15,
+    "micro_epochs": [
+      49
+    ],
+    "start_hash": "b3e733edcd5f4e26d1894d0f57074fa91ca3cca0",
+    "end_hash": "956982dbb26f1db70741c3b2a207d1e65277afd1",
+    "start_date": "2026-02-02T23:00:17+00:00",
+    "end_date": "2026-02-04T06:05:33+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 2
+      },
+      {
+        "dir": "sql/",
+        "commits": 2
+      },
+      {
+        "dir": "Tetsu/",
+        "commits": 1
+      },
+      {
+        "dir": "Work Timeline/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 1
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "A",
+        "commits": 2
+      },
+      {
+        "class": "B",
+        "commits": 1
+      },
+      {
+        "class": "UNKNOWN",
+        "commits": 1
+      }
+    ],
+    "representative_commits": [
+      "11bba2ccaf601e48416c0558bd01328fd8ab33b3|2026-02-03T06:08:18Z|path1 evidence: p1_20260203_GBPUSD_20260202_len5d_8c35df6c",
+      "956982dbb26f1db70741c3b2a207d1e65277afd1|2026-02-04T06:05:33Z|path1 evidence: p1_20260204_GBPUSD_20260203_len5d_c00576a2",
+      "b3e733edcd5f4e26d1894d0f57074fa91ca3cca0|2026-02-02T23:00:17Z|freeze(legend): canonicalize NodeID authority and lock governance"
+    ],
+    "label": "reports/+sql/ | evidence_runs+governance_contracts | path1 evidence 20260203"
+  },
+  {
+    "macro_epoch": 16,
+    "micro_epochs": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56
+    ],
+    "start_hash": "02fc2accfe43f534e2cc305a216679be5e2a0b52",
+    "end_hash": "7021c84d722a6782d032dbeccfccc8aa81bd3353",
+    "start_date": "2026-02-04T20:14:03+00:00",
+    "end_date": "2026-02-07T05:33:31+00:00",
+    "commit_count": 25,
+    "dominant_dirs": [
+      {
+        "dir": "tools/",
+        "commits": 11
+      },
+      {
+        "dir": "docs/",
+        "commits": 9
+      },
+      {
+        "dir": "/",
+        "commits": 8
+      },
+      {
+        "dir": "sql/",
+        "commits": 7
+      },
+      {
+        "dir": "reports/",
+        "commits": 7
+      },
+      {
+        "dir": ".github/",
+        "commits": 4
+      },
+      {
+        "dir": "_quarantine/",
+        "commits": 4
+      },
+      {
+        "dir": "src/",
+        "commits": 4
+      },
+      {
+        "dir": ".codex/",
+        "commits": 3
+      },
+      {
+        "dir": "_archive/",
+        "commits": 3
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "validation",
+        "commits": 9
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 8
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 7
+      },
+      {
+        "tag": "control_panel",
+        "commits": 6
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 4
+      },
+      {
+        "tag": "source_code",
+        "commits": 4
+      },
+      {
+        "tag": "tools_general",
+        "commits": 4
+      },
+      {
+        "tag": "codex_runtime",
+        "commits": 3
+      },
+      {
+        "tag": "infra",
+        "commits": 3
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 3
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "C",
+        "commits": 13
+      },
+      {
+        "class": "UNKNOWN",
+        "commits": 8
+      },
+      {
+        "class": "B",
+        "commits": 8
+      },
+      {
+        "class": "A",
+        "commits": 6
+      },
+      {
+        "class": "D",
+        "commits": 6
+      },
+      {
+        "class": "E",
+        "commits": 5
+      }
+    ],
+    "representative_commits": [
+      "39696066e87f82b694bf4f20905f0f3ea3c9cce2|2026-02-04T20:14:36Z|Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "02fc2accfe43f534e2cc305a216679be5e2a0b52|2026-02-04T20:14:03Z|Phase 1 - Goveranance Reference & Inspection Phase 1.5 - Governance Cohesion & Closure Phase 1.6 \u2014 Canonical Pruning & Freeze",
+      "a818656ec69636a910e6bdc459bf6d122d85b802|2026-02-05T02:28:02Z|Phase 2.2: add registry schema wrapper + validation reports",
+      "8452511e7ae16af73801df8db9137a2fb429c466|2026-02-05T06:45:20Z|Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "9267725acf1cb687ad543188a75076013f29b0c0|2026-02-05T11:53:16Z|Phase 4:  audit interpretation/ agent"
+    ],
+    "label": "tools/+docs/ | validation+evidence_runs | phase governance registry"
+  },
+  {
+    "macro_epoch": 17,
+    "micro_epochs": [
+      57
+    ],
+    "start_hash": "ff1564dd8e4cd61b5bbc76db3aebbba48852abdb",
+    "end_hash": "ff1564dd8e4cd61b5bbc76db3aebbba48852abdb",
+    "start_date": "2026-02-07T18:26:34+00:00",
+    "end_date": "2026-02-07T18:26:34+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": ".vscode/",
+        "commits": 1
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "artifacts/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "scripts/",
+        "commits": 1
+      },
+      {
+        "dir": "tests/",
+        "commits": 1
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "artifacts",
+        "commits": 1
+      },
+      {
+        "tag": "catalogs",
+        "commits": 1
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 1
+      },
+      {
+        "tag": "governance_tooling",
+        "commits": 1
+      },
+      {
+        "tag": "tests",
+        "commits": 1
+      },
+      {
+        "tag": "tools_general",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "B",
+        "commits": 1
+      },
+      {
+        "class": "C",
+        "commits": 1
+      },
+      {
+        "class": "E",
+        "commits": 1
+      },
+      {
+        "class": "UNKNOWN",
+        "commits": 1
+      }
+    ],
+    "representative_commits": [
+      "ff1564dd8e4cd61b5bbc76db3aebbba48852abdb|2026-02-07T18:26:34Z|Change Taxonomy & Governance Classification (Post-Phase 4): introduce change classification and ledger generation"
+    ],
+    "label": ".github/+.vscode/ | artifacts+catalogs | change classification taxonomy"
+  },
+  {
+    "macro_epoch": 18,
+    "micro_epochs": [
+      58
+    ],
+    "start_hash": "2a68adf9762ff6910ea1883a6d5cf1f999cf7dae",
+    "end_hash": "2a68adf9762ff6910ea1883a6d5cf1f999cf7dae",
+    "start_date": "2026-02-07T18:29:46+00:00",
+    "end_date": "2026-02-07T18:29:46+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": ".github/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "UNKNOWN",
+        "commits": 1
+      }
+    ],
+    "representative_commits": [
+      "2a68adf9762ff6910ea1883a6d5cf1f999cf7dae|2026-02-07T18:29:46Z|docs(pr): add change classification section to PR template"
+    ],
+    "label": ".github/ | ci_workflows | docs change classification"
+  },
+  {
+    "macro_epoch": 19,
+    "micro_epochs": [
+      59,
+      60,
+      61,
+      62
+    ],
+    "start_hash": "7d92461d83ba71f8df87d28a130a7279c86d0e62",
+    "end_hash": "cfd91a7d80267d717ab519102b1ce7956361503c",
+    "start_date": "2026-02-08T05:12:11+00:00",
+    "end_date": "2026-02-09T05:12:52+00:00",
+    "commit_count": 9,
+    "dominant_dirs": [
+      {
+        "dir": "scripts/",
+        "commits": 6
+      },
+      {
+        "dir": "tests/",
+        "commits": 4
+      },
+      {
+        "dir": "docs/",
+        "commits": 4
+      },
+      {
+        "dir": "reports/",
+        "commits": 3
+      },
+      {
+        "dir": "sql/",
+        "commits": 3
+      },
+      {
+        "dir": "/",
+        "commits": 2
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "governance_tooling",
+        "commits": 6
+      },
+      {
+        "tag": "tests",
+        "commits": 4
+      },
+      {
+        "tag": "catalogs",
+        "commits": 4
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 3
+      }
+    ],
+    "dominant_classes": [
+      {
+        "class": "C",
+        "commits": 6
+      },
+      {
+        "class": "UNKNOWN",
+        "commits": 4
+      },
+      {
+        "class": "A",
+        "commits": 3
+      },
+      {
+        "class": "E",
+        "commits": 2
+      }
+    ],
+    "representative_commits": [
+      "52d4a177ba43263c8817db27b6634b073b4e5015|2026-02-08T16:51:35Z|Merge branch 'main' of https://github.com/owenguobadia24s-collab/ovc-infra",
+      "7d92461d83ba71f8df87d28a130a7279c86d0e62|2026-02-08T05:12:11Z|path1 evidence: p1_20260208_GBPUSD_20260207_len5d_3d531e1b",
+      "cfd91a7d80267d717ab519102b1ce7956361503c|2026-02-09T05:12:52Z|path1 evidence: p1_20260209_GBPUSD_20260208_len5d_b4cdab60",
+      "d50080c7197abd03ed944af08d21f64cbccbd65e|2026-02-08T16:27:49Z|merge: overlay v0.1 deterministic hardening",
+      "3ee57f59d634db7bb5b1ebb8f642444ee1d7fca2|2026-02-08T14:59:28Z|governance: deterministic hardening for overlay v0.1 (range parser + repo-root seal keys)"
+    ],
+    "label": "scripts/+tests/ | governance_tooling+tests | governance overlay path1"
+  }
+]

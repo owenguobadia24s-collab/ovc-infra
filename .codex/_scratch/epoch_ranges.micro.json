@@ -1,0 +1,2743 @@
+[
+  {
+    "micro_epoch": 0,
+    "start_idx": 0,
+    "end_idx": 15,
+    "start_hash": "e144cf064769f1a5e332090d02a272f6cadc0e6c",
+    "end_hash": "171cd228a37550cd52e02598997907aad76b8dc1",
+    "start_date": "2026-01-14T01:00:01+00:00",
+    "end_date": "2026-01-14T08:31:23+00:00",
+    "commit_count": 16,
+    "dominant_dirs": [
+      {
+        "dir": "/",
+        "commits": 6
+      },
+      {
+        "dir": ".github/",
+        "commits": 4
+      },
+      {
+        "dir": "contracts/",
+        "commits": 3
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      },
+      {
+        "dir": "src/",
+        "commits": 1
+      },
+      {
+        "dir": "pine/",
+        "commits": 1
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "ci_workflows",
+        "commits": 4
+      },
+      {
+        "tag": "contracts",
+        "commits": 3
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "source_code",
+        "commits": 1
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      },
+      {
+        "tag": "tools_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 1,
+    "start_idx": 16,
+    "end_idx": 19,
+    "start_hash": "b694a744daa305e5b5ac522a159c23a023586d5f",
+    "end_hash": "c5574da312127422fb4af8513bf455b798f7f188",
+    "start_date": "2026-01-14T08:31:49+00:00",
+    "end_date": "2026-01-14T09:29:49+00:00",
+    "commit_count": 4,
+    "dominant_dirs": [
+      {
+        "dir": "tools/",
+        "commits": 3
+      },
+      {
+        "dir": "tests/",
+        "commits": 3
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "tools_general",
+        "commits": 3
+      },
+      {
+        "tag": "tests",
+        "commits": 3
+      }
+    ]
+  },
+  {
+    "micro_epoch": 2,
+    "start_idx": 20,
+    "end_idx": 20,
+    "start_hash": "e8c253791cb6b44febb0ba6ea70b5b4042c015f0",
+    "end_hash": "e8c253791cb6b44febb0ba6ea70b5b4042c015f0",
+    "start_date": "2026-01-14T09:37:00+00:00",
+    "end_date": "2026-01-14T09:37:00+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "tests/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "tests",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 3,
+    "start_idx": 21,
+    "end_idx": 31,
+    "start_hash": "4547615fb0df2ce0c207d6fa4d43ff3099070da3",
+    "end_hash": "cf5d987444ce3c7bd92f76fac2bf31a6530bb4d0",
+    "start_date": "2026-01-14T10:29:13+00:00",
+    "end_date": "2026-01-14T14:15:46+00:00",
+    "commit_count": 11,
+    "dominant_dirs": [
+      {
+        "dir": "contracts/",
+        "commits": 4
+      },
+      {
+        "dir": "tools/",
+        "commits": 3
+      },
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": "ovc-webhook/",
+        "commits": 2
+      },
+      {
+        "dir": "infra/",
+        "commits": 2
+      },
+      {
+        "dir": "tests/",
+        "commits": 1
+      },
+      {
+        "dir": "pine/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "contracts",
+        "commits": 4
+      },
+      {
+        "tag": "tools_general",
+        "commits": 3
+      },
+      {
+        "tag": "infra",
+        "commits": 2
+      },
+      {
+        "tag": "tests",
+        "commits": 1
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 4,
+    "start_idx": 32,
+    "end_idx": 32,
+    "start_hash": "7c3982068064cde8acec78811adde90eca014e59",
+    "end_hash": "7c3982068064cde8acec78811adde90eca014e59",
+    "start_date": "2026-01-14T15:57:49+00:00",
+    "end_date": "2026-01-14T15:57:49+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "infra/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "infra",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 5,
+    "start_idx": 33,
+    "end_idx": 33,
+    "start_hash": "aaecb0cab415bdc94a67ffb92ad903d488150367",
+    "end_hash": "aaecb0cab415bdc94a67ffb92ad903d488150367",
+    "start_date": "2026-01-14T18:01:00+00:00",
+    "end_date": "2026-01-14T18:01:00+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "infra/",
+        "commits": 1
+      },
+      {
+        "dir": "src/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "infra",
+        "commits": 1
+      },
+      {
+        "tag": "source_code",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 6,
+    "start_idx": 34,
+    "end_idx": 41,
+    "start_hash": "df6e2c64fc22312b89e5baf052ec725d8bea5a07",
+    "end_hash": "e0fbcdf0e1175bb5aa746303e76fec97a123a6f8",
+    "start_date": "2026-01-14T18:02:46+00:00",
+    "end_date": "2026-01-15T12:28:26+00:00",
+    "commit_count": 8,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 5
+      },
+      {
+        "dir": "infra/",
+        "commits": 4
+      },
+      {
+        "dir": "contracts/",
+        "commits": 3
+      },
+      {
+        "dir": ".github/",
+        "commits": 2
+      },
+      {
+        "dir": "src/",
+        "commits": 2
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "pine/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "infra",
+        "commits": 4
+      },
+      {
+        "tag": "contracts",
+        "commits": 3
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 2
+      },
+      {
+        "tag": "source_code",
+        "commits": 2
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 7,
+    "start_idx": 42,
+    "end_idx": 43,
+    "start_hash": "dc12a30c14c62855ae1b4505f2292ce6bc55e39b",
+    "end_hash": "e9a5ef31982bf1086ef0633801f4c88a6d1bc7a9",
+    "start_date": "2026-01-16T18:08:09+00:00",
+    "end_date": "2026-01-16T18:13:06+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 2
+      }
+    ],
+    "dominant_tags": []
+  },
+  {
+    "micro_epoch": 8,
+    "start_idx": 44,
+    "end_idx": 47,
+    "start_hash": "15353b9226cdc441cca675eda7cdb0cb91ade68d",
+    "end_hash": "8553d26409513c1b2abbe55a56c2d9da620777ae",
+    "start_date": "2026-01-16T21:16:53+00:00",
+    "end_date": "2026-01-16T22:36:02+00:00",
+    "commit_count": 4,
+    "dominant_dirs": [
+      {
+        "dir": "sql/",
+        "commits": 4
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "contracts/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "specs/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 4
+      },
+      {
+        "tag": "contracts",
+        "commits": 1
+      },
+      {
+        "tag": "specs",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 9,
+    "start_idx": 48,
+    "end_idx": 49,
+    "start_hash": "98d55cd4e57eb2ca36a36cf2f44432eb0068f7b1",
+    "end_hash": "a4943ebb9401ac7a694316c215a93b4309b9a320",
+    "start_date": "2026-01-16T22:50:47+00:00",
+    "end_date": "2026-01-17T02:22:30+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": "sql/",
+        "commits": 1
+      },
+      {
+        "dir": "infra/",
+        "commits": 1
+      },
+      {
+        "dir": "pine/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "infra",
+        "commits": 1
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 10,
+    "start_idx": 50,
+    "end_idx": 58,
+    "start_hash": "9555b7f67fde1578f02df14866d1940e2dba3dbb",
+    "end_hash": "903698622a46dbc7515b110cf605269406e72360",
+    "start_date": "2026-01-17T02:38:50+00:00",
+    "end_date": "2026-01-17T04:46:32+00:00",
+    "commit_count": 9,
+    "dominant_dirs": [
+      {
+        "dir": "infra/",
+        "commits": 5
+      },
+      {
+        "dir": "tests/",
+        "commits": 5
+      },
+      {
+        "dir": "docs/",
+        "commits": 5
+      },
+      {
+        "dir": "pine/",
+        "commits": 4
+      },
+      {
+        "dir": "tools/",
+        "commits": 3
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "infra",
+        "commits": 5
+      },
+      {
+        "tag": "tests",
+        "commits": 5
+      },
+      {
+        "tag": "pine",
+        "commits": 4
+      },
+      {
+        "tag": "validation",
+        "commits": 4
+      },
+      {
+        "tag": "tools_general",
+        "commits": 3
+      }
+    ]
+  },
+  {
+    "micro_epoch": 11,
+    "start_idx": 59,
+    "end_idx": 60,
+    "start_hash": "a47e2897bfccd9b1e5b108bcda69449011dc350b",
+    "end_hash": "fab9e5ba3cac560c71c3f5d98f013fd223296559",
+    "start_date": "2026-01-17T06:37:55+00:00",
+    "end_date": "2026-01-17T06:58:24+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": "infra/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "scripts/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "infra",
+        "commits": 1
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 12,
+    "start_idx": 61,
+    "end_idx": 67,
+    "start_hash": "82ed3f00cc42983a0037af3e888d5e3ec624a819",
+    "end_hash": "68306e813ecfae4b9d5a0015441d64bbb8545119",
+    "start_date": "2026-01-17T07:05:03+00:00",
+    "end_date": "2026-01-17T18:53:10+00:00",
+    "commit_count": 7,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 4
+      },
+      {
+        "dir": "sql/",
+        "commits": 4
+      },
+      {
+        "dir": "/",
+        "commits": 3
+      },
+      {
+        "dir": "contracts/",
+        "commits": 3
+      },
+      {
+        "dir": "scripts/",
+        "commits": 3
+      },
+      {
+        "dir": "tests/",
+        "commits": 2
+      },
+      {
+        "dir": "src/",
+        "commits": 1
+      },
+      {
+        "dir": "infra/",
+        "commits": 1
+      },
+      {
+        "dir": ".github/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 4
+      },
+      {
+        "tag": "contracts",
+        "commits": 3
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 3
+      },
+      {
+        "tag": "tests",
+        "commits": 2
+      },
+      {
+        "tag": "source_code",
+        "commits": 1
+      },
+      {
+        "tag": "infra",
+        "commits": 1
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 13,
+    "start_idx": 68,
+    "end_idx": 68,
+    "start_hash": "e3b80fc3cebdf11218409ce368e85a5b9192f923",
+    "end_hash": "e3b80fc3cebdf11218409ce368e85a5b9192f923",
+    "start_date": "2026-01-17T20:40:32+00:00",
+    "end_date": "2026-01-17T20:40:32+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "pine/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "pine",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 14,
+    "start_idx": 69,
+    "end_idx": 77,
+    "start_hash": "cd780720b768933334a53f0231c60b4227311e13",
+    "end_hash": "01ec28f134404dbad08184ff04b9ac7615b99c2a",
+    "start_date": "2026-01-17T21:17:23+00:00",
+    "end_date": "2026-01-18T05:46:40+00:00",
+    "commit_count": 9,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 8
+      },
+      {
+        "dir": "scripts/",
+        "commits": 5
+      },
+      {
+        "dir": "src/",
+        "commits": 5
+      },
+      {
+        "dir": "/",
+        "commits": 3
+      },
+      {
+        "dir": ".github/",
+        "commits": 2
+      },
+      {
+        "dir": "sql/",
+        "commits": 2
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "validation",
+        "commits": 7
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 5
+      },
+      {
+        "tag": "source_code",
+        "commits": 5
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 2
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      }
+    ]
+  },
+  {
+    "micro_epoch": 15,
+    "start_idx": 78,
+    "end_idx": 78,
+    "start_hash": "71072aa465e553a151b4f57ce6fb78e59b5f30e3",
+    "end_hash": "71072aa465e553a151b4f57ce6fb78e59b5f30e3",
+    "start_date": "2026-01-18T06:01:59+00:00",
+    "end_date": "2026-01-18T06:01:59+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "src/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "source_code",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 16,
+    "start_idx": 79,
+    "end_idx": 90,
+    "start_hash": "201fd6c8465a645b52b08435a1665638b2cfa281",
+    "end_hash": "961738bf86f3845f7969922cc9e211c84bf0b22f",
+    "start_date": "2026-01-18T06:43:57+00:00",
+    "end_date": "2026-01-18T22:19:09+00:00",
+    "commit_count": 12,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 12
+      },
+      {
+        "dir": "src/",
+        "commits": 8
+      },
+      {
+        "dir": "sql/",
+        "commits": 4
+      },
+      {
+        "dir": ".github/",
+        "commits": 3
+      },
+      {
+        "dir": "tests/",
+        "commits": 3
+      },
+      {
+        "dir": "scripts/",
+        "commits": 2
+      },
+      {
+        "dir": "artifacts/",
+        "commits": 1
+      },
+      {
+        "dir": "configs/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "source_code",
+        "commits": 8
+      },
+      {
+        "tag": "validation",
+        "commits": 7
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 4
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 4
+      },
+      {
+        "tag": "tests",
+        "commits": 3
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 2
+      },
+      {
+        "tag": "artifacts",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 17,
+    "start_idx": 91,
+    "end_idx": 97,
+    "start_hash": "e43ee24cad882874e42356a34af4c8ad82ec0d88",
+    "end_hash": "597ca8e2c8a774a490342e796ab6da5424fdb003",
+    "start_date": "2026-01-18T22:36:34+00:00",
+    "end_date": "2026-01-19T23:14:58+00:00",
+    "commit_count": 7,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 5
+      },
+      {
+        "dir": "src/",
+        "commits": 4
+      },
+      {
+        "dir": "infra/",
+        "commits": 2
+      },
+      {
+        "dir": ".github/",
+        "commits": 2
+      },
+      {
+        "dir": "scripts/",
+        "commits": 2
+      },
+      {
+        "dir": "configs/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      },
+      {
+        "dir": "tests/",
+        "commits": 1
+      },
+      {
+        "dir": "contracts/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "source_code",
+        "commits": 4
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 3
+      },
+      {
+        "tag": "infra",
+        "commits": 2
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 2
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "tests",
+        "commits": 1
+      },
+      {
+        "tag": "contracts",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 18,
+    "start_idx": 98,
+    "end_idx": 103,
+    "start_hash": "800fbb9a6063f067a63b2f51b5e6bd801d7769e8",
+    "end_hash": "9cf0060e6f423183fbf56c464824254e150be9c2",
+    "start_date": "2026-01-19T23:23:34+00:00",
+    "end_date": "2026-01-20T02:15:14+00:00",
+    "commit_count": 6,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 6
+      },
+      {
+        "dir": "sql/",
+        "commits": 2
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 19,
+    "start_idx": 104,
+    "end_idx": 105,
+    "start_hash": "abc32d76165090fcb47b0348f808d961155396c2",
+    "end_hash": "0197359d49adff54eedae2d3c60e160fe9ba183c",
+    "start_date": "2026-01-20T02:42:17+00:00",
+    "end_date": "2026-01-20T03:05:49+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 2
+      },
+      {
+        "dir": "sql/",
+        "commits": 2
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 20,
+    "start_idx": 106,
+    "end_idx": 106,
+    "start_hash": "88eff122fe893c14902013cedf36c25793e75e8f",
+    "end_hash": "88eff122fe893c14902013cedf36c25793e75e8f",
+    "start_date": "2026-01-20T03:11:01+00:00",
+    "end_date": "2026-01-20T03:11:01+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "releases/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "releases",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 21,
+    "start_idx": 107,
+    "end_idx": 107,
+    "start_hash": "f2f8bd0bbdf3ce7a25eee7a62955602ae24d06d3",
+    "end_hash": "f2f8bd0bbdf3ce7a25eee7a62955602ae24d06d3",
+    "start_date": "2026-01-20T04:58:31+00:00",
+    "end_date": "2026-01-20T04:58:31+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "research/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "research",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 22,
+    "start_idx": 108,
+    "end_idx": 108,
+    "start_hash": "913bd4d3430bff9361fcebbeb08eb2f0ce6fcc1b",
+    "end_hash": "913bd4d3430bff9361fcebbeb08eb2f0ce6fcc1b",
+    "start_date": "2026-01-20T05:01:54+00:00",
+    "end_date": "2026-01-20T05:01:54+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "research/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "research",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 23,
+    "start_idx": 109,
+    "end_idx": 109,
+    "start_hash": "007f21eacce9bef66989ab5034089658cf946cac",
+    "end_hash": "007f21eacce9bef66989ab5034089658cf946cac",
+    "start_date": "2026-01-20T05:04:53+00:00",
+    "end_date": "2026-01-20T05:04:53+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "research/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "research",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 24,
+    "start_idx": 110,
+    "end_idx": 110,
+    "start_hash": "db312bd11cfd3c240d41f6c48c2b3fbf4cb3ab69",
+    "end_hash": "db312bd11cfd3c240d41f6c48c2b3fbf4cb3ab69",
+    "start_date": "2026-01-20T05:10:12+00:00",
+    "end_date": "2026-01-20T05:10:12+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "research/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "research",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 25,
+    "start_idx": 111,
+    "end_idx": 113,
+    "start_hash": "5553e731fc66651ddb934303f7e67f893712f47f",
+    "end_hash": "9a2f52a5e592e1b36937fb383bbee36c54b1ef20",
+    "start_date": "2026-01-20T05:13:47+00:00",
+    "end_date": "2026-01-20T05:27:39+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": "research/",
+        "commits": 3
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "research",
+        "commits": 3
+      }
+    ]
+  },
+  {
+    "micro_epoch": 26,
+    "start_idx": 114,
+    "end_idx": 114,
+    "start_hash": "336d0eb6edc063b295ac0f30c030e591fd0b0d8e",
+    "end_hash": "336d0eb6edc063b295ac0f30c030e591fd0b0d8e",
+    "start_date": "2026-01-20T05:31:50+00:00",
+    "end_date": "2026-01-20T05:31:50+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "research/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "research",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 27,
+    "start_idx": 115,
+    "end_idx": 121,
+    "start_hash": "38fcad2b1963a4b193fa4f629c89999f7d38a172",
+    "end_hash": "fb2bbd3b4513e5b61840519dc3053785300a00c2",
+    "start_date": "2026-01-20T05:43:18+00:00",
+    "end_date": "2026-01-20T10:06:54+00:00",
+    "commit_count": 7,
+    "dominant_dirs": [
+      {
+        "dir": "sql/",
+        "commits": 6
+      },
+      {
+        "dir": "docs/",
+        "commits": 4
+      },
+      {
+        "dir": "research/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 6
+      },
+      {
+        "tag": "research",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 28,
+    "start_idx": 122,
+    "end_idx": 124,
+    "start_hash": "1774ef56bfd2165b8b8e7a83230cd39a1fb46fc8",
+    "end_hash": "f63c710cad5464006ac83f9dd2face06b7f1f477",
+    "start_date": "2026-01-20T10:19:30+00:00",
+    "end_date": "2026-01-20T10:27:37+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 2
+      },
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "scripts/",
+        "commits": 1
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 29,
+    "start_idx": 125,
+    "end_idx": 131,
+    "start_hash": "d2e816266340a2e57b9432a886c3d9fef230be28",
+    "end_hash": "c1b801135e4bccebb2b44c307044ddfd9c6d1628",
+    "start_date": "2026-01-20T10:29:42+00:00",
+    "end_date": "2026-01-20T12:12:21+00:00",
+    "commit_count": 7,
+    "dominant_dirs": [
+      {
+        "dir": "scripts/",
+        "commits": 5
+      },
+      {
+        "dir": "reports/",
+        "commits": 2
+      },
+      {
+        "dir": ".github/",
+        "commits": 2
+      },
+      {
+        "dir": "docs/",
+        "commits": 2
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "scripts_general",
+        "commits": 5
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 2
+      }
+    ]
+  },
+  {
+    "micro_epoch": 30,
+    "start_idx": 132,
+    "end_idx": 136,
+    "start_hash": "03b3e9cf39b5a81ab9e7391f8827a27e49bd874d",
+    "end_hash": "27fde4919e4969dad22738895d85fced89eba514",
+    "start_date": "2026-01-20T12:21:03+00:00",
+    "end_date": "2026-01-20T13:11:25+00:00",
+    "commit_count": 5,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 4
+      },
+      {
+        "dir": "sql/",
+        "commits": 2
+      },
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": "scripts/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 4
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 31,
+    "start_idx": 137,
+    "end_idx": 139,
+    "start_hash": "9e269228ac7849c1e8a9714fd8c94f1f886d1e8a",
+    "end_hash": "ef3e50e405dfa96d7d63364400ee309746b772e4",
+    "start_date": "2026-01-20T13:18:13+00:00",
+    "end_date": "2026-01-20T13:34:12+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 3
+      },
+      {
+        "dir": "scripts/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 3
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 32,
+    "start_idx": 140,
+    "end_idx": 140,
+    "start_hash": "d4b1a6e781599c3d903a7a4de2ad2742d067ad90",
+    "end_hash": "d4b1a6e781599c3d903a7a4de2ad2742d067ad90",
+    "start_date": "2026-01-20T14:01:21+00:00",
+    "end_date": "2026-01-20T14:01:21+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": "scripts/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 33,
+    "start_idx": 141,
+    "end_idx": 155,
+    "start_hash": "7cb0896c3c1068a27ebddb89ad36f0397ff06e6d",
+    "end_hash": "e2fbbc0fac39376c18213ced46399b8c90f7c649",
+    "start_date": "2026-01-20T14:13:12+00:00",
+    "end_date": "2026-01-22T04:35:15+00:00",
+    "commit_count": 15,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 9
+      },
+      {
+        "dir": ".github/",
+        "commits": 7
+      },
+      {
+        "dir": "scripts/",
+        "commits": 6
+      },
+      {
+        "dir": "sql/",
+        "commits": 4
+      },
+      {
+        "dir": "/",
+        "commits": 4
+      },
+      {
+        "dir": "docs/",
+        "commits": 4
+      },
+      {
+        "dir": "specs/",
+        "commits": 2
+      },
+      {
+        "dir": "src/",
+        "commits": 2
+      },
+      {
+        "dir": "artifacts/",
+        "commits": 1
+      },
+      {
+        "dir": "configs/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 9
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 7
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 6
+      },
+      {
+        "tag": "validation",
+        "commits": 3
+      },
+      {
+        "tag": "operations",
+        "commits": 2
+      },
+      {
+        "tag": "source_code",
+        "commits": 2
+      },
+      {
+        "tag": "specs",
+        "commits": 2
+      },
+      {
+        "tag": "artifacts",
+        "commits": 1
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 1
+      },
+      {
+        "tag": "infra",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 34,
+    "start_idx": 156,
+    "end_idx": 159,
+    "start_hash": "2316949b478190c2aa1be564a1d8b466c2faa05b",
+    "end_hash": "ca147a606ce00a7e6b8d2a59aa427e0469dd5759",
+    "start_date": "2026-01-22T04:40:30+00:00",
+    "end_date": "2026-01-22T04:52:19+00:00",
+    "commit_count": 4,
+    "dominant_dirs": [
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": "reports/",
+        "commits": 2
+      },
+      {
+        "dir": "sql/",
+        "commits": 2
+      },
+      {
+        "dir": ".vscode/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      }
+    ]
+  },
+  {
+    "micro_epoch": 35,
+    "start_idx": 160,
+    "end_idx": 162,
+    "start_hash": "26903304ea71a196706c84d7bb1c4babcd3e537a",
+    "end_hash": "094a2dda4ef82ceffca60c9f47b3e5cf85f4c105",
+    "start_date": "2026-01-22T04:58:03+00:00",
+    "end_date": "2026-01-22T05:08:06+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": ".github/",
+        "commits": 2
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "ci_workflows",
+        "commits": 2
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 36,
+    "start_idx": 163,
+    "end_idx": 169,
+    "start_hash": "e7fb6747a47c2d1e175661ff43944c166962e3ae",
+    "end_hash": "119b9f2367630150c690943afb22fb6e7fb133d7",
+    "start_date": "2026-01-22T05:20:09+00:00",
+    "end_date": "2026-01-22T06:24:58+00:00",
+    "commit_count": 7,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 5
+      },
+      {
+        "dir": "sql/",
+        "commits": 5
+      },
+      {
+        "dir": ".github/",
+        "commits": 2
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "scripts/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 5
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 2
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 37,
+    "start_idx": 170,
+    "end_idx": 186,
+    "start_hash": "788fbba78385487d8d60402b1d5d15e020688cb6",
+    "end_hash": "851fbad324673e97d0f97be4bcc242013e334929",
+    "start_date": "2026-01-22T06:25:44+00:00",
+    "end_date": "2026-01-22T16:00:20+00:00",
+    "commit_count": 17,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 11
+      },
+      {
+        "dir": "scripts/",
+        "commits": 9
+      },
+      {
+        "dir": "sql/",
+        "commits": 8
+      },
+      {
+        "dir": ".github/",
+        "commits": 4
+      },
+      {
+        "dir": "tests/",
+        "commits": 4
+      },
+      {
+        "dir": ".vscode/",
+        "commits": 3
+      },
+      {
+        "dir": "docs/",
+        "commits": 3
+      },
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": "infra/",
+        "commits": 1
+      },
+      {
+        "dir": "trajectory_families/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 11
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 9
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 4
+      },
+      {
+        "tag": "tests",
+        "commits": 4
+      },
+      {
+        "tag": "infra",
+        "commits": 1
+      },
+      {
+        "tag": "trajectory",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 38,
+    "start_idx": 187,
+    "end_idx": 192,
+    "start_hash": "b7b09557b7fea4c0199066df93ff64e591922494",
+    "end_hash": "19c9d26e1fa8b00fe89ffc6d5a124b2913f83f50",
+    "start_date": "2026-01-22T16:28:46+00:00",
+    "end_date": "2026-01-22T18:58:46+00:00",
+    "commit_count": 6,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 2
+      },
+      {
+        "dir": "scripts/",
+        "commits": 2
+      },
+      {
+        "dir": "docs/",
+        "commits": 2
+      },
+      {
+        "dir": "CLAIMS/",
+        "commits": 2
+      },
+      {
+        "dir": "trajectory_families/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 2
+      },
+      {
+        "tag": "claims",
+        "commits": 2
+      },
+      {
+        "tag": "trajectory",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 39,
+    "start_idx": 193,
+    "end_idx": 199,
+    "start_hash": "a49f425da9cba5cf7c05f1538848c9f0ebafd0b9",
+    "end_hash": "ec3a7253fe401f9285d7899136eb537565fb3a89",
+    "start_date": "2026-01-22T21:10:17+00:00",
+    "end_date": "2026-01-23T18:32:37+00:00",
+    "commit_count": 7,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 6
+      },
+      {
+        "dir": ".github/",
+        "commits": 4
+      },
+      {
+        "dir": "scripts/",
+        "commits": 3
+      },
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": "reports/",
+        "commits": 2
+      },
+      {
+        "dir": "artifacts/",
+        "commits": 2
+      },
+      {
+        "dir": "schema/",
+        "commits": 1
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "ci_workflows",
+        "commits": 4
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 3
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "artifacts",
+        "commits": 2
+      },
+      {
+        "tag": "operations",
+        "commits": 2
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 2
+      },
+      {
+        "tag": "validation",
+        "commits": 2
+      },
+      {
+        "tag": "schema",
+        "commits": 1
+      },
+      {
+        "tag": "tools_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 40,
+    "start_idx": 200,
+    "end_idx": 201,
+    "start_hash": "51f48c227ef69f6ba7a0eb293746265577034fa2",
+    "end_hash": "380e199d700cbce7c6304ac96d18ad1626490622",
+    "start_date": "2026-01-23T19:56:44+00:00",
+    "end_date": "2026-01-23T20:43:11+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": "docs/",
+        "commits": 2
+      },
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": "Tetsu/",
+        "commits": 1
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "governance_contracts",
+        "commits": 2
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 1
+      },
+      {
+        "tag": "tools_general",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 41,
+    "start_idx": 202,
+    "end_idx": 207,
+    "start_hash": "bae8dade70c31ba07ba20ac0556202a60df9fdcf",
+    "end_hash": "5994d30ad425cf4d7f45feff9c3c6d1f7835f576",
+    "start_date": "2026-01-24T07:58:35+00:00",
+    "end_date": "2026-01-26T15:46:09+00:00",
+    "commit_count": 6,
+    "dominant_dirs": [
+      {
+        "dir": "Tetsu/",
+        "commits": 4
+      },
+      {
+        "dir": "docs/",
+        "commits": 4
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "repo_maze",
+        "commits": 4
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 3
+      },
+      {
+        "tag": "validation",
+        "commits": 2
+      },
+      {
+        "tag": "tools_general",
+        "commits": 1
+      },
+      {
+        "tag": "repo_map",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 42,
+    "start_idx": 208,
+    "end_idx": 213,
+    "start_hash": "cd19465967f98f8916b2f9ad18c5fe3888440fda",
+    "end_hash": "f1688f92b5a987fa2f8aca7c3c022b694a7f87a9",
+    "start_date": "2026-01-29T11:20:13+00:00",
+    "end_date": "2026-02-01T16:42:27+00:00",
+    "commit_count": 6,
+    "dominant_dirs": [
+      {
+        "dir": "Tetsu/",
+        "commits": 3
+      },
+      {
+        "dir": "reports/",
+        "commits": 3
+      },
+      {
+        "dir": "sql/",
+        "commits": 3
+      },
+      {
+        "dir": "docs/",
+        "commits": 2
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "repo_maze",
+        "commits": 3
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 3
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 2
+      },
+      {
+        "tag": "repo_map",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 43,
+    "start_idx": 214,
+    "end_idx": 214,
+    "start_hash": "53a3c0b9a0ba5c9a506224a338ba3da5ba40e2aa",
+    "end_hash": "53a3c0b9a0ba5c9a506224a338ba3da5ba40e2aa",
+    "start_date": "2026-02-01T16:42:31+00:00",
+    "end_date": "2026-02-01T16:42:31+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "Tetsu/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 1
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 44,
+    "start_idx": 215,
+    "end_idx": 215,
+    "start_hash": "f5318b3c33952781932b148d44c6909f78972a8e",
+    "end_hash": "f5318b3c33952781932b148d44c6909f78972a8e",
+    "start_date": "2026-02-02T06:44:44+00:00",
+    "end_date": "2026-02-02T06:44:44+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 45,
+    "start_idx": 216,
+    "end_idx": 216,
+    "start_hash": "4c245c6e90eec04733739f8879d1868e977f0257",
+    "end_hash": "4c245c6e90eec04733739f8879d1868e977f0257",
+    "start_date": "2026-02-02T14:36:41+00:00",
+    "end_date": "2026-02-02T14:36:41+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": ".codex/",
+        "commits": 1
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "codex_runtime",
+        "commits": 1
+      },
+      {
+        "tag": "operations",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 46,
+    "start_idx": 217,
+    "end_idx": 218,
+    "start_hash": "44403d3f47251c870c548e726a596384e30ca426",
+    "end_hash": "ef2dd2f4067b60028788b439394172e92d9d98ef",
+    "start_date": "2026-02-02T15:24:36+00:00",
+    "end_date": "2026-02-02T17:03:21+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": ".codex/",
+        "commits": 1
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      },
+      {
+        "dir": "Tetsu/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "codex_runtime",
+        "commits": 1
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "operations",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 47,
+    "start_idx": 219,
+    "end_idx": 222,
+    "start_hash": "85cb367082e98ac3a2339ca71c51c1141ed91308",
+    "end_hash": "b19cf71b1d1c48b59e5ba5853e37c33a45688220",
+    "start_date": "2026-02-02T17:03:44+00:00",
+    "end_date": "2026-02-02T19:31:01+00:00",
+    "commit_count": 4,
+    "dominant_dirs": [
+      {
+        "dir": ".codex/",
+        "commits": 4
+      },
+      {
+        "dir": "Tetsu/",
+        "commits": 4
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "codex_runtime",
+        "commits": 4
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 4
+      },
+      {
+        "tag": "validation",
+        "commits": 3
+      },
+      {
+        "tag": "operations",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 48,
+    "start_idx": 223,
+    "end_idx": 224,
+    "start_hash": "f758bd189a8b8b7a0b13baed703a4014b29748d5",
+    "end_hash": "3dc06d8df45105eb06284c476f32243021c2a8b9",
+    "start_date": "2026-02-02T19:48:35+00:00",
+    "end_date": "2026-02-02T21:06:37+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": ".codex/",
+        "commits": 2
+      },
+      {
+        "dir": "Tetsu/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "codex_runtime",
+        "commits": 2
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 49,
+    "start_idx": 225,
+    "end_idx": 227,
+    "start_hash": "b3e733edcd5f4e26d1894d0f57074fa91ca3cca0",
+    "end_hash": "956982dbb26f1db70741c3b2a207d1e65277afd1",
+    "start_date": "2026-02-02T23:00:17+00:00",
+    "end_date": "2026-02-04T06:05:33+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": "reports/",
+        "commits": 2
+      },
+      {
+        "dir": "sql/",
+        "commits": 2
+      },
+      {
+        "dir": "Tetsu/",
+        "commits": 1
+      },
+      {
+        "dir": "Work Timeline/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 1
+      },
+      {
+        "tag": "repo_maze",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 50,
+    "start_idx": 228,
+    "end_idx": 233,
+    "start_hash": "02fc2accfe43f534e2cc305a216679be5e2a0b52",
+    "end_hash": "41600c050adf38bc71e8ced7244d5b6917497154",
+    "start_date": "2026-02-04T20:14:03+00:00",
+    "end_date": "2026-02-05T00:54:11+00:00",
+    "commit_count": 6,
+    "dominant_dirs": [
+      {
+        "dir": "src/",
+        "commits": 4
+      },
+      {
+        "dir": ".codex/",
+        "commits": 3
+      },
+      {
+        "dir": "_archive/",
+        "commits": 3
+      },
+      {
+        "dir": "_quarantine/",
+        "commits": 3
+      },
+      {
+        "dir": "infra/",
+        "commits": 3
+      },
+      {
+        "dir": "scripts/",
+        "commits": 3
+      },
+      {
+        "dir": "sql/",
+        "commits": 3
+      },
+      {
+        "dir": "tools/",
+        "commits": 3
+      },
+      {
+        "dir": "docs/",
+        "commits": 3
+      },
+      {
+        "dir": "reports/",
+        "commits": 3
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "evidence_runs",
+        "commits": 4
+      },
+      {
+        "tag": "source_code",
+        "commits": 4
+      },
+      {
+        "tag": "codex_runtime",
+        "commits": 3
+      },
+      {
+        "tag": "infra",
+        "commits": 3
+      },
+      {
+        "tag": "scripts_general",
+        "commits": 3
+      },
+      {
+        "tag": "tools_general",
+        "commits": 3
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 3
+      },
+      {
+        "tag": "validation",
+        "commits": 3
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 2
+      },
+      {
+        "tag": "tests",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 51,
+    "start_idx": 234,
+    "end_idx": 237,
+    "start_hash": "a4f56d59989f53af9d204a2589f11abf523a6e7d",
+    "end_hash": "fd374fa7bb76584c072d1abf7751adde9484a462",
+    "start_date": "2026-02-05T00:55:14+00:00",
+    "end_date": "2026-02-05T02:59:06+00:00",
+    "commit_count": 4,
+    "dominant_dirs": [
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "tools_general",
+        "commits": 1
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 52,
+    "start_idx": 238,
+    "end_idx": 239,
+    "start_hash": "dd964ca3d0151285b5a3d5fc398f4b70feec7b30",
+    "end_hash": "287cf61e3e0ecba43f4606b1f0dc1ee37284b04b",
+    "start_date": "2026-02-05T03:15:59+00:00",
+    "end_date": "2026-02-05T03:52:22+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 2
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "validation",
+        "commits": 1
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 53,
+    "start_idx": 240,
+    "end_idx": 242,
+    "start_hash": "34e45abaa3e1214689e2348e295c76090f279a6c",
+    "end_hash": "07022ac03513f1191f0bc192d8979d5318801c3f",
+    "start_date": "2026-02-05T04:18:21+00:00",
+    "end_date": "2026-02-05T06:13:00+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": ".vscode/",
+        "commits": 1
+      },
+      {
+        "dir": "_quarantine/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "validation",
+        "commits": 2
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "control_panel",
+        "commits": 1
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 54,
+    "start_idx": 243,
+    "end_idx": 243,
+    "start_hash": "8f660b20cd1d0df1780e10e7b52efe7564868719",
+    "end_hash": "8f660b20cd1d0df1780e10e7b52efe7564868719",
+    "start_date": "2026-02-05T06:44:19+00:00",
+    "end_date": "2026-02-05T06:44:19+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "control_panel",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 55,
+    "start_idx": 244,
+    "end_idx": 244,
+    "start_hash": "8452511e7ae16af73801df8db9137a2fb429c466",
+    "end_hash": "8452511e7ae16af73801df8db9137a2fb429c466",
+    "start_date": "2026-02-05T06:45:20+00:00",
+    "end_date": "2026-02-05T06:45:20+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "control_panel",
+        "commits": 1
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 56,
+    "start_idx": 245,
+    "end_idx": 252,
+    "start_hash": "8f5c33733a2ff75f51d3c8848ada4de0596d6506",
+    "end_hash": "7021c84d722a6782d032dbeccfccc8aa81bd3353",
+    "start_date": "2026-02-05T06:48:35+00:00",
+    "end_date": "2026-02-07T05:33:31+00:00",
+    "commit_count": 8,
+    "dominant_dirs": [
+      {
+        "dir": "tools/",
+        "commits": 4
+      },
+      {
+        "dir": "docs/",
+        "commits": 2
+      },
+      {
+        "dir": "reports/",
+        "commits": 2
+      },
+      {
+        "dir": "sql/",
+        "commits": 2
+      },
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "control_panel",
+        "commits": 3
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 2
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 2
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "audit_interpreter",
+        "commits": 1
+      },
+      {
+        "tag": "validation",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 57,
+    "start_idx": 253,
+    "end_idx": 253,
+    "start_hash": "ff1564dd8e4cd61b5bbc76db3aebbba48852abdb",
+    "end_hash": "ff1564dd8e4cd61b5bbc76db3aebbba48852abdb",
+    "start_date": "2026-02-07T18:26:34+00:00",
+    "end_date": "2026-02-07T18:26:34+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": ".github/",
+        "commits": 1
+      },
+      {
+        "dir": ".vscode/",
+        "commits": 1
+      },
+      {
+        "dir": "/",
+        "commits": 1
+      },
+      {
+        "dir": "artifacts/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "scripts/",
+        "commits": 1
+      },
+      {
+        "dir": "tests/",
+        "commits": 1
+      },
+      {
+        "dir": "tools/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "artifacts",
+        "commits": 1
+      },
+      {
+        "tag": "catalogs",
+        "commits": 1
+      },
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      },
+      {
+        "tag": "governance_contracts",
+        "commits": 1
+      },
+      {
+        "tag": "governance_tooling",
+        "commits": 1
+      },
+      {
+        "tag": "tests",
+        "commits": 1
+      },
+      {
+        "tag": "tools_general",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 58,
+    "start_idx": 254,
+    "end_idx": 254,
+    "start_hash": "2a68adf9762ff6910ea1883a6d5cf1f999cf7dae",
+    "end_hash": "2a68adf9762ff6910ea1883a6d5cf1f999cf7dae",
+    "start_date": "2026-02-07T18:29:46+00:00",
+    "end_date": "2026-02-07T18:29:46+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": ".github/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "ci_workflows",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 59,
+    "start_idx": 255,
+    "end_idx": 257,
+    "start_hash": "7d92461d83ba71f8df87d28a130a7279c86d0e62",
+    "end_hash": "3ee57f59d634db7bb5b1ebb8f642444ee1d7fca2",
+    "start_date": "2026-02-08T05:12:11+00:00",
+    "end_date": "2026-02-08T14:59:28+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": "scripts/",
+        "commits": 2
+      },
+      {
+        "dir": "tests/",
+        "commits": 2
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      },
+      {
+        "dir": "docs/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "governance_tooling",
+        "commits": 2
+      },
+      {
+        "tag": "tests",
+        "commits": 2
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      },
+      {
+        "tag": "catalogs",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 60,
+    "start_idx": 258,
+    "end_idx": 258,
+    "start_hash": "35eb846e5c7111384b1570ab3a142d3fee8f3002",
+    "end_hash": "35eb846e5c7111384b1570ab3a142d3fee8f3002",
+    "start_date": "2026-02-08T16:23:57+00:00",
+    "end_date": "2026-02-08T16:23:57+00:00",
+    "commit_count": 1,
+    "dominant_dirs": [
+      {
+        "dir": "scripts/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "governance_tooling",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 61,
+    "start_idx": 259,
+    "end_idx": 261,
+    "start_hash": "d50080c7197abd03ed944af08d21f64cbccbd65e",
+    "end_hash": "52d4a177ba43263c8817db27b6634b073b4e5015",
+    "start_date": "2026-02-08T16:27:49+00:00",
+    "end_date": "2026-02-08T16:51:35+00:00",
+    "commit_count": 3,
+    "dominant_dirs": [
+      {
+        "dir": "scripts/",
+        "commits": 3
+      },
+      {
+        "dir": "docs/",
+        "commits": 2
+      },
+      {
+        "dir": "tests/",
+        "commits": 2
+      },
+      {
+        "dir": "/",
+        "commits": 2
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "governance_tooling",
+        "commits": 3
+      },
+      {
+        "tag": "catalogs",
+        "commits": 2
+      },
+      {
+        "tag": "tests",
+        "commits": 2
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      }
+    ]
+  },
+  {
+    "micro_epoch": 62,
+    "start_idx": 262,
+    "end_idx": 263,
+    "start_hash": "5053bbfdba14990f4017d22ea8cead36e0adb94f",
+    "end_hash": "cfd91a7d80267d717ab519102b1ce7956361503c",
+    "start_date": "2026-02-09T01:55:06+00:00",
+    "end_date": "2026-02-09T05:12:52+00:00",
+    "commit_count": 2,
+    "dominant_dirs": [
+      {
+        "dir": "docs/",
+        "commits": 1
+      },
+      {
+        "dir": "reports/",
+        "commits": 1
+      },
+      {
+        "dir": "sql/",
+        "commits": 1
+      }
+    ],
+    "dominant_tags": [
+      {
+        "tag": "catalogs",
+        "commits": 1
+      },
+      {
+        "tag": "evidence_runs",
+        "commits": 1
+      }
+    ]
+  }
+]
