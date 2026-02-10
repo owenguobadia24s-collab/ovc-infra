@@ -1,0 +1,79 @@
+{
+  "version": "0.1",
+  "source": "scripts/governance/classify_change.py",
+  "class_order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "UNKNOWN"
+  ],
+  "doc_extensions": [
+    ".adoc",
+    ".md",
+    ".rst",
+    ".txt"
+  ],
+  "rules": [
+    {
+      "class": "A",
+      "patterns": [
+        "reports/path1/**",
+        "sql/path1/**"
+      ],
+      "description": "Path1 evidence runs and SQL"
+    },
+    {
+      "class": "B",
+      "patterns": [
+        "docs/contracts/**",
+        "docs/governance/**",
+        "docs/phase_2_2/**"
+      ],
+      "description": "Governance contracts and phase documentation"
+    },
+    {
+      "class": "C",
+      "patterns": [
+        "scripts/**",
+        "src/**",
+        "tests/**",
+        ".github/workflows/**",
+        ".codex/CHECKS/**",
+        "tools/** (excluding pure docs)"
+      ],
+      "description": "Code, scripts, tests, CI, tools (non-doc)"
+    },
+    {
+      "class": "D",
+      "patterns": [
+        "tools/phase3_control_panel/**"
+      ],
+      "description": "Phase3 control panel"
+    },
+    {
+      "class": "E",
+      "patterns": [
+        ".gitattributes",
+        ".gitignore",
+        ".github/workflows/**",
+        "tools/**/shim/**"
+      ],
+      "description": "Repo config, CI, compat shims"
+    },
+    {
+      "class": "UNKNOWN",
+      "patterns": [
+        "(default when no other rule matches)"
+      ],
+      "description": "Unmapped path patterns"
+    }
+  ],
+  "evaluation_logic": "Each path is tested against all rules independently (set accumulation). A path can trigger multiple classes. If no class matches, UNKNOWN is added. Per-commit classification is the union of all per-path classes.",
+  "default_behavior": "UNKNOWN when no other pattern matches",
+  "special_functions": {
+    "is_tools_pure_doc": "tools/ files with doc extensions (.md,.txt,.rst,.adoc) or containing docs/ in subpath -> excluded from C",
+    "is_tools_compat_shim": "tools/ files with shim in path segment -> triggers E"
+  }
+}
