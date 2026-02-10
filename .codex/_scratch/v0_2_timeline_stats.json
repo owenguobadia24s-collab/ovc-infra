@@ -1,0 +1,174 @@
+{
+  "coverage": {
+    "end_commit": "7021c84d722a6782d032dbeccfccc8aa81bd3353",
+    "max_date_utc": "2026-02-07T05:33:31Z",
+    "min_date_utc": "2026-02-05T00:53:52Z",
+    "start_commit": "e54a663953319ac936696413623538e5139e9849",
+    "total_commits": 22,
+    "unknown_clusters_by_prefix": [
+      {
+        "commit_count": 2,
+        "prefix": "/"
+      },
+      {
+        "commit_count": 2,
+        "prefix": "tools/"
+      },
+      {
+        "commit_count": 1,
+        "prefix": "docs/"
+      }
+    ],
+    "unknown_count": 2,
+    "unknown_pct": 9.091
+  },
+  "derived_windows": {
+    "macro_windows_count": 0,
+    "micro_windows_count": 0,
+    "monthly_windows_count": 1,
+    "source": "date_derived_month_time_windows"
+  },
+  "detected_fields": {
+    "ledger_commit": "commit.hash",
+    "ledger_date": "commit.timestamp_utc",
+    "ledger_macro_epoch": null,
+    "ledger_micro_epoch": null,
+    "overlay_classes": "classes",
+    "overlay_commit": "commit",
+    "overlay_unknown": "unknown"
+  },
+  "frequency": {
+    "per_month_by_class": {
+      "2026-02": {
+        "A": 5,
+        "B": 6,
+        "C": 7,
+        "D": 4,
+        "E": 4,
+        "UNKNOWN": 2
+      }
+    },
+    "top_level_directory_touch_counts": [
+      {
+        "prefix": "tools/",
+        "touch_count": 8
+      },
+      {
+        "prefix": "docs/",
+        "touch_count": 7
+      },
+      {
+        "prefix": "/",
+        "touch_count": 5
+      },
+      {
+        "prefix": "reports/",
+        "touch_count": 4
+      },
+      {
+        "prefix": "sql/",
+        "touch_count": 3
+      },
+      {
+        "prefix": ".github/",
+        "touch_count": 2
+      },
+      {
+        "prefix": ".codex/",
+        "touch_count": 1
+      },
+      {
+        "prefix": ".vscode/",
+        "touch_count": 1
+      },
+      {
+        "prefix": "_quarantine/",
+        "touch_count": 1
+      },
+      {
+        "prefix": "scripts/",
+        "touch_count": 1
+      },
+      {
+        "prefix": "src/",
+        "touch_count": 1
+      },
+      {
+        "prefix": "tests/",
+        "touch_count": 1
+      }
+    ]
+  },
+  "inputs": {
+    "ledger": "docs\\catalogs\\DEV_CHANGE_LEDGER_v0.1.jsonl",
+    "overlay": "docs\\catalogs\\DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl"
+  },
+  "join_checks": {
+    "hash_order_match": true,
+    "join_mode": "strict_row_order_by_commit_hash",
+    "ledger_rows": 22,
+    "mismatch_count": 0,
+    "overlay_rows": 22
+  },
+  "overlap": {
+    "highest_pair": [
+      "C",
+      "D"
+    ],
+    "highest_pair_count": 4,
+    "highest_pair_top_windows": [
+      {
+        "date_end": "2026-02-05T08:52:15Z",
+        "date_start": "2026-02-05T07:09:55Z",
+        "end_index": 18,
+        "hashes": [
+          "71cfd9c1f982dc1fa96fd36f12406f0cfe6dddf4",
+          "1af13559e2f56707f29d12b62b34d46917f09c22",
+          "9fa7d15fbb1433fb1cdb88d6ff0f7f2012dd3fe1"
+        ],
+        "length": 3,
+        "start_index": 16
+      },
+      {
+        "date_end": "2026-02-05T06:44:19Z",
+        "date_start": "2026-02-05T06:44:19Z",
+        "end_index": 13,
+        "hashes": [
+          "8f660b20cd1d0df1780e10e7b52efe7564868719"
+        ],
+        "length": 1,
+        "start_index": 13
+      }
+    ],
+    "top_pairs": [
+      {
+        "count": 4,
+        "pair": [
+          "C",
+          "D"
+        ]
+      },
+      {
+        "count": 1,
+        "pair": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "count": 1,
+        "pair": [
+          "B",
+          "E"
+        ]
+      },
+      {
+        "count": 1,
+        "pair": [
+          "C",
+          "E"
+        ]
+      }
+    ]
+  }
+}
