@@ -1,0 +1,27 @@
+OVC Backfill Pipeline v0.2 - Reproducibility Check
+
+Date (UTC context): 2026-02-10
+
+Overlay reproducibility
+1) Pre-hash command:
+   (Get-FileHash docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl -Algorithm SHA256).Hash
+   Result: 0E272ABEFE0D02F8A78ADEE2236290F174794FA5F52198EF99458733D6025515
+2) Rebuild command:
+   python scripts/governance/build_change_classification_overlay_v0_2.py --out docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl --ledger docs/catalogs/DEV_CHANGE_LEDGER_v0.1.jsonl --classifier scripts/governance/classify_change.py --seal-json docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.seal.json --seal-sha256 docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.seal.sha256
+3) Post-hash command:
+   (Get-FileHash docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl -Algorithm SHA256).Hash
+   Result: 0E272ABEFE0D02F8A78ADEE2236290F174794FA5F52198EF99458733D6025515
+4) Overlay reproducibility: PASS (exact match)
+
+Timeline reproducibility
+1) Pre-hash command:
+   (Get-FileHash docs/catalogs/OVC_DEVELOPMENT_TIMELINE_v0.2.md -Algorithm SHA256).Hash
+   Result: 7ACBCB25BF33E0647EFD3782C36E09BB522AECB37CC95D7E9DF54B10802E4BB0
+2) Regenerate command:
+   python .codex/_scratch/_gen_timeline_v02.py
+3) Post-hash command:
+   (Get-FileHash docs/catalogs/OVC_DEVELOPMENT_TIMELINE_v0.2.md -Algorithm SHA256).Hash
+   Result: 7ACBCB25BF33E0647EFD3782C36E09BB522AECB37CC95D7E9DF54B10802E4BB0
+4) Timeline reproducibility: PASS (exact match)
+
+Overall: PASS
