@@ -104,6 +104,90 @@ def classify_path(path: str) -> set[str]:
     ):
         classes.add("E")
 
+    # ---- v0.2 additive rules (BEGIN) ----
+
+    # B: all docs/ (contracts/governance/phase_2_2 already matched above)
+    if path.startswith("docs/"):
+        classes.add("B")
+
+    # B: top-level contracts/
+    if path.startswith("contracts/"):
+        classes.add("B")
+
+    # B: specs/
+    if path.startswith("specs/"):
+        classes.add("B")
+
+    # B: reports/ non-path1 (path1 already A above)
+    if path.startswith("reports/") and not path.startswith("reports/path1/"):
+        classes.add("B")
+
+    # B: releases/
+    if path.startswith("releases/"):
+        classes.add("B")
+
+    # B: root-level documentation files
+    if "/" not in path and Path(path).suffix.lower() in DOC_EXTENSIONS:
+        classes.add("B")
+
+    # C: sql/ non-path1 (path1 already A above)
+    if path.startswith("sql/") and not path.startswith("sql/path1/"):
+        classes.add("C")
+
+    # C: all .codex/ (CHECKS/ already matched above)
+    if path.startswith(".codex/"):
+        classes.add("C")
+
+    # C: infra/
+    if path.startswith("infra/"):
+        classes.add("C")
+
+    # C: pine/
+    if path.startswith("pine/"):
+        classes.add("C")
+
+    # C: Tetsu/
+    if path.startswith("Tetsu/"):
+        classes.add("C")
+
+    # C: trajectory_families/
+    if path.startswith("trajectory_families/"):
+        classes.add("C")
+
+    # C: _archive/
+    if path.startswith("_archive/"):
+        classes.add("C")
+
+    # C: _quarantine/
+    if path.startswith("_quarantine/"):
+        classes.add("C")
+
+    # C: configs/
+    if path.startswith("configs/"):
+        classes.add("C")
+
+    # C: schema/
+    if path.startswith("schema/"):
+        classes.add("C")
+
+    # A: artifacts/ (evidence/validation outputs)
+    if path.startswith("artifacts/"):
+        classes.add("A")
+
+    # E: .github/ non-workflows (repo config)
+    if path.startswith(".github/") and not path.startswith(".github/workflows/"):
+        classes.add("E")
+
+    # E: .vscode/
+    if path.startswith(".vscode/"):
+        classes.add("E")
+
+    # E: ovc-webhook/ (editor config)
+    if path.startswith("ovc-webhook/"):
+        classes.add("E")
+
+    # ---- v0.2 additive rules (END) ----
+
     if not classes:
         classes.add("UNKNOWN")
 

@@ -1,0 +1,50 @@
+{
+  "class_counts": {
+    "A": 5,
+    "B": 6,
+    "C": 7,
+    "D": 4,
+    "E": 4,
+    "UNKNOWN": 2
+  },
+  "diff_vs_v01": {
+    "changed_commits": [
+      {
+        "commit": "34e45abaa3e1214689e2348e295c76090f279a6c",
+        "new_classes": [
+          "B",
+          "C",
+          "E"
+        ],
+        "old_classes": [
+          "UNKNOWN"
+        ]
+      },
+      {
+        "commit": "8f5c33733a2ff75f51d3c8848ada4de0596d6506",
+        "new_classes": [
+          "E"
+        ],
+        "old_classes": [
+          "UNKNOWN"
+        ]
+      }
+    ],
+    "commits_reclassified": 2,
+    "unknown_reduction": 2,
+    "v01_class_counts": {
+      "A": 5,
+      "B": 5,
+      "C": 6,
+      "D": 4,
+      "E": 2,
+      "UNKNOWN": 4
+    },
+    "v01_total_rows": 22,
+    "v01_unknown_count": 4,
+    "v02_unknown_count": 2
+  },
+  "total_rows": 22,
+  "unknown_count": 2,
+  "unknown_pct": 9.1
+}
