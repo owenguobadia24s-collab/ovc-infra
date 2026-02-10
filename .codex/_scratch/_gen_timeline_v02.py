@@ -8,10 +8,10 @@ from itertools import combinations
 from pathlib import Path
 from typing import Any
 
-LEDGER_PATH = Path("docs/catalogs/DEV_CHANGE_LEDGER_v0.1.jsonl")
+LEDGER_PATH = Path("docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl")
 OVERLAY_PATH = Path("docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl")
 TIMELINE_OUT = Path("docs/catalogs/OVC_DEVELOPMENT_TIMELINE_v0.2.md")
-STATS_OUT = Path(".codex/_scratch/v0_2_timeline_stats.json")
+STATS_OUT = Path(".codex/_scratch/v0_2_timeline_stats.full.json")
 
 CLASS_ORDER = ["A", "B", "C", "D", "E", "UNKNOWN"]
 
@@ -312,9 +312,9 @@ def load_joined_records() -> tuple[list[dict[str, Any]], dict[str, Any]]:
             elif isinstance(raw_unknown, str):
                 unknown_value = raw_unknown.strip().lower() in {"1", "true", "yes", "y"}
 
-        if "UNKNOWN" in classes:
+        if overlay_unknown_path is None and "UNKNOWN" in classes:
             unknown_value = True
-        if unknown_value and "UNKNOWN" not in classes:
+        if overlay_unknown_path is None and unknown_value and "UNKNOWN" not in classes:
             classes.append("UNKNOWN")
         classes = list(dict.fromkeys(classes))
 

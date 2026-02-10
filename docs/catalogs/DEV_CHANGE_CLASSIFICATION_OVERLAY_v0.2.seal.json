@@ -1,16 +1,16 @@
 {
   "artifacts": {
     "docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl": {
-      "bytes": 3669,
-      "sha256": "0e272abefe0d02f8a78adee2236290f174794fa5f52198ef99458733d6025515"
+      "bytes": 45268,
+      "sha256": "34acd0760bff9a0582b702cb19442f970acad64a800095a64bca45035383be39"
     },
-    "docs/catalogs/DEV_CHANGE_LEDGER_v0.1.jsonl": {
-      "bytes": 26494,
-      "sha256": "83ea7bd97a235d6e4b8374d4107b2f57a37a7a7ac504c652a41ae99b2a09bd11"
+    "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl": {
+      "bytes": 256821,
+      "sha256": "3c455e93953c69f5f2b2cd11c438332a8fe66715e1f1227d287b21c716ea55fd"
     },
     "scripts/governance/build_change_classification_overlay_v0_2.py": {
-      "bytes": 4046,
-      "sha256": "7ffb06a52f49c10a896608c225f6a713afdfe42c58fbf1b83640f88362e2b63d"
+      "bytes": 6545,
+      "sha256": "85315289f5663c52ad0046f6909938ac20ada94656c115a13ea1f95755f8990b"
     },
     "scripts/governance/classify_change.py": {
       "bytes": 11246,
@@ -19,8 +19,8 @@
   },
   "kind": "DEV_CHANGE_CLASSIFICATION_OVERLAY_SEAL",
   "range": {
-    "from": "e54a663953319ac936696413623538e5139e9849",
-    "to": "7021c84d722a6782d032dbeccfccc8aa81bd3353"
+    "from": "e144cf064769f1a5e332090d02a272f6cadc0e6c",
+    "to": "c3cf19d2bd8f193ae45c2c49a30171e58e73375e"
   },
   "sha_policy": "sha256 in .seal.sha256 is computed over UTF-8 bytes of this seal JSON as written",
   "version": "0.2"
