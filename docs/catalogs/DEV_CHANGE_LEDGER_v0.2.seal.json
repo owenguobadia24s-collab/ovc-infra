@@ -5,8 +5,8 @@
       "sha256": "3060ff14f9625fa891b990bc3af4487393276cb5e8640bbbc8b7eb5e1ecbc96e"
     },
     "scripts/sentinel/append_sentinel.py": {
-      "bytes": 33594,
-      "sha256": "ab836a5f75dfde01bda203d094328a9235cb60c3c45a33eb35b84af6648e182c"
+      "bytes": 34073,
+      "sha256": "8212690ba488b2b25d6bc3d9c91f21c80330f5d1a303051c8087b389b0fc8c03"
     }
   },
   "kind": "APPEND_SENTINEL_FILE_SEAL",

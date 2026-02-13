@@ -21,7 +21,8 @@ bash scripts/sentinel/install_pre_push_hook.sh
 - Reads `scripts/sentinel/sentinel_state.json` for `last_processed_commit`, `ledger_path`, and `overlay_path`.
 - Processes `last_processed_commit..HEAD` via `git rev-list --reverse --topo-order`.
 - Appends exactly one ledger row for each non-sentinel-only commit.
-- Skips commits that touch only managed sentinel paths, but still advances state to `HEAD`.
+- Skips commits that touch only managed sentinel paths and advances state across those commits.
+- Exception: commits that touch only `scripts/sentinel/sentinel_state.json` are excluded from state advancement to prevent a self-referential verify loop.
 - Rebuilds overlay deterministically from the full ledger using current classifier rules.
 - Fails hard on schema mismatch, duplicate SHA, non-append mutation, and blocked classification (unless `--allow-unknown`).
 - `--verify` never writes files and fails if any file would change.
