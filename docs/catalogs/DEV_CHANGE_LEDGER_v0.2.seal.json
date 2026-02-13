@@ -12,9 +12,9 @@
   "kind": "APPEND_SENTINEL_FILE_SEAL",
   "name": "ledger",
   "target": {
-    "bytes": 258311,
+    "bytes": 259434,
     "path": "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl",
-    "sha256": "dd2bb2c7f03cc5dfd93ac83603bb5a630cd7a2667b958196d9d4169a0c174053"
+    "sha256": "8b255bdc3e9e9d0d51c546c602b1c6fd30e6fbdc9144ad6711f2808f709f215e"
   },
   "version": "0.1"
 }
