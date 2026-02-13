@@ -1,27 +1,25 @@
 {
-  "artifacts": {
-    "docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl": {
-      "bytes": 45268,
-      "sha256": "34acd0760bff9a0582b702cb19442f970acad64a800095a64bca45035383be39"
-    },
-    "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl": {
-      "bytes": 256821,
-      "sha256": "3c455e93953c69f5f2b2cd11c438332a8fe66715e1f1227d287b21c716ea55fd"
-    },
-    "scripts/governance/build_change_classification_overlay_v0_2.py": {
-      "bytes": 6545,
-      "sha256": "85315289f5663c52ad0046f6909938ac20ada94656c115a13ea1f95755f8990b"
-    },
+  "inputs": {
     "scripts/governance/classify_change.py": {
       "bytes": 11246,
       "sha256": "3060ff14f9625fa891b990bc3af4487393276cb5e8640bbbc8b7eb5e1ecbc96e"
+    },
+    "scripts/sentinel/append_sentinel.py": {
+      "bytes": 33594,
+      "sha256": "ab836a5f75dfde01bda203d094328a9235cb60c3c45a33eb35b84af6648e182c"
     }
   },
-  "kind": "DEV_CHANGE_CLASSIFICATION_OVERLAY_SEAL",
-  "range": {
-    "from": "e144cf064769f1a5e332090d02a272f6cadc0e6c",
-    "to": "c3cf19d2bd8f193ae45c2c49a30171e58e73375e"
+  "kind": "APPEND_SENTINEL_FILE_SEAL",
+  "name": "overlay",
+  "source_ledger": {
+    "bytes": 258311,
+    "path": "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl",
+    "sha256": "dd2bb2c7f03cc5dfd93ac83603bb5a630cd7a2667b958196d9d4169a0c174053"
   },
-  "sha_policy": "sha256 in .seal.sha256 is computed over UTF-8 bytes of this seal JSON as written",
-  "version": "0.2"
+  "target": {
+    "bytes": 45491,
+    "path": "docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl",
+    "sha256": "f6d34d6fc2a57339f4da1df6f9f0c4d783493e198012945284c5d02f7e36e3c3"
+  },
+  "version": "0.1"
 }
