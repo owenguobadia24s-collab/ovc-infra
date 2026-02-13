@@ -270,3 +270,4 @@
 {"ambiguous":true,"base":"c3cf19d2bd8f193ae45c2c49a30171e58e73375e^","classes":["B","C"],"commit":"c3cf19d2bd8f193ae45c2c49a30171e58e73375e","files":5,"unknown":false}
 {"ambiguous":false,"base":"ad8588cdc69525ce5c1a212c6f7e4f84b8acb950^","classes":["A"],"commit":"ad8588cdc69525ce5c1a212c6f7e4f84b8acb950","files":12,"unknown":false}
 {"ambiguous":true,"base":"93a79ec42750e3364c1841d2b2cbf196ecde4f64^","classes":["B","C","E"],"commit":"93a79ec42750e3364c1841d2b2cbf196ecde4f64","files":13,"unknown":false}
+{"ambiguous":true,"base":"6b69b6901052b3613a0c89491cf61eac63d52567^","classes":["B","C"],"commit":"6b69b6901052b3613a0c89491cf61eac63d52567","files":7,"unknown":false}

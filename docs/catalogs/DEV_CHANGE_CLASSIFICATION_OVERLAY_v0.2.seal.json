@@ -12,14 +12,14 @@
   "kind": "APPEND_SENTINEL_FILE_SEAL",
   "name": "overlay",
   "source_ledger": {
-    "bytes": 259434,
+    "bytes": 260221,
     "path": "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl",
-    "sha256": "8b255bdc3e9e9d0d51c546c602b1c6fd30e6fbdc9144ad6711f2808f709f215e"
+    "sha256": "3a2193fb1b5930aed2ad34e323276ce4e20fc06ecb6d11541e288803578a63d4"
   },
   "target": {
-    "bytes": 45664,
+    "bytes": 45832,
     "path": "docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl",
-    "sha256": "e7cc46bdd44bd222596d50a6fb880d3fe3e30b300ae1b5e8fa5db713a2b28d6d"
+    "sha256": "fb44c063d5cb417b30e6ec2fff99013902c3928329e6611fc95a77409eaf9261"
   },
   "version": "0.1"
 }
