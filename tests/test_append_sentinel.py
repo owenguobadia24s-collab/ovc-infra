@@ -207,6 +207,32 @@ def test_sentinel_only_commit_skip_and_state_advancement(tmp_path: Path):
     assert verify.returncode == 0, verify.stderr
 
 
+def test_state_only_commit_does_not_force_followup_state_settle(tmp_path: Path):
+    repo = create_prepared_repo(tmp_path)
+    state_path = repo / STATE_REL
+    before = read_json(state_path)
+    before_last = before["last_processed_commit"]
+
+    # Commit a state-only metadata key so the commit is sentinel-managed but state-canonical.
+    before["local_note"] = "state-only"
+    write_text(state_path, json.dumps(before, indent=2, sort_keys=True) + "\n")
+    git(repo, "add", STATE_REL.as_posix())
+    git(repo, "commit", "-m", "state only formatting change")
+    state_only_commit = git(repo, "rev-parse", "HEAD")
+
+    verify = run_sentinel(repo, "--verify")
+    assert verify.returncode == 0, verify.stderr
+
+    mutate = run_sentinel(repo)
+    assert mutate.returncode == 0, mutate.stderr
+    assert git(repo, "status", "--porcelain", "--untracked-files=no") == ""
+
+    after = read_json(state_path)
+    assert after["last_processed_commit"] == before_last
+    assert after["last_processed_commit"] != state_only_commit
+    assert after["local_note"] == "state-only"
+
+
 def test_overlay_seal_enforced_without_state_hashes(tmp_path: Path):
     repo = create_prepared_repo(tmp_path)
     overlay_path = repo / OVERLAY_REL

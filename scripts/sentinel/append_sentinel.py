@@ -612,6 +612,12 @@ def managed_match(path: str, managed_exact: set[str]) -> bool:
     return False
 
 
+def is_state_only_commit(paths: list[str], state_relpath: str) -> bool:
+    if not paths:
+        return False
+    return all(normalize_path(path) == state_relpath for path in paths)
+
+
 def write_if_changed(path: Path, content: bytes) -> None:
     if path.exists() and path.read_bytes() == content:
         return
@@ -663,6 +669,7 @@ def main(argv: list[str]) -> int:
             ).splitlines()
             if line.strip()
         ]
+        state_relpath = relpath_posix(state_path, repo_root)
 
         managed_exact = {
             relpath_posix(ledger_path, repo_root),
@@ -671,17 +678,21 @@ def main(argv: list[str]) -> int:
             relpath_posix(overlay_path, repo_root),
             relpath_posix(overlay_path.with_suffix(".seal.json"), repo_root),
             relpath_posix(overlay_path.with_suffix(".seal.sha256"), repo_root),
-            relpath_posix(state_path, repo_root),
+            state_relpath,
             ".github/workflows/append_sentinel.yml",
         }
 
         classify_paths = load_classifier(classifier_path)
         existing_hashes = {row["commit"]["hash"] for row in ledger_rows}
         new_rows: list[dict[str, Any]] = []
+        expected_last_processed = last_processed
 
         for commit_hash in commits:
             paths, notes = collect_commit_paths(repo_root, commit_hash)
+            if is_state_only_commit(paths, state_relpath):
+                continue
             if paths and all(managed_match(path, managed_exact) for path in paths):
+                expected_last_processed = commit_hash
                 continue
 
             classes, _unknown_only, ambiguous, contains_unknown = classify_paths_payload(classify_paths, paths)
@@ -710,6 +721,7 @@ def main(argv: list[str]) -> int:
                 raise SentinelError(f"duplicate commit sha in ledger: {row_hash}")
             existing_hashes.add(row_hash)
             new_rows.append(row)
+            expected_last_processed = commit_hash
 
         append_bytes = serialize_jsonl(new_rows)
         candidate_ledger_bytes = ledger_bytes + append_bytes
@@ -763,7 +775,7 @@ def main(argv: list[str]) -> int:
             repo_root=repo_root,
             ledger_path=ledger_path,
             overlay_path=overlay_path,
-            last_processed_commit=head,
+            last_processed_commit=expected_last_processed,
             ledger_hash=sha256_bytes(candidate_ledger_bytes),
             overlay_hash=sha256_bytes(overlay_bytes_a),
         )
