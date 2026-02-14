@@ -77,7 +77,15 @@ if [[ -f "$hook_path" && "$has_managed" != "true" && "$force" != "true" ]]; then
   exit 1
 fi
 
-if [[ ! -f "$hook_path" ]]; then
+if [[ "$force" == "true" ]]; then
+  {
+    echo "#!/usr/bin/env bash"
+    echo "set -euo pipefail"
+    echo
+    echo "$managed_block"
+    echo
+  } > "$hook_path"
+elif [[ ! -f "$hook_path" ]]; then
   {
     echo "#!/usr/bin/env bash"
     echo "set -euo pipefail"

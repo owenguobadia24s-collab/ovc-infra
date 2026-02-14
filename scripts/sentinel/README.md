@@ -16,6 +16,8 @@ Install pre-push verification hook:
 bash scripts/sentinel/install_pre_push_hook.sh
 ```
 
+`--force` guarantees a valid bash preamble for `.git/hooks/pre-push`; non-force installs never modify unmanaged hooks.
+
 ## Branch Policy
 
 - `main` does not track Sentinel artifacts; `maintenance/sentinel` is the authoritative accounting branch.
