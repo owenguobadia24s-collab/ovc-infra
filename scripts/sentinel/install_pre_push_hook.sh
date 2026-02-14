@@ -16,11 +16,11 @@ while [[ $# -gt 0 ]]; do
       cat <<'EOF'
 Usage: scripts/sentinel/install_pre_push_hook.sh [--force]
 
-Installs a managed pre-push hook block that runs:
+Installs a managed pre-push hook block that runs on maintenance/sentinel only:
   python scripts/sentinel/append_sentinel.py --verify
 
 Behavior:
-- Existing managed block: no-op.
+- Existing managed block: replaced in-place with current managed content.
 - Existing unmanaged pre-push hook: installer aborts unless --force is supplied.
 EOF
       exit 0
@@ -44,6 +44,11 @@ mkdir -p ".git/hooks"
 
 managed_block="$(cat <<EOF
 $BEGIN_MARKER
+_sentinel_branch="\$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+if [[ "\$_sentinel_branch" != "maintenance/sentinel" ]]; then
+  exit 0
+fi
+
 if command -v python >/dev/null 2>&1; then
   _sentinel_python="python"
 elif command -v python3 >/dev/null 2>&1; then
@@ -62,15 +67,14 @@ $END_MARKER
 EOF
 )"
 
-if [[ -f "$hook_path" ]]; then
-  if grep -qF "$BEGIN_MARKER" "$hook_path"; then
-    echo "Managed append-sentinel pre-push block already present. No changes made."
-    exit 0
-  fi
-  if [[ "$force" != "true" ]]; then
-    echo "Existing unmanaged pre-push hook detected. Re-run with --force to append managed block." >&2
-    exit 1
-  fi
+has_managed=false
+if [[ -f "$hook_path" ]] && grep -qF "$BEGIN_MARKER" "$hook_path"; then
+  has_managed=true
+fi
+
+if [[ -f "$hook_path" && "$has_managed" != "true" && "$force" != "true" ]]; then
+  echo "Existing unmanaged pre-push hook detected. Re-run with --force to append managed block." >&2
+  exit 1
 fi
 
 if [[ ! -f "$hook_path" ]]; then
@@ -81,6 +85,21 @@ if [[ ! -f "$hook_path" ]]; then
     echo "$managed_block"
     echo
   } > "$hook_path"
+elif [[ "$has_managed" == "true" ]]; then
+  tmp_file="$(mktemp)"
+  awk -v begin="$BEGIN_MARKER" -v end="$END_MARKER" '
+    $0 == begin { in_block=1; next }
+    $0 == end { in_block=0; next }
+    !in_block { print }
+  ' "$hook_path" > "$tmp_file"
+
+  {
+    cat "$tmp_file"
+    echo
+    echo "$managed_block"
+    echo
+  } > "$hook_path"
+  rm -f "$tmp_file"
 else
   {
     echo
@@ -89,5 +108,15 @@ else
   } >> "$hook_path"
 fi
 
+if [[ ! -f "$hook_path" ]]; then
+  echo "ERROR: failed to write $hook_path" >&2
+  exit 1
+fi
+
+if ! grep -qF "$BEGIN_MARKER" "$hook_path" || ! grep -qF "$END_MARKER" "$hook_path"; then
+  echo "ERROR: managed block markers missing after install" >&2
+    exit 1
+fi
+
 chmod +x "$hook_path"
-echo "Installed append-sentinel pre-push verify block at $hook_path"
+echo "Installed/updated append-sentinel pre-push verify block at $hook_path"

@@ -16,6 +16,12 @@ Install pre-push verification hook:
 bash scripts/sentinel/install_pre_push_hook.sh
 ```
 
+## Branch Policy
+
+- `main` does not track Sentinel artifacts; `maintenance/sentinel` is the authoritative accounting branch.
+- Sentinel artifact ingest/settle commits are maintained on `maintenance/sentinel`.
+- The installed pre-push hook enforces Sentinel verify only on `maintenance/sentinel`.
+
 ## Invariants
 
 - Reads `scripts/sentinel/sentinel_state.json` for `last_processed_commit`, `ledger_path`, and `overlay_path`.
