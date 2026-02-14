@@ -1,8 +1,8 @@
 {
-  "last_processed_commit": "c5b4c6445d8e9fef161232e466b8043686341671",
+  "last_processed_commit": "a5df74bf46deeb8281e2a4121ffa3feeca930153",
   "ledger_path": "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl",
-  "ledger_sha256": "bef2270b8147d738f90cef3d62216fca1f9154d38d295ff80750aafefeeb4b85",
+  "ledger_sha256": "8a9d1ef8c2fd4e2a6c810c7be9801f6f03435c7df1ed85d5309a458350c4cd7b",
   "overlay_path": "docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl",
-  "overlay_sha256": "e71445e43a514835216c2697dcc36954f28d2ad270d6c9dede019c56d7ceb51d",
+  "overlay_sha256": "00b0aeae462a95fa0b44f52ba0ea4c8ff6fb49ffdcf473585f04723a709b8a8c",
   "state_version": "0.1"
 }
