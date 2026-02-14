@@ -19,6 +19,7 @@ bash scripts/sentinel/install_pre_push_hook.sh
 ## Invariants
 
 - Reads `scripts/sentinel/sentinel_state.json` for `last_processed_commit`, `ledger_path`, and `overlay_path`.
+- State is an operational pointer, not part of the historical ledger of change.
 - Processes `last_processed_commit..HEAD` via `git rev-list --reverse --topo-order`.
 - Appends exactly one ledger row for each non-sentinel-only commit.
 - Skips commits that touch only managed sentinel paths and advances state across those commits.

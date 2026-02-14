@@ -25,3 +25,9 @@
 
 # Binary (observed)
 *.png  binary
+
+# Sentinel-managed artifacts: force LF to avoid cross-platform drift
+docs/catalogs/**/*.jsonl text eol=lf
+docs/catalogs/**/*.sha256 text eol=lf
+docs/catalogs/**/*.seal.json text eol=lf
+scripts/sentinel/**/*.json text eol=lf
