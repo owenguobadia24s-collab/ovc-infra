@@ -1,0 +1,285 @@
+{
+  "borderlands_ref": "docs/REPO_MAP/BORDERLANDS_v0.1.md",
+  "generated_utc": "2026-02-17T00:00:00Z",
+  "matching_semantics": "first_match_wins",
+  "module_index_ref": "docs/REPO_MAP/MODULE_INDEX_v0.1.md",
+  "modules": {
+    "B01": {
+      "kind": "borderland",
+      "label": "Root-level markdown sprawl"
+    },
+    "B02": {
+      "kind": "borderland",
+      "label": "contracts/ + docs/contracts/"
+    },
+    "B03": {
+      "kind": "borderland",
+      "label": "sql/"
+    },
+    "B04": {
+      "kind": "borderland",
+      "label": "reports/"
+    },
+    "B05": {
+      "kind": "borderland",
+      "label": "Tetsu/"
+    },
+    "B06": {
+      "kind": "borderland",
+      "label": "_archive/ + _quarantine/"
+    },
+    "B07": {
+      "kind": "borderland",
+      "label": "modules/"
+    },
+    "B08": {
+      "kind": "borderland",
+      "label": ".codex/"
+    },
+    "B09": {
+      "kind": "borderland",
+      "label": "research/"
+    },
+    "B10": {
+      "kind": "borderland",
+      "label": "Isolated/personal content"
+    },
+    "M01": {
+      "kind": "module",
+      "label": "scripts/sentinel/ (Commit Ledger)"
+    },
+    "M02": {
+      "kind": "module",
+      "label": "scripts/governance/ (Change Classification)"
+    },
+    "M03": {
+      "kind": "module",
+      "label": "scripts/path1* (Evidence Pipeline)"
+    },
+    "M04": {
+      "kind": "module",
+      "label": "src/derived/ (Derived Metrics)"
+    },
+    "M05": {
+      "kind": "module",
+      "label": "src/config/ (Threshold Registry)"
+    },
+    "M06": {
+      "kind": "module",
+      "label": "src/ovc_ops/ (Run Artifact Management)"
+    },
+    "M07": {
+      "kind": "module",
+      "label": "src/validate/ (Derived Validation)"
+    },
+    "M08": {
+      "kind": "module",
+      "label": "src/history_sources/ (Data Adapters)"
+    },
+    "M09": {
+      "kind": "module",
+      "label": "tools/audit_interpreter/ (Phase 4 Audit)"
+    },
+    "M10": {
+      "kind": "module",
+      "label": "tools/run_registry/ (System Health)"
+    },
+    "M11": {
+      "kind": "module",
+      "label": "tools/phase3_control_panel/ (Audit UI)"
+    },
+    "M12": {
+      "kind": "module",
+      "label": "infra/ovc-webhook/ (Cloudflare Worker)"
+    },
+    "M13": {
+      "kind": "module",
+      "label": "trajectory_families/ (Clustering)"
+    },
+    "M14": {
+      "kind": "module",
+      "label": "tests/ (Cross-Cutting QA)"
+    },
+    "M15": {
+      "kind": "module",
+      "label": ".github/workflows/ (CI/CD)"
+    }
+  },
+  "rules": [
+    {
+      "owner_id": "M01",
+      "pattern": "scripts/sentinel/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M02",
+      "pattern": "scripts/governance/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M03",
+      "pattern": "scripts/path1/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M03",
+      "pattern": "scripts/path1_replay/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M03",
+      "pattern": "scripts/path1_seal/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M04",
+      "pattern": "src/derived/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M05",
+      "pattern": "src/config/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M06",
+      "pattern": "src/ovc_ops/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M07",
+      "pattern": "src/validate/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M08",
+      "pattern": "src/history_sources/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M09",
+      "pattern": "tools/audit_interpreter/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M10",
+      "pattern": "tools/run_registry/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M11",
+      "pattern": "tools/phase3_control_panel/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M12",
+      "pattern": "infra/ovc-webhook/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M13",
+      "pattern": "trajectory_families/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M14",
+      "pattern": "tests/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "M15",
+      "pattern": ".github/workflows/",
+      "type": "prefix"
+    },
+    {
+      "note": "Root README excluded from B01 per BORDERLANDS_v0.1",
+      "owner_id": "UNKNOWN",
+      "pattern": "README.md",
+      "type": "exact"
+    },
+    {
+      "constraint": "root_only",
+      "owner_id": "B01",
+      "pattern": "*.md",
+      "type": "glob"
+    },
+    {
+      "owner_id": "B02",
+      "pattern": "contracts/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B02",
+      "pattern": "docs/contracts/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B03",
+      "pattern": "sql/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B04",
+      "pattern": "reports/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B05",
+      "pattern": "Tetsu/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B06",
+      "pattern": "_archive/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B06",
+      "pattern": "_quarantine/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B07",
+      "pattern": "modules/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B08",
+      "pattern": ".codex/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B09",
+      "pattern": "research/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B10",
+      "pattern": "Work Timeline/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B10",
+      "pattern": "pine/",
+      "type": "prefix"
+    },
+    {
+      "owner_id": "B10",
+      "pattern": "out.err",
+      "type": "exact"
+    },
+    {
+      "owner_id": "B10",
+      "pattern": "out.json",
+      "type": "exact"
+    },
+    {
+      "owner_id": "B10",
+      "pattern": "VERSION_OPTION_C",
+      "type": "exact"
+    }
+  ],
+  "ruleset_id": "MODULE_OWNERSHIP_RULES_v0.1",
+  "unknown_policy": "review_required",
+  "untracked_policy": "classify_same_rules"
+}
