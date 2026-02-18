@@ -36,6 +36,18 @@ python scripts/repo_cartographer/cartographer.py verify --allow-unknown
 - `verify --run-id ID` — Verify a specific run instead of the latest
 - `verify --allow-unknown` — Allow UNKNOWN files without failing
 
+## Optional Manual Pre-Push Verification
+
+This repo cartographer chain is not auto-installed as a git hook. Run manually before pushing:
+
+```bash
+python scripts/repo_cartographer/cartographer.py run
+python scripts/repo_cartographer/cartographer.py verify
+python scripts/repo_cartographer/phase_b_latest_ok_run.py --strict-verify
+python scripts/repo_cartographer/phase_b6_publish_latest_ownership_summary.py
+python scripts/repo_cartographer/phase_b7_unknown_frontier.py
+```
+
 ## Invariants
 
 - File enumeration uses `git ls-files -z` (NUL-separated, never OS walking)

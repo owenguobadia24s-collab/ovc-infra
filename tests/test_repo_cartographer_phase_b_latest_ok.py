@@ -105,3 +105,104 @@ def test_verify_run_artifacts_fail_when_ledger_hash_mismatch(tmp_path: Path):
     assert result["ok"] is False
     assert result["checks"]["ledger_manifest_match"] is False
     assert result["checks"]["ledger_seal_match"] is False
+
+
+def test_main_writes_pointer_schema_when_write_enabled(tmp_path: Path, monkeypatch):
+    m = load_phase_b_module()
+    run_id = "run_1"
+    run_ts = "2026-02-18T10:00:00Z"
+
+    run_dir = tmp_path / "artifacts" / "repo_cartographer" / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    manifest_bytes = b'{"artifacts":{},"run_id":"run_1"}\n'
+    seal_bytes = b'{"kind":"REPO_CARTOGRAPHER_RUN_SEAL","run_id":"run_1"}\n'
+    (run_dir / "MANIFEST.json").write_bytes(manifest_bytes)
+    (run_dir / "SEAL.json").write_bytes(seal_bytes)
+    manifest_sha = write_sha256_sidecar(run_dir / "MANIFEST.sha256", "MANIFEST.json", manifest_bytes)
+    seal_sha = write_sha256_sidecar(run_dir / "SEAL.sha256", "SEAL.json", seal_bytes)
+
+    ledger_row = {
+        "run_id": run_id,
+        "run_ts": run_ts,
+        "status": "OK",
+        "artifacts_path": f"artifacts/repo_cartographer/{run_id}",
+        "manifest_sha256": manifest_sha,
+        "seal_sha256": seal_sha,
+    }
+    ledger_path = tmp_path / "docs" / "catalogs" / "REPO_CARTOGRAPHER_RUN_LEDGER_v0.1.jsonl"
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    ledger_path.write_text(
+        json.dumps(ledger_row, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(m, "get_repo_root", lambda: tmp_path)
+    rc = m.main(
+        [
+            "--ledger",
+            "docs/catalogs/REPO_CARTOGRAPHER_RUN_LEDGER_v0.1.jsonl",
+            "--out",
+            "docs/catalogs/REPO_CARTOGRAPHER_LATEST_OK_RUN_v0.1.json",
+            "--strict-verify",
+        ]
+    )
+    assert rc == 0
+
+    pointer_path = tmp_path / "docs" / "baselines" / "LATEST_OK_RUN_POINTER_v0.1.json"
+    assert pointer_path.exists()
+    pointer = json.loads(pointer_path.read_text(encoding="utf-8"))
+    assert pointer["LATEST_OK_RUN_ID"] == run_id
+    assert pointer["LATEST_OK_RUN_TS"] == run_ts
+    assert pointer["ok"] is True
+    assert pointer["ledger_manifest_match"] is True
+    assert pointer["ledger_seal_match"] is True
+    assert pointer["manifest_sidecar_match"] is True
+    assert pointer["seal_sidecar_match"] is True
+
+    legacy_out_path = tmp_path / "docs" / "catalogs" / "REPO_CARTOGRAPHER_LATEST_OK_RUN_v0.1.json"
+    assert legacy_out_path.exists()
+    legacy_payload = json.loads(legacy_out_path.read_text(encoding="utf-8"))
+    assert legacy_payload["schema_version"] == "REPO_CARTOGRAPHER_LATEST_OK_RUN_v0.1"
+    assert legacy_payload["selected"]["run_id"] == run_id
+
+
+def test_main_fails_when_out_targets_pointer_path(tmp_path: Path, monkeypatch):
+    m = load_phase_b_module()
+    run_id = "run_1"
+    run_ts = "2026-02-18T10:00:00Z"
+
+    run_dir = tmp_path / "artifacts" / "repo_cartographer" / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    manifest_bytes = b'{"artifacts":{},"run_id":"run_1"}\n'
+    seal_bytes = b'{"kind":"REPO_CARTOGRAPHER_RUN_SEAL","run_id":"run_1"}\n'
+    (run_dir / "MANIFEST.json").write_bytes(manifest_bytes)
+    (run_dir / "SEAL.json").write_bytes(seal_bytes)
+    manifest_sha = write_sha256_sidecar(run_dir / "MANIFEST.sha256", "MANIFEST.json", manifest_bytes)
+    seal_sha = write_sha256_sidecar(run_dir / "SEAL.sha256", "SEAL.json", seal_bytes)
+
+    ledger_row = {
+        "run_id": run_id,
+        "run_ts": run_ts,
+        "status": "OK",
+        "artifacts_path": f"artifacts/repo_cartographer/{run_id}",
+        "manifest_sha256": manifest_sha,
+        "seal_sha256": seal_sha,
+    }
+    ledger_path = tmp_path / "docs" / "catalogs" / "REPO_CARTOGRAPHER_RUN_LEDGER_v0.1.jsonl"
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    ledger_path.write_text(
+        json.dumps(ledger_row, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(m, "get_repo_root", lambda: tmp_path)
+    rc = m.main(
+        [
+            "--ledger",
+            "docs/catalogs/REPO_CARTOGRAPHER_RUN_LEDGER_v0.1.jsonl",
+            "--out",
+            "docs/baselines/LATEST_OK_RUN_POINTER_v0.1.json",
+        ]
+    )
+    assert rc == 2

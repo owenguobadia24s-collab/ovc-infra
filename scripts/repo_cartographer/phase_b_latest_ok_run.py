@@ -5,6 +5,7 @@ import argparse
 import json
 import sys
 import hashlib
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -14,6 +15,7 @@ from typing import Any, Iterable
 LEDGER_PATH_DEFAULT = "docs/catalogs/REPO_CARTOGRAPHER_RUN_LEDGER_v0.1.jsonl"
 ARTIFACTS_DIR_DEFAULT = "artifacts/repo_cartographer"
 LATEST_OK_OUT_DEFAULT = "docs/catalogs/REPO_CARTOGRAPHER_LATEST_OK_RUN_v0.1.json"
+POINTER_OUT_DEFAULT = "docs/baselines/LATEST_OK_RUN_POINTER_v0.1.json"
 
 
 class PhaseBError(RuntimeError):
@@ -195,9 +197,37 @@ def verify_run_artifacts(repo_root: Path, row: LedgerRow) -> dict[str, Any]:
     return result
 
 
-def write_latest_ok_json(out_path: Path, payload: dict[str, Any]) -> None:
+def build_pointer_payload(row: LedgerRow, verification: dict[str, Any]) -> dict[str, Any]:
+    checks = verification.get("checks", {})
+    if not isinstance(checks, dict):
+        checks = {}
+    # Pointer consumers require these booleans to be strictly true. If ledger hash checks
+    # are absent upstream, these values resolve to False and consumers fail closed.
+    return {
+        "LATEST_OK_RUN_ID": row.run_id,
+        "LATEST_OK_RUN_TS": row.run_ts,
+        "ok": verification.get("ok") is True,
+        "ledger_manifest_match": checks.get("ledger_manifest_match") is True,
+        "ledger_seal_match": checks.get("ledger_seal_match") is True,
+        "manifest_sidecar_match": checks.get("manifest_sidecar_match") is True,
+        "seal_sidecar_match": checks.get("seal_sidecar_match") is True,
+    }
+
+
+def write_json_atomic(out_path: Path, payload: dict[str, Any]) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temp_path = out_path.with_name(out_path.name + ".tmp")
+    content = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    try:
+        temp_path.write_text(content, encoding="utf-8")
+        os.replace(temp_path, out_path)
+    except OSError as exc:
+        try:
+            if temp_path.exists():
+                temp_path.unlink()
+        except OSError:
+            pass
+        raise PhaseBError(f"failed writing JSON output: {out_path}") from exc
 
 
 def main(argv: list[str]) -> int:
@@ -211,6 +241,15 @@ def main(argv: list[str]) -> int:
     repo_root = get_repo_root()
     ledger_path = (repo_root / args.ledger).resolve()
     out_path = (repo_root / args.out).resolve()
+    pointer_path = (repo_root / POINTER_OUT_DEFAULT).resolve()
+
+    if out_path == pointer_path and not args.no_write:
+        print(
+            f"ERROR: --out may not equal pointer path ({POINTER_OUT_DEFAULT}); "
+            "legacy payload would violate pointer schema",
+            file=sys.stderr,
+        )
+        return 2
 
     row = select_latest_ok_run(iter_ledger_rows(ledger_path))
     verification = verify_run_artifacts(repo_root, row)
@@ -227,8 +266,13 @@ def main(argv: list[str]) -> int:
     print(f"VERIFY_OK={verification['ok']}")
 
     if not args.no_write:
-        write_latest_ok_json(out_path, payload)
+        write_json_atomic(out_path, payload)
         print(f"WROTE={out_path.as_posix()}")
+        # Preserve legacy --out payload while also emitting pointer artifact for downstream consumers.
+        if out_path != pointer_path:
+            pointer_payload = build_pointer_payload(row, verification)
+            write_json_atomic(pointer_path, pointer_payload)
+            print(f"WROTE_POINTER={pointer_path.as_posix()}")
 
     if args.strict_verify and not verification["ok"]:
         print("ERROR: verification failed for selected run", file=sys.stderr)

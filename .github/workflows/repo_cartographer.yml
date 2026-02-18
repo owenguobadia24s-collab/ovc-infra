@@ -1,0 +1,198 @@
+name: "CI: Repo Cartographer"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - maintenance/sentinel
+  push:
+    branches:
+      - main
+      - maintenance/sentinel
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-repo-cartographer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repo-cartographer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preflight evidence gate
+        id: preflight
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          import os
+          import re
+          import sys
+          from pathlib import Path
+
+          repo_root = Path(".").resolve()
+          report_path = repo_root / "artifacts" / "repo_cartographer" / "CI_FAIL_CLOSED_REPORT_v0.1.txt"
+          report_path.parent.mkdir(parents=True, exist_ok=True)
+          failures: list[str] = []
+
+          python_version = ""
+          python_source = ""
+
+          dot_python = repo_root / ".python-version"
+          if dot_python.exists():
+              for raw in dot_python.read_text(encoding="utf-8").splitlines():
+                  line = raw.strip()
+                  if line and not line.startswith("#"):
+                      python_version = line
+                      python_source = ".python-version"
+                      break
+
+          if not python_version:
+              for wf in [".github/workflows/append_sentinel.yml", ".github/workflows/main.yml"]:
+                  wf_path = repo_root / wf
+                  if not wf_path.exists():
+                      continue
+                  text = wf_path.read_text(encoding="utf-8")
+                  match = re.search(r"^\s*python-version:\s*[\"']?([0-9]+(?:\.[0-9]+)?)[\"']?\s*$", text, flags=re.MULTILINE)
+                  if match:
+                      python_version = match.group(1)
+                      python_source = wf
+                      break
+
+          if not python_version:
+              failures.append(
+                  "No Python version evidence found (.python-version or python-version in append_sentinel/main workflows)."
+              )
+
+          scripts = [
+              "scripts/repo_cartographer/cartographer.py",
+              "scripts/repo_cartographer/phase_b_latest_ok_run.py",
+              "scripts/repo_cartographer/phase_b6_publish_latest_ownership_summary.py",
+              "scripts/repo_cartographer/phase_b7_unknown_frontier.py",
+          ]
+          stdlib_modules = set(getattr(sys, "stdlib_module_names", set()))
+          non_std_imports: dict[str, set[str]] = {}
+
+          for script in scripts:
+              script_path = repo_root / script
+              if not script_path.exists():
+                  failures.append(f"Required script missing: {script}")
+                  continue
+              try:
+                  tree = ast.parse(script_path.read_text(encoding="utf-8"), filename=script)
+              except Exception as exc:
+                  failures.append(f"Failed to parse imports for {script}: {exc}")
+                  continue
+              for node in ast.walk(tree):
+                  root = None
+                  if isinstance(node, ast.Import):
+                      for alias in node.names:
+                          root = alias.name.split(".", 1)[0]
+                          if root and root != "__future__" and root not in stdlib_modules:
+                              non_std_imports.setdefault(script, set()).add(root)
+                  elif isinstance(node, ast.ImportFrom):
+                      if node.level and not node.module:
+                          continue
+                      if node.module:
+                          root = node.module.split(".", 1)[0]
+                          if root and root != "__future__" and root not in stdlib_modules:
+                              non_std_imports.setdefault(script, set()).add(root)
+
+          if non_std_imports:
+              for script, modules in sorted(non_std_imports.items()):
+                  failures.append(
+                      f"Non-stdlib imports in {script}: {', '.join(sorted(modules))}; deterministic install evidence not defined."
+                  )
+
+          if failures:
+              lines = [
+                  "REPO CARTOGRAPHER CI FAIL-CLOSED REPORT v0.1",
+                  "",
+                  "status: FAIL_CLOSED",
+                  "reason_count: " + str(len(failures)),
+                  "",
+                  "reasons:",
+              ]
+              for reason in failures:
+                  lines.append(f"- {reason}")
+              lines.append("")
+              report_path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+              print(f"FAIL_REPORT={report_path.as_posix()}")
+              sys.exit(2)
+
+          output_path = os.environ.get("GITHUB_OUTPUT")
+          if not output_path:
+              failures.append("GITHUB_OUTPUT not set by runner.")
+          else:
+              with open(output_path, "a", encoding="utf-8") as fh:
+                  fh.write(f"python_version={python_version}\n")
+                  fh.write(f"python_source={python_source}\n")
+
+          if failures:
+              lines = [
+                  "REPO CARTOGRAPHER CI FAIL-CLOSED REPORT v0.1",
+                  "",
+                  "status: FAIL_CLOSED",
+                  "reason_count: " + str(len(failures)),
+                  "",
+                  "reasons:",
+              ]
+              for reason in failures:
+                  lines.append(f"- {reason}")
+              lines.append("")
+              report_path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+              print(f"FAIL_REPORT={report_path.as_posix()}")
+              sys.exit(2)
+
+          print(f"PYTHON_VERSION={python_version}")
+          print(f"PYTHON_VERSION_SOURCE={python_source}")
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ steps.preflight.outputs.python_version }}
+
+      - name: Run canonical repo cartographer pipeline
+        run: |
+          set -euo pipefail
+          python scripts/repo_cartographer/cartographer.py run
+          python scripts/repo_cartographer/cartographer.py verify
+          python scripts/repo_cartographer/phase_b_latest_ok_run.py --strict-verify
+          python scripts/repo_cartographer/phase_b6_publish_latest_ownership_summary.py
+          python scripts/repo_cartographer/phase_b7_unknown_frontier.py
+
+      - name: Assert canonical outputs exist
+        run: |
+          set -euo pipefail
+          required=(
+            "docs/baselines/LATEST_OK_RUN_POINTER_v0.1.json"
+            "docs/REPO_MAP/LATEST_OWNERSHIP_SUMMARY.md"
+            "docs/REPO_MAP/LATEST_OWNERSHIP_SUMMARY.receipt.json"
+            "docs/catalogs/REPO_CARTOGRAPHER_UNKNOWN_FRONTIER_v0.1.json"
+            "docs/catalogs/REPO_CARTOGRAPHER_UNKNOWN_FRONTIER_v0.1.txt"
+          )
+          for path in "${required[@]}"; do
+            if [[ ! -f "$path" ]]; then
+              echo "missing required artifact: $path" >&2
+              exit 2
+            fi
+          done
+
+      - name: Upload fail-closed report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-cartographer-fail-closed-report
+          path: artifacts/repo_cartographer/CI_FAIL_CLOSED_REPORT_v0.1.txt
+          if-no-files-found: ignore
