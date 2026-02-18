@@ -16,6 +16,7 @@ from typing import Any
 POINTER_PATH = Path("docs/baselines/LATEST_OK_RUN_POINTER_v0.1.json")
 RUNS_ROOT = Path("artifacts/repo_cartographer")
 PROPOSALS_ROOT = Path("artifacts/repo_cartographer_proposals")
+STAGING_ROOT = PROPOSALS_ROOT / ".staging"
 BASE_RULESET_PATH = Path("docs/baselines/MODULE_OWNERSHIP_RULES_v0.1.json")
 FAILURE_REPORT_PATH = Path("artifacts/repo_cartographer_proposals/FAILURE_v0.1/FAILURE_REPORT.md")
 OPTIONAL_LEDGER_PATH = Path("docs/catalogs/REPO_CARTOGRAPHER_RULE_PROPOSAL_LEDGER_v0.1.jsonl")
@@ -598,11 +599,14 @@ def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = Fal
         inputs_payload = {"proposal_id": proposal_id, "inputs": sorted(inputs, key=lambda x: x["path"])}
 
         proposal_root = repo_root / PROPOSALS_ROOT / proposal_id
+        staging_root = repo_root / STAGING_ROOT
+        stage_dir = staging_root / proposal_id
         if proposal_root.exists():
             raise ProposalError("FAIL_PROPOSAL_DIR_EXISTS", [proposal_root.as_posix()])
-        proposal_root.mkdir(parents=True, exist_ok=False)
-        stage_dir = proposal_root / ".staging"
-        stage_dir.mkdir(parents=True, exist_ok=False)
+        if stage_dir.exists():
+            raise ProposalError("FAIL_STAGE_DIR_EXISTS", [stage_dir.as_posix()])
+        staging_root.mkdir(parents=True, exist_ok=True)
+        stage_dir.mkdir(parents=False, exist_ok=False)
 
         (stage_dir / "PROPOSED_RULESET_PATCH_v0.1.json").write_bytes(serialize_json(patch))
         (stage_dir / "PREDICTED_CLASSIFICATION_DELTA_v0.1.jsonl").write_bytes(serialize_jsonl(final_sim["delta"]))
@@ -638,9 +642,7 @@ def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = Fal
 
         verify_stage(stage_dir, proposal_fingerprint, base_sha, rows, base_rules, modules)
 
-        for name in [*PACK_FILES, "MANIFEST.json", "MANIFEST.sha256", "SEAL.json", "SEAL.sha256"]:
-            os.replace(stage_dir / name, proposal_root / name)
-        stage_dir.rmdir()
+        os.replace(stage_dir, proposal_root)
 
         if append_ledger:
             line = json.dumps(
@@ -663,6 +665,11 @@ def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = Fal
     except ProposalError as exc:
         if stage_dir is not None:
             shutil.rmtree(stage_dir, ignore_errors=True)
+            try:
+                if stage_dir.parent.name == ".staging":
+                    stage_dir.parent.rmdir()
+            except OSError:
+                pass
         write_failure(repo_root, exc.code, exc.details, exc.unknown_no_evidence)
         return Summary(action=exc.code, exit_code=2, proposal_id=proposal_id, proposal_fingerprint=proposal_fingerprint)
 

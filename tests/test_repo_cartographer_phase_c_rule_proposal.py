@@ -116,7 +116,7 @@ def test_success_writes_staged_pack_and_promotes(tmp_path: Path):
 
     proposal_dir = tmp_path / "artifacts" / "repo_cartographer_proposals" / summary.proposal_id
     assert proposal_dir.exists()
-    assert not (proposal_dir / ".staging").exists()
+    assert not (tmp_path / "artifacts" / "repo_cartographer_proposals" / ".staging" / summary.proposal_id).exists()
     for name in [
         "PROPOSED_RULESET_PATCH_v0.1.json",
         "PREDICTED_CLASSIFICATION_DELTA_v0.1.jsonl",
@@ -183,5 +183,5 @@ def test_verify_failure_cleans_staging_and_writes_failure_only(tmp_path: Path, m
     failure_path = tmp_path / "artifacts" / "repo_cartographer_proposals" / "FAILURE_v0.1" / "FAILURE_REPORT.md"
     assert failure_path.exists()
     proposal_dir = tmp_path / "artifacts" / "repo_cartographer_proposals" / summary.proposal_id
-    assert proposal_dir.exists()
-    assert not (proposal_dir / ".staging").exists()
+    assert not proposal_dir.exists()
+    assert not (tmp_path / "artifacts" / "repo_cartographer_proposals" / ".staging" / summary.proposal_id).exists()
