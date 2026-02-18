@@ -1,10 +1,10 @@
 {
-  "last_classification_sha256": "a4c3c2fcdefb042fa20f1dc9229f2df1b6a44ee07678e445b39525c4011c34a0",
-  "last_index_sha256": "a2c98808e133b040243922d286a76024e2e42aa1e7dcfacc1856f958d6b54c62",
-  "last_processed_commit": "69a51a0d713c7c7c60b0bf2ec970973fb5ec7a34",
-  "last_run_fingerprint": "843487615f7f3529ce41847ceb6fa8dbe974d01a8d824fdad4809584999a01a8",
-  "last_run_id": "20260217_103622Z",
-  "last_tracked_list_sha256": "068233a94a23c289b7d836f857f988b9a419ec58a0e7f2a315c8c1244c1227ee",
-  "last_untracked_visible_list_sha256": "325fdf9b9a847d8d5c2c045adb748911ca13c96bc1044cc19f15f2d20e9a5f47",
+  "last_classification_sha256": "86fdc1a21d223dba76c3c276830b2678f54702a95c73ff9314d9dc7ccb0e808b",
+  "last_index_sha256": "f6fedad27f878709d9bbb56b5b9980aff9a02fdc0d0202dce45b58bc43833b17",
+  "last_processed_commit": "7eef324921d01f10b11b5d8174ad64b813b81222",
+  "last_run_fingerprint": "fcb926ed112b38523fcaeb5ded06bf5516b5681501d2684a86876a1344f676cf",
+  "last_run_id": "20260218_141953Z",
+  "last_tracked_list_sha256": "7feff28b29060cda2b8b0639237159a1b76ad68e4f9b27d8a7f802f7b848a200",
+  "last_untracked_visible_list_sha256": "eb432d80bf7a613d63e536272c87dd8110a403911b47fdbf2a3cb596b57e1d26",
   "ruleset_id": "MODULE_OWNERSHIP_RULES_v0.1"
 }
