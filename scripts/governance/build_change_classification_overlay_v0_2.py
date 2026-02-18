@@ -22,7 +22,6 @@ from build_change_classification_overlay_v0_1 import (
     resolve_repo_path,
     run_git,
     sha256_bytes,
-    write_overlay_jsonl,
     write_text,
     artifact_info,
 )
@@ -103,16 +102,37 @@ def load_classifier_module(classifier_path: Path):
     return module
 
 
-def classify_files(module, files: list[str], commit_hash: str) -> tuple[list[str], bool, bool]:
+def classify_files(
+    module, files: list[str], commit_hash: str
+) -> tuple[list[str], bool, bool, list[str], dict[str, int]]:
     payload = module.classify_paths(files)
     classes = payload.get("classes")
     if not isinstance(classes, list) or not all(isinstance(c, str) and c for c in classes):
         raise RuntimeError(f"classifier returned invalid classes for commit {commit_hash}")
     if not classes:
         classes = ["UNKNOWN"]
+    tags = payload.get("tags")
+    if not isinstance(tags, list) or not all(isinstance(tag, str) and tag for tag in tags):
+        raise RuntimeError(f"classifier returned invalid tags for commit {commit_hash}")
+    tag_counts = payload.get("tag_counts")
+    if not isinstance(tag_counts, dict) or not all(
+        isinstance(tag, str) and tag and isinstance(count, int) and count >= 0
+        for tag, count in tag_counts.items()
+    ):
+        raise RuntimeError(f"classifier returned invalid tag_counts for commit {commit_hash}")
+    ordered_tag_counts = {tag: tag_counts[tag] for tag in sorted(tag_counts)}
     unknown = classes == ["UNKNOWN"]
     ambiguous = len(classes) > 1
-    return classes, unknown, ambiguous
+    return classes, unknown, ambiguous, tags, ordered_tag_counts
+
+
+def write_overlay_jsonl_v0_2(records: list[dict], out_path: Path) -> None:
+    lines = [
+        json.dumps(record, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+        for record in records
+    ]
+    payload = ("\n".join(lines) + "\n") if lines else ""
+    write_text(out_path, payload)
 
 
 def build_overlay_records_v0_2(classifier_path: Path, commits: list[str]) -> list[dict]:
@@ -123,11 +143,13 @@ def build_overlay_records_v0_2(classifier_path: Path, commits: list[str]) -> lis
             file_list = collect_commit_files(commit_hash)
         else:
             file_list = collect_root_commit_files(commit_hash)
-        classes, unknown, ambiguous = classify_files(classifier_module, file_list, commit_hash)
+        classes, unknown, ambiguous, tags, tag_counts = classify_files(classifier_module, file_list, commit_hash)
         records.append(
             {
                 "commit": commit_hash,
                 "classes": classes,
+                "tags": tags,
+                "tag_counts": tag_counts,
                 "unknown": unknown,
                 "ambiguous": ambiguous,
                 "files": len(file_list),
@@ -159,7 +181,7 @@ def main(argv: list[str]) -> int:
 
         commits = read_ledger_commits(ledger_path)
         overlay_records = build_overlay_records_v0_2(classifier_path=classifier_path, commits=commits)
-        write_overlay_jsonl(overlay_records, out_path)
+        write_overlay_jsonl_v0_2(overlay_records, out_path)
 
         seal_payload = build_seal_payload(
             out_path=out_path,
