@@ -31,7 +31,9 @@ CONTENT_ARTIFACTS = [
 
 
 class CartographerError(RuntimeError):
-    pass
+    def __init__(self, message: str, exit_code: int = 1):
+        super().__init__(message)
+        self.exit_code = exit_code
 
 
 # ---------------------------------------------------------------------------
@@ -97,6 +99,27 @@ def sha256_bytes(data: bytes) -> str:
 
 def sha256_file(path: Path) -> str:
     return sha256_bytes(path.read_bytes())
+
+
+def sha256_required_nonempty_file(path: Path, label: str) -> str:
+    if not path.exists():
+        raise CartographerError(
+            f"required artifact missing for ledger hash: {label}",
+            exit_code=2,
+        )
+    try:
+        data = path.read_bytes()
+    except OSError as exc:
+        raise CartographerError(
+            f"required artifact unreadable for ledger hash: {label}",
+            exit_code=2,
+        ) from exc
+    if not data:
+        raise CartographerError(
+            f"required artifact empty for ledger hash: {label}",
+            exit_code=2,
+        )
+    return sha256_bytes(data)
 
 
 def now_utc_iso() -> str:
@@ -825,8 +848,8 @@ def cmd_run(repo_root: Path, args: argparse.Namespace) -> int:
     # 15. Append ledger
     index_sha256 = sha256_bytes(index_bytes)
     classification_sha256 = sha256_bytes(classification_bytes)
-    manifest_sha256_val = sha256_bytes(manifest_bytes)
-    seal_sha256_val = sha256_bytes(seal_bytes)
+    manifest_sha256_val = sha256_required_nonempty_file(manifest_path, "MANIFEST.json")
+    seal_sha256_val = sha256_required_nonempty_file(seal_path, "SEAL.json")
 
     unknown_count = sum(1 for r in records if r["module_id"] == "UNKNOWN")
     summary_counts = {
@@ -1054,7 +1077,7 @@ def main(argv: list[str]) -> int:
         return dispatch[args.command](repo_root, args)
     except CartographerError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
-        return 1
+        return exc.exit_code
 
 
 if __name__ == "__main__":
