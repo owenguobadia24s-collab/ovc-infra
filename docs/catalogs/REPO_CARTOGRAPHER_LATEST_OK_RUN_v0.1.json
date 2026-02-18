@@ -1,0 +1,41 @@
+{
+  "schema_version": "REPO_CARTOGRAPHER_LATEST_OK_RUN_v0.1",
+  "selected": {
+    "artifacts_path": "artifacts/repo_cartographer/20260218_142951Z",
+    "generated_utc": "2026-02-18T14:29:51Z",
+    "head_commit": "bc4654dd7d2d899e490447333fbb1a8d07df7aa0",
+    "manifest_sha256": "0481f0cd8a22a93bb22bd77747dfb18a605c40f74817b43d22a0b25a184b75a7",
+    "ruleset_id": "MODULE_OWNERSHIP_RULES_v0.1",
+    "ruleset_sha256": "ee8db500cfb9972b27148a8a1dc2f1b078693f01aad633a9f2180d20d70dbdfe",
+    "run_fingerprint": "02e0076b8c07f501d33863dda5356c557e36269717e31709d8eaf07e541d46fd",
+    "run_id": "20260218_142951Z",
+    "run_ts": "2026-02-18T14:29:51Z",
+    "seal_sha256": "b8cd39bc36bfcc16b46813d92b6ed5f65d9cc01a9f684d9cd75edc99e60712ae",
+    "status": "OK",
+    "summary_counts": {
+      "total": 1321,
+      "tracked": 1321,
+      "unknown": 251,
+      "untracked_visible": 0
+    },
+    "tracked_list_sha256": "77bb2df785357cb91390453b5f7783ae8cb433217c44097be75ac257e5af0f0f",
+    "untracked_visible_list_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "verification": {
+    "artifacts_path": "artifacts/repo_cartographer/20260218_142951Z",
+    "checks": {
+      "files_present": true,
+      "ledger_manifest_match": true,
+      "ledger_seal_match": true,
+      "manifest_sidecar_match": true,
+      "seal_sidecar_match": true,
+      "sidecars_parseable": true
+    },
+    "missing": [],
+    "ok": true,
+    "run_dir": "C:/Users/Owner/projects/ovc-infra/artifacts/repo_cartographer/20260218_142951Z",
+    "run_id": "20260218_142951Z",
+    "run_ts": "2026-02-18T14:29:51Z",
+    "status": "OK"
+  }
+}
