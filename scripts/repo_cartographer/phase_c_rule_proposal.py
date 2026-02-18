@@ -86,6 +86,7 @@ class Summary:
     exit_code: int
     proposal_id: str = ""
     proposal_fingerprint: str = ""
+    prompt_source: str = ""
 
 
 @dataclass(frozen=True)
@@ -103,6 +104,32 @@ def get_repo_root() -> Path:
 
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def compute_prompt_sha256(prompt_bytes: bytes) -> str:
+    # Hash exact invocation prompt bytes with no normalization.
+    return sha256_bytes(prompt_bytes)
+
+
+def resolve_prompt_bytes(
+    phase_c_prompt_text: str | None,
+    stdin_isatty: bool | None = None,
+    stdin_bytes: bytes | None = None,
+) -> tuple[bytes, str]:
+    if phase_c_prompt_text is not None:
+        data = phase_c_prompt_text.encode("utf-8")
+        if not data:
+            raise ProposalError("FAIL_PROMPT_BYTES_MISSING")
+        return data, "arg_text"
+
+    isatty = sys.stdin.isatty() if stdin_isatty is None else stdin_isatty
+    if isatty:
+        raise ProposalError("FAIL_PROMPT_BYTES_MISSING")
+
+    data = stdin_bytes if stdin_bytes is not None else sys.stdin.buffer.read()
+    if not data:
+        raise ProposalError("FAIL_PROMPT_BYTES_MISSING")
+    return data, "stdin_raw"
 
 
 def parse_sha_sidecar(data: bytes) -> str:
@@ -489,12 +516,25 @@ def verify_stage(stage: Path, expected_fp: str, expected_base_sha: str, rows: li
         raise ProposalError("FAIL_VERIFY_SEAL_TARGET")
 
 
-def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = False) -> Summary:
+def execute(
+    repo_root: Path,
+    phase_c_prompt_text: str | None = None,
+    append_ledger: bool = False,
+    stdin_isatty: bool | None = None,
+    stdin_bytes: bytes | None = None,
+) -> Summary:
     inputs: list[dict[str, Any]] = []
     proposal_id = ""
     proposal_fingerprint = ""
     stage_dir: Path | None = None
+    created_stage_dir = False
+    prompt_source = ""
     try:
+        prompt_bytes, prompt_source = resolve_prompt_bytes(
+            phase_c_prompt_text=phase_c_prompt_text,
+            stdin_isatty=stdin_isatty,
+            stdin_bytes=stdin_bytes,
+        )
         pointer_bytes = read_input(repo_root, POINTER_PATH.as_posix(), inputs, True, "FAIL_POINTER_MISSING")
         assert pointer_bytes is not None
         try:
@@ -523,11 +563,9 @@ def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = Fal
             data = read_input(repo_root, f"{run_rel}/{name}", inputs, True, "FAIL_REQUIRED_INPUT_MISSING")
             assert data is not None
             run_data[name] = data
-        optional_texts: list[str] = []
         for name in OPTIONAL_RUN_INPUTS:
             data = read_input(repo_root, f"{run_rel}/{name}", inputs, False, "FAIL_OPTIONAL_INPUT")
-            if data is not None:
-                optional_texts.append(data.decode("utf-8", errors="replace"))
+            _ = data
         for rel in OPTIONAL_CONTEXT_INPUTS:
             _ = read_input(repo_root, rel, inputs, False, "FAIL_OPTIONAL_INPUT")
 
@@ -549,24 +587,26 @@ def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = Fal
         if parse_sha_sidecar(run_data["SEAL.sha256"]) != sha256_bytes(run_data["SEAL.json"]):
             raise ProposalError("FAIL_RUN_SEAL_SIDECAR_MISMATCH")
         try:
-            json.loads(run_data["MANIFEST.json"].decode("utf-8"))
+            run_manifest_obj = json.loads(run_data["MANIFEST.json"].decode("utf-8"))
             json.loads(run_data["SEAL.json"].decode("utf-8"))
         except json.JSONDecodeError as exc:
             raise ProposalError("FAIL_RUN_MANIFEST_SEAL_PARSE") from exc
+        if not isinstance(run_manifest_obj, dict):
+            raise ProposalError("FAIL_RUN_MANIFEST_SEAL_PARSE")
 
         class_raw = parse_jsonl(run_dir / "REPO_FILE_CLASSIFICATION_v0.1.jsonl", "FAIL_CLASSIFICATION_PARSE")
         rows = parse_rows(class_raw)
         _ = parse_jsonl(run_dir / "REPO_FILE_INDEX_v0.1.jsonl", "FAIL_INDEX_PARSE")
         if any(r.generated_hint is not None for r in rows):
-            marker = any("generated_hint_semantics:" in t.lower() or "generated_hint semantics:" in t.lower() for t in optional_texts)
-            if not marker:
+            semantics = run_manifest_obj.get("generated_hint_semantics")
+            if not isinstance(semantics, str) or not semantics.strip():
                 raise ProposalError("FAIL_GENERATED_HINT_UNDOCUMENTED", unknown_no_evidence=True)
 
         run_manifest_sha = sha256_bytes(run_data["MANIFEST.json"])
         run_seal_sha = sha256_bytes(run_data["SEAL.json"])
         base_sha = sha256_bytes(ruleset_bytes)
         policy_sha = sha256_bytes(POLICY_BYTES)
-        prompt_sha = sha256_bytes(phase_c_prompt_text.encode("utf-8"))
+        prompt_sha = compute_prompt_sha256(prompt_bytes)
         proposal_fingerprint = sha256_bytes("\n".join([run_id, run_manifest_sha, run_seal_sha, base_sha, policy_sha, prompt_sha]).encode("utf-8"))
         proposal_id = f"rcp_{run_id}_{proposal_fingerprint[:12]}"
 
@@ -607,6 +647,7 @@ def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = Fal
             raise ProposalError("FAIL_STAGE_DIR_EXISTS", [stage_dir.as_posix()])
         staging_root.mkdir(parents=True, exist_ok=True)
         stage_dir.mkdir(parents=False, exist_ok=False)
+        created_stage_dir = True
 
         (stage_dir / "PROPOSED_RULESET_PATCH_v0.1.json").write_bytes(serialize_json(patch))
         (stage_dir / "PREDICTED_CLASSIFICATION_DELTA_v0.1.jsonl").write_bytes(serialize_jsonl(final_sim["delta"]))
@@ -661,9 +702,15 @@ def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = Fal
             with ledger.open("ab") as f:
                 f.write(line.encode("utf-8"))
 
-        return Summary(action="OK", exit_code=0, proposal_id=proposal_id, proposal_fingerprint=proposal_fingerprint)
+        return Summary(
+            action="OK",
+            exit_code=0,
+            proposal_id=proposal_id,
+            proposal_fingerprint=proposal_fingerprint,
+            prompt_source=prompt_source,
+        )
     except ProposalError as exc:
-        if stage_dir is not None:
+        if created_stage_dir and stage_dir is not None:
             shutil.rmtree(stage_dir, ignore_errors=True)
             try:
                 if stage_dir.parent.name == ".staging":
@@ -671,12 +718,22 @@ def execute(repo_root: Path, phase_c_prompt_text: str, append_ledger: bool = Fal
             except OSError:
                 pass
         write_failure(repo_root, exc.code, exc.details, exc.unknown_no_evidence)
-        return Summary(action=exc.code, exit_code=2, proposal_id=proposal_id, proposal_fingerprint=proposal_fingerprint)
+        return Summary(
+            action=exc.code,
+            exit_code=2,
+            proposal_id=proposal_id,
+            proposal_fingerprint=proposal_fingerprint,
+            prompt_source=prompt_source,
+        )
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Phase-C deterministic rule proposal runner.")
-    p.add_argument("--phase-c-prompt-text", required=True, help="Exact Phase-C prompt text bytes (UTF-8).")
+    p.add_argument(
+        "--phase-c-prompt-text",
+        default=None,
+        help="Prompt text fallback. If omitted, raw prompt bytes are read from piped stdin only.",
+    )
     p.add_argument("--append-ledger", action="store_true", help="Append one line to optional proposal ledger on success.")
     return p.parse_args(argv)
 
@@ -687,6 +744,7 @@ def main(argv: list[str]) -> int:
     print(f"action={s.action}")
     print(f"proposal_id={s.proposal_id}")
     print(f"proposal_fingerprint={s.proposal_fingerprint}")
+    print(f"prompt_source={s.prompt_source}")
     print(f"failure_report_path={FAILURE_REPORT_PATH.as_posix()}")
     return s.exit_code
 

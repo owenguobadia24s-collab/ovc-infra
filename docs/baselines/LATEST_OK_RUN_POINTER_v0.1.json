@@ -1,0 +1,9 @@
+{
+  "LATEST_OK_RUN_ID": "20260218_185402Z",
+  "LATEST_OK_RUN_TS": "2026-02-18T18:54:02Z",
+  "ledger_manifest_match": true,
+  "ledger_seal_match": true,
+  "manifest_sidecar_match": true,
+  "ok": true,
+  "seal_sidecar_match": true
+}

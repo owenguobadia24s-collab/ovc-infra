@@ -47,7 +47,13 @@ def make_pointer(run_id: str) -> dict:
     }
 
 
-def setup_common_inputs(tmp_path: Path, run_id: str, classification_rows: list[dict]) -> None:
+def setup_common_inputs(
+    tmp_path: Path,
+    run_id: str,
+    classification_rows: list[dict],
+    manifest_extras: dict | None = None,
+    optional_artifacts: dict[str, str] | None = None,
+) -> None:
     write_json(tmp_path / "docs" / "baselines" / "LATEST_OK_RUN_POINTER_v0.1.json", make_pointer(run_id))
 
     rules = {
@@ -70,10 +76,10 @@ def setup_common_inputs(tmp_path: Path, run_id: str, classification_rows: list[d
         [{"path": row["path"], "file_ext": ".py", "tracked_status": "tracked", "size_bytes": 1} for row in classification_rows],
     )
 
-    manifest_bytes = json.dumps(
-        {"schema_version": "REPO_CARTOGRAPHER_MANIFEST_v0.1", "run_id": run_id, "artifacts": {}},
-        sort_keys=True,
-    ).encode("utf-8")
+    manifest_payload = {"schema_version": "REPO_CARTOGRAPHER_MANIFEST_v0.1", "run_id": run_id, "artifacts": {}}
+    if manifest_extras:
+        manifest_payload.update(manifest_extras)
+    manifest_bytes = json.dumps(manifest_payload, sort_keys=True).encode("utf-8")
     seal_bytes = json.dumps(
         {"kind": "REPO_CARTOGRAPHER_RUN_SEAL", "run_id": run_id},
         sort_keys=True,
@@ -82,6 +88,11 @@ def setup_common_inputs(tmp_path: Path, run_id: str, classification_rows: list[d
     (run_dir / "SEAL.json").write_bytes(seal_bytes)
     write_sha256_sidecar(run_dir / "MANIFEST.sha256", "MANIFEST.json", manifest_bytes)
     write_sha256_sidecar(run_dir / "SEAL.sha256", "SEAL.json", seal_bytes)
+    if optional_artifacts:
+        for name, content in optional_artifacts.items():
+            path = run_dir / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
 
 
 def test_fail_when_pointer_missing(tmp_path: Path, monkeypatch):
@@ -117,6 +128,7 @@ def test_success_writes_staged_pack_and_promotes(tmp_path: Path):
     proposal_dir = tmp_path / "artifacts" / "repo_cartographer_proposals" / summary.proposal_id
     assert proposal_dir.exists()
     assert not (tmp_path / "artifacts" / "repo_cartographer_proposals" / ".staging" / summary.proposal_id).exists()
+    assert not (tmp_path / "docs" / "catalogs" / "REPO_CARTOGRAPHER_RULE_PROPOSAL_LEDGER_v0.1.jsonl").exists()
     for name in [
         "PROPOSED_RULESET_PATCH_v0.1.json",
         "PREDICTED_CLASSIFICATION_DELTA_v0.1.jsonl",
@@ -134,6 +146,7 @@ def test_success_writes_staged_pack_and_promotes(tmp_path: Path):
     ops = patch["operations"]
     assert len(ops) >= 1
     assert all(op["op"] == "insert_rule" for op in ops)
+    assert patch["fingerprint_components"]["phase_c_prompt_sha256"] == hashlib.sha256("phase-c prompt".encode("utf-8")).hexdigest()
 
 
 def test_generated_hint_without_documentation_aborts_with_exact_text(tmp_path: Path):
@@ -148,13 +161,148 @@ def test_generated_hint_without_documentation_aborts_with_exact_text(tmp_path: P
             "generated_hint": "AUTO",
         }
     ]
-    setup_common_inputs(tmp_path, run_id, rows)
+    setup_common_inputs(
+        tmp_path,
+        run_id,
+        rows,
+        optional_artifacts={"MODULE_OWNERSHIP_SUMMARY_v0.1.md": "generated_hint_semantics: documented-here-but-optional"},
+    )
 
     summary = m.execute(tmp_path, phase_c_prompt_text="phase-c prompt", append_ledger=False)
     assert summary.exit_code == 2
     failure_path = tmp_path / "artifacts" / "repo_cartographer_proposals" / "FAILURE_v0.1" / "FAILURE_REPORT.md"
     assert failure_path.exists()
     assert failure_path.read_text(encoding="utf-8") == "UNKNOWN (no evidence)"
+
+
+def test_generated_hint_with_required_manifest_semantics_succeeds(tmp_path: Path):
+    m = load_module()
+    run_id = "20260218_142955Z"
+    rows = [{"path": "pkg/feature/owned/a.py", "module_id": "M01", "zone_id": None, "file_ext": ".py", "generated_hint": None}]
+    for i in range(1, 6):
+        rows.append(
+            {
+                "path": f"pkg/feature/new/file{i}.py",
+                "module_id": "UNKNOWN",
+                "zone_id": None,
+                "file_ext": ".py",
+                "generated_hint": "AUTO",
+            }
+        )
+    setup_common_inputs(
+        tmp_path,
+        run_id,
+        rows,
+        manifest_extras={"generated_hint_semantics": "AUTO indicates deterministic generated source"},
+    )
+
+    summary = m.execute(tmp_path, phase_c_prompt_text="phase-c prompt", append_ledger=False)
+    assert summary.exit_code == 0
+    assert summary.action == "OK"
+
+
+def test_prompt_text_arg_precedence_over_piped_stdin(tmp_path: Path):
+    m = load_module()
+    run_id = "20260218_142956Z"
+    rows = [{"path": "pkg/feature/owned/a.py", "module_id": "M01", "zone_id": None, "file_ext": ".py", "generated_hint": None}]
+    for i in range(1, 6):
+        rows.append(
+            {
+                "path": f"pkg/feature/new/file{i}.py",
+                "module_id": "UNKNOWN",
+                "zone_id": None,
+                "file_ext": ".py",
+                "generated_hint": None,
+            }
+        )
+    setup_common_inputs(tmp_path, run_id, rows)
+
+    summary = m.execute(
+        tmp_path,
+        phase_c_prompt_text="phase-c prompt",
+        append_ledger=False,
+        stdin_isatty=False,
+        stdin_bytes=b"DIFFERENT_STDIN_BYTES",
+    )
+    assert summary.exit_code == 0
+    assert summary.prompt_source == "arg_text"
+    patch = json.loads(
+        (
+            tmp_path
+            / "artifacts"
+            / "repo_cartographer_proposals"
+            / summary.proposal_id
+            / "PROPOSED_RULESET_PATCH_v0.1.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert patch["fingerprint_components"]["phase_c_prompt_sha256"] == hashlib.sha256("phase-c prompt".encode("utf-8")).hexdigest()
+
+
+def test_prompt_from_piped_stdin_bytes_used_exactly(tmp_path: Path):
+    m = load_module()
+    run_id = "20260218_142957Z"
+    rows = [{"path": "pkg/feature/owned/a.py", "module_id": "M01", "zone_id": None, "file_ext": ".py", "generated_hint": None}]
+    for i in range(1, 6):
+        rows.append(
+            {
+                "path": f"pkg/feature/new/file{i}.py",
+                "module_id": "UNKNOWN",
+                "zone_id": None,
+                "file_ext": ".py",
+                "generated_hint": None,
+            }
+        )
+    setup_common_inputs(tmp_path, run_id, rows)
+    stdin_payload = b"line1\r\nline2\n"
+    summary = m.execute(
+        tmp_path,
+        phase_c_prompt_text=None,
+        append_ledger=False,
+        stdin_isatty=False,
+        stdin_bytes=stdin_payload,
+    )
+    assert summary.exit_code == 0
+    assert summary.prompt_source == "stdin_raw"
+    patch = json.loads(
+        (
+            tmp_path
+            / "artifacts"
+            / "repo_cartographer_proposals"
+            / summary.proposal_id
+            / "PROPOSED_RULESET_PATCH_v0.1.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert patch["fingerprint_components"]["phase_c_prompt_sha256"] == hashlib.sha256(stdin_payload).hexdigest()
+
+
+def test_prompt_missing_and_interactive_stdin_fails_closed(tmp_path: Path):
+    m = load_module()
+    run_id = "20260218_142958Z"
+    rows = [{"path": "pkg/feature/owned/a.py", "module_id": "M01", "zone_id": None, "file_ext": ".py", "generated_hint": None}]
+    for i in range(1, 6):
+        rows.append(
+            {
+                "path": f"pkg/feature/new/file{i}.py",
+                "module_id": "UNKNOWN",
+                "zone_id": None,
+                "file_ext": ".py",
+                "generated_hint": None,
+            }
+        )
+    setup_common_inputs(tmp_path, run_id, rows)
+
+    summary = m.execute(
+        tmp_path,
+        phase_c_prompt_text=None,
+        append_ledger=False,
+        stdin_isatty=True,
+        stdin_bytes=None,
+    )
+    assert summary.exit_code == 2
+    assert summary.action == "FAIL_PROMPT_BYTES_MISSING"
+    failure_path = tmp_path / "artifacts" / "repo_cartographer_proposals" / "FAILURE_v0.1" / "FAILURE_REPORT.md"
+    assert failure_path.exists()
+    assert "FAIL_PROMPT_BYTES_MISSING" in failure_path.read_text(encoding="utf-8")
 
 
 def test_verify_failure_cleans_staging_and_writes_failure_only(tmp_path: Path, monkeypatch):
@@ -177,7 +325,7 @@ def test_verify_failure_cleans_staging_and_writes_failure_only(tmp_path: Path, m
         raise m.ProposalError("FAIL_VERIFY_FORCED")
 
     monkeypatch.setattr(m, "verify_stage", force_verify_fail)
-    summary = m.execute(tmp_path, phase_c_prompt_text="phase-c prompt", append_ledger=False)
+    summary = m.execute(tmp_path, phase_c_prompt_text="phase-c prompt", append_ledger=True)
     assert summary.exit_code == 2
 
     failure_path = tmp_path / "artifacts" / "repo_cartographer_proposals" / "FAILURE_v0.1" / "FAILURE_REPORT.md"
@@ -185,3 +333,54 @@ def test_verify_failure_cleans_staging_and_writes_failure_only(tmp_path: Path, m
     proposal_dir = tmp_path / "artifacts" / "repo_cartographer_proposals" / summary.proposal_id
     assert not proposal_dir.exists()
     assert not (tmp_path / "artifacts" / "repo_cartographer_proposals" / ".staging" / summary.proposal_id).exists()
+    assert not (tmp_path / "docs" / "catalogs" / "REPO_CARTOGRAPHER_RULE_PROPOSAL_LEDGER_v0.1.jsonl").exists()
+
+
+def test_stage_collision_writes_failure_only_and_does_not_touch_existing_stage(tmp_path: Path):
+    m = load_module()
+    run_id = "20260218_142954Z"
+    rows = [{"path": "pkg/feature/owned/a.py", "module_id": "M01", "zone_id": None, "file_ext": ".py", "generated_hint": None}]
+    for i in range(1, 6):
+        rows.append(
+            {
+                "path": f"pkg/feature/new/file{i}.py",
+                "module_id": "UNKNOWN",
+                "zone_id": None,
+                "file_ext": ".py",
+                "generated_hint": None,
+            }
+        )
+    setup_common_inputs(tmp_path, run_id, rows)
+
+    prompt = "phase-c prompt"
+    run_dir = tmp_path / "artifacts" / "repo_cartographer" / run_id
+    rules_bytes = (tmp_path / "docs" / "baselines" / "MODULE_OWNERSHIP_RULES_v0.1.json").read_bytes()
+    proposal_fingerprint = hashlib.sha256(
+        "\n".join(
+            [
+                run_id,
+                hashlib.sha256((run_dir / "MANIFEST.json").read_bytes()).hexdigest(),
+                hashlib.sha256((run_dir / "SEAL.json").read_bytes()).hexdigest(),
+                hashlib.sha256(rules_bytes).hexdigest(),
+                hashlib.sha256(m.POLICY_BYTES).hexdigest(),
+                hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+            ]
+        ).encode("utf-8")
+    ).hexdigest()
+    proposal_id = f"rcp_{run_id}_{proposal_fingerprint[:12]}"
+
+    preexisting_stage = tmp_path / "artifacts" / "repo_cartographer_proposals" / ".staging" / proposal_id
+    preexisting_stage.mkdir(parents=True, exist_ok=True)
+    marker = preexisting_stage / "sentinel.txt"
+    marker.write_text("keep", encoding="utf-8")
+
+    summary = m.execute(tmp_path, phase_c_prompt_text=prompt, append_ledger=False)
+    assert summary.exit_code == 2
+    assert summary.action == "FAIL_STAGE_DIR_EXISTS"
+    assert summary.proposal_id == proposal_id
+
+    failure_path = tmp_path / "artifacts" / "repo_cartographer_proposals" / "FAILURE_v0.1" / "FAILURE_REPORT.md"
+    assert failure_path.exists()
+    assert not (tmp_path / "artifacts" / "repo_cartographer_proposals" / proposal_id).exists()
+    assert preexisting_stage.exists()
+    assert marker.read_text(encoding="utf-8") == "keep"
