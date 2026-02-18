@@ -99,6 +99,31 @@ def sha256_file(path: Path) -> str:
     return sha256_bytes(path.read_bytes())
 
 
+def now_utc_iso() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def is_utc_iso_timestamp(value: str) -> bool:
+    try:
+        datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return False
+    return True
+
+
+def derive_run_ts(generated_utc: str) -> str:
+    if is_utc_iso_timestamp(generated_utc):
+        return generated_utc
+    return now_utc_iso()
+
+
+def parse_sha256_sidecar(path: Path) -> str:
+    content = path.read_text(encoding="utf-8").strip()
+    if not content:
+        return ""
+    return content.split()[0].lower()
+
+
 def relpath_posix(path: Path, repo_root: Path) -> str:
     resolved_path = path.resolve()
     resolved_root = repo_root.resolve()
@@ -582,6 +607,8 @@ def save_state(state_path: Path, state: dict[str, Any]) -> None:
 
 def build_ledger_line(
     run_id: str,
+    run_ts: str,
+    status: str,
     run_fingerprint: str,
     generated_utc: str,
     head_commit: str,
@@ -603,11 +630,37 @@ def build_ledger_line(
         "ruleset_sha256": ruleset_sha256,
         "run_fingerprint": run_fingerprint,
         "run_id": run_id,
+        "run_ts": run_ts,
         "seal_sha256": seal_sha256,
+        "status": status,
         "summary_counts": summary_counts,
         "tracked_list_sha256": tracked_list_sha256,
         "untracked_visible_list_sha256": untracked_visible_list_sha256,
     }
+
+
+def compute_ledger_status(run_dir: Path) -> str:
+    manifest_path = run_dir / "MANIFEST.json"
+    manifest_sha_path = run_dir / "MANIFEST.sha256"
+    seal_path = run_dir / "SEAL.json"
+    seal_sha_path = run_dir / "SEAL.sha256"
+
+    required = [manifest_path, manifest_sha_path, seal_path, seal_sha_path]
+    for path in required:
+        if not path.exists():
+            return "FAIL"
+
+    expected_manifest_sha = parse_sha256_sidecar(manifest_sha_path)
+    expected_seal_sha = parse_sha256_sidecar(seal_sha_path)
+    if not expected_manifest_sha or not expected_seal_sha:
+        return "FAIL"
+
+    if sha256_file(manifest_path) != expected_manifest_sha:
+        return "FAIL"
+    if sha256_file(seal_path) != expected_seal_sha:
+        return "FAIL"
+
+    return "OK"
 
 
 def append_ledger(ledger_path: Path, line: dict[str, Any]) -> None:
@@ -692,7 +745,7 @@ def cmd_run(repo_root: Path, args: argparse.Namespace) -> int:
     )
 
     # 6. Run ID
-    generated_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    generated_utc = now_utc_iso()
     if args.run_id:
         run_id = args.run_id
     else:
@@ -783,8 +836,13 @@ def cmd_run(repo_root: Path, args: argparse.Namespace) -> int:
         "untracked_visible": len(untracked),
     }
 
+    run_ts = derive_run_ts(generated_utc)
+    status = compute_ledger_status(run_dir)
+
     ledger_line = build_ledger_line(
         run_id=run_id,
+        run_ts=run_ts,
+        status=status,
         run_fingerprint=run_fingerprint,
         generated_utc=generated_utc,
         head_commit=head_commit,
