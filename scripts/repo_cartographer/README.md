@@ -46,6 +46,7 @@ python scripts/repo_cartographer/cartographer.py verify
 python scripts/repo_cartographer/phase_b_latest_ok_run.py --strict-verify
 python scripts/repo_cartographer/phase_b6_publish_latest_ownership_summary.py
 python scripts/repo_cartographer/phase_b7_unknown_frontier.py
+python scripts/repo_cartographer/phase_c_rule_proposal.py --phase-c-prompt-text "<exact phase-c prompt>"
 ```
 
 ## Invariants
