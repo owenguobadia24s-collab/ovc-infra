@@ -293,3 +293,9 @@ testdir2/
 tools/dev/codex_tests.ps1
 .codex/_scratch/artifacts/
 .codex_scratch/
+
+# Repo Cartographer run artifacts (evidence only)
+artifacts/
+
+# Local Codex scratch outputs
+.codex/_scratch/
