@@ -1,0 +1,17 @@
+ score_version |                   run_id                   | n_observations | mean_score | stddev_score | min_score | p25_score | p50_score | p75_score | max_score 
+---------------+--------------------------------------------+----------------+------------+--------------+-----------+-----------+-----------+-----------+-----------
+ DIS-v1.1      | p1_20260226_GBPUSD_20260225_len5d_1a9f7494 |              0 |            |              |           |           |           |           |          
+(1 row)
+
+ outcome_category | n_observations | mean_score | stddev_score | min_score | p25_score | p50_score | p75_score | max_score 
+------------------+----------------+------------+--------------+-----------+-----------+-----------+-----------+-----------
+(0 rows)
+
+ score_quartile | outcome_category | n_observations | pct_within_quartile 
+----------------+------------------+----------------+---------------------
+(0 rows)
+
+ score_quartile | n_observations | mean_outcome_ret | stddev_outcome_ret | median_outcome_ret 
+----------------+----------------+------------------+--------------------+--------------------
+(0 rows)
+
