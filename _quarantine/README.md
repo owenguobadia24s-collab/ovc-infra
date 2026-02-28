@@ -1,7 +1,8 @@
-# _quarantine/
+# _quarantine
 
-Non-canonical files (OP-NC) classified as **QUARANTINED** per `ARCHIVE_NON_CANONICAL_v0.1.md`.
+This directory contains **non-canonical** or **transitional** artifacts preserved for reference.
+Files here must not be treated as active architecture unless explicitly promoted via governance.
 
-These files are dormant, stub, or experimental. They have no runtime dependency from canonical operations. They are isolated here and are not executable-by-default.
-
-See `ARCHIVE_NON_CANONICAL_v0.1.md` and `PRUNE_PLAN_v0.1.md` in the repository root for full disposition.
+Rule:
+- Do not extend quarantine content by default.
+- If a quarantine item becomes canonical, migrate it to its correct directory and document the promotion.

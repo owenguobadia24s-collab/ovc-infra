@@ -299,3 +299,9 @@ artifacts/
 
 # Local Codex scratch outputs
 .codex/_scratch/
+# Local run outputs (must not live in repo root)
+out.json
+out.err
+# Local census / genesis scratch
+ALL_TRACKED_FILES.txt
+GENESIS_LEDGER.tsv
