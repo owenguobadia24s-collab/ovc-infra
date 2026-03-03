@@ -1,0 +1,52 @@
+[
+  {
+    "id": "chat_golden_000",
+    "title": "OVC Design Record Engine — Golden Chat",
+    "create_time": 1708473600,
+    "update_time": 1708473900,
+    "mapping": {
+      "m0": {
+        "id": "m0",
+        "message": {
+          "id": "m0",
+          "author": { "role": "user" },
+          "create_time": 1708473601,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "OVC invariant check: fail-closed, pointer gating, MANIFEST.sha256, LATEST_OK_RUN_POINTER. Option A–D. See scripts/path1/validate_post_run.py"
+            ]
+          }
+        }
+      },
+      "m1": {
+        "id": "m1",
+        "message": {
+          "id": "m1",
+          "author": { "role": "assistant" },
+          "create_time": 1708473660,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Acknowledged. The design record must be append-only with deterministic JSONL. Use sha256 seals. Enforce pointer gating."
+            ]
+          }
+        }
+      },
+      "m2": {
+        "id": "m2",
+        "message": {
+          "id": "m2",
+          "author": { "role": "user" },
+          "create_time": 1708473720,
+          "content": {
+            "content_type": "text",
+            "parts": [
+              "Module inference: modules are overlapping documents + recurring concepts + shared invariants. Extract modules + purposes from chat history."
+            ]
+          }
+        }
+      }
+    }
+  }
+]
