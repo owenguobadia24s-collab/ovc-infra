@@ -1,0 +1,28 @@
+path	genesis_commit	genesis_author_date	genesis_subject
+ARCHIVE_NON_CANONICAL_v0.1.md	12ef20f81b8555e879993aaeaca0caf088266b9b	2026-02-04T20:14:32Z	.continued
+OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md	12ef20f81b8555e879993aaeaca0caf088266b9b	2026-02-04T20:14:32Z	.continued
+OVC_ENFORCEMENT_COVERAGE_MATRIX_v0.1.md	12ef20f81b8555e879993aaeaca0caf088266b9b	2026-02-04T20:14:32Z	.continued
+OVC_GOVERNANCE_COMPLETENESS_SCORECARD_v0.1.md	12ef20f81b8555e879993aaeaca0caf088266b9b	2026-02-04T20:14:32Z	.continued
+PHASE_1_5_CLOSURE_DECLARATION.md	12ef20f81b8555e879993aaeaca0caf088266b9b	2026-02-04T20:14:32Z	.continued
+PRUNE_PLAN_v0.1.md	12ef20f81b8555e879993aaeaca0caf088266b9b	2026-02-04T20:14:32Z	.continued
+modules/MOD-76 /342/200/224 scripts.md			
+modules/epoch_1/MOD-01 /342/200/224 tests.md			
+modules/epoch_10/MOD-36 /342/200/224 docs.md			
+modules/epoch_11/MOD-39 /342/200/224 research.md			
+modules/epoch_12/MOD-41 /342/200/224 sql.md			
+modules/epoch_13/MOD-45 /342/200/224 cluster_dot_slash_.github_.vscode_artifacts_docs_reports_scripts_sql_tests_tetsu.md			
+modules/epoch_14/MOD-48 /342/200/224 .codex.md			
+modules/epoch_15/MOD-54 /342/200/224 reports.md			
+modules/epoch_16/MOD-57 /342/200/224 cluster_dot_slash_.codex_.github__archive__quarantine_docs_infra_reports_scripts_sql_src_tools.md			
+modules/epoch_17/MOD-59 /342/200/224 dot_slash.md			
+modules/epoch_18/MOD-74 /342/200/224 .github.md			
+modules/epoch_19/MOD-76 /342/200/224 scripts.md			
+modules/epoch_3/MOD-05 /342/200/224 infra.md			
+modules/epoch_4/MOD-07 /342/200/224 docs.md			
+modules/epoch_5/MOD-11 /342/200/224 sql.md			
+modules/epoch_6/MOD-13 /342/200/224 cluster_docs_infra_pine_tests_tools.md			
+modules/epoch_7/MOD-21 /342/200/224 docs.md			
+modules/epoch_8/MOD-27 /342/200/224 pine.md			
+modules/epoch_9/MOD-31 /342/200/224 docs.md			
+out.err	9267725acf1cb687ad543188a75076013f29b0c0	2026-02-05T11:53:16Z	Phase 4:  audit interpretation/ agent
+out.json	9267725acf1cb687ad543188a75076013f29b0c0	2026-02-05T11:53:16Z	Phase 4:  audit interpretation/ agent

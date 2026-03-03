@@ -1,0 +1,5 @@
+# GENESIS HYBRID Pattern Parse Errors v0.1
+
+PATTERN_PARSE_ERROR count: 0
+
+EMPTY_INCLUDES count: 0
