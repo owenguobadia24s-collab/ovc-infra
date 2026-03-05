@@ -1,0 +1,181 @@
+[
+  {
+    "id": "chat_alpha",
+    "title": "Alpha Chat",
+    "mapping": {
+      "node_root": {
+        "id": "node_root",
+        "message": null
+      },
+      "node_001": {
+        "id": "node_001",
+        "message": {
+          "id": "m001",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1708473601,
+          "content": {
+            "parts": [
+              "Hello  \r\nworld  ",
+              "line2\t "
+            ]
+          }
+        }
+      },
+      "node_002": {
+        "id": "node_002",
+        "message": {
+          "id": "m002",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1708473601000,
+          "content": "Answer\rwith\nmixed\r\nlines   "
+        }
+      },
+      "node_003": {
+        "id": "node_003",
+        "message": {
+          "id": "m003",
+          "author": {
+            "role": "system"
+          },
+          "create_time": "2024-02-20T12:00:05+00:00",
+          "content": {
+            "parts": [
+              "sys part",
+              "two"
+            ]
+          }
+        }
+      },
+      "node_004": {
+        "id": "node_004",
+        "message": {
+          "id": "m004",
+          "author": {
+            "role": "tool"
+          },
+          "create_time": "2024-02-20T12:00:07",
+          "content": {
+            "content_type": "image_asset_pointer"
+          }
+        }
+      },
+      "node_005": {
+        "id": "node_005",
+        "message": {
+          "id": "m005",
+          "author": {
+            "role": "critic"
+          },
+          "create_time": null,
+          "content": {
+            "parts": [
+              "unknown role line",
+              123
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "chat_beta",
+    "title": "Beta Chat",
+    "messages": [
+      {
+        "id": "m101",
+        "author": {
+          "role": "user"
+        },
+        "create_time": 1708470000,
+        "content": [
+          "beta line 1",
+          "beta line 2"
+        ]
+      },
+      {
+        "id": "m102",
+        "author": {
+          "role": "assistant"
+        },
+        "create_time": "2024-02-20T13:30:00Z",
+        "content": {
+          "parts": [
+            "assistant reply",
+            {
+              "ignored": true
+            },
+            "tail"
+          ]
+        }
+      },
+      {
+        "id": "m103",
+        "author": {
+          "role": "user"
+        },
+        "create_time": 1708470001,
+        "content": "alpha9f8k2n3q7v1b4m6x0z5p2c8t4y7u3w6r1h5j9l2d8s0g3f7k1n4q6v9b2m5x8z1p4c7t0y3u6w9r2h5j8l1d4s7g0"
+      },
+      {
+        "id": "m104",
+        "author": {
+          "role": "assistant"
+        },
+        "create_time": 1708470002,
+        "content": "beta8m3x7q1v5c9t2y6u0w4r8h1j5l9d2s6g0f3k7n1p4z8b2m6x9q3v7c1t5y0u4w8r2h6j9l3d7s1g5f8k2n6p0z4"
+      },
+      {
+        "id": "m105",
+        "author": {
+          "role": "user"
+        },
+        "create_time": 1708470003,
+        "content": "gamma7q2v6c0t4y8u1w5r9h2j6l0d4s8g1f5k9n2p6z0b4m8x1q5v9c2t6y0u3w7r1h5j9l2d6s0g4f8k1n5p9z3b7m0"
+      },
+      {
+        "id": "m106",
+        "author": {
+          "role": "assistant"
+        },
+        "create_time": 1708470004,
+        "content": "delta6v1c5t9y2u6w0r4h8j1l5d9s2g6f0k4n8p1z5b9m2x6q0v4c8t1y5u9w2r6h0j4l8d1s5g9f2k6n0p4z8b1m5x9"
+      },
+      {
+        "id": "m107",
+        "author": {
+          "role": "user"
+        },
+        "create_time": 1708470005,
+        "content": "epsilon5c0t4y8u2w6r1h5j9l3d7s0g4f8k2n6p1z5b9m3x7q0v4c8t2y6u1w5r9h3j7l0d4s8g2f6k1n5p9z2b6m0x4q8"
+      },
+      {
+        "id": "m108",
+        "author": {
+          "role": "assistant"
+        },
+        "create_time": 1708470006,
+        "content": "zeta4t9y3u7w1r5h9j2l6d0s4g8f1k5n9p2z6b0m4x8q1v5c9t3y7u0w4r8h2j6l9d3s7g1f5k8n2p6z9b3m7x0q4v8"
+      },
+      {
+        "id": "m109",
+        "author": {
+          "role": "user"
+        },
+        "create_time": 1708470007,
+        "content": "eta3y8u2w6r0h4j8l1d5s9g2f6k0n4p8z1b5m9x2q6v0c4t8y1u5w9r3h7j0l4d8s1g5f9k2n6p0z4b8m1x5q9v3c7"
+      },
+      {
+        "id": "m110",
+        "author": {
+          "role": "assistant"
+        },
+        "create_time": 1708470008,
+        "content": "theta2u7w1r5h9j3l7d0s4g8f2k6n9p3z7b0m4x8q2v6c9t3y7u1w5r9h2j6l0d4s8g1f5k9n3p7z0b4m8x2q6v9c3t7"
+      }
+    ]
+  }
+]

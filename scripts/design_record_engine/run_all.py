@@ -26,8 +26,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Run all Design Record Engine phases in strict order.")
     ap.add_argument(
         "--export-root",
-        default="evidence/chat_exports/2026-02-21_export_raw",
-        help="Chat export root folder (sealed or to be sealed).",
+        default=".",
+        help="Workspace/output root. Chat corpus writes under <export-root>/evidence/chat_corpus/v1.",
     )
     ap.add_argument(
         "--artifacts-root",
@@ -35,9 +35,19 @@ def main() -> int:
         help="Artifacts output root.",
     )
     ap.add_argument(
+        "--chat-export-root",
+        default="evidence/chat_exports/2026-02-21_export_raw",
+        help="Raw chat export root folder.",
+    )
+    ap.add_argument(
+        "--allow-missing-chat-export",
+        action="store_true",
+        help="Skip Phase 0 and Phase 1 when --chat-export-root is missing.",
+    )
+    ap.add_argument(
         "--use-golden",
         action="store_true",
-        help="Use golden fixture as export-root (overrides --export-root).",
+        help="Use golden fixture as chat-export-root (overrides --chat-export-root).",
     )
     ap.add_argument(
         "--seal",
@@ -81,59 +91,96 @@ def main() -> int:
         return 2
 
     export_root = Path(args.export_root)
+    chat_export_root = Path(args.chat_export_root)
     if args.use_golden:
-        export_root = Path("tests/fixtures/chat_export_golden/2026-02-21_export_raw")
+        chat_export_root = Path("tests/fixtures/chat_export_golden/2026-02-21_export_raw")
 
     if not export_root.is_absolute():
         export_root = (root / export_root).resolve()
     else:
         export_root = export_root.resolve()
 
+    if not chat_export_root.is_absolute():
+        chat_export_root = (root / chat_export_root).resolve()
+    else:
+        chat_export_root = chat_export_root.resolve()
+
     artifacts_root = Path(args.artifacts_root)
     if not artifacts_root.is_absolute():
-        artifacts_root = (root / artifacts_root).resolve()
+        artifacts_root = (export_root / artifacts_root).resolve()
     else:
         artifacts_root = artifacts_root.resolve()
 
     export_root_str = export_root.as_posix()
+    chat_export_root_str = chat_export_root.as_posix()
     artifacts_root_str = artifacts_root.as_posix()
 
     env = dict(os.environ)
 
-    if not export_root.exists() or not export_root.is_dir():
-        print(f"ERROR: export root does not exist or is not a directory: {export_root_str}", file=sys.stderr)
+    if export_root.exists() and not export_root.is_dir():
+        print(f"ERROR: export root exists but is not a directory: {export_root_str}", file=sys.stderr)
         return 2
 
     try:
+        export_root.mkdir(parents=True, exist_ok=True)
         artifacts_root.mkdir(parents=True, exist_ok=True)
     except OSError as exc:
-        print(f"ERROR: failed to create artifacts root '{artifacts_root_str}': {exc}", file=sys.stderr)
+        print(
+            f"ERROR: failed to create export/artifacts roots '{export_root_str}' / '{artifacts_root_str}': {exc}",
+            file=sys.stderr,
+        )
         return 2
 
     print(f"INFO: export-root={export_root_str}")
+    print(f"INFO: chat-export-root={chat_export_root_str}")
     print(f"INFO: artifacts-root={artifacts_root_str}")
 
     # Strict phase order:
     # 0 (optional), 1, 2, 3, 4, 6, 7, 8, 9, 5 (optional hosted)
+    phase0_phase1_skipped = False
+    chat_export_missing = not chat_export_root.exists() or not chat_export_root.is_dir()
+    if chat_export_missing:
+        if args.allow_missing_chat_export:
+            phase0_phase1_skipped = True
+            print(f"INFO: skipping Phase 0 and Phase 1; missing chat export root: {chat_export_root_str}")
+        else:
+            print(f"ERROR: chat export root does not exist or is not a directory: {chat_export_root_str}", file=sys.stderr)
+            return 2
+
     if args.seal:
-        # PowerShell script for Phase 0
-        # Note: uses -File so it works consistently in CI
-        run(
-            ["pwsh", "-NoProfile", "-File", "scripts/design_record_engine/phase0_chat_seal.ps1", "-ExportRoot", export_root_str],
-            cwd=root,
-            env=env,
-            label="Phase 0 — Seal chat export",
-        )
+        if not phase0_phase1_skipped:
+            run(
+                [
+                    "python",
+                    "scripts/design_record_engine/phase0_chat_export_normalize.py",
+                    "--chat-export-root",
+                    chat_export_root_str,
+                    "--out-root",
+                    export_root_str,
+                ],
+                cwd=root,
+                env=env,
+                label="Phase 0 — Normalize chat export into chat_corpus/v1",
+            )
         if args.stop_after_phase0:
             print("DONE: Design Record Engine RUN_ALL succeeded")
             return 0
 
-    run(
-        ["python", "scripts/design_record_engine/phase1_build_evidence_nodes.py", "--export-root", export_root_str, "--out-root", artifacts_root_str],
-        cwd=root,
-        env=env,
-        label="Phase 1 — evidence_nodes.jsonl",
-    )
+    if not phase0_phase1_skipped:
+        chat_corpus_root = (export_root / "evidence" / "chat_corpus" / "v1").resolve().as_posix()
+        run(
+            [
+                "python",
+                "scripts/design_record_engine/phase1_build_evidence_nodes_from_chat_corpus.py",
+                "--chat-corpus-root",
+                chat_corpus_root,
+                "--out",
+                (artifacts_root / "evidence_nodes.jsonl").resolve().as_posix(),
+            ],
+            cwd=root,
+            env=env,
+            label="Phase 1 — evidence_nodes.jsonl from chat corpus index",
+        )
     if args.stop_after_phase1:
         print("DONE: Design Record Engine RUN_ALL succeeded")
         return 0

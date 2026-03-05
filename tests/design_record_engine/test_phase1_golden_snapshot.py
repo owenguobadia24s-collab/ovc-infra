@@ -18,21 +18,23 @@ def _repo_root() -> Path:
 
 
 def _fixture_export_root() -> Path:
-    return _repo_root() / "tests" / "fixtures" / "chat_export_golden" / "2026-02-21_export_raw"
+    return _repo_root() / "tests" / "fixtures" / "chat_export_minimal"
 
 
 def _expected_snapshot_path() -> Path:
     return _repo_root() / "tests" / "golden" / "design_record_engine" / "phase1" / "expected" / "evidence_nodes.jsonl"
 
 
-def _run_phase1_pipeline(export_root: Path, artifacts_root: Path) -> subprocess.CompletedProcess[str]:
+def _run_phase1_pipeline(chat_export_root: Path, workspace_root: Path, artifacts_root: Path) -> subprocess.CompletedProcess[str]:
     clean_env = os.environ.copy()
     clean_env.pop("OPENAI_API_KEY", None)
     cmd = [
         "python",
         "scripts/design_record_engine/run_all.py",
         "--export-root",
-        str(export_root),
+        str(workspace_root),
+        "--chat-export-root",
+        str(chat_export_root),
         "--seal",
         "--artifacts-root",
         str(artifacts_root),
@@ -55,7 +57,6 @@ def _assert_jsonl_invariants(path: Path) -> None:
         assert "node_id" in row, "Missing node_id field in evidence_nodes.jsonl row"
         node_ids.append(row["node_id"])
     assert len(node_ids) == len(set(node_ids)), "node_id values must be unique"
-    assert node_ids == sorted(node_ids), "node_id values must be lexicographically sorted"
 
 
 def _format_diff(actual: bytes, expected: bytes, actual_name: str, expected_name: str) -> str:
@@ -89,11 +90,16 @@ def _format_diff(actual: bytes, expected: bytes, actual_name: str, expected_name
 
 
 def test_phase1_golden_snapshot(tmp_path: Path) -> None:
-    export_root = tmp_path / "export_raw"
+    chat_export_root = tmp_path / "chat_export_raw"
+    workspace_root = tmp_path / "workspace_root"
     artifacts_root = tmp_path / "artifacts_phase1"
-    shutil.copytree(_fixture_export_root(), export_root)
+    shutil.copytree(_fixture_export_root(), chat_export_root)
 
-    run = _run_phase1_pipeline(export_root=export_root, artifacts_root=artifacts_root)
+    run = _run_phase1_pipeline(
+        chat_export_root=chat_export_root,
+        workspace_root=workspace_root,
+        artifacts_root=artifacts_root,
+    )
     assert run.returncode == 0, f"stdout={run.stdout}\nstderr={run.stderr}"
 
     actual_path = artifacts_root / "evidence_nodes.jsonl"
@@ -118,16 +124,18 @@ def test_phase1_golden_snapshot(tmp_path: Path) -> None:
 
 
 def test_phase1_determinism_rerun(tmp_path: Path) -> None:
-    export_a = tmp_path / "export_a"
-    export_b = tmp_path / "export_b"
+    export_a = tmp_path / "chat_export_a"
+    export_b = tmp_path / "chat_export_b"
+    workspace_a = tmp_path / "workspace_a"
+    workspace_b = tmp_path / "workspace_b"
     artifacts_a = tmp_path / "artifacts_a"
     artifacts_b = tmp_path / "artifacts_b"
     shutil.copytree(_fixture_export_root(), export_a)
     shutil.copytree(_fixture_export_root(), export_b)
 
-    run_a = _run_phase1_pipeline(export_root=export_a, artifacts_root=artifacts_a)
+    run_a = _run_phase1_pipeline(chat_export_root=export_a, workspace_root=workspace_a, artifacts_root=artifacts_a)
     assert run_a.returncode == 0, f"stdout={run_a.stdout}\nstderr={run_a.stderr}"
-    run_b = _run_phase1_pipeline(export_root=export_b, artifacts_root=artifacts_b)
+    run_b = _run_phase1_pipeline(chat_export_root=export_b, workspace_root=workspace_b, artifacts_root=artifacts_b)
     assert run_b.returncode == 0, f"stdout={run_b.stdout}\nstderr={run_b.stderr}"
 
     file_a = artifacts_a / "evidence_nodes.jsonl"

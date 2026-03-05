@@ -251,6 +251,10 @@ artifacts/path1_summary.json
 .pytest-tmp/
 .pytest-tmp2/
 
+# Chat export safety
+evidence/chat_exports/**
+!evidence/chat_corpus/**
+
 
 # VS Code workspace settings (track only this)
 .vscode/

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ovc.local/schemas/design_record_engine/chat_corpus_record_v1.schema.json",
+  "title": "Chat Corpus Record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "chat_id",
+    "chat_title",
+    "content_sha256",
+    "created_at",
+    "export_id",
+    "message_id",
+    "role",
+    "source_path",
+    "text"
+  ],
+  "properties": {
+    "chat_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "chat_title": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "content_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "created_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "export_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "message_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "assistant",
+        "system",
+        "tool",
+        "unknown",
+        "user"
+      ]
+    },
+    "source_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "text": {
+      "type": "string"
+    }
+  }
+}
