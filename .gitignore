@@ -309,3 +309,5 @@ out.err
 # Local census / genesis scratch
 ALL_TRACKED_FILES.txt
 GENESIS_LEDGER.tsv
+
+tools/_local/**
