@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 
 def run(cmd: List[str], cwd: Path, env: dict, label: str) -> None:
@@ -45,6 +45,16 @@ def main() -> int:
         help="Run Phase 0 sealing step before other phases.",
     )
     ap.add_argument(
+        "--stop-after-phase0",
+        action="store_true",
+        help="Stop after Phase 0 (valid only with --seal).",
+    )
+    ap.add_argument(
+        "--stop-after-phase1",
+        action="store_true",
+        help="Stop after Phase 1.",
+    )
+    ap.add_argument(
         "--embed",
         action="store_true",
         help="Run embedding phase (requires OPENAI_API_KEY).",
@@ -63,19 +73,45 @@ def main() -> int:
 
     root = repo_root_from_here()
 
+    if args.stop_after_phase0 and not args.seal:
+        print("ERROR: --stop-after-phase0 requires --seal", file=sys.stderr)
+        return 2
+    if args.stop_after_phase0 and args.stop_after_phase1:
+        print("ERROR: --stop-after-phase0 and --stop-after-phase1 are mutually exclusive", file=sys.stderr)
+        return 2
+
     export_root = Path(args.export_root)
     if args.use_golden:
         export_root = Path("tests/fixtures/chat_export_golden/2026-02-21_export_raw")
 
-    # Normalize to repo-relative string paths for scripts
-    export_root_str = str(export_root).replace("\\", "/")
+    if not export_root.is_absolute():
+        export_root = (root / export_root).resolve()
+    else:
+        export_root = export_root.resolve()
+
     artifacts_root = Path(args.artifacts_root)
-    artifacts_root_str = str(artifacts_root).replace("\\", "/")
+    if not artifacts_root.is_absolute():
+        artifacts_root = (root / artifacts_root).resolve()
+    else:
+        artifacts_root = artifacts_root.resolve()
+
+    export_root_str = export_root.as_posix()
+    artifacts_root_str = artifacts_root.as_posix()
 
     env = dict(os.environ)
 
-    # Ensure artifacts root exists
-    (root / artifacts_root).mkdir(parents=True, exist_ok=True)
+    if not export_root.exists() or not export_root.is_dir():
+        print(f"ERROR: export root does not exist or is not a directory: {export_root_str}", file=sys.stderr)
+        return 2
+
+    try:
+        artifacts_root.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        print(f"ERROR: failed to create artifacts root '{artifacts_root_str}': {exc}", file=sys.stderr)
+        return 2
+
+    print(f"INFO: export-root={export_root_str}")
+    print(f"INFO: artifacts-root={artifacts_root_str}")
 
     # Strict phase order:
     # 0 (optional), 1, 2, 3, 4, 6, 7, 8, 9, 5 (optional hosted)
@@ -88,6 +124,9 @@ def main() -> int:
             env=env,
             label="Phase 0 — Seal chat export",
         )
+        if args.stop_after_phase0:
+            print("DONE: Design Record Engine RUN_ALL succeeded")
+            return 0
 
     run(
         ["python", "scripts/design_record_engine/phase1_build_evidence_nodes.py", "--export-root", export_root_str, "--out-root", artifacts_root_str],
@@ -95,6 +134,9 @@ def main() -> int:
         env=env,
         label="Phase 1 — evidence_nodes.jsonl",
     )
+    if args.stop_after_phase1:
+        print("DONE: Design Record Engine RUN_ALL succeeded")
+        return 0
 
     run(
         ["python", "scripts/design_record_engine/phase2_extract_anchors.py", "--in-root", artifacts_root_str, "--out-root", artifacts_root_str],
@@ -166,7 +208,7 @@ def main() -> int:
     if args.pytest:
         run(["python", "-m", "pytest", "-q"], cwd=root, env=env, label="pytest")
 
-    print("\n=== DONE: Design Record Engine RUN_ALL succeeded ===")
+    print("DONE: Design Record Engine RUN_ALL succeeded")
     return 0
 
 
