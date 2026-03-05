@@ -1,0 +1,21 @@
+{
+  "inputs": {
+    "docs/baselines/MODULE_OWNERSHIP_RULES_v0.1.json": {
+      "bytes": 5953,
+      "sha256": "ee8db500cfb9972b27148a8a1dc2f1b078693f01aad633a9f2180d20d70dbdfe"
+    },
+    "scripts/repo_cartographer/cartographer.py": {
+      "bytes": 38046,
+      "sha256": "c083fd8a19c8afa861d70732647e30dbb383b2edfc07d1217aad06e963c0fa1d"
+    }
+  },
+  "kind": "REPO_CARTOGRAPHER_RUN_SEAL",
+  "run_fingerprint": "10b75a8ac3f26825a435cf975786aa500b913bf8c71ca167211a0dc3a2920ecc",
+  "run_id": "20260218_185402Z",
+  "target": {
+    "bytes": 1026,
+    "path": "MANIFEST.json",
+    "sha256": "31b72ecf3e8130399dfa40d4b63d919441acca02df8fa1668096453d51259c43"
+  },
+  "version": "0.1"
+}

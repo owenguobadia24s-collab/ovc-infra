@@ -1,0 +1,5 @@
+# FAILURE_REPORT
+
+code: FAIL_PROMPT_BYTES_MISSING
+details:
+- (none)

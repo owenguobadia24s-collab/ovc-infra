@@ -1,0 +1,30 @@
+{
+  "artifacts": {
+    "BORDERLANDS_PRESSURE_REPORT_v0.1.md": {
+      "bytes": 1893,
+      "sha256": "b7d7a7a813032b8e44541d72018f7e2b605358efdc7ddea38f35b29ce01da68d"
+    },
+    "MODULE_OWNERSHIP_SUMMARY_v0.1.md": {
+      "bytes": 2000,
+      "sha256": "7f62f3fa91143e0890c7a4704b9e17d2141365fe77b18143f58ff8939aeccce3"
+    },
+    "MOVE_PLAN_PROPOSED_v0.1.json": {
+      "bytes": 56,
+      "sha256": "afcd20629415bf9fec07b55054766548de82eb56c9b1b8c5be0ca839d1090652"
+    },
+    "REPO_FILE_CLASSIFICATION_v0.1.jsonl": {
+      "bytes": 359072,
+      "sha256": "ea1f1dd38916076ff398d2008d7876f800689f58446f566d159d34bfe54d9ef2"
+    },
+    "REPO_FILE_INDEX_v0.1.jsonl": {
+      "bytes": 179031,
+      "sha256": "a858099588b963f6e6ea6f0b1286091b947d767bf40b302738a29daada78fb12"
+    },
+    "UNTRACKED_VISIBLE_REPORT_v0.1.md": {
+      "bytes": 164,
+      "sha256": "b61ff1fce586228816b3260ede990c8c2acd15978de2ca7c145a92b982f0c821"
+    }
+  },
+  "run_id": "20260218_185402Z",
+  "schema_version": "REPO_CARTOGRAPHER_MANIFEST_v0.1"
+}
