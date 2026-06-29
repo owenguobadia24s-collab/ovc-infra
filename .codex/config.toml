@@ -1,4 +1,4 @@
-model = "gpt-5.2"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 
 # Behavior profile
