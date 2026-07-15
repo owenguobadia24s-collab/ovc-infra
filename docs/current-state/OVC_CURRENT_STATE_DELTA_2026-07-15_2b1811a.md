@@ -69,6 +69,13 @@ workflow_dispatch:
 
 R0 containment removes the `schedule` trigger and preserves `workflow_dispatch` so controlled manual diagnosis remains possible.
 
+Remote verification after push:
+
+```text
+remote main commit containing R0 containment: 25a90bb
+raw GitHub .github/workflows/ovc_option_c_schedule.yml: workflow_dispatch present; schedule/cron absent
+```
+
 ### Notion Sync
 
 Before R0, `.github/workflows/notion_sync.yml` had:
@@ -80,6 +87,13 @@ schedule:
 ```
 
 R0 containment removes the `schedule` trigger and preserves `workflow_dispatch` so controlled manual diagnosis remains possible.
+
+Remote verification after push:
+
+```text
+remote main commit containing R0 containment: 25a90bb
+raw GitHub .github/workflows/notion_sync.yml: workflow_dispatch present; schedule/cron absent
+```
 
 ### Paths Not Automatically Paused
 
@@ -317,7 +331,6 @@ The following claims remain unverified live in this R0 pass:
 
 - live Cloudflare Worker deployment and secret names
 - live repository and Cloudflare configured secret names
-- confirmation that the containment commit has reached GitHub and disabled remote cron triggers
 - direct migration/application state equality versus repository SQL hashes
 
 ## 10. R0 Gate Result
@@ -331,7 +344,7 @@ Rationale:
 - Live Neon object inventory, view fingerprints, counts, and latest timestamps were collected through the Neon connector.
 - Live GitHub workflow evidence is partial: latest relevant runs and artifact references were collected through the public GitHub API, but repository secret names could not be listed.
 - Live Cloudflare evidence could not be collected because `wrangler`, Cloudflare credentials, and a Cloudflare connector are unavailable locally.
-- Remote GitHub schedule containment is not yet verified because these working-tree changes have not been committed and pushed.
+- Remote GitHub schedule containment is verified: raw GitHub workflow files on `main` after push contain `workflow_dispatch` and no `schedule`/`cron` trigger for Option C or Notion Sync.
 - R0 requires live deployed objects and active automation to be known before `PASS`.
 
-R0 should not proceed to R1 until an operator provides live Cloudflare access, repository/Cloudflare secret-name evidence, and confirmation that the containment commit has reached GitHub.
+R0 should not proceed to R1 until an operator provides live Cloudflare access and repository/Cloudflare secret-name evidence.
