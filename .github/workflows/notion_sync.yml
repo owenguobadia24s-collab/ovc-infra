@@ -2,8 +2,6 @@ name: notion-sync
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "17 */2 * * *"
 
 jobs:
   sync:

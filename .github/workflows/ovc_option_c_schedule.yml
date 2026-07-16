@@ -1,8 +1,6 @@
 name: OVC Option C Schedule
 
 on:
-  schedule:
-    - cron: "15 6 * * *"
   workflow_dispatch:
     inputs:
       strict:
