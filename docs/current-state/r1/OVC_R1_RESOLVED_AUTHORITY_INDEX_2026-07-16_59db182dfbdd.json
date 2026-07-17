@@ -1,0 +1,1489 @@
+{
+  "index_version": "r1.1",
+  "status": "PASS_WITH_CARRIED_UNRESOLVED_ITEMS",
+  "scope": "ABCD_QA_OPERATIONS_AND_DISCOVERED_CONTROL_SURFACES",
+  "object_count": 41,
+  "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+  "generated_date": "2026-07-16",
+  "resolution_policy": {
+    "active_operations_catalog_base": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+    "active_operations_catalog_extension": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+    "proposed_operations_catalog": "docs/phase_2_2/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+    "retention_authority": "docs/governance/contracts/phase_2_3/PHASE_2_3_CLOSING_DECLARATION.md",
+    "unresolved_rule": "No draft artifact is promoted by this index. Conflicting or unratified authority is recorded as CONFLICTING or UNRESOLVED.",
+    "supersession_rule": "A proposed or conditionally approved replacement does not change current authority status until all required replacement, ratification, and deprecation evidence exists."
+  },
+  "objects": [
+    {
+      "object_id": "OP-A01",
+      "architectural_layer": "A",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "UNVERIFIED_DEPLOYMENT",
+      "implementation_paths": [
+        "infra/ovc-webhook/src/index.ts"
+      ],
+      "runtime_object": [
+        "ovc.ovc_blocks_v01_1_min",
+        "ovc.ovc_run_reports_v01",
+        "ovc-raw-events"
+      ],
+      "runtime_verification": "NEON_TARGET_VERIFIED_R0; CLOUDFLARE_DEPLOYMENT_UNVERIFIED",
+      "qa_paths": [
+        "infra/ovc-webhook/test/index.spec.ts",
+        "tests/test_min_contract_validation.py"
+      ],
+      "supporting_artifacts": [
+        "contracts/export_contract_v0.1.1_min.json",
+        "docs/architecture/OVC_DATA_FLOW_CANON_v0.2.md",
+        "docs/contracts/option_a1_bar_ingest_contract_v1.md",
+        "docs/contracts/option_a_ingest_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "Live worker version, bindings, routes, secrets, and R2 writes were not verified in R0.",
+        "The Worker inserts ended_at and meta into ovc.ovc_run_reports_v01, while repository DDL and the live table use finished_at and have no meta column.",
+        "Option A semantic columns remain physically present and writable as tolerated legacy, but are non-authoritative and forbidden as B, C, or D inputs."
+      ],
+      "resolution_basis": "The frozen v0.1 operation catalog and ACTIVE A1 contract define the operation. Data-flow canon v0.2 tolerates physical semantic legacy while denying downstream authority; run-report implementation and deployment state still conflict with the verified table.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "CONDITIONAL_ON_EXISTING_A1_AUTHORITY_AND_LATER_RUN_REPORT_DEPLOYMENT_REPAIR; OPTION_A_SEMANTIC_LEGACY_DENIED_TO_B_C_D",
+      "proposed_supersession_id": [
+        "PS-01"
+      ],
+      "historical_retention": "EXPORT_CONTRACT_V0_1_RETAINED_AS_SUPPORTING_LEGACY_PENDING_COMPLIANT_DEPRECATION_RECORD"
+    },
+    {
+      "object_id": "OP-A02",
+      "architectural_layer": "A",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "src/backfill_oanda_2h_checkpointed.py"
+      ],
+      "runtime_object": [
+        "ovc.ovc_blocks_v01_1_min",
+        ".github/workflows/backfill.yml"
+      ],
+      "runtime_verification": "NEON_TARGET_AND_GITHUB_WORKFLOW_VERIFIED_R0",
+      "qa_paths": [
+        "src/validate_day.py",
+        "src/validate_range.py",
+        ".github/workflows/backfill_then_validate.yml"
+      ],
+      "supporting_artifacts": [
+        "contracts/run_artifact_spec_v0.1.json",
+        "docs/contracts/option_a_ingest_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The v0.1 catalog binds the checkpointed implementation and the observed workflow targets the verified canonical table.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-A03",
+      "architectural_layer": "A",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE_MANUAL",
+      "implementation_paths": [
+        "src/backfill_oanda_m15_checkpointed.py",
+        "sql/path1/db_patches/patch_m15_raw_20260122.sql"
+      ],
+      "runtime_object": [
+        "ovc.ovc_candles_m15_raw",
+        ".github/workflows/backfill_m15.yml"
+      ],
+      "runtime_verification": "NEON_TARGET_VERIFIED_R0; WORKFLOW_PRESENT",
+      "qa_paths": [
+        "tests/test_evidence_pack_manifest.py",
+        "tests/test_pack_rebuild_equivalence.py"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/option_a2_event_ingest_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The v0.1 catalog and ACTIVE A2 contract agree on the M15 ingest target and checkpointed implementation.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-A04",
+      "architectural_layer": "A",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "DEGRADED",
+      "implementation_paths": [
+        "sql/00_schema.sql",
+        "sql/01_tables_min.sql",
+        "sql/02_tables_run_reports.sql",
+        "sql/03_tables_outcomes.sql",
+        "sql/path1/db_patches/patch_m15_raw_20260122.sql"
+      ],
+      "runtime_object": [
+        "ovc.ovc_blocks_v01_1_min",
+        "ovc.ovc_candles_m15_raw",
+        "ovc.ovc_run_reports_v01",
+        "ovc.ovc_outcomes_v01"
+      ],
+      "runtime_verification": "CORE_NEON_OBJECTS_VERIFIED_R0; MIGRATION_LEDGER_UNVERIFIED",
+      "qa_paths": [
+        "scripts/ci/verify_schema_objects.py",
+        "sql/90_verify_gate2.sql",
+        ".github/workflows/ci_schema_check.yml"
+      ],
+      "supporting_artifacts": [
+        "schema/applied_migrations.json",
+        "schema/required_objects.txt",
+        "docs/governance/GOVERNANCE_RULES_v0.1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "All migration ledger entries are UNVERIFIED.",
+        "The ledger references missing sql/derived_v0_1.sql.",
+        "The required-object list retains legacy derived.derived_runs."
+      ],
+      "resolution_basis": "The DDL operation remains catalogued, but migration and required-object evidence do not establish a coherent deployed schema authority.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-B01",
+      "architectural_layer": "B",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "IMPLEMENTED_DEPLOYMENT_UNVERIFIED",
+      "implementation_paths": [
+        "src/derived/compute_c1_v0_1.py"
+      ],
+      "runtime_object": [
+        "derived.ovc_c1_features_v0_1",
+        "derived.derived_runs_v0_1"
+      ],
+      "runtime_verification": "UNVERIFIED_DEPLOYMENT; MATERIALIZED_TABLES_NOT_SAMPLED_R0",
+      "qa_paths": [
+        "tests/test_derived_features.py",
+        "tests/test_validate_derived.py"
+      ],
+      "supporting_artifacts": [
+        "sql/02_derived_c1_c2_tables_v0_1.sql",
+        "sql/derived/v_ovc_c1_features_v0_1.sql",
+        "docs/contracts/option_b_derived_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The catalog and ACTIVE Option B contract bind the deterministic C1 implementation; materialized deployment was not sampled.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-B02",
+      "architectural_layer": "B",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "IMPLEMENTED_DEPLOYMENT_UNVERIFIED",
+      "implementation_paths": [
+        "src/derived/compute_c2_v0_1.py"
+      ],
+      "runtime_object": [
+        "derived.ovc_c2_features_v0_1",
+        "derived.derived_runs_v0_1"
+      ],
+      "runtime_verification": "UNVERIFIED_DEPLOYMENT; MATERIALIZED_TABLES_NOT_SAMPLED_R0",
+      "qa_paths": [
+        "tests/test_derived_features.py",
+        "tests/test_validate_derived.py"
+      ],
+      "supporting_artifacts": [
+        "sql/02_derived_c1_c2_tables_v0_1.sql",
+        "sql/derived/v_ovc_c2_features_v0_1.sql",
+        "docs/contracts/option_b_derived_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The catalog and ACTIVE Option B contract bind the deterministic C2 implementation; materialized deployment was not sampled.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-B03",
+      "architectural_layer": "B",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "sql/derived/v_ovc_c3_features_v0_1.sql"
+      ],
+      "runtime_object": [
+        "derived.v_ovc_c3_features_v0_1"
+      ],
+      "runtime_verification": "VERIFIED_R0_NEON_59875_ROWS",
+      "qa_paths": [
+        "tests/test_derived_features.py",
+        ".github/workflows/ci_schema_check.yml"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/option_b_derived_contract_v1.md",
+        "docs/contracts/c3_semantic_contract_v0_1.md",
+        "docs/contracts/c_feature_registry_freeze_v0_1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The frozen catalog, Option B contract, and C feature freeze agree with the live C3 view.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-B04",
+      "architectural_layer": "B",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "DEGRADED",
+      "implementation_paths": [
+        "src/derived/compute_c3_regime_trend_v0_1.py",
+        "sql/05_c3_regime_trend_v0_1.sql"
+      ],
+      "runtime_object": [
+        "derived.ovc_c3_regime_trend_v0_1"
+      ],
+      "runtime_verification": "UNVERIFIED_DEPLOYMENT; NOT_VERIFIED_R0",
+      "qa_paths": [
+        "tests/test_c3_regime_trend.py",
+        ".github/workflows/backfill_then_validate.yml"
+      ],
+      "supporting_artifacts": [
+        "sql/04_threshold_registry_v0_1.sql",
+        "docs/contracts/c3_semantic_contract_v0_1.md",
+        "docs/contracts/option_b_derived_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The workflow invocation omits required --threshold-pack and --scope arguments."
+      ],
+      "resolution_basis": "The operation and implementation are governed, but the workflow does not satisfy the bound CLI contract.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-B05",
+      "architectural_layer": "B",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "sql/derived/v_ovc_c1_features_v0_1.sql",
+        "sql/derived/v_ovc_c2_features_v0_1.sql",
+        "sql/derived/v_ovc_c3_features_v0_1.sql"
+      ],
+      "runtime_object": [
+        "derived.v_ovc_c1_features_v0_1",
+        "derived.v_ovc_c2_features_v0_1",
+        "derived.v_ovc_c3_features_v0_1"
+      ],
+      "runtime_verification": "VERIFIED_R0_NEON_59875_ROWS_EACH",
+      "qa_paths": [
+        "scripts/ci/verify_schema_objects.py",
+        "sql/90_verify_gate2.sql"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/option_b_derived_contract_v1.md",
+        "docs/contracts/c_feature_registry_freeze_v0_1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The frozen C interface registry and live Neon views establish the split C1/C2/C3 authority.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "SPLIT_C1_C2_C3_INTERFACES_ALLOWED; LEGACY_COMBINED_CONTRACT_NOT_NEW_AUTHORITY",
+      "proposed_supersession_id": [
+        "PS-02"
+      ],
+      "historical_retention": "COMBINED_DERIVED_FEATURE_CONTRACT_RETAINED_AS_SUPPORTING_LEGACY"
+    },
+    {
+      "object_id": "OP-B06",
+      "architectural_layer": "B",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "UNVERIFIED_DEPLOYMENT",
+      "implementation_paths": [
+        "sql/02_derived_c1_c2_tables_v0_1.sql",
+        "sql/05_c3_regime_trend_v0_1.sql"
+      ],
+      "runtime_object": [
+        "derived.ovc_c1_features_v0_1",
+        "derived.ovc_c2_features_v0_1",
+        "derived.ovc_c3_regime_trend_v0_1",
+        "derived.derived_runs_v0_1"
+      ],
+      "runtime_verification": "UNVERIFIED_DEPLOYMENT; NOT_SAMPLED_R0",
+      "qa_paths": [
+        "scripts/ci/verify_schema_objects.py",
+        "tests/test_validate_derived.py"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/option_b_derived_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The operation is defined by the frozen catalog and ACTIVE Option B contract; live table deployment remains unverified.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-B07",
+      "architectural_layer": "B",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "sql/04_threshold_registry_v0_1.sql",
+        "sql/06_state_plane_threshold_pack_v0_2.sql",
+        "src/config/threshold_registry_v0_1.py",
+        "src/config/threshold_registry_cli.py"
+      ],
+      "runtime_object": [
+        "ovc_cfg.threshold_pack",
+        "ovc_cfg.threshold_pack_active"
+      ],
+      "runtime_verification": "VERIFIED_R0_NEON_2_ROWS_EACH",
+      "qa_paths": [
+        "tests/test_threshold_registry.py",
+        "tests/test_c3_regime_trend.py"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/c3_semantic_contract_v0_1.md",
+        "docs/phase_2_2/THRESHOLD_REGISTRY_ASSESSMENT_v0_1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The catalog and frozen semantic contract match the verified live threshold registry.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-B08",
+      "architectural_layer": "B",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "src/validate/validate_derived_range_v0_1.py"
+      ],
+      "runtime_object": [],
+      "runtime_verification": "REPOSITORY_AND_TEST_COVERAGE_VERIFIED",
+      "qa_paths": [
+        "tests/test_validate_derived.py",
+        ".github/workflows/backfill_then_validate.yml"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/option_b_derived_contract_v1.md",
+        "contracts/run_artifact_spec_v0.1.json",
+        "docs/phase_2_2/ACTIVE_REGISTRY_POINTERS_v0_1.json"
+      ],
+      "superseded_artifacts": [
+        "artifacts/derived_validation/LATEST.txt"
+      ],
+      "conflicts": [],
+      "resolution_basis": "The validation implementation is bound by the catalog and covered by focused tests.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "ACTIVE_POINTER_GOVERNANCE_REQUIRED_FOR_CURRENT_SELECTION",
+      "proposed_supersession_id": [
+        "PS-12"
+      ],
+      "historical_retention": "LATEST_TXT_RETAINED_AS_BACKWARD_COMPATIBLE_HISTORICAL_POINTER"
+    },
+    {
+      "object_id": "OP-C01",
+      "architectural_layer": "C",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "RATIFICATION_PENDING_REQUIRED_NEW_TARGET",
+      "implementation_paths": [
+        "sql/derived/v_ovc_c_outcomes_v0_1.sql"
+      ],
+      "runtime_object": [
+        "derived.v_ovc_c_outcomes_v0_1"
+      ],
+      "runtime_verification": "VERIFIED_R0_NEON_59875_ROWS",
+      "qa_paths": [
+        "sql/option_c_spotchecks.sql",
+        "tests/test_contract_equivalence.py"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/option_c_outcomes_contract_v1.md",
+        "docs/specs/OPTION_C_OUTCOMES_v0.1.md",
+        "docs/contracts/outcomes_definitions_v0.1.md",
+        "docs/architecture/OVC_DATA_FLOW_CANON_v0.2.md",
+        "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The contract that selects the B-backed view remains DRAFT.",
+        "The legacy direct-A outcomes view remains live and is still consumed."
+      ],
+      "resolution_basis": "Operator approved the B-backed view as the required target for all new Option C and downstream outcome projection, but the governing v1 contract remains DRAFT and must be ratified before full AUTHORITATIVE classification.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [
+        "PS-03",
+        "PS-05",
+        "PS-06",
+        "PS-09"
+      ],
+      "historical_retention": "LEGACY_OPTION_C_BOUNDARY_SQL_AND_VIEW_RETAINED_FOR_REPLAY_AND_MIGRATION_VERIFICATION",
+      "new_execution_authorization": "DERIVED_V_OVC_C_OUTCOMES_V0_1_IS_REQUIRED_TARGET; FULL_AUTHORITY_PENDING_V1_CONTRACT_RATIFICATION"
+    },
+    {
+      "object_id": "OP-C02",
+      "architectural_layer": "C",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "DEGRADED",
+      "implementation_paths": [
+        "scripts/run/run_option_c_with_artifact.sh",
+        "scripts/run/run_option_c_wrapper.py",
+        "scripts/run/run_option_c.ps1",
+        "scripts/run/run_option_c.sh",
+        "sql/option_c_v0_1.sql",
+        "sql/option_c_run_report.sql"
+      ],
+      "runtime_object": [
+        ".github/workflows/ovc_option_c_schedule.yml",
+        "derived.v_ovc_c_outcomes_v0_1",
+        "derived.ovc_outcomes_v0_1"
+      ],
+      "runtime_verification": "WORKFLOW_FAILURE_OBSERVED_R0; BOTH_OUTCOME_SURFACES_LIVE",
+      "qa_paths": [
+        "sql/option_c_spotchecks.sql",
+        "contracts/eval_contract_v0.1.json"
+      ],
+      "supporting_artifacts": [
+        "docs/specs/OPTION_C_IMPLEMENTATION_CONTRACT_v0.1.md",
+        "docs/contracts/option_c_outcomes_contract_v1.md",
+        "docs/contracts/option_d_ops_boundary.md",
+        "docs/architecture/OVC_DATA_FLOW_CANON_v0.2.md",
+        "docs/workflows/WORKFLOW_CATALOG_v0_2.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The runner applies sql/option_c_v0_1.sql and therefore uses the legacy direct-A outcomes surface.",
+        "The evaluation contract requires direct canonical-table input while the intended Option C contract requires B-backed outcomes.",
+        "R0 schedule containment is local-only and not effective on remote main."
+      ],
+      "resolution_basis": "No single artifact currently aligns the runner, evaluation contract, intended outcomes contract, and deployed workflow.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "NOT_AUTHORIZED_FOR_NEW_PRODUCTION_EXECUTION_UNTIL_V1_RATIFICATION_AND_RUNNER_CONFORMANCE",
+      "proposed_supersession_id": [
+        "PS-04",
+        "PS-05",
+        "PS-06",
+        "PS-09"
+      ],
+      "historical_retention": "LEGACY_RUNNER_CONTRACT_AND_SQL_RETAINED_FOR_HISTORICAL_REPLAY_ONLY"
+    },
+    {
+      "object_id": "OP-D01",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "scripts/path1/build_evidence_pack_v0_2.py"
+      ],
+      "runtime_object": [
+        "derived.v_path1_evidence_dis_v1_1",
+        "reports/path1/evidence"
+      ],
+      "runtime_verification": "NEON_SOURCE_VERIFIED_R0; REPOSITORY_OUTPUTS_PRESENT",
+      "qa_paths": [
+        "tests/test_evidence_pack_manifest.py",
+        "tests/test_pack_rebuild_equivalence.py"
+      ],
+      "supporting_artifacts": [
+        "docs/evidence_pack/EVIDENCE_PACK_v0_2.md",
+        "docs/contracts/option_d_evidence_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The Option D evidence contract remains DRAFT."
+      ],
+      "resolution_basis": "The frozen operation catalog binds the implementation; the draft evidence contract is supporting rather than promoted.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-D02",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "scripts/path1/run_evidence_range.py"
+      ],
+      "runtime_object": [
+        ".github/workflows/path1_evidence.yml",
+        "reports/path1/evidence"
+      ],
+      "runtime_verification": "RECENT_SUCCESS_OBSERVED_R0",
+      "qa_paths": [
+        "scripts/path1/validate_post_run.py",
+        "tests/test_evidence_pack_manifest.py"
+      ],
+      "supporting_artifacts": [
+        "docs/history/path1/PATH1_EVIDENCE_PROTOCOL_v1_0.md",
+        "docs/contracts/option_d_evidence_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The v0.1 catalog binds the range runner and R0 observed a successful workflow execution.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-D03",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "HISTORICAL_MANUAL_RECOVERY_ONLY_WITH_NONCONFORMING_SCHEDULE_PRESENT",
+      "implementation_paths": [
+        "scripts/path1/run_evidence_queue.py"
+      ],
+      "runtime_object": [
+        ".github/workflows/path1_evidence_queue.yml",
+        ".github/workflows/main.yml",
+        "reports/path1/evidence/RUN_QUEUE.csv",
+        "reports/path1/evidence/INDEX.md"
+      ],
+      "runtime_verification": "WORKFLOWS_PRESENT; DEPLOYED_SCHEDULE_OBSERVED_R0",
+      "qa_paths": [
+        "scripts/path1/validate_post_run.py"
+      ],
+      "supporting_artifacts": [
+        "docs/workflows/WORKFLOW_OPERATING_LOOP_v0_1.md",
+        "docs/contracts/option_d_evidence_contract_v1.md",
+        "docs/architecture/OVC_DATA_FLOW_CANON_v0.2.md",
+        "docs/workflows/WORKFLOW_CATALOG_v0_2.md",
+        "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The operator rejected queue-based Path1 as canonical, while .github/workflows/main.yml still schedules queue execution and both queue workflows can mutate repository state."
+      ],
+      "resolution_basis": "The range-based loop is canonical. Queue operation is retained only for historical analysis or a future controlled manual recovery contract; current scheduled use is nonconforming.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "QUEUE_IMPLEMENTATION_WORKFLOWS_AND_FILES_RETAINED_FOR_HISTORICAL_ANALYSIS_OR_CONTROLLED_RECOVERY",
+      "new_execution_authorization": "RECOVERY_ONLY; NOT_SCHEDULED_PRODUCTION; NO_CANONICAL_QUEUE_MUTATION"
+    },
+    {
+      "object_id": "OP-D04",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "scripts/path1/validate_post_run.py"
+      ],
+      "runtime_object": [
+        ".github/workflows/path1_evidence_queue.yml"
+      ],
+      "runtime_verification": "REPOSITORY_AND_WORKFLOW_BINDING_VERIFIED",
+      "qa_paths": [
+        "tests/test_path1_replay_structural.py"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/option_d_evidence_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The catalog and queue workflow consistently bind post-run structural validation.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-D05",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "DEGRADED",
+      "implementation_paths": [
+        "scripts/path1_replay/run_replay_verification.py",
+        "scripts/path1_replay/lib.py"
+      ],
+      "runtime_object": [
+        ".github/workflows/path1_replay_verify.yml"
+      ],
+      "runtime_verification": "LATEST_OBSERVED_RUN_FAILED_R0",
+      "qa_paths": [
+        "tests/test_path1_replay_structural.py"
+      ],
+      "supporting_artifacts": [
+        "scripts/path1_replay/README.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The latest observed scheduled replay verification failed."
+      ],
+      "resolution_basis": "Authority is clear, but the observed runtime health is degraded.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-D06",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "MANUAL_ONLY",
+      "implementation_paths": [
+        "scripts/path1_seal/run_seal_manifests.py",
+        "scripts/path1_seal/lib.py"
+      ],
+      "runtime_object": [
+        "reports/path1/evidence"
+      ],
+      "runtime_verification": "REPOSITORY_ONLY",
+      "qa_paths": [
+        "tests/test_evidence_pack_manifest.py"
+      ],
+      "supporting_artifacts": [
+        "docs/governance/contracts/phase_2_3/HEALTH_CONTRACTS_v0_1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The operation is catalogued and implemented as a manual append-only sealing action.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-D07",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "EXECUTION_UNVERIFIED",
+      "implementation_paths": [
+        "scripts/path1/run_state_plane.py",
+        "sql/derived/v_ovc_state_plane_v0_2.sql",
+        "sql/derived/v_ovc_state_plane_daypath_v0_2.sql"
+      ],
+      "runtime_object": [
+        "derived.v_ovc_state_plane_v0_2"
+      ],
+      "runtime_verification": "VIEW_EXISTS; ROWS_NOT_SAMPLED_R0",
+      "qa_paths": [
+        "tests/test_pack_rebuild_equivalence.py"
+      ],
+      "supporting_artifacts": [
+        "docs/state_plane/STATE_PLANE_v0_2.md",
+        "docs/state_plane/RUN_STATE_PLANE.md",
+        "sql/06_state_plane_threshold_pack_v0_2.sql"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The catalog and state-plane specification bind the implementation; current execution output was not verified.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-D08",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "scripts/path1/run_trajectory_families.py",
+        "trajectory_families/__init__.py",
+        "trajectory_families/fingerprint.py",
+        "trajectory_families/features.py",
+        "trajectory_families/distance.py",
+        "trajectory_families/clustering.py",
+        "trajectory_families/naming.py",
+        "trajectory_families/gallery.py",
+        "trajectory_families/schema.py",
+        "trajectory_families/params_v0_1.json"
+      ],
+      "runtime_object": [
+        "reports/path1/trajectory_families/v0.1/fingerprints/index.csv"
+      ],
+      "runtime_verification": "REPOSITORY_OUTPUTS_PRESENT",
+      "qa_paths": [
+        "tests/test_fingerprint.py",
+        "tests/test_fingerprint_determinism.py"
+      ],
+      "supporting_artifacts": [
+        "docs/specs/TRAJECTORY_FAMILIES_v0_1_SPEC.md",
+        "tests/fixtures/golden_fingerprint_v0_1.json"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The catalog, specification, implementation, tests, and committed fingerprint index form a coherent authority chain.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-D09",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "scripts/path1/overlays_v0_3.py"
+      ],
+      "runtime_object": [
+        "reports/path1/evidence"
+      ],
+      "runtime_verification": "REPOSITORY_AND_TEST_COVERAGE_VERIFIED",
+      "qa_paths": [
+        "tests/test_overlays_v0_3_determinism.py"
+      ],
+      "supporting_artifacts": [
+        "docs/OVERLAY_V0_3_HARDENING_SUMMARY.md",
+        "CHANGELOG_overlays_v0_3.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The frozen catalog binds the deterministic overlay implementation and its focused test.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-D10",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "SUPPORTING",
+      "lifecycle_status": "HISTORICAL_RECOVERY_ONLY",
+      "implementation_paths": [
+        "scripts/path1/generate_queue_resolved.py"
+      ],
+      "runtime_object": [
+        "reports/path1/evidence/RUN_QUEUE_RESOLVED.csv"
+      ],
+      "runtime_verification": "REPOSITORY_OUTPUT_PRESENT",
+      "qa_paths": [
+        "scripts/path1/validate_post_run.py"
+      ],
+      "supporting_artifacts": [
+        "reports/path1/evidence/RUN_QUEUE.csv",
+        "reports/path1/evidence/INDEX.md",
+        "docs/architecture/OVC_DATA_FLOW_CANON_v0.2.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The output remains a non-authoritative derivation. Following the operator ruling, queue reconciliation is supporting historical/recovery tooling and not a canonical production operation.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "DERIVED_QUEUE_RECONCILIATION_RETAINED_FOR_HISTORICAL_ANALYSIS_OR_CONTROLLED_RECOVERY",
+      "new_execution_authorization": "RECOVERY_ONLY; NOT_CANONICAL_PRODUCTION"
+    },
+    {
+      "object_id": "OP-D11",
+      "architectural_layer": "D",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "DEGRADED",
+      "implementation_paths": [
+        "scripts/export/notion_sync.py",
+        "sql/04_ops_notion_sync.sql"
+      ],
+      "runtime_object": [
+        ".github/workflows/notion_sync.yml",
+        "ops.notion_sync_state"
+      ],
+      "runtime_verification": "WORKFLOW_FAILURE_OBSERVED_R0; UNVERIFIED_DEPLOYMENT_FOR_EXTERNAL_PROJECTION",
+      "qa_paths": [
+        ".github/workflows/ci_workflow_sanity.yml"
+      ],
+      "supporting_artifacts": [
+        "docs/operations/WORKFLOW_STATUS.md",
+        "docs/workflows/WORKFLOW_CATALOG_v0_1.md",
+        "docs/workflows/WORKFLOW_CATALOG_v0_2.md",
+        "docs/architecture/OVC_DATA_FLOW_CANON_v0.2.md",
+        "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The workflow invokes missing scripts/notion_sync.py instead of scripts/export/notion_sync.py.",
+        "The implementation reads the legacy direct-A outcomes view.",
+        "The catalog records NOTIOM_TOKEN while the workflow and implementation relationship is not coherently governed.",
+        "R0 schedule containment is local-only and not effective on remote main."
+      ],
+      "resolution_basis": "The intended implementation is identifiable, but workflow path, outcomes source, external deployment, and schedule authority remain inconsistent.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "NOT_AUTHORIZED_FOR_NEW_PRODUCTION_EXECUTION_UNTIL_REAL_SCRIPT_PATH_B_BACKED_OUTCOMES_AND_EXTERNAL_SCHEMA_ARE_VERIFIED",
+      "proposed_supersession_id": [
+        "PS-03",
+        "PS-04",
+        "PS-05",
+        "PS-06",
+        "PS-09"
+      ],
+      "historical_retention": "CURRENT_NOTION_IMPLEMENTATION_AND_PRIOR_PROJECTION_CLAIMS_RETAINED_AS_CONFLICT_EVIDENCE"
+    },
+    {
+      "object_id": "OP-QA01",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "src/validate_day.py",
+        "src/validate_range.py"
+      ],
+      "runtime_object": [
+        "ovc_qa.validation_run",
+        "ovc_qa.ohlc_mismatch"
+      ],
+      "runtime_verification": "REPOSITORY_AND_BACKFILL_VALIDATION_WORKFLOW_PRESENT",
+      "qa_paths": [
+        "sql/qa_schema.sql",
+        "sql/qa_validation_pack_core.sql",
+        "sql/qa_validation_pack_derived.sql"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/qa_validation_contract_v1.md",
+        "docs/contracts/tradingview_reference_contract_v0_1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The broader QA validation contract remains DRAFT, but the operation is retained by the frozen catalog."
+      ],
+      "resolution_basis": "The catalog binds the day/range validators and their QA schema surfaces.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-QA02",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE",
+      "implementation_paths": [
+        "tests/test_min_contract_validation.py",
+        "tests/test_contract_equivalence.py",
+        "tests/test_derived_features.py",
+        "tests/test_validate_derived.py",
+        "tests/test_threshold_registry.py",
+        "tests/test_path1_replay_structural.py",
+        "tests/test_fingerprint.py",
+        "tests/test_fingerprint_determinism.py",
+        "tests/test_c3_regime_trend.py",
+        "tests/test_overlays_v0_3_determinism.py",
+        "tests/test_evidence_pack_manifest.py",
+        "tests/test_pack_rebuild_equivalence.py",
+        "tests/test_dst_audit.py"
+      ],
+      "runtime_object": [
+        ".github/workflows/ci_pytest.yml"
+      ],
+      "runtime_verification": "WORKFLOW_PRESENT",
+      "qa_paths": [
+        "pytest.ini"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/qa_validation_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The frozen catalog explicitly binds the listed test suite and CI workflow.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-QA03",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "DEGRADED",
+      "implementation_paths": [
+        "scripts/ci/verify_schema_objects.py",
+        "sql/90_verify_gate2.sql"
+      ],
+      "runtime_object": [
+        ".github/workflows/ci_schema_check.yml"
+      ],
+      "runtime_verification": "WORKFLOW_PRESENT; MIGRATION_EVIDENCE_UNVERIFIED",
+      "qa_paths": [
+        "schema/required_objects.txt",
+        "schema/applied_migrations.json"
+      ],
+      "supporting_artifacts": [
+        "docs/phase_2_2/schemas/REGISTRY_migration_ledger_v0_1.schema.json"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "Schema CI validates migration-ledger JSON syntax but not the existence or deployment of each referenced migration.",
+        "The required-object list retains legacy derived.derived_runs.",
+        "The migration ledger references missing sql/derived_v0_1.sql."
+      ],
+      "resolution_basis": "The operation is catalogued, but its implementation does not establish the claimed migration and object authority.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-QA04",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "DEGRADED",
+      "implementation_paths": [
+        ".github/workflows/ci_workflow_sanity.yml"
+      ],
+      "runtime_object": [
+        ".github/workflows/ci_workflow_sanity.yml"
+      ],
+      "runtime_verification": "WORKFLOW_PRESENT",
+      "qa_paths": [
+        ".github/workflows/notion_sync.yml",
+        ".github/workflows/ovc_option_c_schedule.yml"
+      ],
+      "supporting_artifacts": [
+        "docs/workflows/WORKFLOW_CATALOG_v0_1.md",
+        "docs/workflows/WORKFLOW_CATALOG_v0_2.md",
+        "docs/workflows/WORKFLOW_OPERATING_LOOP_v0_1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The current workflow sanity check has not prevented the missing Notion script reference or broader catalog-versus-workflow drift."
+      ],
+      "resolution_basis": "The operation is authoritative as a catalogued control, but observed workflow defects show incomplete enforcement.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "QA_GATE_REMAINS_PRESENT; CURRENT_INVENTORY_CLAIMS_GOVERNED_BY_WORKFLOW_CATALOG_V0_2",
+      "proposed_supersession_id": [
+        "PS-08"
+      ],
+      "historical_retention": "WORKFLOW_CATALOG_V0_1_RETAINED_AS_HISTORICAL_INVENTORY"
+    },
+    {
+      "object_id": "OP-QA05",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "MANUAL_ONLY",
+      "implementation_paths": [
+        ".codex/CHECKS/coverage_audit.py",
+        ".codex/CHECKS/run_audit_pack.ps1",
+        ".codex/CHECKS/rg_index.ps1",
+        ".codex/CHECKS/snapshot_tree.ps1"
+      ],
+      "runtime_object": [
+        ".codex/RUNS"
+      ],
+      "runtime_verification": "HISTORICAL_OUTPUTS_PRESENT",
+      "qa_paths": [
+        ".codex/PROMPTS/PASS_1_READONLY_GRAPH_AUDIT.md"
+      ],
+      "supporting_artifacts": [
+        "docs/governance/PHASE_2_1_CLOSURE_DECLARATION.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [],
+      "resolution_basis": "The operation is catalogued as read-only and historical audit outputs exist.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-QA06",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.1.md",
+      "authority_status": "CONFLICTING",
+      "lifecycle_status": "DEGRADED",
+      "implementation_paths": [
+        "sql/qa_validation_pack_core.sql",
+        "sql/qa_validation_pack_derived.sql",
+        "sql/qa_validation_pack.sql",
+        "sql/option_c_spotchecks.sql",
+        "sql/option_c_run_report.sql"
+      ],
+      "runtime_object": [],
+      "runtime_verification": "REPOSITORY_ONLY",
+      "qa_paths": [
+        "scripts/validate/run_qa_validation_pack.py"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/qa_validation_contract_v1.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The QA pack joins the legacy direct-A outcomes surface while the intended Option C authority is B-backed.",
+        "The QA validation contract remains DRAFT and contains stale script paths."
+      ],
+      "resolution_basis": "The catalog authorizes the packs, but their Option C dependency and draft QA contract prevent coherent authority.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "OP-QA07",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE_WITH_RECORDED_LIMITATIONS",
+      "implementation_paths": [
+        "tools/run_registry/build_run_registry_v0_1.py"
+      ],
+      "runtime_object": [
+        "RUN_REGISTRY_v0_1.jsonl"
+      ],
+      "runtime_verification": "HISTORICAL_SEALED_OUTPUTS_PRESENT",
+      "qa_paths": [
+        "docs/phase_2_2/schemas/REGISTRY_run_registry_v0_1.schema.json"
+      ],
+      "supporting_artifacts": [
+        "docs/phase_2_2/REGISTRY_LAYER_RUNBOOK_v0_1.md",
+        "docs/governance/PHASE_2_1_CLOSURE_DECLARATION.md",
+        "docs/phase_2_2/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+        "docs/current-state/r1/OVC_R1_QA07_QA11_RATIFICATION_REVIEW_2026-07-16_59db182dfbdd.md",
+        "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "Recorded limitation: no dedicated unit test or CI enforcement gate.",
+        "Recorded limitation: timestamped run-envelope fields prevent whole-folder byte identity."
+      ],
+      "resolution_basis": "The operator approved OP-QA07 with recorded limitations and the filtered additive v0.2 catalog ratifies it.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "AUTHORIZED_WITH_RECORDED_LIMITATIONS",
+      "proposed_supersession_id": [
+        "PS-13"
+      ],
+      "historical_retention": "DRAFT_CATALOG_ENTRY_RETAINED_AS_PROPOSAL_EVIDENCE"
+    },
+    {
+      "object_id": "OP-QA08",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/current-state/r1/OVC_R1_CLOSURE_DECISION_2026-07-16_59db182dfbdd.md",
+      "authority_status": "UNRESOLVED",
+      "lifecycle_status": "IMPLEMENTED_UNRATIFIED",
+      "implementation_paths": [
+        "tools/run_registry/build_op_status_table_v0_1.py"
+      ],
+      "runtime_object": [
+        "OPERATION_STATUS_TABLE_v0_1.json"
+      ],
+      "runtime_verification": "HISTORICAL_SEALED_OUTPUTS_PRESENT",
+      "qa_paths": [
+        "docs/phase_2_2/schemas/REGISTRY_op_status_table_v0_1.schema.json",
+        "docs/phase_2_2/schemas/REGISTRY_op_status_table_v0_1.array.schema.json"
+      ],
+      "supporting_artifacts": [
+        "docs/phase_2_2/REGISTRY_LAYER_RUNBOOK_v0_1.md",
+        "docs/governance/PHASE_2_1_CLOSURE_DECLARATION.md",
+        "docs/phase_2_2/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+        "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+        "docs/current-state/r1/OVC_R1_QA07_QA11_RATIFICATION_REVIEW_2026-07-16_59db182dfbdd.md",
+        "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The implementation path contract refers to root-level catalog names while authoritative catalogs are under docs/governance/."
+      ],
+      "resolution_basis": "The operator kept OP-QA08 conditional pending path-contract correction; it is excluded from the ratified additive catalog.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "CONDITIONAL_PENDING_PATH_CONTRACT_CORRECTION; NOT_A_RATIFIED_CATALOG_OPERATION",
+      "proposed_supersession_id": [
+        "PS-13"
+      ],
+      "historical_retention": "IMPLEMENTATION_AND_SEALED_EVIDENCE_RETAINED_PENDING_PATH_CONTRACT_CORRECTION_AND_RATIFICATION"
+    },
+    {
+      "object_id": "OP-QA09",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE_WITH_RECORDED_LIMITATIONS",
+      "implementation_paths": [
+        "tools/run_registry/build_drift_signals_v0_1.py"
+      ],
+      "runtime_object": [
+        "DRIFT_SIGNALS_v0_1.json"
+      ],
+      "runtime_verification": "HISTORICAL_SEALED_OUTPUTS_PRESENT",
+      "qa_paths": [
+        "docs/phase_2_2/schemas/REGISTRY_drift_signals_v0_1.schema.json"
+      ],
+      "supporting_artifacts": [
+        "docs/governance/EXPECTED_VERSIONS_v0_1.json",
+        "docs/phase_2_2/REGISTRY_LAYER_RUNBOOK_v0_1.md",
+        "docs/governance/PHASE_2_1_CLOSURE_DECLARATION.md",
+        "docs/phase_2_2/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+        "docs/current-state/r1/OVC_R1_QA07_QA11_RATIFICATION_REVIEW_2026-07-16_59db182dfbdd.md",
+        "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "Recorded limitation: no dedicated unit test or CI enforcement gate.",
+        "Recorded limitation: expected threshold-version authority remains partly unresolved.",
+        "Recorded limitation: the current chain consumes OP-QA08 output while OP-QA08 remains conditional and unratified."
+      ],
+      "resolution_basis": "The operator approved OP-QA09 with recorded limitations and the filtered additive v0.2 catalog ratifies it without promoting OP-QA08.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "AUTHORIZED_WITH_RECORDED_LIMITATIONS; PRODUCTION_CHAINING_THROUGH_OP_QA08_REMAINS_CONDITIONAL",
+      "proposed_supersession_id": [
+        "PS-13"
+      ],
+      "historical_retention": "DRAFT_CATALOG_ENTRY_RETAINED_AS_PROPOSAL_EVIDENCE"
+    },
+    {
+      "object_id": "OP-QA10",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/current-state/r1/OVC_R1_CLOSURE_DECISION_2026-07-16_59db182dfbdd.md",
+      "authority_status": "UNRESOLVED",
+      "lifecycle_status": "IMPLEMENTED_UNRATIFIED",
+      "implementation_paths": [
+        "tools/run_registry/render_system_health_v0_1.py"
+      ],
+      "runtime_object": [
+        "SYSTEM_HEALTH_REPORT_v0_1.md",
+        "SYSTEM_HEALTH_SUMMARY_v0_1.json"
+      ],
+      "runtime_verification": "HISTORICAL_SEALED_OUTPUTS_PRESENT",
+      "qa_paths": [
+        "docs/phase_2_2/schemas/REGISTRY_system_health_report_v0_1.schema.json"
+      ],
+      "supporting_artifacts": [
+        "docs/phase_2_2/REGISTRY_LAYER_RUNBOOK_v0_1.md",
+        "docs/governance/PHASE_2_1_CLOSURE_DECLARATION.md",
+        "docs/phase_2_2/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+        "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+        "docs/current-state/r1/OVC_R1_QA07_QA11_RATIFICATION_REVIEW_2026-07-16_59db182dfbdd.md",
+        "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The draft contract names SYSTEM_HEALTH_v0_1.md while the implementation emits SYSTEM_HEALTH_REPORT_v0_1.md."
+      ],
+      "resolution_basis": "The operator deferred OP-QA10 pending contract and output-name correction; it is excluded from the ratified additive catalog.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "DEFERRED_PENDING_CONTRACT_OUTPUT_NAME_CORRECTION; NOT_A_RATIFIED_CATALOG_OPERATION",
+      "proposed_supersession_id": [
+        "PS-13"
+      ],
+      "historical_retention": "IMPLEMENTATION_AND_SEALED_EVIDENCE_RETAINED_PENDING_CONTRACT_CORRECTION_AND_RATIFICATION"
+    },
+    {
+      "object_id": "OP-QA11",
+      "architectural_layer": "QA",
+      "object_type": "OPERATION",
+      "authority_artifact": "docs/governance/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+      "authority_status": "AUTHORITATIVE",
+      "lifecycle_status": "ACTIVE_WITH_RECORDED_LIMITATIONS",
+      "implementation_paths": [
+        "docs/phase_2_2/builders/build_registry_delta_log_v0_1.py"
+      ],
+      "runtime_object": [
+        "REGISTRY_DELTA_LOG_v0_1.jsonl"
+      ],
+      "runtime_verification": "PHASE_2_2_VALIDATION_EVIDENCE_PRESENT",
+      "qa_paths": [
+        "docs/phase_2_2/schemas/REGISTRY_registry_delta_log_v0_1.schema.json",
+        "docs/phase_2_2/validators/validate_registry_schema_v0_1.py",
+        "docs/phase_2_2/validators/validate_registry_seals_v0_1.py"
+      ],
+      "supporting_artifacts": [
+        "docs/phase_2_2/ACTIVE_REGISTRY_POINTERS_v0_1.json",
+        "docs/phase_2_2/REGISTRY_CATALOG_v0_1.json",
+        "docs/phase_2_2/REGISTRY_CATALOG_ADDENDUM_v0_1__phase_2_2_3.json",
+        "docs/phase_2_2/PHASE_2_2_3_VALIDATION_REPORT.md",
+        "docs/phase_2_2/OVC_ALLOWED_OPERATIONS_CATALOG_v0.2.md",
+        "docs/current-state/r1/OVC_R1_QA07_QA11_RATIFICATION_REVIEW_2026-07-16_59db182dfbdd.md",
+        "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "Recorded limitation: no dedicated unit test or CI enforcement gate.",
+        "Recorded limitation: execution remains manual."
+      ],
+      "resolution_basis": "The operator approved OP-QA11 with recorded limitations and the filtered additive v0.2 catalog ratifies it.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "new_execution_authorization": "AUTHORIZED_WITH_RECORDED_LIMITATIONS",
+      "proposed_supersession_id": [
+        "PS-13"
+      ],
+      "historical_retention": "DRAFT_CATALOG_ENTRY_RETAINED_AS_PROPOSAL_EVIDENCE"
+    },
+    {
+      "object_id": "CTRL-CHANGE-CLASSIFIER",
+      "architectural_layer": "CONTROL",
+      "object_type": "CI_CONTROL",
+      "authority_artifact": "docs/governance/CHANGE_TAXONOMY_v0_2.md",
+      "authority_status": "UNRESOLVED",
+      "lifecycle_status": "IMPLEMENTED_UNRATIFIED",
+      "implementation_paths": [
+        "scripts/governance/classify_change.py",
+        ".github/workflows/change_classifier.yml"
+      ],
+      "runtime_object": [
+        ".github/workflows/change_classifier.yml"
+      ],
+      "runtime_verification": "REPOSITORY_WORKFLOW_PRESENT; UNVERIFIED_DEPLOYMENT",
+      "qa_paths": [
+        "tests/test_change_classifier.py"
+      ],
+      "supporting_artifacts": [
+        "docs/contracts/DEV_CHANGE_LEDGER_SCHEMA_v0.1.json",
+        "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl",
+        "docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "Change Taxonomy v0.2 is implemented by the classifier and PR workflow, but no formal ratification record was found; PS-11 is therefore conditional and not effective."
+      ],
+      "resolution_basis": "Implementation evidence satisfies only the implementation half of PS-11. Without ratification evidence, v0.2 cannot be the resolved authoritative replacement and v0.1 cannot be recorded as effectively superseded.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [
+        "PS-11"
+      ],
+      "historical_retention": "CHANGE_TAXONOMY_V0_1_AND_V0_1_LEDGER_OVERLAYS_RETAINED_AS_HISTORICAL_BASE",
+      "new_execution_authorization": "CI_IMPLEMENTATION_PRESENT; V0_2_AUTHORITY_NOT_RATIFIED"
+    },
+    {
+      "object_id": "CTRL-APPEND-SENTINEL",
+      "architectural_layer": "CONTROL",
+      "object_type": "CI_CONTROL",
+      "authority_artifact": "scripts/sentinel/README.md",
+      "authority_status": "UNRESOLVED",
+      "lifecycle_status": "ACTIVE_UNCATALOGUED",
+      "implementation_paths": [
+        "scripts/sentinel/append_sentinel.py",
+        "scripts/sentinel/sentinel_state.json",
+        ".github/workflows/append_sentinel.yml"
+      ],
+      "runtime_object": [
+        ".github/workflows/append_sentinel.yml"
+      ],
+      "runtime_verification": "REPOSITORY_WORKFLOW_PRESENT; UNVERIFIED_DEPLOYMENT",
+      "qa_paths": [
+        "tests/test_append_sentinel.py"
+      ],
+      "supporting_artifacts": [
+        "docs/governance/CHANGE_TAXONOMY_v0_2.md",
+        "docs/catalogs/DEV_CHANGE_LEDGER_v0.2.jsonl",
+        "docs/catalogs/DEV_CHANGE_CLASSIFICATION_OVERLAY_v0.2.jsonl"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The active control is absent from the authoritative allowed-operations catalog.",
+        "Its README documents behavior but is not a ratified governance authority."
+      ],
+      "resolution_basis": "The implementation and CI surface are identifiable, but no authoritative operation or control record governs them.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "CTRL-REPO-CARTOGRAPHER",
+      "architectural_layer": "CONTROL",
+      "object_type": "CI_CONTROL",
+      "authority_artifact": "docs/baselines/PHASE_B_DEFINITION_OF_DONE_v0.1.md",
+      "authority_status": "UNRESOLVED",
+      "lifecycle_status": "ACTIVE_DEGRADED_UNCATALOGUED",
+      "implementation_paths": [
+        "scripts/repo_cartographer/cartographer.py",
+        "scripts/repo_cartographer/phase_b_latest_ok_run.py",
+        "scripts/repo_cartographer/phase_b6_publish_latest_ownership_summary.py",
+        "scripts/repo_cartographer/phase_b7_unknown_frontier.py",
+        ".github/workflows/repo_cartographer.yml"
+      ],
+      "runtime_object": [
+        ".github/workflows/repo_cartographer.yml",
+        "docs/baselines/LATEST_OK_RUN_POINTER_v0.1.json",
+        "docs/catalogs/REPO_CARTOGRAPHER_RUN_LEDGER_v0.1.jsonl"
+      ],
+      "runtime_verification": "REPOSITORY_WORKFLOW_PRESENT; UNVERIFIED_DEPLOYMENT; DECLARED_REQUIRED_OUTPUTS_MISSING",
+      "qa_paths": [
+        "tests/test_repo_cartographer_ledger_schema.py",
+        "tests/test_repo_cartographer_phase_b_chain.py",
+        "tests/test_repo_cartographer_phase_b_latest_ok.py",
+        "tests/test_repo_cartographer_phase_b6_publish_latest_summary.py",
+        "tests/test_repo_cartographer_phase_b7_unknown_frontier.py"
+      ],
+      "supporting_artifacts": [
+        "scripts/repo_cartographer/README.md",
+        "docs/baselines/REPO_CARTOGRAPHER_RUN_LEDGER_SCHEMA_v0.1.md",
+        "docs/catalogs/REPO_CARTOGRAPHER_LATEST_OK_RUN_v0.1.json"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The active control is absent from the authoritative allowed-operations catalog.",
+        "The workflow declares stable required outputs that are absent from the repository."
+      ],
+      "resolution_basis": "Local contracts, implementation, tests, and ledger evidence exist, but control authority and output publication state are unresolved.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    },
+    {
+      "object_id": "CTRL-DESIGN-RECORD-ENGINE",
+      "architectural_layer": "CONTROL",
+      "object_type": "CI_CONTROL",
+      "authority_artifact": "docs/design_record_engine/TASKPACK_FULLBUILD.md",
+      "authority_status": "UNRESOLVED",
+      "lifecycle_status": "SCAFFOLD_PRESENT_EMPTY_WORKFLOW",
+      "implementation_paths": [
+        "scripts/design_record_engine/run_all.py",
+        "scripts/design_record_engine/phase0_chat_export_normalize.py",
+        "scripts/design_record_engine/phase1_build_evidence_nodes.py",
+        "scripts/design_record_engine/phase1_build_evidence_nodes_from_chat_corpus.py",
+        "scripts/design_record_engine/phase2_extract_anchors.py",
+        "scripts/design_record_engine/phase3_parse_chat_export.py",
+        "scripts/design_record_engine/phase4_chunk_and_embed.py",
+        "scripts/design_record_engine/phase5_vector_store_sync.py",
+        "scripts/design_record_engine/phase6_build_graph.py",
+        "scripts/design_record_engine/phase7_cluster_modules.py",
+        "scripts/design_record_engine/phase8_invariants_ledger.py",
+        ".github/workflows/design_record_engine_ci.yml"
+      ],
+      "runtime_object": [
+        ".github/workflows/design_record_engine_ci.yml"
+      ],
+      "runtime_verification": "REPOSITORY_WORKFLOW_FILE_IS_ZERO_BYTES; NOT_AN_ACTIVE_WORKFLOW",
+      "qa_paths": [
+        "tests/design_record_engine/test_determinism.py",
+        "tests/design_record_engine/test_phase0_chat_corpus_shards_deterministic.py",
+        "tests/design_record_engine/test_phase0_manifest_integrity.py",
+        "tests/design_record_engine/test_phase1_evidence_nodes_from_chat_corpus.py",
+        "tests/design_record_engine/test_phase1_golden_snapshot.py",
+        "tests/design_record_engine/test_run_all_golden.py",
+        "tests/design_record_engine/test_schemas.py"
+      ],
+      "supporting_artifacts": [
+        "docs/design_record_engine/ID_SPEC.md",
+        "docs/design_record_engine/SCHEMA_VERSIONING.md",
+        "docs/design_record_engine/THREAD_RULES.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The component has scripts, tests, and taskpack documentation, but .github/workflows/design_record_engine_ci.yml is zero bytes and provides no active CI trigger or job definition.",
+        "The component remains outside the authoritative operations catalog."
+      ],
+      "resolution_basis": "Design Record Engine implementation and tests exist, but the named CI file is an empty scaffold and no ratified CONTROL authority exists.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "NO_WORKFLOW_EXECUTION_DEFINITION_PRESENT"
+    },
+    {
+      "object_id": "CTRL-PHASE3-CONTROL-PANEL",
+      "architectural_layer": "CONTROL",
+      "object_type": "READ_ONLY_CONTROL_SURFACE",
+      "authority_artifact": "tools/phase3_control_panel/docs/contracts/PHASE3_CANON_SCHEMA_CONTRACT_v0.1.md",
+      "authority_status": "UNRESOLVED",
+      "lifecycle_status": "IMPLEMENTED_REPOSITORY_ONLY",
+      "implementation_paths": [
+        "tools/phase3_control_panel/src/runtime/App.tsx",
+        "tools/phase3_control_panel/src/server/index.ts",
+        "tools/phase3_control_panel/package.json"
+      ],
+      "runtime_object": [
+        "tools/phase3_control_panel"
+      ],
+      "runtime_verification": "REPOSITORY_ONLY; DEPLOYMENT_NOT_CLAIMED",
+      "qa_paths": [
+        "tools/phase3_control_panel/audits/phase3_no_network_mutation_audit.py",
+        "tools/phase3_control_panel/audits/phase3_read_only_audit.py",
+        "tools/phase3_control_panel/audits/phase3_ui_action_audit.py"
+      ],
+      "supporting_artifacts": [
+        "tools/phase3_control_panel/docs/PHASE3_CLOSURE_RECORD.md",
+        "tools/phase3_control_panel/README.md"
+      ],
+      "superseded_artifacts": [],
+      "conflicts": [
+        "The read-only surface has a local contract and closure record but no placement in the authoritative operational governance spine."
+      ],
+      "resolution_basis": "The component is internally governed as a read-only surface, but its relationship to system-wide CONTROL authority is unresolved.",
+      "evidence_commit": "59db182dfbdd1eaf467ee91ac79a6bd385697450",
+      "proposed_supersession_id": [],
+      "historical_retention": "NOT_APPLICABLE",
+      "new_execution_authorization": "UNCHANGED_BY_R1_CORRECTION"
+    }
+  ],
+  "operator_decision_ledger": "docs/current-state/r1/OVC_R1_OPERATOR_DECISION_LEDGER_2026-07-16_59db182dfbdd.md",
+  "current_data_flow_canon": "docs/architecture/OVC_DATA_FLOW_CANON_v0.2.md",
+  "current_workflow_catalog": "docs/workflows/WORKFLOW_CATALOG_v0_2.md",
+  "partial_catalog_review": "docs/current-state/r1/OVC_R1_QA07_QA11_RATIFICATION_REVIEW_2026-07-16_59db182dfbdd.md",
+  "closure_decision": "docs/current-state/r1/OVC_R1_CLOSURE_DECISION_2026-07-16_59db182dfbdd.md",
+  "r2_authorization": "NOT_AUTHORIZED_REQUIRES_SEPARATE_OPERATOR_DECISION",
+  "option_c_v1_ratification": "SEPARATE_DECISION_PENDING"
+}
